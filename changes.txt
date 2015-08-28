@@ -1,0 +1,38 @@
+First in auto_nox.c: I defined these:
+
+char this_auto_file[200];
+char fort3[200];
+char fort7[200];
+char fort8[200];
+char fort9[200];
+char TMPSWAP[200];
+
+Then modified several lines within 
+open_auto(), close_auto(), and appendf() to create and use those file names based at the 
+user's home directory.
+
+
+Then, open.c Line 63: Modified to
+
+sprintf(buf,"%s/%s",getenv("HOME"),"tmp.FXXXXXX");
+
+
+endfile.c Line 45: Made nm buffer bigger to accomodate longer path.
+
+char nm[200];
+
+also in endfile.c Line 65: Modified to
+sprintf(nm,"%s/%s",getenv("HOME"),"tmp.FXXXXXX");
+
+
+Then in run_auto.c: Included the following externs...
+
+extern char fort3[200];
+extern char fort7[200];
+extern char fort8[200];
+extern char fort9[200]; 
+
+Modified run_aut in run_auto.c lines 83-84, lines 94-95, lines 106-107, and lines 118-119 to
+use those file names and the lengths of those strings.
+
+

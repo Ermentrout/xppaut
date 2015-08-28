@@ -1,0 +1,23 @@
+# (0,0)
+# 0   1
+# 1  -a
+# 
+!tr=-a
+!det=-1
+!r=sqrt(tr^2-4*det)
+!lp=(-a+r)/2
+!lm=(-a-r)/2
+b x-eps
+b y-lp*eps
+b (x'-eps)
+b (y'-eps*lm)
+x'=p*y
+y'=p*(x*(1-x)-a*y+b*x*y)
+b'=0
+p'=0
+par eps=.005
+@ total=1,dt=.002
+init x=.005,y=.005
+init p=20
+par a=0
+done

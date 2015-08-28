@@ -1,0 +1,8 @@
+par gamma=.175,eps=.1,ri=.4
+@ total=1.573879,dt=.01
+ph1'=ps1
+ph2'=ps2
+ps1'=-eps * ps1 - sin(ph1) + ri + gamma * (ph2 - ph1)
+ps2'=-eps * ps2 - sin(ph2) + ri + gamma * (ph1 - ph2)
+init ph1=1.24,ph2=1.24,ps1=4.078,ps2=4.078
+d

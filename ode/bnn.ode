@@ -1,0 +1,8 @@
+f(x)=1/(1+exp(-x))
+u'=k*(-u+f(beta*(w-th)))/c
+w'=k*z
+z'=k*(w-u)
+par beta=30,th=.2,c=1.7453,k=1
+@ total=12
+@ xp=u,yp=z,xlo=-.1,xhi=1.1,ylo=-.1,yhi=1.1
+d

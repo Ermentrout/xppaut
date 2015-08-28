@@ -1,0 +1,35 @@
+# setup a table for 10x10 nn coupled oscillators
+# with natural boundary conditions
+#  arrays are only 1-d so 0..9 10-19... are the rows
+# t=0..99, get x,y
+x(t)=mod(t,10)
+y(t)=flr(t/10)
+# negative and positive with clamps
+n(x)=max(x-1,0)
+p(x)=min(x+1,9)
+# pull back together
+s(x,y)=10*y+x
+# here is the interaction function
+h(x)=sin(x+phi)-sin(phi)
+par phi=0
+# set tstart to negative to ignore global, else generate random ICs
+par tstart=0
+# get the indices for north south east west
+table nr % 100 0 99 s(x(t),p(y(t)))
+table so % 100 0 99 s(x(t),n(y(t)))
+table ea % 100 0 99 s(p(x(t)),y(t))
+table we % 100 0 99 s(n(x(t)),y(t))
+# now just add up the ODEs
+x[0..99]'=1+h(shift(x0,nr([j]))-x[j])+h(shift(x0,so([j]))-x[j])+h(shift(x0,we([j]))-x[j])+h(shift(x0,ea([j]))-x[j])
+# make them all periodic
+@ fold=x[0..99]
+@ xp=x0,yp=x21,xlo=0,xhi=6.3,ylo=0,yhi=6.3
+@ total=50,meth=euler
+# set periodic colormap
+@ colormap=1
+# add the relative phase difference
+aux y[0..99]=mod(x[j]-x0,2*pi)
+# initial conditions
+global 0 t-tstart {x[0..99]=ran(1)*2*pi}
+done
+

@@ -1,0 +1,60 @@
+# EXAMPLE 2
+# compile the C program example.c 
+# creating example.so 
+# for LINUX  (need some sort of flag to say 32 bit maybe -arch i386)
+# gcc -fpic -shared -o example.so example.c
+# for MAC:
+# gcc -fPIC -dynamiclib -arch i386 example.c -o example.so 
+# In XPP click on File-Edit-Load Library
+# example.so
+# and pick either lv, vdp, duff as the function.
+# 
+x'=xp
+y'=yp
+# these are dummies holding the RHS
+xp=0
+yp=0
+export {x,y,a,b,c,d,t} {xp,yp}
+par a=1,b=1,c=1,d=1
+init x=1
+# @ dll_lib=example.so,dll_fun=vdp
+done
+------------------ Cut below, save as example.c  -------------------------
+#include <math.h>
+/*  
+ some example functions
+*/
+ 
+lv(double *in,double *out,int nin,int nout,double *var,double *con)
+{
+  double x=in[0],y=in[1];
+  double a=in[2],b=in[3],c=in[4],d=in[5];
+   double t=in[6];
+  out[0]=a*x*(b-y);
+  out[1]=c*y*(-d+x);
+}
+
+vdp(double *in,double *out,int nin,int nout,double *var,double *con)
+{
+  double x=in[0],y=in[1];
+  double a=in[2],b=in[3],c=in[4],d=in[5];
+   double t=in[6];
+  out[0]=y;
+  out[1]=-x+a*y*(1-x*x);
+
+}
+
+duff(double *in,double *out,int nin,int nout,double *var,double *con)
+{
+  double x=in[0],y=in[1];
+  double a=in[2],b=in[3],c=in[4],d=in[5];
+ double t=in[6];
+  out[0]=y;
+  out[1]=x*(1-x*x)+a*sin(b*t)-c*y;
+}
+
+
+
+
+
+

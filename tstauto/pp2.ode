@@ -1,0 +1,6 @@
+e = exp(-par2 * u0)
+u0'= par1 * u0 * (1 - u0) - u0 * u1 - par0 * (1 - e)
+u1' = -u1 + par3 * u0 * u1
+par par0=0,par1=3,par2=5,par3=3
+
+done

@@ -1,0 +1,11 @@
+# mackey.ode
+# mackey-glass equations
+x'=-g*x+b*f(delay(x,tau))
+init x=.5
+f(u)=u/(1+u^n)
+# delayed value of x
+aux xdel=delay(x,tau)
+par tau=6,g=.1,b=.2,n=10
+@ delay=30,total=600,nout=10
+@ xhi=600,yhi=2
+done

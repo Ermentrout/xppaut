@@ -1,0 +1,6 @@
+# don't have the cart in this one - just the pendulums
+line .35;.1;.35;.85;$BLACK;3
+line .35;.85;.35+.45*sin(p1);.85-.45*cos(p1);$RED;6
+line .65;.1;.65;.85;$BLACK;3
+line .65;.85;.65+.45*sin(p2);.85-.45*cos(p1);$BLUE;6
+end

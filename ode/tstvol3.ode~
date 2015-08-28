@@ -1,0 +1,6 @@
+x'=-x+1
+init x=1
+u(t)=int{heav(tau-t)#x}
+par tau=1
+@ total=10
+done

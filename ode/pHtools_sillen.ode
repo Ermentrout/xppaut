@@ -1,0 +1,53 @@
+#Demonstration of pHtools functionality in XPPAUT
+#We titrate a solution containing 2 weak acids
+#over a wide range of acidic and basic pH. We then
+#plot the LOG10 anionic and uncharged species 
+#concentrations in a Sillen plot.
+
+init L=0.0   
+init A=0.0
+init Cb=0.0
+
+#We purposefully acidify the media with with the strong 
+#acid HCL so that we start the titration in the acidic 
+#range (i.e. initial pH~1.5)
+
+mksol mysol
+addtosol mysol {'Lactic',0.01,'Acetic',0.01}
+addtosol mysol {'NaOH',0.00,'HCl',0.03} 
+tracksol mysol {'Lactic',L,'Acetic',A,'NaOH',Cb} 
+pHsol mysol pH pHrhs
+species mysol {'Acetic',-1,Am,'Acetic',0,A0,'Lactic',-1,Lm}
+species mysol {'Lactic',0,L0,'water',-1,OHw,'water',+1,H30w} 
+
+#Create some auxilliary variables scaled to have convenient 
+#units for plotting purposes.
+
+AUX Acetic(mM)=A*1000
+AUX Acetic(m1)=log10(Am)
+AUX Acetic(m0)=log10(A0)
+AUX Lactic(m1)=log10(Lm)
+AUX OH=log10(OHw)
+AUX H30=log10(H30w)
+AUX Lactic(mM)=L*1000
+AUX Lactic(m0)=log10(L0)
+
+#During a titration we add strong base (NaOH) at a constant rate.
+dCb/dt  = 0.01
+dL/dt  = 0
+dA/dt  = 0
+#This is the r.h.s. automatically updated behind the scenes
+#for our complex buffer solution 'mysol'
+dpH/dt = pHrhs        
+        
+@ BOUND=1000,maxstor=50000
+@ meth=qualrk
+@ total=100
+#Options for producing a Sillen diagram...
+@ NPLOT=6,XP=pH,YP=Lactic(m1)
+@ XP2=pH,YP2=Lactic(m0),XP3=pH,YP3=Acetic(m1),XP4=pH,YP4=Acetic(m0)
+@ XP5=pH,YP5=OH,XP6=pH,YP6=H30
+@ XLO=2.0,XHI=12.1,YLO=-12.1,YHI=-1.5
+#@ XP=pH, YP=Cb, XLO=1.5, XHI=12.1,YLO=-0.01,YHI=0.08
+
+done

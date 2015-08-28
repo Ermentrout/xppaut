@@ -1,0 +1,9 @@
+# 
+@ meth=discrete,total=50
+init s=-1
+s'=s+.08
+aux sdot=sp
+par ibar=-.5,isig=.3333,tau=10
+sp=0
+export {s,ibar,isig,tau} {sp}
+done

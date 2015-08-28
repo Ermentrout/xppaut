@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>XPP - GRAPHICS</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xppkine.html">Back</a> | <a href="xppnumerics.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Graphics</h1>
+This menu lets you alter things like linetypes, add multiple curves, freeze simulations, import diagrams, change axes, colormaps, and print.  <p>
+<ul>
+<li> To change the view, axes labels, start the animator, or plot arrays,
+click <a href="xppview.html"> here </a> <p>
+<li> To change the three-d settings click <a href="xpp3d.html"> here </a> <p>
+<li> To make a new window <a href="xpphalf.html"> click here </a> <p>
+<li> To quickly plot a variable against time <a href="xppxivst.html"> click here </a> <p>
+</ul>  
+<ul>
+<table border = 0>
+<tr><td><h3><b><a href="#add">(A)dd curve<td></tr>
+<tr><td><h3><b><a href="#delete">(D)elete last<td></tr>
+<tr><td><h3><b><a href="#remove">(R)emove all<td></tr>
+<tr><td><h3><b><a href="#edit">(E)dit curve<td></tr>
+<tr><td><h3><b><a href="#postscript">(P)ostscript<td></tr>
+<tr><td><h3><b><a href="#freeze">(F)reeze<td></tr>
+<tr><td><h3><b><a href="#axes">a(X)es opts<td></tr>
+<tr><td><h3><b><a href="#export">exp(O)rt<td></tr>
+<tr><td><h3><b><a href="#colormap">(C)olormap<td></tr>
+</table>
+</ul>
+<hr>
+<ul>
+<a name=add><li> <b>(A)dd curve</b> This lets you add another curve to the picture. A dialog box will appear asking you for <br> <ul> 
+<li> the variables on each axis,
+<li> a color and
+<li> a line type (1 - solid and 0 - point, negative integers draw circles of various radii)
+</ul> <p> All subsequent integrations and restorations will include the new graph.  Up to 
+10 per window are allowed. <p>
+<a name=delete><li> <b>(D)elete last</b>  <br> Will remove most recent curve that was added. <P>
+<a name=remove><li> <b>(R)emove all</b> <br> Deletes all curves but first which can never be deleted. <P>
+<a name=edit><li> <b>(E)dit curve</b>  <br> You will be asked for the curve to edit.  
+The first is 0, the second 1, etc.  You will get a dialog box like the <a href="#add">(A)dd curve</a>
+option.<p>
+<a name=postscript><li> <b>(P)ostscript</b><br>  
+This generates a postscript file for the XPP window including  nullclines, text, and all graphs.  A new dialog box will come up asking for <br> <ul>
+<li> whether you want black and white or color <br> 
+<li> whether you want landscape or portrait <br>
+<li> the fontsize of the axes text and numbers <br>
+</ul> <p>
+You are then asked for a file name for the postscript file. <p>
+<a name=freeze><li> <b> (F)reeze</b> </a>  <br>
+This will create a permanent curve in the window.  Usually, 
+when you reintegrate the equations or load in some new data, the current curve 
+will be replace by the new data.  Freeze prevents this.  Up to 26 curves can be
+ frozen per window.  <p>
+There are several options: <p>
+<ul>
+
+<li> <b>(F)reeze </b> <br> This freezes the current curve 0 for the current plotting window.  It will not be plotted in other windows. If you change the axes from 2 to 3 dimensions and it was frozen as a 2D curve (and <i> vice versa </i> ) then it will also not be plotted. It is better to create another window to work in 3 dimensions so this is avoided. <p> A parameter box pops up that asks you for the color (linetype) as well as the key name and the curve name.  The curve name is for easy reference and should be a few characters.  The key name is what will be printed on the graph if a key is present. <p>
+
+<li> <b>(D)elete</b> <br> This gives you a choice of available curves to delete. <p>
+<li> <b>(E)dit</b> <br> This lets you edit a named curve; the key, name, and linetype can be altered. <p>   
+<li> <b>(R)emove all</b>  <br> This gets rid of all of the frozen curves in the current window. <p> 
+<li> <b>(K)ey</b> <br> This turns the key on or off.  If you turn it on, then you can position it with the mouse on the graph.  The key consists of a line followed by some text describing the line.  Only about 15 characters are permitted.<p>
+<li> <b>(B)if.diag</b> </a> <br> will prompt you for a filename and then using the
+current view, draw the diagram. <p> The file must be of the same format as
+is produced by the <a href=xppauto.html#save><b> Write pts </b></a> option in the AUTO menus.
+<p>The diagram is colored according to whether the points are stable/unstable fixed points or periodics. The diagram is ``frozen'' and there can only be one diagram at a time.  <p>
+<li> <b>(C)lr. BD</b> <br> clears out the current bifurcation diagram. <p>
+<li> <b> (O)n freeze </b> <br>  Toggles a flag that automatically freezes the
+curves as you integrate them. Use this to permanantly freeze everything
+that you draw<p>
+</ul>
+<p>
+
+<a name=axes><li> <b> a(X)es opts</b><br>This puts up a window which allows you to tell XPP where you want the axes to be drawn, whether you want them, and what fontsize to make the PostScript axes labels. <p>  
+<a name=export><li> <b> exp(O)rt</b><br> This lets you save the points that are currently plotted on the screen in XY format. Thus if you have a phaseplane on the screen, only the X and Y values are saved. This makes it
+compatible with programs like XMGR which assume <tt> X Y1 Y2 ... </tt> data. If you have several traces on the screen at once, it saves the X values of the first trace and the Y values of the first and all subsequent
+traces. Frozen curves are not exported. <p> 
+<a name=colormap><li> <b> (C)olormap</b><br> This lets you choose a different color map from the
+default. There are a bunch of them; try them all and pick your
+favorite. <p>
+
+</ul>
+<p> 

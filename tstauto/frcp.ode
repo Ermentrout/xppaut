@@ -1,0 +1,9 @@
+ss=x*x+y*y
+v'=(v*(v-a)*(1-v)-w)/eps
+w'=v-d*w-(b+r*x)
+x'=x+bet*y-x*ss
+y'=y-bet*x-y*ss
+par a=.5,b=.5,r=0,eps=.005,bet=100,d=1.0
+init v=.5,w=0,x=0,y=1
+@ total=.0628,dt=.0001
+done

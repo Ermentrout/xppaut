@@ -1,0 +1,5 @@
+r=x^2+y^2
+par a=-1
+x'=a*x-r*x+y
+y'=a*y-r*y-x
+done

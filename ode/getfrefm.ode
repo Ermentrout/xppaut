@@ -1,0 +1,15 @@
+par ibar=2,isig=.3333,nsig=0.5,tau=10
+par nn=128,ntr=128
+par gee=0
+@ meth=discrete,total=95
+init nit=50,s=0
+nit'=nit+10
+sd'=sp
+tim'=tt
+s'=0
+sp=0
+tt=0
+@ bound=1000000000
+@ xp=nit,yp=sd,xlo=50,xhi=7,ylo=-1,yhi=8
+export {s,ibar,isig,nsig,tau,nit,ntr,nn,gee} {sp,tt}
+done

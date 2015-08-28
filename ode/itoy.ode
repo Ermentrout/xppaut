@@ -1,0 +1,103 @@
+num q1=0,q2=2.19324542,q3=4.38649084
+# The 24 points
+x1n[1..3]=cos(t1+a+q[j])
+x1s[1..3]=cos(t1-a+q[j])
+y1n[1..3]=sin(t1+a+q[j])
+y1s[1..3]=sin(t1-a+q[j])
+x2n[1..3]=2+d+cos(t2-a+q[j])
+x2s[1..3]=2+d+cos(t2+a+q[j])
+y2n[1..3]=sin(t2-a+q[j])
+y2s[1..3]=sin(t2+a+q[j])
+# the 36 distances !!
+dnn1[1..3]=(x1n1-x2n[j])^2+(y1n1-y2n[j])^2
+dss1[1..3]=(x1s1-x2s[j])^2+(y1s1-y2s[j])^2
+dns1[1..3]=(x1n1-x2s[j])^2+(y1n1-y2s[j])^2
+dsn1[1..3]=(x1s1-x2n[j])^2+(y1s1-y2n[j])^2
+
+dnn2[1..3]=(x1n2-x2n[j])^2+(y1n2-y2n[j])^2
+dss2[1..3]=(x1s2-x2s[j])^2+(y1s2-y2s[j])^2
+dns2[1..3]=(x1n2-x2s[j])^2+(y1n2-y2s[j])^2
+dsn2[1..3]=(x1s2-x2n[j])^2+(y1s2-y2n[j])^2
+
+dnn3[1..3]=(x1n3-x2n[j])^2+(y1n3-y2n[j])^2
+dss3[1..3]=(x1s3-x2s[j])^2+(y1s3-y2s[j])^2
+dns3[1..3]=(x1n3-x2s[j])^2+(y1n3-y2s[j])^2
+dsn3[1..3]=(x1s3-x2n[j])^2+(y1s3-y2n[j])^2
+
+# the 72 component forces !!
+fnnx1[1..3]=(x1n1-x2n[j])/dnn1[j]^1.5
+fnny1[1..3]=(y1n1-y2n[j])/dnn1[j]^1.5
+fssx1[1..3]=(x1s1-x2s[j])/dss1[j]^1.5
+fssy1[1..3]=(y1s1-y2s[j])/dss1[j]^1.5
+fnsx1[1..3]=(x1n1-x2s[j])/dns1[j]^1.5
+fnsy1[1..3]=(y1n1-y2s[j])/dns1[j]^1.5
+fsnx1[1..3]=(x1s1-x2n[j])/dsn1[j]^1.5
+fsny1[1..3]=(y1s1-y2n[j])/dsn1[j]^1.5
+
+fnnx2[1..3]=(x1n2-x2n[j])/dnn2[j]^1.5
+fnny2[1..3]=(y1n2-y2n[j])/dnn2[j]^1.5
+fssx2[1..3]=(x1s2-x2s[j])/dss2[j]^1.5
+fssy2[1..3]=(y1s2-y2s[j])/dss2[j]^1.5
+fnsx2[1..3]=(x1n2-x2s[j])/dns2[j]^1.5
+fnsy2[1..3]=(y1n2-y2s[j])/dns2[j]^1.5
+fsnx2[1..3]=(x1s2-x2n[j])/dsn2[j]^1.5
+fsny2[1..3]=(y1s2-y2n[j])/dsn2[j]^1.5
+
+fnnx3[1..3]=(x1n3-x2n[j])/dnn3[j]^1.5
+fnny3[1..3]=(y1n3-y2n[j])/dnn3[j]^1.5
+fssx3[1..3]=(x1s3-x2s[j])/dss3[j]^1.5
+fssy3[1..3]=(y1s3-y2s[j])/dss3[j]^1.5
+fnsx3[1..3]=(x1n3-x2s[j])/dns3[j]^1.5
+fnsy3[1..3]=(y1n3-y2s[j])/dns3[j]^1.5
+fsnx3[1..3]=(x1s3-x2n[j])/dsn3[j]^1.5
+fsny3[1..3]=(y1s3-y2n[j])/dsn3[j]^1.5
+
+# sin and cos of the arms
+c1[1..3]=cos(t1+q[j])
+s1[1..3]=-sin(t1+q[j])
+c2[1..3]=cos(t2+q[j])
+s2[1..3]=-sin(t2+q[j])
+#
+# forces for circle 1
+#
+# arm 1
+f11x=(fnnx11+fnnx12+fnnx13+fssx11+fssx12+fssx13-(fnsx11+fnsx12+fnsx13+fsnx11+fsnx12+fsnx13))*s11
+f11y=(fnny11+fnny12+fnny13+fssy11+fssy12+fssy13-(fnsy11+fnsy12+fnsy13+fsny11+fsny12+fsny13))*c11
+#  arm 2
+f12x=(fnnx21+fnnx22+fnnx23+fssx21+fssx22+fssx23-(fnsx21+fnsx22+fnsx23+fsnx21+fsnx22+fsnx23))*s12
+f12y=(fnny21+fnny22+fnny23+fssy21+fssy22+fssy23-(fnsy21+fnsy22+fnsy23+fsny21+fsny22+fsny23))*c12
+# arm 3
+f13x=(fnnx31+fnnx32+fnnx33+fssx31+fssx32+fssx33-(fnsx31+fnsx32+fnsx33+fsnx31+fsnx32+fsnx33))*s13
+f13y=(fnny31+fnny32+fnny33+fssy31+fssy32+fssy33-(fnsy31+fnsy32+fnsy33+fsny31+fsny32+fsny33))*c13
+#
+# forces for circle 2
+#
+# arm 1
+f21x=(fnnx11+fnnx21+fnnx31+fssx11+fssx21+fssx31-(fnsx11+fnsx21+fnsx31+fsnx11+fsnx21+fsnx31))*s21
+f21y=(fnny11+fnny21+fnny31+fssy11+fssy21+fssy31-(fnsy11+fnsy21+fnsy31+fsny11+fsny21+fsny31))*c21
+# arm 2
+f22x=(fnnx12+fnnx22+fnnx32+fssx12+fssx22+fssx32-(fnsx12+fnsx22+fnsx32+fsnx12+fsnx22+fsnx32))*s22
+f22y=(fnny12+fnny22+fnny32+fssy12+fssy22+fssy32-(fnsy12+fnsy22+fnsy32+fsny12+fsny22+fsny32))*c22
+# arm 3
+f23x=(fnnx13+fnnx23+fnnx33+fssx13+fssx23+fssx33-(fnsx13+fnsx23+fnsx33+fsnx13+fsnx23+fsnx33))*s23
+f23y=(fnny13+fnny23+fnny33+fssy13+fssy23+fssy33-(fnsy13+fnsy23+fnsy33+fsny13+fsny23+fsny33))*c23
+
+
+t1'=t1p
+t1p'=-nu*t1p+f0*(f11x+f11y+f12x+f12y+f13x+f13y)
+t2'=t2p
+t2p'=-nu*t2p+dd*f0*(f21x+f21y+f22x+f22y+f23x+f23y)
+par a=.05,d=.1,dd=-1,f0=1,nu=.01
+aux x1=cos(t1)
+aux x2=cos(t2)
+aux y1=sin(t1)
+aux y2=sin(t2)
+t1dot(x,y,xp,yp)=(yp*x-xp*y)/(x^2+y^2)
+@ bound=10000 meth=cvode dt=.05 atoler=1e-4 toler=1e-5 total=100
+done
+
+
+
+
+
+

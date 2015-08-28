@@ -1,0 +1,21 @@
+# damped pendulum pend.ode
+dx/dt = xp
+dxp/dt = (-mu*xp-m*g*sin(x))/(m*l)
+pe=m*g*(1-cos(x))
+ke=.5*m*l*xp^2
+aux P.E.=pe
+aux K.E.=ke
+aux T.E=pe+ke
+# MKS units
+# 
+param m=10,mu=2,g=9.8,l=1
+param scale=0.0083333
+@ xp=x,yp=xp,xlo=-4,xhi=4,ylo=-8,yhi=8
+@ bounds=1000
+x(0)=2
+# click on numerics colorize color via T.e
+# choose min=0, max=400
+# click dir fld - colorize - grid=80
+# click on the slider and choose g, gravity start at 9.8, min=0,max=20
+# watch the energy landscape change as you move the slider!
+done

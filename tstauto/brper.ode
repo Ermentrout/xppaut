@@ -1,0 +1,9 @@
+r=sqrt(x^2+y^2)
+par a=-1,b=1
+par q=.1
+lam=(a-r)*(b-r)
+om=1+q*r*r
+x'=x*lam+y*om
+y'=y*lam-x*om
+d
+

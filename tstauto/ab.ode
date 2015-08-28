@@ -1,0 +1,6 @@
+e=exp(u2)
+u1'=-u1+p0*(1-u1)*e
+u2'=-u2+p0*p1*(1-u1)*e-p2*u2
+par p0=0.0,p1=14,p2=2
+init u1=0,u2=0
+done

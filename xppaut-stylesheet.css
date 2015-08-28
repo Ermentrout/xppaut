@@ -1,0 +1,26 @@
+		   line.xppaxes {
+		      stroke: #000000;
+		      stroke-width: 2;
+		   }
+		   line.xppboxaxes {
+		      stroke: none;
+		      stroke-width: 0;
+		   }
+
+		   text.xppaxestext {
+		      stroke: #000000;
+		      fill: #000000;
+		   }
+		   
+		   text.xppyaxislabelv {
+		      stroke: #000000;
+		      fill: #000000;
+		   }
+		   text.xppyaxislabelh {
+		      stroke: none;
+		      fill: none;
+		   }
+                   line.xppline0 {
+                      stroke: #000000;
+		      stroke-dasharray: 4,4;
+                   }

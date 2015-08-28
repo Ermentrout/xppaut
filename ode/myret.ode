@@ -1,0 +1,7 @@
+# problem from hairer et al
+y0'=-y0*delay(y1,1)+delay(y1,10)
+y1'=y0*delay(y1,1)-y1
+y2'=y1-delay(y1,10)
+init y0=5,y1=.1,y2=1
+@ delay=20,total=50
+done

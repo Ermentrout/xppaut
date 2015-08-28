@@ -1,0 +1,32 @@
+# animation file osc.ode neural oscillator nullcline demo
+dimension -6.25;-1.25;6.25;10.25
+TRANSIENT
+line xm([-100..100]*.06);Xnull([j]*.06);xm([j+1]*.06);Xnull([j+1]*.06);$RED
+line xm([-100..100]*.06);Vnull([j]*.06);xm([j+1]*.06);Vnull([j+1]*.06);$GREEN
+fcirc V;X;0.25;$BLUE
+grab V;X;0.25
+{V=mouse_x;X=mouse_y}
+{V=mouse_x;X=mouse_y;runnow=1} 
+fcirc 5;2*gam;0.1;$RED
+grab 5;2*gam;0.1
+{gam=0.5*abs(mouse_y)}
+{gam=0.5*abs(mouse_y);runnow=1} 
+fcirc 4*beta;0;0.1;$YELLOW
+grab 4*beta;0;0.1
+{beta=0.25*abs(mouse_x)}
+{beta=0.25*abs(mouse_x);runnow=1} 
+fcirc -1;Input;0.1;$BLACK
+grab -1;Input;0.1
+{Input=mouse_y}
+{Input=mouse_y;runnow=1} 
+fcirc 10*sigma;9;0.1;$GREEN
+grab 10*sigma;9;0.1
+{sigma=0.1*abs(mouse_x)}
+{sigma=0.1*abs(mouse_x);runnow=1} 
+fcirc 10*eps;10;0.1;$PURPLE
+grab 10*eps;10;0.1
+{eps=0.1*abs(mouse_x)}
+{eps=0.1*abs(mouse_x);runnow=1} 
+end
+
+

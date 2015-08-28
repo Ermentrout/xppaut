@@ -1,0 +1,11 @@
+#
+# gcc -fPIC -dynamiclib -arch i386 efmx.c -o efx.so 
+par ibar=-.5,isig=.3333,nsig=0,tau=10
+par nit=200,nn=100,ntr=100
+init s=-.25
+s'=sp
+sp=0
+aux spp=sp
+export {s,ibar,isig,nsig,tau,nit,ntr,nn} {sp}
+@ meth=euler
+done

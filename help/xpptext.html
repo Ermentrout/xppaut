@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>XPP - TEXT</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xpphalf.html">Back</a> | <a href="xppsing.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Text, etc</h1>Allows you to write text to the display in a variety
+of sizes and in two different fonts.  You can also add other symbols
+to your graph.  <p> 
+<ul>
+<li> <b>(T)ext</b> <br> This prompts you for the text you want to add.
+You are asked for the size; there are five choices (0-5): 0-8pt,
+1-12pt, 2-14pt, 3-18pt, 4-24pt. (Note that not all X servers will have these
+fonts, but the postscript file will still draw them.) Finally, place
+the text with the mouse. There are a number of escape sequences that
+allow you to change fonts and add super- and subscripts. The escape
+sequences are:
+<ul> 
+<li> <b> \0 </b>  Use the normal Times-Roman font
+<li><b> \1</b> Use the Symbol font
+<li><b> \s</b> Subscript 
+<li><b> \S</b> Superscript
+<li><b> \n</b> Normal - no sub- or superscripts
+</ul>
+
+<p> 
+<li><b>(A)rrow</b> <br> This lets you draw an arrow-head to indicate a direction on a trajectory.  You will be prompted for the size, which should be some positive number, usually less than 1.  Then you must move the the mouse and select a direction and starting point.  Click on the starting point and holding the mouse buttton down, drag the mouse to indicate the direction of the arrow-head. Then release the mouse-button and the arrow will be drawn.<p>
+<li><b>(P)ointer</b> <br> This is like an arrow, but draws the stem as well as the arrow head.  It can be used to point to important features of your graph. The prompts are like those for <b>Arrow</b>. <p>
+<li><b>(E)dit</b> <br> This lets you edit the text,arrows, and pointers in one of three ways:<p>
+<ul>
+<li><b>(M)ove</b> <br> lets you move the object to another location without changing any of its properties.   Choose the object with the mouse by clicking near it.  You will then be prompted as to whether you want to move the item that XPP selected.  If you answer <tt>yes</tt> use the mouse to reposition it.<p>
+<li><b>(C)hange</b> <br> lets you change the properties: for text, the text itself, size, and font can be change; for arrows and pointers, only the size of the arrow head can be changed. As above, select the object with the mouse and then edit the properties.<p>
+<li><b>(D)elete</b> <br> deletes the object that you select with the mouse. <p>
+</ul>
+<li><b>(D)elete All</b><br>Deletes all the objects in the current window. <p>
+<li><b>marker(S)</b><br>This is similar to the Marker command, but allows you to automatically mark a number of points along a computed trajectory.  Use the data browser to move the desired starting point of the list to the top line of the browser. Then click on this command and choose a size and color.  Then tell XPP how many markers and how many browser lines to jump between markers. (Thus, 10 would put a marker at every 10th data point). <p>
+
+</ul>
+

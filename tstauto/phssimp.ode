@@ -1,0 +1,6 @@
+x1'=1+d+k*sin(x2-x1)
+x2'=1-d+k*sin(x1-x2)
+y'=-y+sin(x1)
+par d=0,k=.1
+@ dt=.01,total=6.28
+done

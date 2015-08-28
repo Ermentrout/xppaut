@@ -1,0 +1,12 @@
+@ total=100,delay=6
+@ autoeval=0
+table w % 250 0 249 ran(1)
+table ind % 250 0 249 flr(ran(1)*50)
+table td % 250 0 249 5*ran(1)
+special k1=sparse(50,5,w,ind,u0)
+special k2=delspar(50,5,w,ind,td,u0)
+f(u)=u/(1+u^2)
+u[0..49]'=c0-u[j]-c1*f(k1([j]))-c2*f(k2([j]))
+@ total=50
+par c0=.5,c1=2,c2=0
+d

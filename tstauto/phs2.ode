@@ -1,0 +1,7 @@
+x'=a+b*sin(y-x)
+y'=1+b*sin(x-y)
+z'=-z+sin(x)
+par a=1,b=.2
+@ total=6.28
+@ dt=.01
+d

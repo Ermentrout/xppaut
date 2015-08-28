@@ -1,0 +1,11 @@
+par ibar=-.5,isig=.3333,nsig=0.25,tau=10
+par nit=200,nn=128,ntr=128
+@ meth=euler,total=50,dt=.2
+init s=.5
+s'=sp
+sdot'=(-sdot+sp)*5
+sp=0
+@ bound=1000000000
+@ xp=s,yp=sdot,xlo=-1,xhi=3,ylo=-.1,yhi=.2
+export {s,ibar,isig,nsig,tau,nit,ntr,nn} {sp}
+done

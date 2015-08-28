@@ -1,0 +1,30 @@
+		   line.xppaxes {
+		      stroke: #000000;
+		      stroke-width: 2;
+		   }
+		  
+		   line.xppboxaxes {
+		      stroke: #000000;
+		      stroke-width: 2;
+		   }
+
+		   text.xppaxestext {
+		      stroke: #000000;
+		      fill: #000000;
+		   }
+		   
+		   text.xppyaxislabelv {
+		      stroke: #000000;
+		      fill: #000000;
+		   }
+		   
+		   text.xppyaxislabelh {
+		      stroke: none;
+		      fill: none;
+		   }
+                   
+		   
+		   rect {
+		   	fill-opacity: 0.2;
+			stroke-opacity: 0.2;
+		   }

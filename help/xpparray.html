@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>ARRAY PLOTS</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xpphelp.html">Contents</a>
+<hr>
+<H1>
+Array plots
+</H1>
+
+<b> (A)rray plot </b>  introduces a new window that lets the user plot many
+variables at once as a function of time with color coded values.  The
+user can plot for example an array of voltages, <tt> V1, V2,
+..., VN </tt>  across the horizontal as time varies in the vertical
+dimension. For example, suppose you have discretized some PDE and want
+to see the evolution in space and time of the variables.  Then use
+this plotting option. A dialog box will appear asking for 
+<ul>
+<li> the first column name
+of the <b> array </b>,
+<li> the number of columns, 
+<li> the first row, 
+<li> the numberof rows, 
+<li> the number of rows to skip,
+<li> the max and min of the plotted variable
+<li> the column skip.
+</ul>
+ For example, if the
+discretized PDE variables are {\tt u0,u1, ... ,u50}, then type in {\tt
+u0} for the first element and {\tt 51} for the number of columns.
+If you want rows 200
+through 800 only every 4th time unit, you would put 200 for the first
+row, 201 as the number of rows, and 4 as the row skip value.  
+You can also set the column skip as well. This is useful if you have
+defined a series of variables with the array blocks. If the array
+block is for a two-component system, then set the column skip to 
+2, to plot every other variable.
+<p>
+
+The <b> Print </b>
+button asks you for a file name and  top and bottom labels and a
+render style. The render styles are:
+<ul>
+<li> <b> -1: </b>  Grey scale
+<li> <b> 0: </b> Blue-red
+<li> <b> 1: </b>  Red-Yellow-Green-Blue-Violet
+<li> <b> 2: </b>  Like <b> 1</b> but periodic
+</ul>
+<p>
+The <b>  Style </b>  button does nothing yet. The <b> Edit </b>  button lets
+you change ranges and arrays to plot. The <b> Redraw </b> button is obvious.
+
+<h2> Shortcut </h2>
+
+In the <b> Initial conditions window </b> each variable has a little
+box next to it. If you click the box next to the  first element in
+the array and the box next to the last element in the array and then
+click the <b> Arry </b> button at the bottom, you will get a nice
+scaled array plot!
+

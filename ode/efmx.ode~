@@ -1,0 +1,9 @@
+# 
+par ibar=-.5,isig=.3333,tau=10
+init s=-.25
+s'=sp
+sp=0
+aux spp=sp
+export {s,ibar,isig,tau} {sp}
+@ meth=euler
+done

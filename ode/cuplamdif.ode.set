@@ -1,0 +1,216 @@
+## Set file for cuplamdif.ode on Mon Jan 26 11:18:59 2015
+7   Number of equations and auxiliaries
+5   Number of parameters
+# Numerical stuff
+1    nout
+40    nullcline mesh
+6   Volterra
+250  total
+0.05  DeltaT
+0  T0
+249.99  Transient
+100  Bound
+1e-12  DtMin
+1  DtMax
+0.001  Tolerance
+0.001  Abs. Tolerance
+0  Max Delay
+100   Eigenvector iterates
+0.001  Eigenvector tolerance
+0.001  Newton tolerance
+0  Poincare plane
+1e-05  Boundary value tolerance
+1e-05  Boundary value epsilon
+20   Boundary value iterates
+0   Poincare None
+1   Poincare variable
+1   Poincare sign
+0   Stop on Section
+0   Delay flag
+0  Current time
+250.0000000000226  Last Time
+0   MyStart
+1   INFLAG
+4000   Max points for volterra
+# Delays
+0.0
+0.0
+0.0
+0.0
+# Bndry conds
+0
+0
+0
+0
+# Old ICs
+0  U
+0  V
+0  U1
+0  V1
+# Ending  ICs
+0  U
+0  V
+0  U1
+0  V1
+# Parameters
+1.5  lam
+0.8  q
+1  d
+1  u0
+-0.5  u10
+# Graphics
+0.7071097251469876  rm
+-0.4999999999826661  rm
+0.4999958366025516  rm
+0.7071038372138505  rm
+0.5000041633974482  rm
+-0.4999999999826661  rm
+0  rm
+0.7071038372138505  rm
+0.7071097251469876  rm
+6    
+7    
+1    
+-4    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+0    
+1    
+1    
+1    
+0    
+-1000   
+1000   
+0    
+0   3DFlag
+0   Timeflag
+2   Colorflag
+0   Type
+3.986556351184845  color scale
+-0.6720507740974426   minscale
+0.949999988079071   xmax
+-0.949999988079071   xmin
+4   ymax
+1   ymin
+12   zmax
+-12   zmin
+0   
+1.052631592156154   
+2.5   
+0.6666666666666666   
+0   
+0.08333333333333333   
+45   Theta
+45   Phi
+0    xshft
+0    yshft
+0    zshft
+-0.949999988079071   xlo
+1   ylo
+0   
+-1   
+0.949999988079071   xhi
+4   yhi
+20   
+1   
+# Transpose variables etc
+U
+2   n columns
+1   n rows
+1   row skip
+1   col skip
+1   row 0
+# Coupling stuff for H funs
+0
+0
+0
+0
+# Array plot stuff
+
+1   NCols
+0   Row 1
+50   NRows
+8   RowSkip
+0  Zmin
+1  Zmax
+# Torus information 
+0    Torus flag 1=ON
+6.283185307179586  Torus period
+# Range information
+lam
+-1   eq-range stab col
+0   shoot flag 1=on
+10   eq-range steps
+0  eq_range low
+1  eq_range high
+u10
+d
+20   Range steps
+0   Cycle color 1=on
+0   Reset data 1=on
+1   Use old I.C.s 1=yes
+-0.95  Par1 low
+1  Par2 low
+0.95  Par1 high
+4  Par2 high
+lam
+0   BVP side
+0   color cycle flag 1=on
+10   BVP range steps
+0  BVP range low
+1  BVP range high
+RHS etc ...
+dU/dT=U0*EXP(-5*T)+SPI*(INT[.5]{EXP(-T)#F}+INT[.5]{EXP(-T-D/(T+.0001))#F1})
+dV/dT=SPI*(INT[.5]{EXP(-T)#G}+INT[.5]{EXP(-T-D/(T+.0001))#G1})
+dU1/dT=U10*EXP(-5*T)+SPI*(INT[.5]{EXP(-T)#F1}+INT[.5]{EXP(-T-D/(T+.0001))#F})
+dV1/dT=SPI*(INT[.5]{EXP(-T)#G1}+INT[.5]{EXP(-T-D/(T+.0001))#G})
+PHI=MOD(TH1-TH2,2*PI)
+UI=U10
+DD=D
+
+where ...
+F = LAM*U-V-(U*U+V*V)*(U+Q*V)   
+G = LAM*V+U-(U*U+V*V)*(V-Q*U)   
+F1 = LAM*U1-V1-(U1*U1+V1*V1)*(U1+Q*V1)   
+G1 = LAM*V1+U1-(U1*U1+V1*V1)*(V1-Q*U1)   
+TH1 = ATAN2(U,V)   
+TH2 = ATAN2(U1,V1)   

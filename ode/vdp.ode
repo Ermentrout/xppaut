@@ -1,0 +1,10 @@
+# The van der Pol Oscillator with a frequuency parameter and
+# periodic boundary conditions
+p om=6.6
+x'=xp*om
+xp'=(-x+xp*(1-x^2))*om
+x(0)=1
+bndry x-x'
+bndry xp-xp'
+d
+

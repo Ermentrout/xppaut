@@ -1,0 +1,21 @@
+# this is an example showing the logistic bifurcation diagram
+f(x,a)=a*x*(1-x)
+# here is the map
+x'=f(x,aa)
+# keep tabs on the parameter for plotting
+a'=aa
+# dummy index so you can change range without reloading
+par ind
+# define a in terms of the index ind over which we range
+!aa=amin+(amax-amin)*ind/200
+# 
+init x=.1
+# change amin and amax to change the window
+par amin=2,amax=4
+@ maxstor=11000,total=400,trans=350,meth=discrete
+@ xlo=2,xhi=4.001,ylo=0,yhi=1.001,xp=a,yp=x
+@ range=1,rangeover=ind
+@ rangereset=no
+@ rangelow=0,rangehigh=200,rangestep=200
+@ LT=0
+done

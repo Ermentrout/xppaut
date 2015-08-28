@@ -1,0 +1,10 @@
+# -c v' = f(v) + v''
+#
+@ total=20
+f(v)=v*(1-v)*(v-a)+p
+par c=.56
+par a=.1,p=0.0
+v'=vp
+vp'=-c*vp-f(v)
+i v=.995,vp=-.0039366
+d

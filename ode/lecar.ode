@@ -1,0 +1,60 @@
+# The Morris-Lecar model as in our chapter in Koch & Segev
+#  A simple membrane oscillator.  
+#
+params iapp=0.0,phi=.333
+param v1=-.01,v2=0.15,v3=0.1,v4=0.145,gca=1
+params vk=-.7,vl=-.5,gk=2.0,gl=.5,om=1
+minf(v)=.5*(1+tanh((v-v1)/v2))
+ninf(v)=.5*(1+tanh((v-v3)/v4))
+lamn(v)= phi*cosh((v-v3)/(2*v4))
+ica=gca*minf(v)*(v-1)
+v'=  (iapp+gl*(vl-v)+gk*w*(vk-v)-ica)
+w'= (lamn(v)*(ninf(v)-w))
+aux cur=iapp
+aux ica=ica
+aux ik=gk*w*(v-vk)
+aux rate=phi
+# some options
+@ colormap=5
+@ TOTAL=30,DT=.05,xlo=-.6,xhi=1.2,ylo=-.25,yhi=1.2
+@ xplot=v,yplot=w
+# AUTO options
+@ dsmin=1e-5,dsmax=.02,parmin=-.2 parmax=.5
+@ npr=500,nmax=2000
+@ autoymax=.4,autoymin=-.5,autoxmin=-.2,autoxmax=.5
+@ dfgrid=16,ncdraw=1,dfdraw=2
+#
+# plot v vs time
+set vvst {xplot=t,yplot=v,xlo=0,xhi=100,ylo=-.6,yhi=.5,total=100,iapp=.1}
+# plot phaseplane
+set pp {xp=v,yp=w,xlo=-.6.xhi=1.2,ylo=-.25,yhi=1.2}
+# now some nice parameter sets for the homoclinic and the Hopf
+set snic {v3=.1,v4=.145,gca=1,phi=.333}
+set hopf {v3=0,v4=.3,gca=1.1,phi=.2}
+set hom {v3=.1,v4=.145,gca=1,phi=1.15}
+set cool {v3=.1,v4=.145,gca=1,phi=1.15,iapp=.080918}
+#
+#  set up a little tutorial for channesl 
+"                Channnels for the ML Eqns
+" The ML eqns have three channels Calcium, potassium and leak. 
+" To set parameters click on the asterisks
+" {total=100,iapp=.1} We first set the integration time to 100 and increase the current
+" Integrate the equations and see the nice limit cycle. Draw the nullclines.
+" {gk=0} Now we block potassium. Integrate again and look at what happens
+" Draw the nullclines. Where is the V nullcline?
+" {gk=0,gca=0} Now we block both currents and integrate
+" {gk=2,gca=0} Now calcium is blocked. Explore this
+" {gk=2,gca=1.33} Back to normal.  Both currents are required for oscillations!
+" {gl=0}  What happens with no leak??? 
+done
+
+
+
+
+
+
+
+
+
+
+

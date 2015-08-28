@@ -1,0 +1,12 @@
+par isig=.3333,nsig=0.25,tau=10
+par nit=60,nn=128,ntr=128
+@ meth=euler,total=50,dt=.2
+par taui=50,k=-1,c=0.3
+s'=sp
+ibar'=(-ibar+k*s+c)/taui
+sp=0
+@ bound=1000000000
+@ xp=s,yp=ibar,xlo=9,xhi=2,ylo=-1.25,yhi=0
+@ nmesh=20
+export {s,ibar,isig,nsig,tau,nit,ntr,nn} {sp}
+done

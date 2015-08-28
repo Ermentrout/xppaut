@@ -1,0 +1,8 @@
+# nonlinear boundary value problem
+u'=v
+v'=sin(t*u)
+bdry u-1
+bdry u'
+init u=1,v=-1
+@ total=2,bell=0,xhi=2
+done

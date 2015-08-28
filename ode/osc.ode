@@ -1,0 +1,18 @@
+par beta=1.463,gam=3.358,Input=1.352,eps=0.1,sigma=0
+init V=2,X=1.5
+@ parmin=0,parmax=6, ds=-0.001, dsmax=.01
+
+xm(z) = z
+Vnull(z) = 3*z-z^3+2+Input
+Xnull(z) = gam*(1+tanh(z/beta))
+wiener z
+
+dV/dt = 3*V-V^3+2-X+Input+sigma*z
+dX/dt = eps*(gam*(1+tanh(V/beta))-X)
+
+@ BUT=AUTO:fa,NOUT=10
+@ MAXSTOR=100000,TOTAL=400,XP=V,YP=X,Xlo=-3,Xhi=3,Ylo=-3,Yhi=6
+@ METH=euler
+@ AUTOVAR=V
+
+

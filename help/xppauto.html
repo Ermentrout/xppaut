@@ -1,0 +1,311 @@
+<html>
+<head>
+<title> XPP AUTO </title>
+</head>
+<body bgcolor="#ffffff" link="#CC0000" alink="#FF3300"
+    vlink="#330099">
+<a href="xpphelp.html">Main Help</a>
+<center>
+<h1> Bifurcation Calculations with AUTO <p> </h1>
+</center>
+<h2>Running AUTO </h2>
+<h3>
+<ul>
+<dd> <a href=#prep> Preparation   </a>
+<dd> <a href=#choose> Choosing the "hot" parameters   </a>
+<dd> <a href=#axes> Choosing the plotting axes    </a>
+<dd> <a href=#numer> Setting up the numerical parameters   </a>
+<dd> <a href=#user> User defined points   </a>
+<dd> <a href=#run> Running and continuing from a point   </a>
+<dd> <a href=#special> Specially labeled points   </a>
+<dd> <a href=#grab> Traversing the diagram and selecting points </a>
+<dd> <a href=#abort> Stopping a calculation </a>
+<dd> <a href=#save> Saving, printing, resetting diagrams </a>
+</ul>
+</h3>
+<p>
+<hr>
+
+<p> <a name=prep> <h2> Preparation </h2> </a> <p> 
+
+Before you can use AUTO, you must prepare your system for it.  You must
+start your bifurcation analysis from either a  fixed point of your
+model, a periodic orbit, or a boundary value.  
+AUTO seems to work best when you start
+from a steady state, but I have had success starting at periodic
+orbits.  
+<ul>
+<li> If you want to start at a steady state, find one and
+integrate so that the system is at rest.  Use the <a
+href="xppics.html#last"> <b> Init.conds. Last </b> </a> repeatedly.
+<li> If you want to start at a
+periodic orbit, find one by integration and make sure you have
+converged to it.  The set the <a
+href="xppnumerics.html#total"> total integration </a>
+time is the ``period'' of your orbit.  This is what the AUTO interface
+uses as an approximate starting period. 
+<li> If you want to use AUTO to solve a boundary value problem, you
+must do several things.
+<ol>
+ <li>  First rescale everything so that the total
+length of the interval is 1.
+<li> If the system is non-autonomous, define a new variable to make it
+autonomous. 
+<li> The number of ODEs must be the same as the number of boundary
+conditions.
+<li> Compute a solution using XPP's <a href=xppbdry.html> boundary
+value solver </a> or guessing a solution. (AUTO is pretty forgiving -- moreso than the XPP BVP solver.) 
+</ol>
+<li> Setting up for homoclinics is similar to BVPs. Make sure that you
+include the <b> hom_bcs </b> boundary conditions. 
+</ul>
+
+<p> <a name=choose> <h2> Choosing parameters </h2> </a> <p>
+
+The first thing you should do is tell AUTO which parameters you might
+use in the bifurcation analysis. Up to 5 are allowed.  Click on
+``Parameter'' and a list of 5 parameters will appear.  Type in the
+names of the parameters you want to use.   The default is the first 5
+or fewer parameters
+in your file. If you have fewer than 5 parameters, only the
+available ones will appear.  <i> You can have as many parameters in
+your ODE file as you want. However, the AUTO interface allows only 5
+<b> hot </b> parameters. </i>
+ 
+<p> <a name=axes> <h2> Diagram axes </h2> </a> <p>
+Use this to set up the plotting of the diagram as well as to tell AUTO
+which parameters should be varied.  This is also where you set up for
+two-parameter continuation.  There are 8 choices
+<ul>
+<li> <b>(H)i </b> This plots the maximum of the chosen variable.
+<li> <b>(N)orm </b>  This plots the <i> L_2 </i>  norm of the solution.
+<li> <b>h(I)-lo </b> This plots both the max and min of the chosen variable
+(convenient for periodic orbits.)
+<li> <b>(P)eriod </b> Plot the period versus a parameter
+<li> <b>(T)wo par </b> Plot the second parameter versus the primary
+parameter for two-parameter continuations.
+<li> <b>(Z)oom </b> Use the mouse to zoom in on a region.
+<li> <b>last (1) par </b> Use the plot parameters from the last 1-parameter
+plot.
+<li> <b>last (2) par </b>  Use plot parameters from last 2-parameter
+plot.
+<li> <b> (F)requency </b> Plot frequency versus a parameter
+<li> <b> (A)verage </b> Plot the average over a period of a quantity
+</ul>
+<p>
+After clicking, a new window pops up with the following items:
+<ul>
+<li> <b>Y-axis </b> This is the variable for the y-axis of the plot.  For
+two-parameter and period plots, its contents is ignored.
+<li> <b>Main Parm </b> This is the principal bifurcation parameter.  It must
+be one of those you specified in the parameter window.  The default is
+the first parameter in the parameter list.
+<li> <b>2nd Parm </b> This is the other parameter for two-parameter
+continuations.
+<li> <b>Xmin ... Ymax </b> The plotting dimensions of the diagram.
+</ul>
+
+Once you press  (OK) the axes will be redrawn and labeled.
+
+
+<p> <a name=numer> <h2> Numerical parameters </h2> </a> <p>
+
+You will often have to change these. In particular, you set the range
+of the parameters as well as the direction of bifurcation in this
+dialog. 
+<ul>
+<li> <b>Ntst </b> This is the number of mesh intervals for discretization
+of periodic orbits.
+If you are getting bad results or not converging, it helps
+to increase this.  For following period doubling bifurcations, this is
+automatically doubled so you should reset it later.
+<li> <b>Nmax </b> The maximum number of steps taken along any branch.  If
+you max out, make this bigger.
+<li> <b>Npr </b> Give complete info every  Npr steps. Set this to a
+big number if you want to speed things along.
+<li> <b>Ds </b> This is the initial step size for the bifurcation
+calculation. <i> The sign of  Ds  tells AUTO the direction to
+change the parameter. </i> Since stepsize is adaptive, (Ds) is just a
+``suggestion.''
+<li> <b>Dsmin </b> The minimum stepsize (positive).
+<li> <b>Dsmax </b> The maximum step size.  If this is too big, AUTO will
+sometimes miss important points so if it seems to miss a stability
+transition, or if the diagram is jagged, decrease this.
+<li> <b>Par Min </b> This is the left-hand limit of the diagram for the
+principle parameter. The calculation will stop if the parameter is
+less than this.
+<li> <b>Par Max </b> This is the right-hand limit of the diagram for the
+principle parameter. The calculation will stop if the parameter is
+greater than this.
+<li> <b>Norm Min </b> The lower bound for the <i>L<sub>2</sub></i> norm of the solution.  If it
+is less than this the calculation will stop.
+<li> <b>Norm Max </b> The upper bound for the <i>L<sub>2</sub></i> norm of the solution.  If it
+is greater than this the calculation will stop.
+<li> <b> Ncol </b> number of collocation points used. I never have changed this in 10 years of running AUTO.
+<li> <b> EPSU,EPSS,EPSL </b> some sort of tolerances for AUTO. Keep 'em positive but make 'em smaller for better accuracy. 1e-7 seems to be a popular choice!
+</ul>
+
+<p><a name=user>  <h2>User functions </h2> </a> <p>
+
+Suppose you want to get plots at specific values of parameters or at
+fixed periods of a limit cycle.  Then you can click on ``User''
+which produces a menu 0-9 asking you how many points you want to keep.
+Click on 0 for none or another number less than 10.  A new window will appear
+with slots for 9 items.  You can type in anything of the form:
+<xmp>
+	parameter=value
+</xmp>
+
+or
+<xmp>
+	T=value
+</xmp>
+AUTO will mark and save complete information for any point that
+satisfies either of these criteria.  The second is used to indicate
+that you want to keep a point with a particular period, e.g., 
+T=25 will save the any periodic orbit with period 25.  
+
+<p> <a name=run> <h2> Running </h2> </a> <p>
+
+Click on ``Run'' to run the bifurcation.  Depending on the situation,
+a number of menus can come up.  For initial exploration, there are four
+choices: <ul>
+<li>  starting at a new steady state 
+<li> starting at a periodic orbit
+<li> starting at a boundary-value solution,
+<li> starting at a homoclinic/heteroclinic orbit.
+</ul>
+You must be sure that you are starting from a good initial solution or the continuation will fail. If successful,
+a nice diagram will show up and a bunch of points will move
+around in the stability circle.  These indicate stability: for fixed
+points, they represent exponentials of the eigenvalues; for periodics,
+the Floquet multipliers. Thus those in
+the circle are stable and those out of the circle are unstable.
+Bifurcations occur on the circle. The outer eigenvalues are ``clipped'' so
+that they will always lie in the square, thus you can keep count of
+them.  
+<p> <a name=special> <h3> Special Points </h3> </a> <p>
+The diagram,itself, has two different lines and two different circles.
+Stable fixed points are thick lines, stable periodics are solid
+circles, unstable fixed points are thin lines, and unstable periodics
+are open circles. Additionally, there are crosses occasionally
+dispersed with numbers associated with them.  These represent
+``special'' points that AUTO wants to keep.  There are several of
+them:
+<ul>
+<li> <b>EP </b> Endpoint of a branch
+<li> <b>LP </b> Limit point or turning point of a branch
+<li> <b>TR </b> Torus bifurcation from a periodic
+<li> <b>PD </b> Period doubling bifurcation
+<li> <b>UZ </b> User defined function
+<li> <b>MX </b> Failure to converge  
+<li> <b>BP </b> Bifurcation or branch point
+<li> <b>HB</b> Hopf bifurcation point
+<li> <b>   </b> Output every <i> N<sup>th</sup> </i>  point.
+</ul>
+
+<p> <a name=grab>  <h2>Grabbing </h2> </a> <p>
+
+You can use these special points to continue calculations with AUTO.
+The ``Grab'' item lets you peruse the diagram at a leisurely pace and
+to grab special points or regular points for importing into XPP or
+continuing a bifurcation calculation.  Click on ``Grab'' and info
+appears in the info window and a cross appears on the diagram.  Use
+the left and right arrow keys to cruise through the diagram. The right
+key goes forward and the left backward.  At the bottom, information
+about the branch, the point number, the type of point, the AUTO label,
+the parameters, and the period are given. The points marked by crosses
+have lables and types associated with them.  The type is one of the
+above.  The label corresponds to the number on the diagram.  If point
+is positive, it is an unstable solution and if it is negative it is
+stable. As you traverse the diagram, stability is shown in the circle.
+<p>
+You can traverse the diagram very quickly by tapping the (Tab) key
+which takes you the special points only.  Type (Esc) to exit with
+no action or type (Enter) to grab the point.  If it is a regular
+point (i.e., not special) then the parameters and the variables will
+be set to the values for that point within XPP.  You can then
+integrate the equations or look at nullclines, etc.  If you grab a
+special point, then you can use this as a restart point for more AUTO
+calculations, such as fixed period, two-parameter studies, and
+continuations. Then, you can run AUTO again.  Bifurcation diagrams are
+cumulative unless you reset them in the ``File'' menu.  That is, new
+stuff is continually appended to the old.  The only limit is machine
+memory.
+<p>
+If you grab a special point and click on ``Run'' several possibilities
+arise depending on the point:
+<ul>
+<li> <b>Regular Point </b> Reset the diagram and begin anew.  You will be
+asked first if you want to reset the diagram first.
+<li> <b>Hopf Point </b>  
+<ul>
+	<li> <b>Periodic </b> Compute the branch of periodics emanating from
+the Hopf point
+	<li> <b>Extend </b> Continue the branch of steady states through
+this point.
+	<li> <b>New Point </b> Restart whole calculation using this as a
+starting point
+	<li> <b>Two Param </b> Compute a two parameter diagram of Hopf
+points. 
+	</ul>
+<li> <b>Period doubling </b> 
+	<ul>
+	<li> <b>Doubling </b> Compute the branch of period 2 solutions.
+	<li> <b>Two-param </b>  Compute two-parameter curve of period
+doubling points.
+	</ul>
+ 
+<li> <b>Limit point </b> Compute two parameter family of limit points (fixed
+points or periodic.) 
+<li> <b>Periodic point </b> The point is periodic so
+	<ul>
+	<li> <b>Extend </b> Extend the branch
+	<li> <b>Fixed Period </b> Two parameter branch of fixed period
+points. 
+	</ul>
+<li> <b> Branch point  of periodic </b> Branch points of steady states
+are automatically followed by AUTO.  If you click on a branch point
+for a periodic, the program traces out the new branch.  Changing the
+sign of <b> Ds </b> will trace a different branch.
+	
+<li> <b>Torus point </b>  Compute two-parameter family of torus
+bifurcations or extend the branch or compute two-parameter
+fixed period.
+
+</ul>
+
+<p> <i>Before running, after a point is grabbed, be sure to set up the
+correct axes and ranges for the parameters. </i>
+
+<p> <a name=abort> <h2> Aborting </h2> </a> <p>
+Any calculation can be gracefully stopped by clicking on the ``Abort''
+key. This produces a new end point from which you can continue.  Note
+that if there are many branches, you may have to press "Abort"
+several times. 
+
+<p> <b> Clear </b> clears the diagram and <b> reDraw</b> redraws it.
+<p>
+
+<p> <a name=save> <h2> Saving diagrams </h2> </a> <p>
+ <b> File </b> allows you to do several things:
+<ul>
+<li> <b>Import orbit </b> If the grabbed point is a special one and is a
+periodic orbit or BVP solution, 
+ this loads the orbit into XPP for plotting.  This is
+useful for unstable orbits that can't be computed by integrating
+initial data.
+<li> <b>Save diagram </b> Writes a file for the complete diagram which you
+can use later.
+<li> <b>Load Diagram </b> Loads a previously saved one.
+<li> <b>Postscript </b>  This makes a hard copy of the bifurcation diagram
+<li> <b> Reset diagram </b> This clears the whole thing.
+<li> <b> Clear Grab </b> This clears the grab point.
+<li> <b> Write Points </b>  This makes an ascii file of the <b> (x,y)
+</b> coordinates of the diagram.  Use this to make nicer figures with
+ by <a href=xppfreeze.html> importing </a> the diagram into XPP
+<li> <b> All info </b> writes all the fixed points, eigenvalues, etc for
+each point on the diagram.
+</ul>
+
+

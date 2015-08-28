@@ -1,0 +1,10 @@
+# this solves a continuous functional iteration problem
+# in the Volterra solver, change MaxPoints to 10 to get fast performance 
+#
+# fool XPP
+z=int{0#u}
+#
+volt u=1.5*sin(t)+.5*delay(u,pi)
+aux ut=sin(t)
+@ delay=4,total=80
+done

@@ -1,0 +1,15 @@
+u'=k*(-u+f(aee*we-aie*v-aze*z-te))/(c*taue)
+v'=k*(-v+f(aei*we-aii*v-ti))/(c*taui)
+z'=k*(-z+f(aez*u-tz))/(c*tauz)
+we'=k*ve
+ve'=k*(we-u)
+f(u)=1/(1+exp(-u))
+par c=.528907
+par k=1
+par aze=12,te=3.8,aee=15,aie=10,taue=2
+par taui=5,aei=25,aii=8,ti=8.5
+par tauz=50,aez=10,tz=7
+init u=.036,v=.0005,z=.0013,we=.0365
+@ dt=.002
+@ xp=we,yp=ve,xlo=-.05,ylo=-.2,xhi=.5,yhi=.3
+dobe

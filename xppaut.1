@@ -1,0 +1,437 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" groff xppaut.1 -man -T ps > xppman.ps to make a copy
+.\" other parameters are allowed: see man(7), man(1)
+.TH XPPAUT 1 "Dec  30, 2012" "Version 7.0" "XPPAUT Documentation"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+xppaut \- X Phase plane plus AUTO.  Solves many kinds of equations.
+.SH SYNOPSIS
+.PD 0
+.HP 7
+.B xppaut \fR[\fB\-silent\fR] [\fB\-xorfix\fR] [\fB\-convert\fR] 
+.IP
+\fR[\fB\-newseed\fR] [\fB\-ee\fR] [\fB\-allwin\fR]
+.IP
+\fR[\fB\-white\fR] [\fB\-setfile\fR \fIfile\fR] \fR[\fB\-runnow\fR]
+.IP
+\fR[\fB\-bigfont\fR \fIfont\fR] [\fB\-smallfont\fR \fIfont\fR] [\fB\-parfile\fR \fIfile\fR]
+.IP
+\fR[\fB\-outfile\fR \fIfile\fR] [\fB\-icfile\fR \fIfile\fR] [\fB\-grads \fIboolean\fR] [\fB\-bell \fIboolean\fR]
+.IP
+\fR[\fB\-forecolor\fR \fIcolor\fR] [\fB\-backcolor\fR \fIcolor\fR] [\fB\-backimage\fR \fIimage\fR]
+.IP
+\fR[\fB\-quiet \fIboolean\fR] [\fB\-logfile \fIfile\fR] [\fB\-internset \fIboolean\fR] \fR[\fB\-uset\fR \fIsetname\fR]
+.IP
+\fR[\fB\-rset\fR \fIsetname\fR] [\fB\-include \fIfile\fR]  [\fB\-qics\fR] [\fB\-qpars\fR] [\fB\-qsets\fR]
+.IP
+\fR[\fB\-anifile \fIfile\fR] [file...] \fR[\fB\-mkplot\fR] \fR[\fB\-plotfmt \fIformat\fR] 
+.IP
+\fR[\fB\-ncdraw \fIboolean\fR] \fR[\fB\-dfdraw \fIN\fR] \fR[\fB\-version\fR] \fR[\fB\-noout\fR] 
+.PD
+.br
+.SH DESCRIPTION 
+\fBxppaut\fP is a tool for solving:
+.PD 0
+.HP 
+.IP \(bu 4 
+differential equations
+.IP \(bu 4 
+difference equations
+.IP \(bu 4 
+delay equations
+.IP \(bu 4 
+functional equations
+.IP \(bu 4 
+differential-algebraic equation
+.IP \(bu 4 
+boundary value problems
+.IP \(bu 4 
+stochastic equations
+.PD
+.LP
+The code brings together a number of useful algorithms and is
+written in C. All the graphics and interface are created using 
+the X Window System protocol client library Xlib <http://www.xfree86.org>.
+.HP 5
+\fBxppaut\fP capabilities:
+.PD 0
+.IP \(bu 4
+Handles up to 1950 differential equations.
+.IP \(bu 4
+There are over a dozen solvers including several for stiff systems, a solver for integral equations and a symplectic solver
+.IP \(bu 4
+Up to 10 graphics windows can be visible at once and a variety of color combinations is supported
+.IP \(bu 4
+PostScript output is supported as well as GIF and animated GIF movies
+.IP \(bu 4
+Post processing is easy and includes the ability to make histograms, FFTs and applying functions to columns of data
+.IP \(bu 4
+Equilibria and linear stability as well as one-dimensional invariant sets can be computed
+.IP \(bu 4
+Nullclines and flow fields aid in the qualitative understanding of two-dimensional models
+.IP \(bu 4
+Poincare maps and equations on cylinders and tori are also supported
+.IP \(bu 4
+Some useful averaging theory tricks and various methods for dealing with coupled oscillators
+.IP \(bu 4
+Equations with Dirac delta functions are allowable
+.IP \(bu 4
+Animations of simulations such as a little pendulum moving back and forth or lamprey swimming
+.IP \(bu 4
+A curve-fitter based on the Marquardt-Levenberg algorithm which lets you fit dynamical systems to data
+.IP \(bu 4
+Generate "movies" of three-dimensional views of attractors or parametric changes in the attractor as some parameters vary
+.IP \(bu 4
+Dynamically link to external subroutines
+.IP \(bu 4
+From the command line type /dev/stdin as the file and you can write the ODE on the fly
+.PD
+.SH OPTIONS
+.TP
+.B \-silent                
+Batch run without the interface and dump solutions to a file
+.TP
+.B \-xorfix                
+Work-around for exclusive Or with X on some monitors/graphics setups
+.TP
+.B \-convert               
+Convert old style ODE files (e.g. phaseplane) to new ODE style
+.TP
+.B \-newseed               
+Randomizes the random number generator which will often use the same seed
+.TP
+.B \-ee	 
+.br                               
+Emulates shortcuts of Evil Empire style (MS)
+.TP
+.B \-allwin                
+Brings XPP up with all the windows visible
+.TP
+.B \-white
+.br                                
+Swaps foreground and background colors 
+.TP
+.B \-setfile \fIfilename   
+Loads the set file before starting up
+.TP
+.B \-runnow                
+Runs ode file immediately upon startup (implied by -silent)
+.TP
+.B \-bigfont \fIfont        
+Use the big font whose filename is given
+.TP
+.B \-smallfont \fIfont      
+Use the small font whose filename is given
+.TP
+.B \-parfile \fIfilename    
+Load parameters from the named file
+.TP
+.B \-outfile \fIfilename    
+Send output to this file (default is output.dat)
+.TP
+.B \-icfile \fIfilename     
+Load initial conditions from the named file
+.TP
+.B \-forecolor \fIcolor
+Hexadecimal color (e.g. 000000) for foreground
+.TP
+.B \-backcolor \fIcolor  
+Hexadecimal color (e.g. EDE9E3) for background
+.TP
+.B \-mwcolor \fIcolor  
+Hexadecimal color (e.g. 808080) for main window
+.TP
+.B \-dwcolor \fIcolor  
+Hexadecimal color (e.g. FFFFFF) for drawing window
+.TP
+.B \-backimage \fIfilename  
+Name of bitmap file (.xbm) to tile in background
+.PP
+.RS
+For example, the following text saved to a file named stipple2.xbm
+can be loaded to impart a stippled background.
+.PP
+.PD 0
+.RS
+.PP
+.PP
+#define stipple2_width 2
+.PP
+#define stipple2_height 2
+.PP
+static char stipple2_bits[] = {
+.PP
+ 0x02,0x01};
+.PP
+.PD
+.RE
+.RE
+.TP
+.B \-grads \fIB            
+Color gradients will (B=1) or will not (B=0) be used
+.TP
+.B \-width  \fIN              
+Minimum width in pixels of main window
+.TP
+.B \-height \fIN               
+Minimum height in pixels of main window
+.TP
+.B \-bell \fIB            
+System bell on events will (B=1) or will not (B=0) be used
+.TP
+.B \-internset \fIB               
+Internal sets will (B=1) or will not (B=0) be run during batch run
+.TP
+.B \-uset \fIsetname        
+Named internal set will be run during batch run
+.TP 
+.B \-rset \fIsetname 
+Named internal set will not be run during batch run
+.TP
+.B \-include \fIfilename    
+Named file will be included (see include directive)
+.TP
+.B \-qsets
+.br
+Query internal sets (output saved to OUTFILE)
+.TP
+.B \-qpars                 
+.br
+Query parameters (output saved to OUTFILE)
+.TP
+.B \-qics                  
+.br
+Query initial conditions (output saved to OUTFILE)
+.TP 
+.B \-quiet \fIB       
+Verbose log messages will (B=0) or will not be (B=1) written
+.TP 
+.B \-logfile \fIfilename
+Verbose log messages are written to named file instead of stdout 
+.TP 
+.B \-anifile \fIfilename
+Load animation (.ani) from the named file
+.TP 
+.B \-mkplot 
+Produce graphics from solution (requires -silent).
+.TP 
+.B \-plotfmt \fIformat
+Graphics format (see -mkplot).  Supported values for format include svg and ps.
+.TP 
+.B \-ncdraw \fIB
+Nullclines will (B=1) or will not be (B=0) produced (see -mkplot) for graphics output.
+.TP 
+.B \-dfdraw \fIN
+Vector field may be produced (see -mkplot) for graphics output. Supported values for N are 
+none (N=0), direction field (N=1), scaled direction field (N=2), and colorized (N=3).  The number of grid values
+used in producing the field are determined by the nmesh @-option (see .xpprc or .ode syntax).
+.TP 
+.B \-version 
+Output the version of this software and exit.
+.TP 
+.B \-noout 
+During a batch run (see -silent) no solution output (.dat) file will be produced.
+.LP
+.SH ENVIRONMENT
+ 
+.B \fBXPPSTART\fP
+.RS
+File browser will open to the specified path. This may be useful in an instructional setting to point to a mapped drive containing course materials.
+.RE
+.TP
+.B \fBXPPHELP\fP
+.RS
+Path to the XPPAUT documentation file <xpphelp.html> (e.g. /usr/share/doc/xppaut/html/xpphelp.html)
+.RE
+.TP
+.B \fBXPPBROWSER\fP
+Web browser to view documentation (e.g. /usr/bin/firefox)
+.RE
+.SH FILES
+Each user can customize the behavior and appearance of Xppaut via the
+file \(lq$HOME/.xpprc\(rq. Where the environment variable $HOME points
+to the user's home directory. On most systems $HOME will already be set.
+Each option line in .xpprc begins with the \(lq@\(rq symbol followed by a comma-separated list of options. Comment
+lines begin with the \(lq#\(rq symbol and are ignored.
+  
+
+
+.PD 0
+.RS
+# Example .xpprc file
+.PP
+@ maxstor=50000
+.PP
+@ meth=qualrk,tol=1e-6,atol=1e-6
+.PP
+#Set up a customized look
+.PP
+@ but=quit:fq,bell=1
+.PP
+@ bigfont=lucidasanstypewriter-bold-14,grads=1
+.PP
+# thats it
+.PD
+.RE
+.PP
+
+An list of the extensive options are given below. For complete description of
+each of these options the reader is referred to the technical documentation for Xppaut.
+
+ATOL,
+AUTOEVAL,
+AUTOVAR,
+AUTOXMAX,
+AUTOXMIN,
+AUTOYMAX,
+AUTOYMIN,
+AXES,
+BACK,
+BACKCOLOR,
+BACKIMAGE,
+BANDLO,
+BANDUP,
+BELL,
+BIGFONT,
+BOUND,
+BUT,
+COLORMAP,
+DELAY,
+DLL_FUN,
+DLL_LIB,
+DS,
+DSMAX,
+DSMIN,
+DT,
+DTMAX,
+DTMIN,
+DWCOLOR,
+EPSL,
+EPSS,
+EPSU,
+FOLD,
+FORECOLOR,
+GRADS,
+HEIGHT,
+HISTI,
+HISTLO,
+HISTBINS,
+HISTCOL,
+JAC_EPS,
+LOGFILE,
+LT,
+MAXSTOR,
+METH,
+MULTIWIN,
+MWCOLOR,
+NCOL,
+NEWT_ITER,
+NEWT_TOL,
+NJMP,
+NMAX,
+NMESH,
+NORMMAX,
+NORMMIN,
+NPLOT,
+NPR,
+NTST,
+OUT,
+OUTPUT,
+PARMAX,
+PARMIN,
+PHI,
+POIMAP,
+POIPLN,
+POISGN,
+POISTOP,
+POIVAR,
+POSTPROCESS,
+PS_COLOR,
+PS_FONT,
+PS_FSIZE,
+PS_LW,
+QUIET,
+RANGE,
+RANGEHIGH,
+RANGELOW,
+RANGEOLDIC,
+RANGEOVER,
+RANGERESET,
+RANGESTEP,
+RUNNOW,
+S#,
+SLO#,
+SHI#,
+SEC,
+SEED,
+SIMPLOT,
+SMALLFONT,
+SMC,
+SPC,
+SPECCOL,
+SPECCOL2,
+SPECWIDTH,
+SPECWIN,
+STOCH,
+T0,
+THETA,
+TOL,
+TOR_PER,
+TOTAL,
+TRANS,
+UEC,
+UMC,
+UPC,
+VMAXPTS,
+WIDTH,
+XHI,
+XLO,
+XMAX,
+XMIN,
+XNC,
+XP#,
+YHI,
+YLO,
+YMAX,
+YMIN,
+YNC,
+YP#,
+ZMAX,
+ZMIN,
+ZP#,
+
+
+.SH HELP
+Note: On typical X Window installations the command \fIxlsfonts\fP lists available fonts. 
+For example, the following command lists only the available fixed width fonts:  
+.PP
+.PD 0
+.RS
+xlsfonts | grep -i -e "typewriter" \\
+.RS
+-e "mono" -e "^[0-9]x[0-9]" \\
+.PP
+-e "fixed" -e "-c-" -e "-m-" | sort
+.PD
+.PP
+.RE
+.RE
+Note: For a listing of standard hexadecimal colors see <http://en.wikipedia.org/wiki/Web_colors>.
+
+.SH AUTHORS
+This manual page was originally written by Isaac Jones <ijones@syntaxpolice.org>,
+for the Debian GNU/Linux system on March  4, 2002. 
+This man page is currently maintained by D. P. Dougherty and B. Ermentrout.

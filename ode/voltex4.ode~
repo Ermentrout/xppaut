@@ -1,0 +1,4 @@
+#  voltex2.ode - uses convolution to speed up soln
+u(t)=sin(t)-int{cos(t)#u}
+aux utrue=(2/sqrt(3))*sin(sqrt(3)*t/2)*exp(-t/2)
+done

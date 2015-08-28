@@ -1,0 +1,22 @@
+# plots the rhs of s'
+# gcc -fPIC -dynamiclib -arch i386 efmx.c -o efx.so 
+# File Edit Load-dll - choose efx.so   
+# choose efmx for the function
+#  ibar is the mean input, isig is the SD of the currents
+# nsig is the amplitude of the white noise
+# tau is synaptic time scale
+# nit is the number of timesteps to take. Only the last 3/4 are used
+# ntr is the number fo trials over which to average
+# nn is the number of neurons
+par ibar=-.5,isig=.3333,nsig=0.25,tau=10
+par nit=200,nn=128,ntr=128
+@ meth=discrete,total=50
+init s=-1
+s'=s+.08
+sdot'=sp
+sp=0
+tt=0
+@ bound=1000000000
+@ xp=s,yp=sdot,xlo=-1,xhi=3,ylo=-.1,yhi=.2
+export {s,ibar,isig,nsig,tau,nit,ntr,nn} {sp}
+done

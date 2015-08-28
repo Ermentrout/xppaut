@@ -1,0 +1,7 @@
+v'=-a*v+ K*(v^2-v^3 -w)
+w'=b*(v-c-d*w)
+par a=.1,d=.5,c=.2,b=.2
+par K=1
+@ total=100
+init v=.5
+done
