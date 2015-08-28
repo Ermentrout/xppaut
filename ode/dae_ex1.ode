@@ -1,0 +1,7 @@
+# dae_ex1.ode
+x'=-x
+0= x+y-1 
+x(0)=1
+solv y
+aux yy=y
+done

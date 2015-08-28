@@ -1,0 +1,20 @@
+# super fast!!
+#
+@ autoeval=0
+@ meth=discrete
+table w % 262144 0 262143 ran(1)/256
+params iapp=0.1,phi=.333
+param va=-.01,vb=0.15,vc=0.1,vd=0.145,gca=1
+params vk=-.7,vl=-.5,gk=2.0,gl=.5
+par tsyn=1,gsyn=0.1,vsyn=0
+par vth=0,vshp=.05
+par dt=.01,nout=50
+special vp=import(MLGPUEUL.SO,MLGPUEUL,1536,v0,w)
+v[0..511]'=vp([j])
+w[0..511]'=vp([j]+512)
+s[0..511]'=vp([j]+1024)
+tt'=tt+dt*nout
+@ bound=100000
+v[0..512](0)=ran(1)-.5
+@ total=2000, autoeval=0
+d

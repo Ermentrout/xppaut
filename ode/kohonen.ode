@@ -1,0 +1,31 @@
+# this implements the kohonen algorithm
+# using the findext code in xpp
+number ntot=100
+# here is the Gauddian like nbhd function
+h(u)=exp(-sig*(1-cos(2*pi*u*k/ntot)))
+par sig=10
+# k=1 gives 1 peak, k=2, 2, etc
+# eps is the growth rate
+par k=1,eps=.1
+# generate a random stimulus
+z=2*ran(1)-1
+# compute distance between stimulus and weight
+d[0..99]=abs(w[j]-z)
+# find minimum  mx(2) is value mx(3) is index
+special mx=findext(-1,100,1,d0)
+# here is the algorithm
+w[0..99]'=w[j]+eps*(z-w[j])*h(mx(3)-[j])
+# keep track of the index
+ip'=mx(3)
+# and keep track of the stim
+aux zz=z
+# randomly initialize
+global 0 t-t0 {w[0..99]=2*ran(1)-1}
+par t0=0
+# 
+@ meth=discrete, total=16000,nout=8
+@ colormap=6
+d
+
+
+

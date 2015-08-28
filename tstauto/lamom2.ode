@@ -1,0 +1,6 @@
+ss=x^2+y^2
+par a=-2,b=1,q=1
+x'=x*(a+b*ss-ss^2)-y*(1+q*ss)
+y'=y*(a+b*ss-ss^2)+x*(1+q*ss)
+@ total=10
+done

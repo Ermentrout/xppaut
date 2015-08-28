@@ -1,0 +1,11 @@
+t1' = t1p
+t2' = t2p
+t2p' = -mu*t2p+1/(L2*(m1+m2*(sin(t2-t1))^2))*(-(m1+m2)*g*sin(t2)-(m1+m2)*\
+L1*t1p^2*sin(t2-t1)+cos(t2-t1)*((m1+m2)*g*sin(t1)-m2*L2*t2p^2*sin(t2-t1)))
+t1p' = -mu*t1p+1/(L1*(m1+m2*(sin(t2-t1))^2))*(-(m1+m2)*g*sin(t1)+\
+m2*L2*t2p^2*sin(t2-t1)+cos(t2-t1)*(m2*g*sin(t2)+m2*L1*t1p^2*sin(t2-t1)))
+# parameters
+par L1=4,L2=1,m1=2,m2=1,g=9.8,mu=.01
+@ total=200,bound=100000
+init t1=1.5,t2=0
+done

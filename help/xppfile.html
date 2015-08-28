@@ -1,0 +1,45 @@
+<html>
+<head>
+<title>XPP - FILE</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xppnumerics.html">Back</a> | <a href="xpppara.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>File</h1>
+<ul><p>
+<a name="prtinfo"><li> <b>(P)rt info</b> <br> This creates a new window which contains the complete source of the ODE file. If you click on the <b> Action </b> and have defined some <a href=xppodes.html#action> action </a> associated with it, then this is how to execute it. Click on <b> Source </b> to get back the original ODE file.
+<li> <b>(W)rite set</b> <br> This creates a file with all of the info about the current numerics, etc as well as all of the currently highlighted graphics window.  It is easily readable by the user and essentially saves the current state of XPP to be read in later. <p>
+<li> <b>(S)ave info</b> <br> This is like  <a href="#prtinfo">(P)rt info</a>  but saves the info to a file.  It is human readable but not nearly as comprehensive as the files saved by <b>Write set</b>.  <p>
+<li> <b>(A)uto</b> <br> This brings up the <a href=xppauto.html>AUTO</a> window if you have installed it. <p>
+<li> <b>(C)alculator</b> <br> This pops up a little answer window.  Type formulae in the command line involving your variables and the results are displayed in the popup.  <p> To set an initial condition or parameter type <tt>x:exp(-1)</tt>, for example, to set the parameter or variable, <tt>x</tt> to <tt>exp(-1) </tt>.  <p> To exit the calculator, click on <b>Quit</b> in the answer window or type <b>Esc</b>. <p> 
+<li> <a name=rw> <b>(R)ead set</b> </a> <br> This reads a set that you have previously written with the <b>Write set</b> command. The files is very tightly connected to the ODE file that wrote it, so you should not try to load a saved  file from one equation for a different problem or even the same one  if you have altered the ODE file. <p>
+<li><a name=quit>  <b>(Q)uit</b> <br> This exits XPP first asking if you are sure. <p>
+<li><a name=edrhs> <b>(E)dit</b> <br> You can edit the equations from within XPP. <i><b>Note:</b> XPP is capable of understanding right-hand sides of up to 1000 characters.  However, the RHS editor will not accept anything longer than about 72 characters. </i>  This menu item presents a list of four options:<p>
+<ul>
+<li> <b>(R)HS</b> <br> Edit the right-hand sides of the ODEs IDEs, and auxiliary variables. If you are happy with the editing, then type <b> TAB </b> or click on <b> OK. </b> The program will parse the new equations and if they are syntactically correct, alter the corresponding equation.  If there is an error, the you will be told of the offending right-hand-side and that will not be changed.  <p>
+<li> <b>(F)unctions</b> <br> This lets you alter any user-defined functions.  It is otherwise the same as the above. <p>
+<li> <b>(S)ave as</b> <br>This creates an ``ODE'' file based on the current parameter values, functions, and right-hand sides.  You will be asked for a filename. <p>
+<li> <b> (L)oad DLL </b> <br>On systems which allow dynamically linked libraries, you can load in a compiled version of right-hand sides for your ODE.  
+See <a href=xppdll.html> linking to C</a> for examples. <p>
+</ul>
+<li> <a name="bell"><b>(B)ell on/off</b> </a>  <br> This toggles the stupid noisy bell on and off. <p> 
+<li> <a name="trans"> <b> (T)ranspose </b> </a> <br> This allows you to transpose data in the data browser. You may want to do this is you are solving a discretization of a PDE and want to see solutions at a fixed
+value of time plotted as a function of index.  A dialog box comes up asking for
+<br>
+<ul> 
+<li> the first column <br>
+<li> the total number of columns <br>
+<li> the skip between columns (eg every 3 cols) <br>
+<li> the first time slice as a row number <br>
+<li> the number of rows <br>
+<li> skip between rows (e.g. every 10th row)
+</ul><p>
+Suppose you have data of the form <i> [u1(t),...,u20(t)] </i>for<i>t=0,0.05, ..., 20.00 </i> in the data browser. You thus have 401 rows of data. Then if you choose <b>u1</b> as the first column, <b>20</b> as the number of columns, <b>1</b> for the column skip, <b>100</b> as the first row, <b>10</b> as the number of rows, and <b>20</b> as the row skip, the data in the "time" column of the browser is replaced by the numbers 1 to 20
+representing the index; the column for "u1" is replaced by <p><center><i>[u1(t1),u2(t1),...,u20(t1)]</i><p> </center> where <i> t1=100*0.05 </i>.  The tenth column,"u10", is replaced by<p><center><i>[u1(t10),u2(t10),...,u20(t10)]</i><p></center> where <i> t10=100*0.05 + 10*20*0.05 </i> since you chose to skip
+every 20 rows. 
+</ul>
+
+<p>
+
+

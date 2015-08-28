@@ -1,0 +1,51 @@
+#Demonstration of malolactic alkalinization during fermentation
+#
+#Parameters
+par alpha=0.32,beta=1.e-6,gamma=1.0,K=1.e9,mu=1.e-5,Ltot
+#Initial conditions
+init N=1.e4, G=0.01,L=0.000,M=0.000,pH=0.00
+
+#These 4 commands are all that are needed to model complex buffers 
+#using the pHtools module.
+mksol mysol 
+addtosol mysol {'Lactic',0.00,'Malic',0.031,'NaBenzoate',0.032}
+#Additional commands to track ionic strength and buffer capacity
+tracksol mysol {'Lactic',L,'Malic',M} 
+
+pHsol mysol pH pHrhs
+
+#
+strength mysol istr
+buffcap mysol bcap
+Cb mysol mcb
+
+#Create some auxilliary variables scaled to have convenient 
+#units for plotting purposes.
+AUX log(CFU)=log10(N)
+AUX Glucose(mM)=G*1000
+AUX Lactic(mM)=L*1000
+AUX Malic(mM)=M*1000
+AUX STR=istr
+AUX CAP=bcap
+AUX CB=mcb
+
+dN/dt  = alpha*(G/(0.001+G))*N*(1-N/K)          
+dL/dt  = gamma*(beta*N*G) + mu*N*M 
+dG/dt  = -beta*N*G 
+dM/dt  = -mu*N*M
+#This is the r.h.s. automatically updated behind the scenes
+#for our complex buffer solution 'mysol'
+dpH/dt = pHrhs        
+
+@ BOUND=1.e10,maxstor=50000,meth=qualrk,total=20
+@ NPLOT=4, XP=t,YP=log(CFU), XP2=t,YP2=pH
+@ XP3=t,YP3=Lactic(mM),XP4=t,YP4=Malic(mM)
+@ XLO=-0.1,XHI=20,YLO=-0.1,YHI=45
+#Uncomment to plot the ionic strength over time
+#@ XP=T,YP=STR
+#@ XLO=0,XHI=20,YLO=0.004,YHI=0.015
+#Uncomment to plot the buffer capacity over time
+#@ XP=T,YP=CAP
+#@ XLO=0,XHI=20,YLO=0.0165,YHI=0.0192
+
+done

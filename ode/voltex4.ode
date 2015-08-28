@@ -1,0 +1,6 @@
+#  voltex4.ode - no convol
+u(t)=exp(4*t)+(exp(t*(t+4))+exp(-(t+4)))/(t+4)-int{exp(t*t')*u}
+aux utrue=exp(4*t)
+@ total=1
+@ bound=10000000
+done

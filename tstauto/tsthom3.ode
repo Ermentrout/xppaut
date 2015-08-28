@@ -1,0 +1,11 @@
+xl'=0
+yl'=0
+b xl
+b yl
+x'=p*y
+y'=p*(x*(1-x)-a*y+b*x*y)
+b'=0
+b hom_bcs(0
+b hom_bcs(1)
+par a=0,b=0
+done

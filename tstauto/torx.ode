@@ -1,0 +1,11 @@
+x'=(-(be + rn) * x + be * y - a3 * (x * (x * x)) + b3 *((y-x) * ((y-x) * (y-x)))) / r
+y'= be * x - (be + ga) * y - z - b3 * ((y-x) * ((y-x) * (y-x)))
+z'=y
+
+par rn=-.9,be=.5,ga=-.6,r=.6,a3=.328578,b3=.933578
+@ dsmin=1e-4,dsmax=.01,parmin=-.9,parmax=-.4
+@ npr=500,nmax=125
+@ epsl=1e-7,epsu=1e-7,epss=1e-5
+@ autoymax=1,autoymin=-1,autoxmin=-.9,autoxmax=-.4
+@ ds=.001
+done

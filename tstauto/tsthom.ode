@@ -1,0 +1,4 @@
+x'=y
+y'=x*(1-x)-a*y+b*x*y
+par a=0,b=0
+done

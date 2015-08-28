@@ -1,0 +1,467 @@
+<html>
+<head>
+<title>XPP - EXAMPLES</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+ <a href="xpphelp.html">Contents</a>
+<hr>
+<center> <h1>Examples</h1> </center>
+
+<h4> <a href=#ode> Systems of ODEs </a> </h4>
+<h4> <a href=#ode2> Higher order ODEs </a> </h4>
+<h4> <a href=#map> Maps and difference equations</a> </h4>
+<h4> <a href=#delay> Delay equations </a> </h4>
+<h4> <a href=#dae> Differential-algebraic equations </a> </h4>
+<h4> <a href=#int> Volterra equations </a> </h4>
+<h4> <a href=#ran> Markov models</a> </h4>
+<h4> <a href=#disc> Delta functions </a> </h4>
+<h4> <a href=#bdry> Boundary value problems </a> </h4>
+<h4> <a href=#pde> Discretized PDEs</a> </h4> 
+<h4> <a href=#net> Spatial networks </a> </h4>
+<hr>
+
+
+<ul>
+<li> <a name=ode> <h3> Differential equation </h3> </a>
+Here is the Wilson-Cowan equation:
+<p> <font size=+1  color=#993300> 
+ <i> u' = -u+f(a<sub>ee</sub>u-a<sub>ie</sub>v-z<sub>e</sub> + I<sub>e</sub>(t) ) 
+<br>
+v' = (-v+f(a<sub>ei</sub>u-a<sub>ii</sub>v-z<sub>i</sub> + I<sub>i</sub>(t) ))/tau <p>
+</i> </font> 
+and  here is the corresponding ODE file:
+<font size=+1 color=#CC33CC> <pre>
+# wilson-cowan
+f(u)=1/(1+exp(-u))
+par aee=10,aie=8,aei=12,aii=3,ze=.2,zi=4
+par tau=1
+i_e(t)=ie0+ie1*sin(w*t)
+i_i(t)=ii0+ii1*sin(w*t)
+par ie0=0,ie1=0,w=.25
+par ii0=0,ii1=0
+init u=.1,v=.05
+u'=-u+f(aee*u-aie*v-ze+i_e(t))
+v'=(-v+f(aei*u-aii*v-zi+i_i(t)))/tau
+@ total=40
+@ xp=u,yp=v,xlo=-.1,xhi=1,ylo=-.1,yhi=1
+done
+</pre></font>
+I have added definitions for the inputs and the function <b>f</b> as
+well as default initial data and parameters. I also set it up so that
+the initial window is the phaseplane. 
+<p><hr>
+<li> <a name=ode2> <h3> Higher order differential equations </h3> </a>
+XPP cannot solve higher order equations. You must first write them as
+a system of first order equations. For example, the third order
+equation:
+<font size=+1 color=#99330> <p><i>
+x''' + a x'' + b x' + c x = x<sup>2</sup> <p></i>
+</font>
+should be rewritten as
+<font size=+1 color=#99330> <p><i>
+x' = y <br>
+y' = z <br>
+z' = x<sup>2</sup> - a z -b y -c x <p> </i> </font>
+with the corresponding ODE file
+<font color=#CC33CC> <pre>
+# third.ode
+x'=y
+y'=z
+z'=x^2-a*z-b*y-c*x
+par a=1,b=2,c=3.7
+init x=1,y=0,z=0
+aux en=x^2+y^2+z^2
+@ total=200
+@ xp=x,yp=y,xlo=-2,xhi=5,ylo=-4,yhi=5
+done
+</pre></font>
+I have set the plotting parameters and integration time. I have also
+added another quantity <b> en </b> which is stored and can be plotted
+as well.
+<p>
+<hr>
+<li><a name=map> <h3> Difference equation or maps </h3> </a>
+The example is the delayed logistic map
+<p> <font  size=+1 color=#993300> 
+<i>
+x<sub>n+1</sub> = a x<sub>n-1</sub>(1-x<sub>n</sub>)
+</i>
+<p> </font>
+This is a second order map and XPP can only solve first order
+equations. We write it as a pair of first order equations:
+<p> <font size=+1 color=#993300> 
+<i>
+x<sub>n+1</sub> = y<sub>n</sub> <br>
+y<sub>n+1</sub> = a y<sub>n</sub>(1-x<sub>n</sub>)
+</i>
+<p></font>
+and get the corresponding ODE file:
+<font color=#CC33CC> <pre>
+# delayed logistic map
+x'=y
+y'=a*y*(1-x)
+par a=2.2
+init x=.2,y=.2
+# set method to discrete
+@ meth=discrete
+@ total=100
+@ ylo=-.1,yhi=1,xhi=100
+done
+</pre>
+</font>
+Here the most important thing is that I tell XPP that this is a
+discrete dynamical system.
+<p>
+<hr>
+<li> <a name=delay> 
+<h3> Delay-differential equation </h3> </a>
+
+XPP can solve delay equations with one or more delays. Here is a delay
+equation due to Mike Mackey and Leon Glass:
+<p> <font size=+1 color=#993300> <i>
+x'(t) = -g x(t) + b f(x(t-d)) <br>
+f(x) = x/(1+x<sup>n</sup>) <p>
+</i> </font>
+Here is the ODE file:
+<font color=#CC33CC> <pre>
+# mackey-glass
+f(x)=x/(1+x^n)
+x'=-g*x+b*f(delay(x,d))
+init x=.2
+par g=.1,b=.2,n=10,d=6
+@ delay=20
+@ total=200
+@ xhi=200,yhi=2
+done
+</pre></font>
+I have told XPP that the maximal delay to expect is 20. 
+<p>
+Delay equations with delay <b> d </b> require initial data on an
+interval  <b> -d &lt t &lt 0. </b>  You can set these in the ODE file
+by adding the line:
+<font color=#CC33CC> <pre>
+x(0)=exp(t)*0.2
+</pre></font> which sets <b> x(t)=0.2e<sup>t</sup> </b>  for  <b> -d
+&lt t &lt 0. </b> <p> 
+<b> NOTE </b> this does <i> not</i> &nbsp; set the initial condition for <b> x</b> at <b>t=0.</b> You can do this by adding one more line after the delayed condition:
+<font color=#CC33CC> <pre>
+x(0)=exp(t)*0.2
+init x=.2
+</pre></font>
+<h4> Setting delay initial data within XPP  </h4> 
+There is a window called <b> Delay ICs </b> which shows up in XPP and
+you can use this to type in delay initial data. <font
+color=#FF0000> Before integrating delay equations always click on the
+<font color=#009900 size=+2> OK </font> button in the <b> Delay ICs
+</b> window!</font> Otherwise, the delay initial data will not take effect.   
+<p>
+<hr>
+<li><a name=dae> <h3> Differential-algebraic equations </h3> </a>
+Differential algebraic equations of the form:
+<font size=+1 color=#993300> <p><i>
+x' = F(x,y) <br>
+0  = G(x,y) <p> </i> </font>
+can be solved in XPP. The DAE 
+<font size=+1 color=#993300> <p><i>
+x' = z<br>
+z' = y <br>
+0  = x+z+y+y^3 <p> </i> </font>
+has an ODE file:
+<pre> <font color=#CC33CC>
+# dae.ode
+x'=z
+z'=y
+0=x+z+y+y^3
+solve y=-1
+init x=2
+aux ys=y
+@ yhi=2.5
+done
+</pre></font>
+You have to tell it which variables to solve for. In this case, we
+solve for <b> y </b> as a function of <b> x,z </b>. You can give XPP a
+guess about what the value of <b> y </b> is at the initial conditions
+for <b> x,z.</b> I have added an additional quantity <b> ys </b> which
+is the solution to the algebraic condition.    
+<p>
+<hr>
+<li><a name=int> <h3> Volterra integral equations </h3></a>
+ XPP solves both continuous
+and singular integral equations. Here is a regular equation:
+<font size=+1 color=#993300><p> <i>
+u(t)=sin(t) + 0.5 cos(t)-0.5 e<sup>-t</sup>(t + 1) + int[u(t') (t-t')
+e<sup>t'-t</sup>,t'=0..t]  
+</i> </font>
+<p>
+and here is the ODE file
+<font color=#CC33CC> <pre>
+# volterra example 1
+u(t)=sin(t)+.5*cos(t)-.5*t*exp(-t)-.5*exp(-t)+int{(t-t')*exp(t'-t)*u} 
+aux utrue=sin(t)
+done
+</pre> </font>
+I have included the true solution as well. This is actually a
+convolution equation so that you and improve the speed by exploiting
+that:
+<font color=#CC33CC> <pre>
+#  volt2.ode - uses convolution to speed up soln
+u(t)=sin(t)+.5*cos(t)-.5*t*exp(-t)-.5*exp(-t)+int{t*exp(-t)#u}
+aux utrue=sin(t)
+done
+</pre></font>
+
+<p> 
+Integro-differential equations are also possible:
+<font size=+1 color=#993300><p> <i>
+u'(t)=-2u+e<sup>-2t</sup> + int[u^2(t')e<sup>t'-t</sup>,t'=0..t]  
+</i> </font>
+<p>
+with <i> u(0)=1 </i> has a solution <i> u(t)=e<sup>-t</sup></i> as can
+be confirmed with the ODE file
+<font color=#CC33CC> <pre>
+# nonlinear integrodifferential volterra equation
+u'=-2*u+exp(-2*t)+int{exp(-t)#u^2}
+init u=1
+aux utrue=exp(-t)
+done
+</pre></font>
+
+Finally, integral equations with singularities are easily solved. For
+example
+<font size=+1 color=#993300><p> <i>
+u(t)=exp(-t)-int[e<sup>-(t-s)</sup>(t-s)<sup>-&frac14;</sup>
+u(s),s=0..t]
+<p></i></font>
+This has a removeable singularity in that the power of <b>t</b> is
+less than 1. The ODE file has the form:
+<font color=#CC33CC> <pre>
+# singular integral equation
+u(t)=exp(-t)-int[.25]{exp(-t)#sin(u)}
+done
+</pre>
+</font>
+<p>
+<font size +3 color=#FF0000> WARNINGS </font>
+<ol> 
+ <li> The expression inside the <b>[ ]</b> must be a number and not a
+ parameter. 
+<li> Volterra integral equations cannot be edited inside XPP.
+</ol>
+<hr>
+<li><a name=ran>  <h3> Markov models </h3> </a>
+XPP simulates random processes. Here is a stochastic ratchet:
+<font size=+1 color=#993300><p> <i>
+dx=z f(x)&nbsp;dt  + s&nbsp;dW
+<p> </i> </font> 
+The variable <b> z </b> randomly switches back and forth between 0 and
+1 at rates <b> r<sub>0</sub>,r<sub>1</sub> </b> respectively. <b> dW
+</b> is a Wiener process. The function <b>f(x)</b> is an asymmetric
+periodic potential with zero mean. Here is the ODE file
+<font color=#CC33CC> <pre>
+# a simple thermal ratchet
+wiener w
+par a=.8,s=.05,r0=.1,r1=.1
+f(x)=if(x&lt;a)then(-1)else(a/(1-a))
+x'=z*f(mod(x,1))+s*w
+# z is two states
+markov z 2
+{0} {r0}
+{r1} {0}
+@ meth=euler,dt=.1,total=2000,nout=10
+@ xhi=2000,yhi=8,ylo=-8
+done
+</pre></font>
+
+The rates in a Markov process need not be constant but can depend on
+any of the variables or parameters. <font color=#FF0000> Always use
+Euler's method </font> for stochastic equations.
+<p>
+<hr>
+<li><a name=disc>  <h3> Delta functions and all that </h3> </a>
+XPP has a way of dealing with delta-function discontinuities. XPP uses
+<b> global </b> flags which check for events and act on variables
+accordingly. Here is an equation due to John Tyson for the cell cycle:
+<font size=+1 color=#993300><p> <i>
+u' = k<sub>4</sub> (v-u)(a + u<sup>2</sup>) - k<sub>6</sub> <br>
+v' = k<sub>1</sub> -k<sub>6</sub> u <br>
+m' = b m <p></i></font>
+with the condition that when <b>u</b> falls below <b>0.2</b> the mass
+is halved. We tell XPP to look for crossings of <b>u</b> and to cut
+the mass in half. Here is the ODE file
+<font color=#CC33CC> <pre>
+# tyson.ode
+init u=.0075,v=.48,m=1
+p k1=.015,k4=200,k6=2,a=.0001,b=.005
+u'=  k4*(v-u)*(a+u^2) - k6*u
+v'= k1*m - k6*u
+m'= b*m
+global 1 {0.2-u} {m=.5*m}
+@ total=1000,nout=10
+@ yp=m,xhi=1000,ylo=0,yhi=2 
+done
+</pre> </font>
+<p>
+<hr>
+<li><a name=bdry> <h3> Boundary value problems </h3> </a>
+Boundary value problems require that you satisfy conditions at both
+ends of the integration interval.  Consider the boundary value
+problem:
+<font size=+1 color=#993300><p> <i>
+u'' = sin(t u) <br>
+u(0)= 1      <br>
+u(2) = 0    <p>
+</i></font>
+We rewrite this as a first order system:
+<font size=+1 color=#993300><p> <i>
+u' = v <br>
+v' = sin(t u) <br>
+u(0)= 1      <br>
+u(2) = 0    <p>
+</i></font>
+Here is the ODE file for this:
+<font color=#CC33CC> <pre>
+# nonlinear boundary value problem
+u'=v
+v'=sin(t*u)
+bdry u-1
+bdry u'
+init u=1,v=-1
+@ total=2,bell=0,xhi=2
+done
+</pre> </font>
+Boundary conditions take the form:
+<font color=#CC33CC> <pre>
+bdry F(u,u')
+</pre> </font>
+where <b>u'</b> represents the value of the variable at the end of the
+interval. <i><font color=#FF0000> It is not the derivative in this
+context!!</font> </i>  &nbsp;
+XPP tries to make the functions defined by each boundary condition
+vanish.  The length of the interval is the total amount of time
+integrated.
+Note that in this example, I have turned off the stinking
+bell. <p>
+
+You solve boundary value problems in XPP by using the <b> Bdryval </b>
+menu item instead of the <b>Initialconds</b> item.
+<p>
+XPP can also solve systems with homoclinic orbits. See the manual for
+an example. 
+
+<p> 
+<hr>
+<li><a name=pde> <h3> Discretized PDEs </h3> </a>
+XPP can make fake arrays of variables and save you from typing every
+one. The Schnakenberg system is a classic model:
+<font size=+1 color=#993300><p> <i>
+u<sub>t</sub> = -u+vu<sup>2</sup>+d<sub>u</sub> u<sub>xx</sub> <br>
+v<sub>t</sub> = a - vu<sup>2</sup>+d<sub>v</sub> v<sub>xx</sub>
+<p> 
+</i> </font>
+which we can discretize yielding:
+<font size=+1 color=#993300><p> <i>
+u'<sub>j</sub> = -u<sub>j</sub>+v<sub>j</sub>u<sup>2</sup><sub>j</sub>+(d<sub>u</sub>/h<sup>2</sup>) (u<sub>j+1</sub>-2 u<sub>j</sub>+u<sub>j-1</sub>) <br>
+v'<sub>j</sub> = a - v<sub>j</sub>u<sup>2</sup><sub>j</sub>+(d<sub>v</sub>/h<sup>2</sup>) (v<sub>j+1</sub>-2 v<sub>j</sub>+v<sub>j-1</sub>)
+<p> 
+</i> </font> 
+with appropriate end conditions.  We will make this into an ODE file:
+<font color=#CC33CC> <pre>
+# schnakenberg PDE 100 points
+f(u,v)=-u+v*u^2
+g(u,v)=a-v*u^2
+u0'=f(u0,v0)+duh*(u1-u0)
+u[1..99]'=f(u[j],v[j])+duh*(u[j+1]-2*u[j]+u[j-1])
+u100'=f(u100,v100)+duh*(u99-u100)
+v0'=g(u0,v0)+dvh*(v1-v0)
+v[1..99]'=g(u[j],v[j])+dvh*(v[j+1]-2*v[j]+v[j-1])
+v100'=g(u100,v100)+dvh*(v99-v100)
+par a=1.05,du=.2,dv=3,h=.2
+!duh=du/(h*h)
+!dvh=dv/(h*h)
+init u0=1.5,u1=1.3,u2=1.1,v0=1.05,v1=1.05,v2=1.05
+init u[3..100]=1.05,v[j]=1.05
+@ dt=.1,nout=50,total=50,meth=cvode,tol=1e-5,atol=1e-5
+done
+</pre></font>
+Note that I have defined the kinetics as a pair of functions. The
+statements starting with the <b> ! </b> are derived parameters -- 
+parameters which depend on other parameters. I use a stiff integrator
+<b> CVODE </b>.  Plot this using <a href=xpparray.html> array plots
+</a> or look at the spatial profile with the <a
+href=xppfile.html#trans> transpose </a> operation.
+<p>
+Take advantage of the banded quality of the system and speed up the
+stiff integrators my an order of magnitude. You have to rearrange the
+equations a bit. Here is the ODE file:
+<font color=#CC33CC> <pre>
+# schnakenberg PDE 100 points
+# interlaced
+f(u,v)=-u+v*u^2
+g(u,v)=a-v*u^2
+u0'=f(u0,v0)+duh*(u1-u0)
+v0'=g(u0,v0)+dvh*(v1-v0)
+%[1..99]
+u[j]'=f(u[j],v[j])+duh*(u[j+1]-2*u[j]+u[j-1])
+v[j]'=g(u[j],v[j])+dvh*(v[j+1]-2*v[j]+v[j-1])
+%
+u100'=f(u100,v100)+duh*(u99-u100)
+v100'=g(u100,v100)+dvh*(v99-v100)
+par a=1.05,du=5,dv=75,h=.2
+!duh=du/(h*h)
+!dvh=dv/(h*h)
+init u0=1.5,u1=1.3,u2=1.1,v0=1.05,v1=1.05,v2=1.05
+init u[3..100]=1.05,v[j]=1.05
+@ dt=.1,nout=50,total=50,meth=cvode,tol=1e-5,atol=1e-5
+@ bandlo=2,bandup=2
+done
+</pre></font>
+I tell XPP the system is banded and interlace the two variables.
+This runs significantly faster than
+the previous ODE!
+<p>
+<hr>
+<li> <a name=net><h3> Network problems and tables </h3> </a>
+The last example is a solution to the Wilson-Cowan equations
+distributed in space. We will solve:
+<font size=+1 color=#993300><p> <i>
+u'<sub>j</sub> = -u<sub>j</sub> + F(a<sub>ee</sub>K<sub>e,j</sub>
+-a<sub>ie</sub> K<sub>i,j</sub>) <br>
+v'<sub>j</sub> = (-v<sub>j</sub> + F(a<sub>ei</sub>K<sub>e,j</sub>
+-a<sub>ii</sub> K<sub>i,j</sub>))/tau <p>
+</i></font>  
+where
+<font size=+1 color=#993300><p> <i>
+K<sub>e,j</sub> = SUM(W<sub>e</sub>(k)u<sub>j-k</sub>,k=-m..m)<br>
+K<sub>i,j</sub> = SUM(W<sub>i</sub>(k)u<sub>j-k</sub>,k=-m..m)<p>
+</i> </font>
+with some sort of "boundary" conditions at the edges.  Here is an XPP file for a network of 201 cells and an exponential weight function:
+<font color=#CC33CC> <pre>
+# Wilson-Cowan network
+table we % 51 -25 25 .5*exp(-abs(t)/se)/se
+table wi % 51 -25 25 .5*exp(-abs(t)/si)/si
+special ke=conv(even,201,25,we,u0)
+special ki=conv(even,201,25,wi,v0)
+par se=4,si=2.5
+f(u)=1/(1+exp(-u))
+par aee=16,aie=10,aei=25,aii=3,ze=4,zi=10
+par tau=4
+init u[0..4]=1
+u[0..200]'=-u[j]+f(aee*ke([j])-aie*ki([j])-ze)
+v[0..200]'=(-v[j]+f(aei*ke([j])-aii*ki([j])-zi))/tau
+@ total=60,meth=qualrk,dt=.25
+@ yp=u100,xhi=60,ylo=0
+@ yp2=u150,nplot=2
+done
+</pre>
+</font>
+The weights are defined as tables which give the number of points in
+the table, the x-range, and the functional form of the table. You can
+also read a file to fill a table. Consult the documentation for
+more. The <b> special </b> declaration convolves the values in the
+tables with the variables. The <b> even </b> means that the ends are
+reflected. Note that you must write <b> ke([j])</b>, that is the <b> [
+] </b> must be included. I have also told XPP to plot two things, <b>
+u100</b> and <b> u150.</b>
+</ul>
+ 

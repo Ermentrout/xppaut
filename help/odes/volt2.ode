@@ -1,0 +1,4 @@
+#  volt2.ode - uses convolution to speed up soln
+u(t)=sin(t)+.5*cos(t)-.5*t*exp(-t)-.5*exp(-t)+int{t*exp(-t)#u}
+aux utrue=sin(t)
+done

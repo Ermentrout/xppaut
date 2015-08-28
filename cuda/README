@@ -1,0 +1,27 @@
+This code is for using XPP and CUDA for GPU speedup.
+There is also code to compare with straight up C and without any code
+ml_noc.ode is a straght-up ODE file 
+mlcpu.ode calls righthand sides written in C
+mlgpu.ode calls the RHS vis GPU (precision can be chosen by the user)
+mlgpueul.ode  calls the GPU several times and then treats the code as a discrete file and basically just loads it into XPP. 
+
+C code
+ml.c 
+GPU codes    
+
+mlgpu.cu single precision
+mlgpu2.cu double precision
+mlgpueul.cu  single precision euler integration specificed number of steps
+
+
+see the instructions in mlgpu.cu for compiling the cuda stuff
+see instructions in ml.c for compiling the .c code
+
+
+Basically the steps are to compile the code and then run the XPP file
+
+Unfortunately, I do not know how to do this on Windows since I have no windows computers with a GPU.
+
+ 
+
+

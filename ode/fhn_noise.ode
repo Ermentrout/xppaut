@@ -1,0 +1,8 @@
+# Forced Fitzhugh-Nagumo fhn.ode 
+wiener n
+dv/dt = f(v)-w+I_0+sig*n
+dw/dt = eps*(v-gamma*w)
+f(v)=v*(1-v)*(v-a)
+param a=.25,eps=.1,gamma=1,I_0=.25,sig=.1
+@ total=1000,dt=.05,meth=euler
+done

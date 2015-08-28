@@ -1,0 +1,7 @@
+x'=xp
+par flag=0
+export {x} {xp}
+init x=1
+xp=0
+done
+

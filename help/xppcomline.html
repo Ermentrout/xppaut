@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+<TITLE>xppcomline</TITLE>
+</HEAD>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+<P>
+<center>
+<h1>Command line</h1> 
+</center>
+</DIV>
+<P>
+<b> xppaut </b> <tt> -options </tt> <tt> filename </tt>
+<p>
+<h3> options </h3>
+<ul>
+<li> <b> -silent </b> batch run without GUI (silent mode) and dump solutions to one or more files
+<li> <b> -xorfix </b> Work-around for exclusive Or with X on some monitors/graphics setups
+
+<li> <b> -convert </b> Convert old style ODE files (e.g. phaseplane) to new ODE style
+<li> <b> -newseed</b> Randomizes the random number generator which will often use the same seed
+<li> <b> -ee </b> Emulates dialog box behavior of Evil Empire (MS) 
+<li> <b> -allwin </b> Brings XPP up with all the windows visible
+<li> <b> -setfile </b>  <tt> filename </tt>  Loads the set file before starting up
+
+
+<li> <b> -runnow  </b>              
+Runs ode file immediately upon startup (implied by -silent)
+
+<li> <b> -bigfont </b> <tt>font</tt>        
+Use the big font whose filename is given
+
+<li> <b> -smallfont </b> <tt>font</tt>      
+Use the small font whose filename is given
+
+<li> <b> -parfile </b> <tt>filename </tt>   
+Load parameters from the named file
+
+<li> <b> -outfile </b> <tt>filename    </tt>
+Send output to this file (default is output.dat)
+
+<li> <b> -icfile </b> <tt>filename     </tt>
+Load initial conditions from the named file
+
+<li> <b> -forecolor </b> <tt>color </tt>
+Hexadecimal color (e.g. 000000) for foreground
+
+<li> <b> -backcolor </b> <tt>color  </tt>
+Hexadecimal color (e.g. EDE9E3) for background
+
+<li> <b> -mwcolor </b> <tt>color  </tt>
+Hexadecimal color (e.g. 808080) for main window
+
+<li> <b> -dwcolor </b> <tt>color  </tt>
+Hexadecimal color (e.g. FFFFFF) for drawing window
+
+<li> <b> -backimage </b> <tt>filename </tt>  
+Name of bitmap file (.xbm) to tile in background
+
+<li> <b>-grads </b> <tt>B</tt>            
+Color gradients will (B=1) or will not (B=0) be used
+
+<li> <b>-width  </b> <tt>N</tt>              
+Minimum width in pixels of main window
+
+<li> <b>-height </b> <tt>N</tt>               
+Minimum height in pixels of main window
+
+<li> <b>-bell </b> <tt>B</tt>            
+System bell on events will (B=1) or will not (B=0) be used
+ 
+<li> <b>-internset </b> <tt>B</tt>               
+Internal sets will (B=1) or will not (B=0) be run during batch run
+</ul>
+<hr>
+<p>
+
+<h3> Windows note </h3> 
+In the MS Windows distribution, in the <b> C:/xppall </b> directory, edit <tt> xpp.bat </tt> and add whatever command line arguments you always want. Or edit the resource file 
+<p>
+<p>
+<hr>
+<p>
+<h3> Environment variables </h3>
+<ul>
+<li> <b> XPPHELP</b> file path to help, e.g. <tt> export XPPHELP=/usr/share/xpphelp.html </tt>
+<li> <b> XPPBROWSER </b> browser to use, e.g. on the Mac, <tt> export XPPBROWSER=open </tt>
+</ul>
+<p>
+<hr> 
+<h3> Resource file </h3>
+
+Call it <tt> .xpprc </tt> 
+<p>
+It can contain any of the <a href=xppopt.html> OPTIONS </a> for example
+<p>
+<pre>
+@ bell=0,grads=0,dwcolor=eeddff
+@ bigfont=lucidasanstypewriter-bold-14
+@ maxstor=200000
+</pre>
+

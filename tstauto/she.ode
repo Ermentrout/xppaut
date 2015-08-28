@@ -1,0 +1,18 @@
+par mus=.163875
+par q=0.0
+par sigma=.5
+par zeta=2
+!pi2=pi^2
+@ meth=qualrk4,dt=.01,total=85.07
+@ tol=1e-10
+p11ss'=p11ss * t02cs + p11ss * mus - p12cs * p01cs
+t02cs'=-(p11ss * p11ss + t02cs)
+p12cs'=(sigma*4.*p11ss*p01cs+sigma*4.*p12cs*mus-sigma*9.*p12cs+p11ss*4.*p01cs+p12cs*4.*mus) / ((sigma +1.) *4.)
+p01cs'=(-q * (sigma * sigma) * a01cs - pi2 * (sigma * sigma) * p01cs + pi2 * 3. * sigma * p11ss * p12cs + pi2 * 3. * p11ss * p12cs) / (pi2 * 4. * sigma)
+a01cs'=zeta * (p01cs - a01cs) / 4.
+i P11SS=0.4048147756870142  
+i T02CS=-0.1638749999491637  
+i P12CS=-0.0008869668098317242 
+i P01CS=-0.001  
+i A01CS=0.0
+d

@@ -1,0 +1,31 @@
+params iapp=0.0,phi=.333
+param va=-.01,vb=0.15,vc=0.1,vd=0.145,gca=1
+params vk=-.7,vl=-.5,gk=2.0,gl=.5,om=1
+minf(v)=.5*(1+tanh((v-va)/vb))
+ninf(v)=.5*(1+tanh((v-vc)/vd))
+lamn(v)= phi*cosh((v-vc)/(2*vd))
+i=imin+(imax-imin)*(1+cos(2*pi*eps*a*t))/2
+par imin=.09,imax=.23
+isyn1=eps*gsyn*s2*(v1-esyn)
+isyn2=eps*gsyn*s1*(v2-esyn)
+p1=delta
+p2=-delta
+v[1..2]'=  i+eps*p[j]+gl*(vl-v[j])+gk*w[j]*(vk-v[j])+gca*minf(v[j])*(1-v[j])+isyn[j]
+w[1..2]'= lamn(v[j])*(ninf(v[j])-w[j])
+s[1..2]'=1/(1+exp(-(v[j]-vth)/vshp))-s[j]/tau
+par vshp=.05,tau=.25,vth=.05
+par esyn=-.65,gsyn=1,delta=0
+aux ii=i
+par a=1,eps=.002
+done
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+x'=y
+y'=x
+b y
+b x'-a
+par a=0
+@ total=1
+d

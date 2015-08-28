@@ -1,0 +1,3 @@
+# animated wave 
+fcircle .05+.04*[0..20];.5*(vv[j]+1);.02;1-w[j]
+end

@@ -1,0 +1,21 @@
+# coupled Ginsberg-Landau equation
+# cgl.ode
+!d=1/(h*h)
+r[0..127]=u[j]*u[j]+v[j]*v[j]
+u0'=u0-(u0-beta*v0)*r0+d*(u1-u0-eps*(v1-v0))
+v0'=v0-(v0+beta*u0)*r0+d*(v1-v0+eps*(u1-u0))
+%[1..126]
+u[j]'=u[j]-(u[j]-beta*v[j])*r[j]+d*(u[j+1]+u[j-1]-2*u[j]-eps*(v[j+1]+v[j-1]-2*v[j]))
+v[j]'=v[j]-(v[j]+beta*u[j])*r[j]+d*(v[j+1]+v[j-1]-2*v[j]+eps*(u[j+1]+u[j-1]-2*u[j]))
+%
+u127'=u127-(u127-beta*v127)*r127+d*(u126-u127-eps*(v126-v127))
+v127'=v127-(v127+beta*u127)*r127+d*(v126-v127+eps*(u126-u127))
+# parameters
+par beta=-1.8,eps=.8,h=1
+aux rr[0..127]=r[j]
+init u[50..55]=1
+@ dt=.25,total=300,trans=100
+done
+Use the array to plot u0 256 cols 
+with colskip=2 rowskip=2,nrows=401,zlo=-1,zhi=+1
+
