@@ -1,0 +1,7 @@
+# dae_ex2.ode
+x'=xp
+0= xp+exp(xp)+x
+x(0)=-3.7182
+solv xp=1
+aux xdot=xp
+done

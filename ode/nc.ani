@@ -1,0 +1,5 @@
+xnull -.6;-.2;1.2;1.2;$RED;20*t
+ynull -.6;-.2;1.2;1.2;$GREEN;20*t
+settext 2;roman;$BLACK
+vtext .2;.8;i=;.05*t
+end

@@ -1,0 +1,30 @@
+# pendulum on a cart
+# uses DAE solver to solve for x'', th1''
+# 
+# pend-cart1.ode
+# 
+# masses of cart and pendulum (kg)
+par mc=5,mp=1
+# length (m) and gravity
+par l=1,g=9.8
+# simple linear friction
+par muc=0,mup=0
+# set up DAEs
+0=(mc+mp)*xdd+mp*l*cos(th1)*th1dd-mp*l*sin(th1)*th1p^2+muc*xp
+0=cos(th1)*xdd+l*th1dd+g*sin(th1)+mup*th1p
+solv xdd=0
+solv th1dd=0
+#
+# dynamics
+x'=xp
+xp'=xdd
+th1'=th1p
+th1p'=th1dd
+# track accelerations
+aux xpp=xdd
+aux th1pp=th1dd
+@ dt=.02
+# nice ICs
+init th1=1.5
+done
+ 

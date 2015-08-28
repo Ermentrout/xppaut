@@ -1,0 +1,17 @@
+# Generic linear equation
+#
+init x=2,y=0
+p a=1,b=0,c=0,d=-1
+#f(z)=z/(1+z^2)
+f(z)=z
+only x,y
+x'= a*x+b*y
+y'= f(c*x+d*y)
+#aux z=if(x>c)then(a*y)else(b*x)
+d
+
+
+
+
+
+

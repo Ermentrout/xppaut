@@ -1,0 +1,18 @@
+# duck.ani
+PERMANENT
+rect 0;0;.4;.4
+frect 0;0;.4;.3;$BLUEGREEN
+TRANSIENT
+line .5;.5;.5;0;$BLACK;4
+line .5;.5;x1;y1;$RED;4
+line .5;.5;x2;y2;$RED;4
+circle x1;y1;.08;$BLACK;2
+circle x2;y2;.08;$BLACK;2
+fcircle x1;y1;.079*(mu/mutot);$RED
+fcircle x2;y2;.079*(1-mu/mutot);$RED
+line x2;y2;x2-.15*cos(x);y2-.15*sin(x);$ORANGE;4
+grab x2;y2;.03
+{x=th(mouse_x,mouse_y)}
+{x=th(mouse_x,mouse_y);runnow=1}
+# fcircle x2;y2;.02;$BLACK
+done

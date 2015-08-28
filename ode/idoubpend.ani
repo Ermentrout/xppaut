@@ -1,0 +1,13 @@
+# animation of double pendulum
+fcircle .5;.5;.025;$BLACK
+line .5;.5;.5+.2*sin(t1);.5-.2*cos(t1)
+line .5+.2*sin(t1);.5-.2*cos(t1);.5+.2*sin(t1)+.2*sin(t2);.5-.2*cos(t1)-.2*cos(t2)
+fcircle .5+.2*sin(t1);.5-.2*cos(t1);.04;$RED
+fcircle .5+.2*sin(t1)+.2*sin(t2);.5-.2*cos(t1)-.2*cos(t2);.04;$GREEN
+grab .5+.2*sin(t1);.5-.2*cos(t1);.03
+{t1=th1(mouse_x,mouse_y)}
+{t1=th1(mouse_x,mouse_y);runnow=0}
+grab .5+.2*sin(t1)+.2*sin(t2);.5-.2*cos(t1)-.2*cos(t2);.03
+{t2=th2(mouse_x,mouse_y)}
+{t2=th2(mouse_x,mouse_y);t2p=th2dot(mouse_x,mouse_y,mouse_vx,mouse_vy);runnow=1}
+end

@@ -1,0 +1,25 @@
+# the pendulum on a spring
+# the dimensionless parameter is 
+# a= k l/m g   where k is the spring constant
+#  r is the length and th is the angle
+# 
+# friction is set to zero 
+# scale is for animation
+r'=rp
+rp'=r*thp^2+cos(th)-1-a*(r-1)-f*rp
+th'=thp
+thp'=-(2*rp*thp+sin(th)+f*thp)/r
+par a=1,f=0.05,scale=10
+init r=1,th=1.4
+# the position of the bob for animation
+xb=.5+.5*r*sin(th)/scale
+yb=.5-.5*r*cos(th)/scale
+r0(x,y)=sqrt((x-.5)^2+(y-.5)^2)*2*scale
+q(x,y)=atan2(x-.5,.5-y)
+# the energy 
+
+aux e=.5*(rp^2+(r*thp)^2+a*(r-1)^2)-r*(cos(th)-1)
+@ total=100,meth=qualrk,dt=.1
+@ bound=100000
+done
+ 

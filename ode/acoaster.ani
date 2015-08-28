@@ -1,0 +1,17 @@
+# animation file for 2D roller coaster
+# speed 75
+dimension -1.25;-1.25;1.25;1.25
+PERMANENT
+settext 3;rom;$PURPLE
+vtext -1.0;1.0;g=;g
+line xm([0..50]*.04*pi);zm([j]*.04*pi);xm([j+1]*.04*pi);zm([j+1]*.04*pi);$GREEN
+#ellip 0;0;1;1;
+TRANSIENT
+comet X;Z;-5;5;Lalt
+fcirc X;Z;0.05;$RED
+grab xm(M);Zm(M);tol
+{M=(mouse_x+1.25)*2*pi/2.5;x=xm(m);z=zm(m)}
+{M=(mouse_x+1.25)*2*pi/2.5;x=xm(m);z=zm(m);Lalt=sv*sign(mouse_vx)*sqrt(mouse_vx^2+mouse_vy^2);runnow=1} 
+end
+
+

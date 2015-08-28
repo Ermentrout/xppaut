@@ -1,0 +1,16 @@
+# animation file for 2D roller coaster
+speed 75
+dimension -1.25;-1.25;1.25;1.25
+PERMANENT
+settext 3;rom;$PURPLE
+vtext -1.0;1.0;g=;g
+ellip 0;0;1;1;
+TRANSIENT
+comet X;Z;-5;5;Lalt
+fcirc X;Z;0.05;$RED
+grab x;Z;tol
+{X=mouse_x;Z=sqrt(1-mouse_x^2)}
+{M=asin(mouse_x);X=mouse_x;Z=sqrt(1-mouse_x^2);Lalt=sign(mouse_vx)*sqrt(mouse_vx^2+mouse_vy^2);runnow=1} 
+end
+
+

@@ -1,0 +1,20 @@
+# animation for elastic pendulum
+PERMANENT
+line 0;.5;1;.5;$BLACK;3
+TRANSIENT
+line .5;.5;xb;yb;$BLUE;2
+fcircle xb;yb;.025;$RED
+fcircle a/4;.95;.01;$PURPLE
+vtext .01;.9;k=;a
+fcircle f*2;.85;.01;$GREEN
+vtext .01;.8;f=;f
+grab a/4;.95;.02*scale
+{a=mouse_x*4}
+{a=mouse_x*4;runnow=0}
+grab f*2;.85;.02*scale
+{f=mouse_x/2}
+{f=mouse_x/2;runnow=0}
+grab xb;yb;.02*scale
+{r=r0(mouse_x,mouse_y);th=q(mouse_x,mouse_y)}
+{r=r0(mouse_x,mouse_y);th=q(mouse_x,mouse_y);runnow=1}
+end

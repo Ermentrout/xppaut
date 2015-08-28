@@ -1,0 +1,26 @@
+# gb_wnet.ode
+# gillespie algorithm for brusselator
+# using the special declaration - it is a bit faster than by hand
+# should work even better for more complex systems
+# x1  -> y1 (c1)
+# x2+y1 -> y2+Z (c2)
+# 2 y1 + y2 -> 3 y1 (c3)
+# y1 -> Z2 (c4)
+par c1x1=5000,c2x2=50,c3=.00005,c4=5
+init y1=1000,y2=2000
+#  compute the cumulative reactions
+p1=c1x1
+p2=c2x2*y1
+p3=c3*y1*y2*(y1-1)/2
+p4=c4*y1
+special z=gill(0,p{1-4})
+# time for next reaction
+tr'=tr+z(0)
+y1'=max(1,y1+z(1)-z(2)+z(3)-z(4))
+y2'=max(1,y2+z(2)-z(3))
+@ bound=100000000,meth=discrete,total=1000000,njmp=1000
+@ xp=y1,yp=y2
+@ xlo=0,ylo=0,xhi=10000,yhi=10000
+aux w[0..4]=z([j])
+done
+

@@ -1,0 +1,20 @@
+# animation file for toy_ok.ode
+# I will use the average coordinates of the magnets
+# may want to slow it down
+speed 50
+dimension -1.25;-1.25;3.25;1.25
+line 0;0;.5*(x1n[1..3]+x1s[j]);.5*(y1n[j]+y1s[j]);$BLACK;3
+line 2.1;0;.5*(x2n[1..3]+x2s[j]);.5*(y2n[j]+y2s[j]);$BLACK;3
+fcircle .5*(x1n[1..3]+x1s[j]);.5*(y1n[j]+y1s[j]);.1;$BLACK
+fcircle .5*(x2n[1..3]+x2s[j]);.5*(y2n[j]+y2s[j]);.1;$BLACK
+end
+
+
+
+
+
+
+
+
+
+

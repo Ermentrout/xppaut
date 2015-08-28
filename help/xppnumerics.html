@@ -1,0 +1,273 @@
+<html>
+<head>
+<title>XPP - NUMERICS</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xppgraph.html">Back</a> | <a href="xppfile.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Numerics</h1>
+This menu controls the numerical aspects of the program. 
+<h3> <font color=#FF0000> Press nUmerics from main menu </font></h3>
+
+<ul> <!-- this ul effectively tab the table over -->
+<table border=0>
+<tr><td><h3><a href="#total">(T)otal </a>  -- Change total time
+<tr><td><h3><a href="#start">(S)tart time </a> -- Change start time of simulation
+<tr><td><h3><a href="#transient">t(R)ansient </a> -- Only store after this much time
+<tr><td><h3><a href="#dt">(D)t</a> -- Integration timestep
+<tr><td><h3><a href="#ncline">n(C)line ctrl</a> -- nullcline grid
+<tr><td><h3><a href="#singpt">s(I)ng pt ctl</a> -- fixed point accuracy
+<tr><td><h3><a href="#nout">n(O)ut</a> -- frequency of output
+<tr><td><h3><a href="#bounds">(B)ounds</a> -- global bounds for all variables
+<tr><td><h3><a href="#method">(M)ethod</a> -- integration method
+<tr><td><h3><a href="#delay">d(E)lay</a> -- delay equations params
+<tr><td><h3><a href="#color">(C)olor code</a> -- color code trajectories
+<tr><td><h3><a href="#poincare">(P)oincare map</a> -- c'mon you should know!
+<tr><td><h3><a href="#ruelle">r(U)elle plot</a> -- make delayed embedding plots
+<tr><td><h3><a href="#stochastic">stoc(H)astic</a> -- all sorts of
+statistics, curve fitting, miscellany! 
+<tr><td><h3><a href="#lookup">loo(K)up</a> -- change tables
+<tr><td><h3><a href="#bndry">bndry(V)al</a> -- params for BVP solver
+<tr><td><h3><a href="#adjoint">(A)djoint</a> -- weakly coupled oscillator
+   stuff.
+</table>
+</ul>
+
+<hr>
+<ul>
+
+<a name=total>  <li> <b> (T)otal </b> <br>This is the amount of time
+to integrate. If it is negative then it will be made positive and no
+data will be stored. Thus you can integrate for very long periods of
+time without being told that the storage is full.<p> 
+
+<a name=start><li> <b>(S)tart time</b> <br>This is the initial time
+<b>T0</b>. For autonomous systems it is usually irrelevant. <p> 
+
+<a name=transient><li> <b>t(R)ansient</b> <br>The program will
+integrate silently for this amount of time before plotting output.  It
+is used to get rid of transients.<p> 
+
+<a name=dt><li> <b>(D)t</b> <br>This is the step size used by the
+fixed step integrators and the output step for the adaptivve
+algorithms.  It is positive or negative depending on the direction of
+integration. That is, to integrate backwards, make it negative.<p> 
+
+<a name=ncline> <li> <b>n(C)line ctrl</b> <br> will prompt you for the
+grid size for computing nullclines. <p> 
+
+<a name=singpt><li> <b>s(I)ng pt ctrl</b> <br> This prompts you for errors and epsilons for eigenvalues and equilibria calculations as well as the maximum iterates.<p>
+
+<a name=nout><li> <b>n(O)utput</b>  <br>This sets the number of integration steps to perform between output to storage for fixed step integrators.
+  Thus, if you output every 10 steps with a Dt of .05, XPP will yield output at times that are 10*.05=.5 timesteps apart.  The advantage of this is that lengthier records of data can be made without losing accuracy of the integrator.<p>
+
+<a name=bounds><li> <a name=bound> <b>(B)ounds</b><br>  This sets a global bound on the integrator.  If any variable exceeds this value in magnitude, a message appears and the integration stops.<p>
+ 
+<a name=method><li> <b>(M)ethod</b> <br>  allows you to choose the
+methods of integration.  There are many integrators available for use:
+<ul> 
+<li> <b> (D)iscrete </b> Use this for discrete dynamical systems or
+maps.
+<li> <b> (E)uler </b> is the usual Euler one-step method.
+<li> <b>  (M)od. Euler </b> is the two-step Euler or Heun method.
+<li> <b> (R)unge-Kutta </b> is the fourth order Runge-Kutta method
+described in every text book
+<li> <b> (A)dams </b> is an Adams-Bashforth fourth order
+predictor-corrector method. It requires fewer right-hand side
+eva,uations than RK and achieves the same accurace. However, it is
+notoriously unstable.
+<li> <b> (G)ear </b> is a stiff integrator based on the algorithm in
+Gear's classic text. The step size is adaptive. You need to specify a
+tolerance (the smaller, the more accurate), a minimum step size, and a
+maximum step size.
+<li> <b> (V)olterra </b> is a backward integrator used for solve
+Volterra integral equations. It is first order accurate. XPP prompts for
+a tolerance, maximum iterates, and a ``memory size.''  The memory size
+sets the storage used by the solver. If the kernel decays rapidly,
+you can make this small. Tolerance and maximum iterates are used to
+advance to the next step. You will also
+be asked if you want the convolution kernels to be re-evaluated after
+any parameter is changed in either the range integration or through a
+manual change in parameters.  If this flag is 1 then the kernels will
+be re-computed.  The default is to not recompute them.
+<li> <b> (B)ackEul </b> is a simple backward Euler
+integrator. Smaller tolerances imply tighter requirements for the
+Newton's method and maximum iterates specifies how many Newton
+attempts will be made.
+<li> <b> (Q)ualst.RK4 </b> is an adaptive stepsize Runge-Kutta
+integrator recommended for nonstiff systems. Choose small tolerances
+for increased accuracy and a minimum/maximum allowable step size.
+<li> <b> (S)tiff </b> is another adaptive stiff integrator similar to
+Gear. You are prompted for error tolerance and maximum/minimum
+allowable steps.
+<li> <b> (C)Vode </b> a C implementation of LSODE based on Gear. It is
+the recommended stiff integrator. Relative and absolute tolerances are
+requested. You will be asked if you want to use a banded solver. For
+systems like discretized PDEs, using banded solvers can increase the
+speed by factors of 10 to 100. The upper and lower bands will be requested.
+<li> <b> DoPri(5) </b> Dormand-Prince adaptive step size integrator
+for nonstiff systems. Absolute and relative tolerances are requested.
+<li> <b> DoPri(8)3 </b> is a higher order DP integrator. Absolute and
+relative tolerances are requested.
+<li> <b> Rosen(2)3 </b> is a Rosenbrock adaptive integrator for stiff
+systems. Tolerances and bandedness are requested,
+<li>  <b> s(Y)mplect </b> is a symplectic integrator for conservative
+systems of the form:
+<p>
+<center>
+ y<sub>1</sub>'' = f<sub>1</sub>(y<sub>1</sub>,...,y<sub>n</sub>) <p>
+ y<sub>2</sub>'' = f<sub>2</sub>(y<sub>1</sub>,...,y<sub>n</sub>) <p>
+ ... <p>
+ y<sub>n</sub>'' = f<sub>n</sub>(y<sub>1</sub>,...,y<sub>n</sub>) <p>
+</center>
+<p>
+
+<li> <a name=delay><b>d(E)lay</b><br>  This sets the upper bound for
+the maximum delay as well as some other parameters used in computing
+the stability of fixed points for delay equations. The first pair are
+guesses for the eigenvalue with maximal real part and the <b> grid
+</b> is for the integration around a contour to determine how many
+eigenvalues there are with positive real part using the argument
+principle.   If in your delay
+equations, the delay exceeds the <b> maximal delay </b> , a message will appear and the
+integration will stop.  Each time the <b> maximal delay </b> 
+is changed all previous delay
+data is destroyed and you must begin your integration anew.  Thus, it
+should be the first thing you set when solving a delay equation.
+Since the storage depends on the size of Dt when you change this, then
+the delay storage will also be destroyed.  Delay equations require
+data for <i> t &lt;t0 </i> so that you should edit the   Delay ICs to
+achieve this.  Use caution when integrating with adaptive step-size
+integrators. <p> 
+
+<a name=color><li> <b>(C)olor code</b><br> If you have a color system,
+XPP can code the output according to the magnitude of the velocity or
+the magnitude of a different quantity.  A choice pops up for these two
+options or for turning off the color.  This overides any color on any
+other curves in your picture.  Once you choose to color code, you are
+asked to either choose max and min values or have XPP do it for you
+via optimize.  The latter will compute the max and min and set the
+scales accordingly.<p> 
+
+<li> <a name=poincare> <b>(P)oincare map</b> <br>This sets up
+parameters for Poincare sections. A choice of four items will appear:
+the <b>Max/Min </b> option, the <b>Poincare section</b> option, <b> period </b> option, and
+the option to turn <b> off</b>  all maps. Only sections orthogonal to
+the coordinates are allowed, however, by defing the appropriate
+auxiliary variables, you can make sections for any quantity.
+The <b> Max/Min </b> finds local extrema of  variable and the <b>
+Period </b> option records the time between events  in the <b> Time
+</b> column as well as the local section info. 
+A window will pop up and you should
+type in the parameters.  They are the variable to check and the
+section and the direction. That is, a point will be recorded if the
+variable crosses the section such that it is either positive going to
+negative or vice versa according to the direction parameter.  If the
+direction is set to zero, the, the point will be recorded from either
+direction.  The flag <b>Stop on Section</b> instructs XPP to halt when
+the section is crossed.  Note that automatic interpolation is done.
+If the section variable is  <b> Time, T </b> and the section is say
+<i> T1</i>,then each time <i>T=0 modulo T1</i> the point is recorded.
+This is useful for periodically driven systems.  If you have opted for
+the  <b> Max/Min </b> option, then the section is irrelevant and the
+point will be recorded when a local maximum (if the direction is 1)
+minimum (direction=-1) or both (direction=0) of the variable is
+encountered.<p> 
+
+
+<a name=stochastic><li> <b>stoc(H)astic</b><br>This brings up a series of items that allow you to compute many trajectories and find their mean and variance.  It is most useful when used with systems that are either Markovian or have noise added to the right-hand sides.  The items are:<p>
+   <ul>
+	<li> <b>New seed</b>  <br>Use this to reseed the random number generator.  If you use the same seed then the results will not change from run to run.<p>
+	<li> <b>Compute</b> <br>This will put up the same dialog box as the ``Integrate'' ``Range'' choice.  Two new data sets will be created that will compute the mean and the variance of the point by point values of the trajectories over the number of trial runs you choose.  If the system is completely deterministic and the parameters and initial conditions are identical for each run, then this is superfluous.  Otherwise, the mean and variance are computed.  You can then access these new arrays as described below.  If you fire up the sample Markov problem, choose the ``Compute'' option, and set keep the initial data constant over say 20 runs, then you can look at the mean trajectory and its variance for each of your variables.<p>
+	<li> <b>Data</b> <br>This puts the results of the most recent run into the data browser and enables plotting of them.<p>
+	<li> <b>Mean</b> <br>This puts the results of the mean value of the most recently computed set of trials.<p>
+	<li> <b>Variance</b> <br>This does the same for the variance.<p>
+   <li> <a name=histogram> <b>Histogram</b><br>  This computes a histogram for a chosen variable and additional conditions and replaces the ``t'' column and
+the first variable column with the bin values and the number per bin respectively. You will be prompted for the number of bins, a maximum and minimum value and the variable on which to perform the histogram. Finally, you will be asked for additional conditions that involve the other stored variables (not the fixed ones though.)  For example, suppose you have run an ODE/Markov system and you want the distribution of a continuous variable when the Markov variable is in state 1.  Then the additional condition would be   z==1 where  z is the Markov variable.  Multiple conditions are made by using the & and | expressions.  Note that == is the logical equal and is not the same as the algebraic one.<p>
+	<li> <b>Old Hist</b> <br>brings back the most recently computed histogram.<p>
+	<a name=fourier> <li> <b>Fourier</b> <br> This prompts you for
+	a data column and the number of modes you want.  It then
+	computes a Fourier transform (not an FFT, since I don't want
+	to worry about zero padding and other matters) for the number
+	of modes you have chosen.  The results are in the Browser.
+	The first column (labeled ``T'') is the mode.  The second, the
+	cosine component and the third, the sine component.<p>
+<a name=power> <li> Power </b> <br> This is just like <b> Fourier </b>
+	except the magnitude and phase of the FFT are kept.
+   <a name=curvefit> <li> <b>f(I)t curve</b> <br> This is a routine based on
+Marquardt-Levenberg algorithm for nonlinear least squares fitting.  A description of the method can be found in <i> Numerical Recipes in C.</i> In this implementation, one can choose parameters and initial data to vary in an attempt to minimize the least-squares difference between solutions to a dynamical system and data.  The data must be in a file in which the first column contains the independent values in increasing order.  The remaining columns contain data which are to be fitted to solutions to a DE.  Not all the columns need be used.  When you choose this option, a window pops up with 10 entries describing the fit parameters. The items are:
+      <ul> 
+   	<li> <b>File</b> This is the name of the data file. The first column must contain the times at which the data was taken.
+      <li> <b>NCols</b> This contains the total number of columns in the
+data file. This includes all columns in the file, even those that you will not use.
+      <li> <b>Fitvar</b> This is a list separated by commas or spaces of variables that you want to fit to the data.  These must not be Markov variables or Auxiliary variables.  They are restricted to the items that you define as ``Variables'' in the ODE file.  Due to laziness, you can only have as many variables as you can type in 25 or fewer characters.  
+      <li> <b>To Col</b>  This should contain a list of column numbers in the data file associated with each of the variables you want to fit. Thus, for example, if you want to fit ``x'' to column 5 and ``y'' to column 2, you would type ``x y'' in the ``Fitvar'' entry and ``5 2'' in the ``To Col'' entry. The number of columns in this must equal the number of variables to be fit.
+      <li> <b>Params</b>  These items (there are 2 of them in case you have lots
+of parameters you need to vary) contain the names of parameters and variables.  If the name is a variable, then the initial data for that variable will be adjusted.  If it is a parameter, then the parameter will be adjusted.  On the initial call, the current initial data and parameter values are used. The lists of parameters and initial data can be separated by spaces or commas.  
+      <li> <b>Tolerance</b>  This is just a small number that tells the algorithm when the least square error is not changing enough to be significant.  That is if either the difference is less than ``TOL'' or the ratio of the difference with the least square is less than ``TOL'' then the program will halt sucessfully.  One should not make this too small as such differences are insignificant and a waste of CPU time. The default of .001 seems to work well.
+      <li> <b>Npts</b>  This is the number of points in the data file that you
+want to fit to.  
+      <li> <b>Epsilon</b>  This is used for numerical differentiation.  1e-5 is
+a good value since we really don't need precise derivatives.
+      <li> <b>Max iter</b> This is the maximum number of iterates you should use
+before giving up.  
+      </ul>
+On return, the program will put the best set of parameters that it has
+found.  It currently is quite verbose and prints a lot of stuff to the
+console.  This is mainly info about the current values of the
+parameters and the least square.  
+<li> <a name=corel> <b> Stat </b> </a> brings up two choices: <b> Mean/Dev </b> which
+computes the mean and standard deviation of a given column of numbers;
+and <b> autoCor </b> which computes the autocorrelation within a
+column of data. You should give a number for the bins and for the max
+and min. It is a symmetric function.
+ <li> <a name=liap> <b> Liapunov </b> </a> computes the maximal Liapunov exponent for the
+ current simulation. If you choose to compute it over a range of
+ parameters, the parameter and the maximal exponent are stored in the
+ first two columns of the browser. 
+   </ul><p>
+	
+<a name=ruelle><li> <b>R(U)elle plot</b> <br>  This allows you to retard any of the axes by an integral number of steps.  This is useful for chaotic orbits and delayed systems.  Choosing a number for any of the axes will result in the variable associated with that axis being delayed by the number of steps inputted.  Thus if you plot X vs X then of course you will get a diagonal line, but if you make the Y-axis delayed by say 50 and the output is every .1 timesteps, then the plot will be X(t-5) vs X(t). This does not appear during integration of the equations and is available only after a computation.  You set it up and then click <a href=xpprestore.html> Restore </a> from the main menu.<p>
+
+<a name=lookup> <li> <b>loo(K)up </b><br> This allows you to change the definitions of tabulated functions by reading in a different file.  Thus, if you have many experimental sets of data, you can read them in one by one and integrate the equations. You are prompted for the name of a tabulated function.  Then you give the filename to read in.  You will continue to be prompted and can type a few carriage returns to get out. If the table was defined as a function instead of a file, then you will be prompted for the number of points, the limits of the range (Xhi,Xlo) ad finally, the formula of for the function defining the table.  Note that it must be a function of   t.  Note that if the
+function contains parameters and these are changed, it will be automatically recomputed.<p>
+
+<li><a name=bndry>  <b>bndry(V)al</b> <br>prompts you for the maximum iterates, the error tolerance, and the  deviation for the numerical Jacobian for the shooting method for solving BVPs.<p>
+
+<a name=adjoint><li> <b>(A)djoint</b><br>  This allows you to compute
+the adjoint and do averaging for weakly coupled oscillators.  To use
+this option, you must successfully compute a periodic orbit and set
+the total integration time to one full orbit. If you are only
+interested in the adjoint of a single component of an oscillation, the
+algorithm works best if you start at a maximum of that component.
+The menu that pops up is: 
+<ul>
+	<li> <b>(N)ew adj</b>  This makes the adjoint from the
+   computed periodic data.  Success or failure will be noted. Separate
+   storage is maintained for the adjoint.  The program automatically
+   puts the data from the adjoint into  the browser so it can be
+   viewed and plotted or saved.  If <b> Out of bounds </b> increase
+   the <a href=#bounds> bounds. </a>
+   <li> <b>(A)djoint</b>  This will place the adjoint data in the browser,
+   <li> <b>(O)rbit</b>  This places the periodic orbit in the browser.
+   <li> <b>(M)ake H</b> This will prompt you for the coupling function
+   and the result  will be averaged and placed in 2 columns of
+   storage, the first is the time, then the H function. If there are
+   enough columns, the odd and even 
+parts of the averaged function will be retained. As with the adjoint,
+this list is automatically placed in the browser.   The user will be
+   prompted for the coupling functions and should type in the
+   formulas. The coupling is between two identical units.  Say you
+   want to couple two oscillators via a variable called V Then, you
+   V refers to the oscillator getting the input 
+and  V' refers to the oscillator providing it. So, e.g, for diffusive
+   coupling you would type in <tt> V'-V </tt> 
+   <li> <b>(H) function</b>  This places the computed H function in the browser.
+</ul>
+Anytime you integrate, etc, the data will be placed back into the storage area.
+</ul>
+
+<p>
+
+

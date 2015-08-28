@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>XPP - EQILIBRIUM POINTS</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xpptext.html">Back</a> | <a href="xppview.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Equilibrium Points</h1> This allows you to calculate equilibria for a system. There
+ are three options.<p>
+<ul> 
+<li> <b>(G)o</b> <br> Begins the calculation  using the values in the initial data box as a first guess. Newton's method is applied.  If a value is found XPP tries to find the eigenvalues and asks you if you want them printed out.  If so, they are written to the console.  Then if there is a single real positive or real negative eigenvalue, the program asks you if you want the unstable or stable manifolds to be plotted.  Answer yes if so and they will be approximated.  The calculation will continue until either a variable goes out of bounds or you press <b>Esc</b>.  If <b>Esc</b> is pressed, the other branch is computed. (Unstable manifolds are yellow and computed first followed by the stable manifolds in color turquoise.)  The program continues to find any other invariant sets until it has gotten them all. These are stored and can be accessed by clicking <a href=xppics.html#shoot> Initalconds|Shoot.</a> Once an equilibrium is computed a window appears with info on the value of the point and its stability.  The top of the window tells you the number of complex eigenvalues with positive,<b> (c+) </b>, negative <b> (c-)</b>, zero <b> (im) </b>  real parts and the number of real positive <b>  (r+) </b>  and real negative <b> (r-)</b> eigenvalues. If the equation is a difference equation, then the symbols correspond the numbers of real or complex eigenvalues outside <b> (+) </b> the unit circle or inside <b> (-) </b>.  This window remains and can be iconified.  <p>
+
+<li> <b>(M)ouse</b>  <br> This is as above but you can specify the initial guess by clicking the mouse.  Only the two variables in the two-D window will reflect the mouse values.  This is most useful for 2D systems. <p>
+<li> <b>monte(C)ar</b> <br> This lets you randomly select guesses for fixed points. You are asked whether you want to append the new list to an older list, the number of guesses, and ranges for the variables. <p>
+<li> <b>(R)ange</b>  <br> This allows you to find a set of equilibria over a range of parameters.  A parameter box will prompt you for<ul>
+<li>  the parameter, <li> starting and ending values, <li> number of steps; <li> Column for stability will record the stability of the equilibrium point in the specified column.  <li> Shoot at each; if you choose this
+ the invariant manifolds will be drawn for each equilibrium computed.  </ul> <p>  The stability can be read as a decimal number of the form <b>u.s</b> where <b> s </b>  is the number of stable and <b>u</b> the number of unstable eigenvalues. So <b> 2.03 </b>  means 3 eigenvalues with negative real parts (or in the unit circle) and 2 with positive real parts (outside the unit circle.) <p> For delay equations, if a root is found, its real part is included in this column rather than the stability summary since there are infinitely many possible eigenvalues. <p> The result of a range calculation is saved in the data array and replaces what ever was there.  The value of the parameter is in the time column, the equilibria in the remaining columns and the 
+stability info in whatever column you have specified.<p> <b>Esc</b> aborts one step and <b>/</b> aborts the whole procedure. <p>
+</ul> <p>

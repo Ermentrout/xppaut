@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>XPP - INITAL CONDITIONS</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xpphelp.html">Back</a> | <a href="xppcont.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Initial Conditions</h1>
+This lets you set initial data and then integrates the equations. Ypou can also set initial data by typing into the initial condition window.
+<p>
+
+To solve boundary-value problems using shooting, click <a href="xppbdry.html"> here </a>
+<p>
+<hr>
+
+<ul>
+<table border = 0>
+<tr><td><h3><b><a href="#range"> (R)ange <td></tr>
+<tr><td><h3><b><a href="#2par"> (2)par range <td></tr>
+<tr><td><h3><b><a href="#last"> (L)ast <td></tr>
+<tr><td><h3><b><a href="#old"> (O)ld <td></tr>
+<tr><td><h3><b><a href="#go"> (G)o <td></tr>
+<tr><td><h3><b><a href="#mouse"> (M)ouse <td></tr>
+<tr><td><h3><b><a href="#shift"> (S)hift <td></tr>
+<tr><td><h3><b><a href="#new"> (N)ew <td></tr>
+<tr><td><h3><b><a href="#shoot"> s(H)oot <td></tr>
+<tr><td><h3><b><a href="#file"> (F)ile <td></tr>
+<tr><td><h3><b><a href="#formula"> form(U)la <td></tr>
+<tr><td><h3><b><a href="#mice"> m(I)ce <td></tr>
+<tr><td><h3><b><a href="#dae"> (D)AE guess <td></tr>
+<tr><td><h3><b><a href="#backward">(B)ackward <td></tr>
+</table>
+</ul>
+<hr>
+
+
+
+<ul><a name=range> <li> <b> (R)ange </b> </a> <br>This lets you 
+integrate multiple times with the results shown
+ in the graphics window.  Pressing this option produces a new window with
+ several boxes to fill in.  <p> First choose the quantity you want to range
+ over.  It can be a parameter or a variable.  The integrator will be called
+ and this quantity will be changed at the beginning of each integration.<p>
+  Then choose the starting and ending value and the number of steps. <p>The
+ option <b>Reset storage </b>only stores the last integration.  If you choose not
+ to reset, each integration is appended to storage.  Most likely, storage
+ will be exceeded and the integration will overwrite or stop. <p> The option 
+to use last initial conditions will automatically use the final result of
+ the previous integration as initial data for the next integration.  Otherwise,
+ the current ICs will be used at each step (except of course for the  variable
+ through wich you are ranging.) <p> 
+If you choose <b> Yes </b>  in the <b> Movie </b>  item,
+then after each integration, XPP will take a snapshot of the picture.
+You can then replay this series of snapshots back using the <a href=xppkine.html>Kinescope.</a> <p> 
+When you are happy with the parameters, simply
+ press the <b> OK</b>  button.  Otherwise, press the <b> Cancel </b> button to abort.  <p> Assuming
+ that you have accepted, the program will compute the trajectories and plot 
+them storing none of them or all of them.  If you press <b> Esc</b> it will abort the 
+current trajectory and move on to the next.  <p> Pressing the <b> / </b> key will abort
+ the whole process. <p>
+<li> <a name=2par><b> (2)par range </b><br> Similar to range integration, but allows you to
+range over two items. <p>The <tt> Crv(1) Array(2) </tt> item determines how
+the range is done. If you choose <tt> Crv </tt> then the two paramaters are
+varied in concert, <i>[a(i),b(i)]</i> for <i>i=0,...,N</i>. <p> The more useful
+<tt> Array</tt> varies them independently as <i>[a(i),b(j)]</i> for
+<i>i=0,...,N</i> and <i> j=0,...,M.</i> <p>    
+<a name=last><li> <b> (L)ast </b> <br> This uses the end result of the most recent integration as the starting point of the current integration. <p>
+<a name=old><li> <b> (O)ld </b> <br> This uses the most recent initial data as the current initial data.  It is essentially the same as Go. <p>
+
+<a name=go><li> <b> (G)o </b> <br> Uses the initial data in the IC window and the current
+ numerics parameters to solve the equation.  <p> The output is drawn in the
+ current selected graphics window and the data are saved for later use.  <p> The
+ solution continues until either the user aborts by pressing <b> Esc </b>, the
+ integration is complete, or storage runs out.<p>
+<a name=mouse><li> <b> (M)ouse </b>  <br> allows you to specify the values with the mouse.  Click at the
+ desired spot in a phase-plane picture. You must have a two-dimensional
+view and only variables along the axes.<p>
+<a name=shift><li> <b> (S)hift </b> <br> This is like <b> Last </b> except that the stating time is shifted to the current integration time.  This is irrelevant for autonomous systems but is useful for nonautonomous ODEs. <p>
+
+
+<a name=new> <li> <b> (N)ew </b><br> This prompts you at the command line for each
+initial condition.<p> 
+ Press <b> Enter </b> to accept the value presented. Press <b>Esc </b> to quit entering and start the integration.<p>
+
+<a name=shoot><li> <b> s(H)oot</b><br> allows you to use initial data that was produced when
+you last searched for an equilibrium.  <p> When a rest state has a single
+positive or negative eigenvalue, then XPP will ask if you want to
+approximate the invariant manifold.  If you choose <tt> yes </tt> to this,
+then the initial data that were used to compute the trajectories are
+remembered.  Thus, when you choose this option, you will be asked for
+a number 1-4.  This number is the order in which the invariant
+trajectories were computed.<p> 1 and 2 are always unstable manifolds and 3 and 4 are stable manifolds.  <p> Note if the invariant set is a stable
+manifold, then you should integrate backwards in time.<p>
+
+<a name=file><li> <b> (F)ile</b> <br> Prompts you for a file name which has the initial data
+as a sequence of numerical values. <p>
+
+<a name=formula><li> <b> form(U)la</b> <br> Allows you to set all the initial data as a
+formula. This is good for systems that represent chains of many ODEs. <p>
+When prompted for the variable, type in <tt> u[2..10] </tt> for example to
+set the variables <tt> u2,u3, ..., u10 </tt>  and then put in a formula
+using the index <tt> [j] </tt>. <p> Note you must use <tt> [j]</tt> and not <tt> j </tt> by itself. <p> For example <tt> sin([j]*2*pi/10)</tt>. Repeat this for
+different variables hitting enter twice to begin the integration. <p>
+
+<a name=mice><li> <b> m(I)ce</b> <br> allows you to choose multiple points with the
+mouse. Click <b> Esc </b> when done. <p>
+
+<a name=dae><li> <b> (D)AE guess</b> <br> lets you choose a guess for the algebraic variables of the DAE.<p>
+
+<a name=backward><li> <b> (B)ackward</tt> <br> is the same as <a href="#go"> Go </a> but the integration is run backwards in time.<p><p>
+</ul>
+

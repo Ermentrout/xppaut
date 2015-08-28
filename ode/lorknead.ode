@@ -1,0 +1,17 @@
+# the famous Lorenz equation set up for 3d view
+init x=-7.5  y=-3.6  z=30
+par r=27  s=10  b=2.66666
+par q=.8  
+x'=s*(-x+y)
+y'=r*x-y-x*z
+z'=-b*z+x*y
+global 1 x-y {p=p+(x>0)*(q^count);count=count+(x>0);out_put=(count>cmax);arret=(count>cmax)}
+global 1 y-x {p=p-(x<0)*(q^count);count=count+(x<0);out_put=(count>cmax);arret=(count>cmax)}
+count'=0
+p'=0
+aux xd=-x+y
+par cmax=25
+aux rr=r
+aux ss=s
+@ dt=.001, nout=10,total=40,trans=1000
+done

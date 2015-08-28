@@ -1,0 +1,4 @@
+v'=v*(v-a)*(1-v)-w
+w'=b*(v-c-d*w)
+par a=.1,d=.5,c=.2,b=.1
+done

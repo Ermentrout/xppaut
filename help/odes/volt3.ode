@@ -1,0 +1,5 @@
+# nonlinear integrodifferential volterra equation
+u'=-2*u+exp(-2*t)+int{exp(-t)#u^2}
+init u=1
+aux utrue=exp(-t)
+done
