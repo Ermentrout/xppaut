@@ -1,0 +1,18 @@
+# cube volt.ode
+# two equlations with passive media and then two active regions
+# 
+# dV/dt = -a v + active stuff + d V_xx
+# G(xhat,t) = exp(-a*t-xhat/t)/sqrt(pi t) xhat is a distance 
+f1=k*(v1^2-v1^3-w1) 
+f2=k*(v2^2-v2^3-w2)
+v1(t)=v10*exp(-kk*t) + int[.5]{exp(-a*t)#f1}+int[.5]{exp(-a*t-xhat/(t+.0001))#f2}
+v2(t)=v20*exp(-kk*t) + int[.5]{exp(-a*t)#f2}+int[.5]{exp(-a*t-xhat/(t+.0001))#f1}
+w[1..2]'=b*(v[j]-c-d*w[j])
+par a=.1,d=.5,c=.2,b=.2,k=2
+par xhat=3
+par v10=.5,v20=.2,kk=5
+@ dt=.05,total=100
+init w1=.5,w2=-.4
+# change w2=-.2 to get sync
+@ xp=v1,yp=v2,xlo=-.5,xhi=1,ylo=-.5,yhi=1
+done

@@ -1,0 +1,7 @@
+x'=-x+1
+init x=1
+u(t)=int{(heav(tau-t)/tau)#x}
+par tau=1
+@ autoeval=1
+@ total=10
+done

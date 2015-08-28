@@ -1,0 +1,542 @@
+\documentclass{article}
+\oddsidemargin  -0.25 cm
+\evensidemargin -.25 cm
+\textwidth      18 cm
+%\textwidth  17cm
+ \topmargin     -1.5 cm
+%\textheight     24cm
+\textheight  25.5  cm
+
+%\newenvironment{itemize1}{
+%  \begin{itemize}{$\bullet$}{
+%      \setlength{\leftmargin}{0.25in}}}{\end{itemize}}
+\begin{document}
+\begin{center}
+{\Huge \bf All the commands }
+\end{center}
+
+\noindent {\large \bf Some general features of the interface}
+\begin{itemize}
+\item All the main menu commands have one-key shortcuts. These are indicated below. E.g. to quit type FQY.  (File Quit Yes)
+\item Generally {\tt ESC} will get you out of most stuff. 
+\item As you slide over menu items, some tips will appear at the bottom. 
+\item  In the dialog boxes that come up, some items have a (*) next to them. If you click on the (*), you can get a list of allowable options such as variable names, colors, etc.
+\item By default {\tt Return} moves between entries and {\tt Tab} is like hitting {\tt Ok.} If you want the opposite behavior, use the command line {\tt -ee}.  
+\item On any 2D graphics window and AUTO window, hold the mouse down and move and the coordinates are reported. In the 3D view, moving the mouse while holding down performs rotations.
+\item There are six buttons across the main window that bring up new windows allowing you to manipulate initial data {\tt ICs}, boundary conditions {\tt BCs}, delay initial conditions {\tt Delay}, parameters {\tt Param}, and the numerical values of the data {\tt Data.} The {\tt Eqns} button shows you the ODEs. 
+\begin{itemize}
+\item The {\tt ICs} window has buttons {\tt xvst, xvsy,arry} that allow you to quickly choose and plot stuff. Click on several check boxes and {\tt xvst} and all the curves will be plotted vs time. Click on two check boxes and {\tt xvsy} to get a phaseplane view. For PDEs and networks, click on a first item and a last item and then {\tt array} and the {\tt Array} window comes up (see (V)iew axes, below) with all the variables between the first and last plotted vs time.
+\item The {\tt ICs, BCs, Param, Delay} windows all have buttons across the top. {\tt Default} restores values in the ODE file; {\tt Cancel} cancels what you have typed {\tt Ok} accepts it, and {\tt Go} accepts it and runs the integrator. Arrow keys on side and on keyboard allow you to move between entries. You can resize the windows, but it is quirky and may crash. Use the {\tt Delay} window to edit initial data for delay equations for $t<0.$ Note that clicking {\tt OK} in the {\tt ICs} window will replace the $t<0$ data by the most recent data computed, so always go back and click {\tt OK} in the {\tt Delay} window to reset it after you change the {\tt ICs} stuff.
+\end{itemize}      
+\item At the bottom of the main window are three slider buttons which let you vary parameters and initial data. Nullclines and direction fields are redrawn as well as trajectories. Click on the {\tt Par/Var} part and fill it it, Then use the slider. Nullclines, direction fields, trajectories, and color coding are all redrawn.
+\end{itemize}
+
+\bigskip
+\noindent {\large  \bf Main Menu commands}
+\begin{itemize}
+\item {\tt (I)nitconds}  You can exit a single integration by typing {\tt ESC}. 
+\begin{itemize} 
+\item (R)ange - bring up range dialog; choose the parameter you want to range over, the number of steps, start/end values, whether you want to reset the storage each time (otherwise it is appended), use old initial data (otherwise it uses the end of the last integration),cycle color (to see multiple plots), movie (erases each time and creates a movie to be played back with (K)inescope). You can exit a range integration if it is going by clicking the {\tt /} key.
+\item (2)par range - range over two parameters/variables; set the steps, etc like in above. Crv - means vary both parameters simultaneously along a one-dimensional line; Array- vary them independently (producing Steps*Steps2 solutions)
+\item (L)ast - start the new integration at the end of the last one. Very useful in getting rid of transients
+\item (O)ld - default using the current initial conditions
+\item (G)o - same as old, I think
+\item (M)ouse - select initial data in a two-variable window using the mouse
+\item (S)hift- like (L)ast, the time is also shifted. Useful for non-autonomous equations
+\item (N)ew - type in initial conditions from the command window - type Esc to finish early
+\item s(H)oot - use as initial conditions the stable/unstable manifolds found with the singulatr point command. Choose 1-4 according to the order they were computed. For stable manifolds, make sure you make DT negative
+\item (F)ile - read initial conditions from a file. This is a plain ascii file that contains the numbers in order
+\item  form(U)la - type in a formula. This is good for systems of PDEs etc. For example type in {\tt u[0..99]} and then type in {\tt sin(2*pi*[j]/100)} and this will initialize to those values. Hit return when done or type in another variable
+\item m(I)ce - us mouse to put in multiple initial conditions
+\item (D)AE guess - reset the guess for differential algebrainc systems 
+\item (B)ackward - like (G)o but integrate backward in time
+\end{itemize}
+\item (C)ontinue - add more time to the current solution extending the integrating time
+\item (N)ullcline 
+\begin{itemize}
+\item (N)ew - draw new nullclines
+\item (R)estore - redraw previously drawn ones
+\item (A)uto - automatically draws then after integrating
+\item (M)anual - only draw if you use restore
+\item (F)reeze
+\begin{itemize}
+\item (F)reeze - save these nullclines on the screen
+\item (D)elete all - delete all the saved nullclines
+\item (R)ange - range over a parameter and draw all the nullclines
+\item (A)nimate - draw the nullclines from the range integration above successively erasing after each redraw.
+\end{itemize}
+\item (S)ave - save the stored nullclines. They are stored as pairs of line segments with the X nullcline first and the Y-nullcline second. If you save the frozen and ranged ones, they will be saved in a separate file for each set.
+\end{itemize}
+\item (D)ir.field/flow 
+\begin{itemize}
+\item (D)irect Field - prompts you for a grid (10-16 is good) and will draw unscaled direction fields. (These are saved and thus plotted)
+\item (F)low - prompts for a grid (5 -8 is good) and draws trajectories forward and backward in time. They are not saved so they wont be printed, but you can capture the plot to save with the (K)inescope.
+\item (N)o dir. field - don't draw it
+\item (C)olorize - Use the parameters from (N)umerics (C)olor code to colorize the whole phase plane. A good grid is 100.
+\item (S)caled Dir.Fld - direction field with unit length.
+\end{itemize}
+\item (W)indow/zoom 
+\begin{itemize}
+\item (W)indow - set the view for the two-d axes (see (V)iew axes to set 3D stuff)
+\item (Z)oom in - use the mouse to zoom in
+\item Zoom (O)ut - use the mouse to zoom out
+\item (F)it - use the current set of graphs to fit the window to hold everything. A very useful command!
+\item (D)efault - set the window to the values when you first start
+\end{itemize}
+\item ph(A)sespace - Differential equations that lie on the circle can be readily plotted and handled with this command. This allows you to select the size of the circle (default $2\pi$) and which are folded. Can do this within the ODE file using the {\tt @ fold=name} option.
+\item (K)inescope - Lets you capture the image in the drawing window and play it back
+\begin{itemize}
+\item (C)apture - capture the image on the screen
+\item (R)eset - delete all captured images
+\item (P)layback - cycle through the images using the left and right arrows, Escape to exit
+\item (A)utoplay - cycles through the images specificed number times with specified time between frames in milliseconds
+\item (S)ave - save the individual images as a series of Gifs. 
+\item (M)ake anigif - saves the images as one animated gif file. Playback on your browser or convert to some other video format (e.g. with Quicktime Pro)
+\end{itemize}
+\item (G)raphic stuff 
+\begin{itemize}
+\item (A)dd curve - use this to add curves to the plot. A dialog will come up asking for the details. Colors are 0-10 (click on the (*) to see the actual colors). Linetype is 1,0, or negative integgers which produce filled circles of larger diameters. 0 is just dots.
+\item (D)elete last - deletes the most recent curve. You cannot delete the primary curve, which is always on.
+\item (R)emove all - removes all the curves
+\item (E)dit curve - lets you edit the curve; 0 is the primary curve; added are 1-9.  The dialog is the same as with (A)dd curve
+\item (P)ostscript - produce postscript output. A dialog comes up first to let you decide the properties. Then the file selector comes up so you can choose the file. 
+\item S(V)G - produce scaleable vector graphics output. This is an XML-based format that is viewable on a web browser, infinitely zoomable, and is supported by many platforms including iOS. It has the disadvantage of being rather large in some cases.
+\item (F)reeze - keeps lots of curves and other stuff on the screen so you can change stuff and still keep the curves.
+\begin{itemize} 
+\item (F)reeze -brings up a dialog box to let you freeze the current primary curve. Give it a color. The Key is the title for the legend. The name is just for convenience in choices below.  Up to 26 curves can be frozen.
+\item (D)elete - lets you delete selected curves (their names are listed; ESC gets you out).
+\item (R)emove all - removes all frozen curves. 
+\item (K)ey - turn the key (legends) on/off and if you turn them on, position with the mouse.
+\item (B)if.Diag - import a bifurcation diagram from Auto.
+\item (C)lr. BD - clear the diagram
+\item (O)n freeze - each time you integrate, the new curve will be frozen, so you can automatically freeze up to 26 curves. This toggles to (O)ff freeze.
+\end{itemize}
+\item (A)xes options - Brings up a dialog. You can set the positions of the axes (thin dotted lines) and whether they appear or not and the postscript font size.
+\item exp(O)rt data - save all the primary curves (those that you have added with (A)dd curve) into a text file that is space delimited. First column is the x-axis and the others are the y-axes for the  viewed curves.
+\item (C)olormap - select the colormap that is used in the animator, the colorize options, and the array plot.
+\end{itemize}
+\item (N)umerics - see below; this is a huge menu!!
+\item (F)ile - see below; this is also big
+\item (P)arameters - change parameters manually from the command window. Type the name of the parameter and then type in a value. Hit return twice to exit. Type default to get the parameters to their default values (those when loaded). Better is to click the {\tt Param} box in the top main window. 
+\item (E)rase - erases the screen
+\item (M)akewindow - allows you to create new windows
+\begin{itemize}
+\item (C)reate - make a new window. This copies the current window (all the added curves, but not the frozen curves) and this window becomes the hot window. A small black box occurs in the upper left. You can edit this window as in the main window. 
+\item (K)ill all - deletes all created windows
+\item (D)estroy - deletes the most recently created window
+ cannot be destroyed.  
+\item (B)ottom puts the active window on the bottom. 
+\item (A)uto turns on a flag so that the window will automatically be
+redrawn when needed.
+
+\item (M)anual turns off the flag and the user must restore the picture manually.
+\item (S)imPlot on/off lets you plot the solution in all active
+windows while the simulation is running. This can slow you down abit.
+\end{itemize}
+\item (T)ext etc - add text, arrows, other wodgets
+\begin{itemize}
+\item (T)ext This prompts you for the text you want to add.  Then you
+are asked for the size: 0-8pt, 1-12pt, 2-14pt,
+3-18pt, 4-24pt. Text also has several escape sequences:
+\begin{itemize}
+\item $\backslash$1 -- switches to Greek font 
+\item $\backslash$0 -- switches to Roman font 
+\item $\backslash$s -- subscript
+\item $\backslash$S -- superscript
+\item  $\backslash$n -- neither sub nor superscript
+\item $\backslash$\{expr\} -- evaluate the expression in the braces before   rendering.
+\end{itemize}
+So that {\tt $\backslash$1a=$\backslash$\{alpha\}} will produce the text $\alpha=.123$ where .123 was the value of the parameter {\tt alpha}. If you change alpha, it will also change the text, when you redraw. 
+Note that not all X-servers will have these fonts, but the
+postscript file will still draw them. Finally, place the text with the
+mouse.
+\item (A)rrow This lets you draw an arrow-head to indicate a direction
+on a trajectory.  You will be prompted for the size, which should be
+some positive number, usually less than 1.  Then you must move the the
+mouse and select a direction and starting point.  Click on the
+starting point and holding the mouse button down, drag the mouse to
+indicate the direction of the arrow-head. Then release the
+mouse-button and the arrow will be drawn.  
+\item (P)ointer This is like an arrow, but draws the stem as well as
+the arrow head.  It can be used to point to important features of your
+graph. The prompts are like those for {\tt (A)rrow.}
+\item (M)arker This lets you draw little markers, such as triangles,
+squares, etc on the picture. When prompted to position the marker with
+the mouse, you can over-ride the mouse and manually type in
+coordinates if you hit the (Tab) key.
+\item (E)dit This lets you edit the text, arrows, and pointers in one of three ways (M)ove, (C)hange, (D)elete. Select the object with the mouse.
+\item (D)elete All Deletes all the objects in the current window.
+\item marker(S) This is similar to the Marker command, but allows you to
+automatically mark a number of points along a computed trajectory. 
+Choose the marker properties, the starting row of data, the number of markers, and the number of rows to skip between markers.
+\end{itemize}
+\item (S)ing pts - find equilibria
+\begin{itemize}
+\item (G)o - use the current initial data to try to find equilibria with a Newton solver. If successful, you will be asked if you want the eigenvalues printed to the console; if there any special one-dimensional manifolds, you will be asked if you want them drawn. Then a summary window will appear. It shows the equilibria. It also tells how many complex with positive real parts (c+), etc. The {\tt Import} button lets you load the equilibria as initial data. The initial data for one-dimensional manifolds is remembered, so they can be recreated as trajectories with the (I)nitialconds s(H)oot menu
+\item (M)ouse - use the mouse to select a guess
+\item (R)ange - range over parameters as you find equilibria. The dialog asks you the parameter, steps, etc. Choosing {\tt Shoot=Y}, will draw the relevant one-dimensional invariant manifolds. {\tt Stability col.} will put the stability info into one of the data browser columns. {\tt Movie=Y} will create a Kinescope clip at each point - this is only useful if there are invariant manifolds to be drawn. When done, the first column of the browser has the parameter and the remainng, the equilibrium values or stability info (Unstab.stab) 
+\item monte(C)ar - Randomly guess starting values to try to find all the equilibria. You will be prompted to append (add onto what you already have), {\tt Shoot} (draw one-dimensional manifolds when relevant) ,  number of guesses, tolerance (if their difference is less than the tolerance, they will be treated as the same point and not stored; otherwise you would have lots of repeats), and the ranges for each variable. This is a great tool to get the full behavior of all the fixed points, etc. Try {\tt wcfun.ode}.
+\end{itemize}
+\item (V)iew axes - choose some viewing options
+\begin{itemize}
+\item (2)D view - select the axes, the window, and the labels.
+\item (3)D view - select the axes, the max/min of the three axes variables, and the 2D viewing window. (I ignore these and use the convenient (W)indow (F)it; then go back and refine it). The (3)d params will give you rotation options, etc
+\item (A)rray - brings up the array plot window which is for large systems such as a discretized PDE. Suppose you have a system with variables called {\tt U0, U1,...U199} and you integrated for 50 time units with a stepsize of 0.05 (so there are 1000 steps) and you  want to plot them vs time. Then pick {\tt Column 1} as {\tt U0}; {\tt Ncols=200}; {\tt Row 1:0}; {\tt NRows:201}; {\tt RowSkip:5} and leave the rest as is and click {\tt OK}. This will plot the data colored according to the magnitude with time running down. (The color map used is chosen in the (G)raphic stuff (C)olormap.)  If you want to skip everyother column, set {\tt Colskip:2}, etc. There are 7 buttons: {\tt Redraw,Close} are obvious; {\tt Edit} brings up the initial dialog box; {\tt GIF} saves a GIF of the current view (without the scale bar); {\tt Fit} will use the chosen variables to find the best scaling. {\tt Range} is really cool! This allows you to range through parameters, redrawing afetr each integration. A dialog comes up prompting for the filename, and whether you want the image tagged with the parameter value ({\tt Tag})  whether you want to save one animated GIF ({\tt Still:0}) or a sequence of individual GIFs ({\tt Still:1}). The dialog from {\tt (I)nitconds (R)ange} comes up.
+\item {\tt (T)oon} brings up the animation window. See below!
+\end{itemize}
+\item {\tt (X)i vst t} prompts you for a variable and plots it vs time; it atomatically scales the window.
+\item {\tt Restore} redraws everything
+\item {\tt (3)d-params} Brings up a dialog allowing you to change the perspective, etc. You can play with these and then click {\tt (W)indow (F)it} to get it in the window. The {\tt Movie} option lets you create a series of Kinescope frames as you vary the angle through various increments.  Use the {\tt (K)inescope} to view and save them.
+\end{itemize}
+
+\bigskip
+\noindent {\large  \bf File Menu commands}
+From the main menu, click on {\tt (F)ile } to get this menu. 
+\begin{itemize}
+\item {\tt (P)rt Src} brings up the source code of your ODE file. The buttons allow you to navigate if it is a big file. (up/down arrows, PgUp/Dn, Home/End on the keyboard also work.) {\tt Kill} closes the window. There is one cool button called {\tt Action.} This allows you to runs a sort of tutorial using the ODE file. To see it work, try the file {\tt lecar.ode} and click on the {\tt Action} button. Most of the text goes away leaving stuff with little asterisks. If you click these, some parameters are changed in the model and you can follow the directions. The author of the ODE file must write the relevant code. 
+\item {\tt (W)rite set} allows you to store much of the info from your current session for later recall. Numerical parameters, ODE parameters, initial data, graphics information, etc are all stored in a human readable ascii file. Use this a lot so that if you have something interesting, you will be able to reproduce it. I have had so many students that could not reproduce their results because they did not remember how they got them! Use it in conjunction with the next command. The standard name for these files is {\tt *.set} and if you use {\tt XPPAUT} from the command line, you can add the line {\tt -setfile bob.set} to automatically start up with the saved set file as your starting parameters etc. Set files are not very smart so that if you change your ODE file, it will probably not work. You will be prompted for a file name.
+\item {\tt (R)ead set} reads a saved set (see previous command). You will be prompted for a file name.
+\item {\tt (A)uto} brings up the AUTO bifurcation package window. See below for its usage.
+\item {\tt (C)alculator} brings up a window which will give results of calculations that you type in; e.g., {\tt sin(sqrt(3)/pi)} will return 0.523819...  You can use any parameter names and variable names; in the latter case it returns their current value. (If you have integrated the equations, it is the last value.) You can set parameters and initial conditions as numbers or formulae using the following {\tt m:minf(v)} for example.  Type {\tt ESC} to exit the calculator.
+\item {\tt (E)dit} allows you to edit the functions, etc.
+\begin{itemize}
+\item {\tt (R)HS's} Lets you edit the right-hand sides of the equation. It works OK with simple right hand sides and if there are just a few of them. Don't try it for really complex ones as it will either crash or just give an error.
+\item {\tt (F)unctions} lets you edit user-defined functions.
+\item {\tt (S)ave as} seems to be a left over from a vary old version of {\tt XPPAUT} and will save a version in the old style of the original DOS program {\tt PhasePlane}; it may or may not work :)
+\item {\tt (L)oad DLL} allows you to load a dynamically linked library and associated function. See the ode {\tt tstdll.ode} in the {\tt ode} directory that comes with {\tt XPPAUT.}  You can add options to the ode file to automatically load the desired library and functions.    
+\end{itemize}
+
+\item {\tt (S)ave info}  provides a summary of the important info about the numerics, parameters, initial data, etc.  It cannot be read by {\tt XPPAUT} but can be easily read by the user. 
+\item {\tt (B)ell on/off} toggles the annoying bell noise that {\tt XPPAUT} makes.
+\item {\tt (H)elp} Assuming you have told {\tt XPPAUT} where to find the help directory and what browser you use, this should fire up a rather out of date help file. You have to define two environmental variables, {\tt XPPHELP} which points to the help directory in the XPP distribution and {\tt XPPBROWSER} which is the command to open a web browser. On the Mac, in a terminal, I write:
+\begin{verbatim}
+export XPPHELP=/Users/bard/xppaut/help/xpphelp.html
+export XPPBROWSER=open
+\end{verbatim}
+since {\tt open} seems to know how to handle html files by opening Safari.
+\item{\tt (Q)uit} Well, duh
+\item {\tt (T)ranspose} opens up a dialog box that allows you to transpose the data in the browser. The Time column is replaced the integers, 1 to $n$ where $n$ is the number of columns. For each of the $m$ rows the first $m$ columns after the time column contain the transposed data. This is a useful command for looking at discretized PDEs where you can then look at their spatial profile. Clicking {\tt cancel} in the dialog will put the data back into the untransposed form.
+\item {\tt t(I)ps} turns on/off the tips that are shown at the bottom of the screen.
+\item {\tt (G)et par set} loads a predefined parameter set. These can be initial conditions, parameter values, and even controls for the graphs. See {\tt lecar.ode} for examples, declared via the {\tt set } command in the ODE file
+\item {\tt c(L)one} will attempt to write a new ODE file with the current initial data and parameters. You will be prompted for the file name.
+\item {\tt .(X)pprc} will bring up your .xpprc file if you have defined the environmental variable {\tt XPPEDITOR}.
+\item {\tt t(U)torial} brings up a series of little suggestions. A work in progress to be sure.
+\end{itemize}
+
+
+
+\bigskip
+
+\noindent {\large  \bf Numerics Menu commands}
+From the main menu, click on {\tt nUmerics} to get this menu. It is a permanent menu in the sense that it replaces the main menu until you exit it. This presumes you would want to do a bunch of numerical settings at one time.
+\begin{itemize}
+\item {\tt (T)otal} allows you to set the total time to integrate. 
+\item {\tt (S)tart time} sets the initial value of $t$. This is relevant for nonautonomous systems.
+\item {\tt t(R)ansient} is a very useful setting. XPPAUT will only save data once $t$ exceeds transient. So this lets you throw out data  that may be a transient before you reach a steady state.
+\item {\tt (D)t} sets the step size for the integrator. If this is negative, then XPP integrates backwards in time. For adaptive integrators, this sets the frequency that numbers are output.
+\item{\tt (N)cline control} sets the nullcline mesh. Larger values make for smoother nullclines but will take longer to plot.
+\item{\tt s(I)ng pt control} sets parameters for finding equilibria: the number of Newton iterates, the Newton tolerence, and the perturbation size for computing the Jacobi matrix.
+\item{\tt n(O)utput} sets the frequency of output for fixed step size integrators. Adaptive integrators ignore this.
+\item{\tt (B)ounds} sets the bounds in XPP. If the magnitude of any variable or auxilliary quantity exceed {\tt Bounds} then XPP stops integrating.
+\item {\tt (M)ethod} lets you choose from many integration methods:
+\begin{itemize}
+\item {\tt (D)iscrete} is used to discrete dynamical systems
+\item {\tt (E)uler} is the standard one step method and is what you should use for stochastic ODEs
+\item {\tt (M)od. Euler} is a two-step method also called Heun's methos
+\item {\tt (R)unge-Kutta} is the well-known fourth order method
+\item {\tt (A)dama} is a fixed step Adams Bashforth predictor corrector
+\item {\tt (G)ear} is an adaptive step size stiff solver. You should provide a tolerance (smaller is slower and more accurate), minimum step size and maximum. The maximum should be bigger than {\tt Dt}. Note that with this and other adaptive integrators, {\tt Dt} does not affect output, just its frequency.
+\item {\tt (V)olterra} is a fixed step size backward integrator for Volterra integral equations. It asks for tolerance (this is for the newton solver, not accuracy), maximum iterations (ditto), and maximum points (how much history is kept in the buffers; integral equations use all data back in time), and whether you want the convolutions etc automatically re-evaluated whenever you change parameters.
+\item {\tt (B)ackEul} is a stiff version of Euler (first order) but backward solver. It asks for a tolerance and a maximum number of iterations, both related to the Newton solver
+\item {\tt (Q)ual. RK4} is a fourth order nonstiff adaptive integrator. Smaller tolerances are more accurate
+\item {\tt (S)tiff} is the stiff solver in NRC and is related to Gear's method
+\item {\tt (C)vode} is CVODE, an adaptic stiff solver that askes for relative and absolute tolerance. This and Rosebrock are the only stiff solvers that can exploit a banded system; that is one whose Jacobi matrix is zero at some distance from the diagonal.  It is the recommended integrator for stiff systems.
+\item {\tt DoPri(5),DoPri(8)3} are Dormand-Prince solvers that are related to Runge-Kutta and are adaptive. MatLab uses these as its default.
+\item {\tt Rosen(2)3} is a Rosenbrock stiff integrator that is used by MatLab. Like CVODE it can handle banded systems
+\item {\tt s(Y)mplectic} is a first order symplectic integrator for conservative systems.
+\end{itemize}  
+\item {\tt d(E)lay} allows you to set delay equation parameters The maximum delay sets the biggest delay you can have in your equations. Real and imag guess are the guesses for roots to the exponential polynomial equations that you see in delay equations. The grid size determines how the accurate the contour integration is to find instabilities of the linearized equations.
+\item {\tt (C)olor code} allows you to color your trajectories according to the value of some quantity. The choices are {\tt (N)o color} which turns this off, {\tt (V)elocity} colors according to the maginitude of the vector field, and {\tt (A)nother quantity} which can be another variable, time, or any auxiliary variable such as energy. You are asked for the ranges or whether you want to optimize, which will automatically scale it for you.
+\item {\tt stoc(H)ast} is a rather large menu that has many things related to the analysis of noisy systems and some signal processing.
+\begin{itemize}
+\item {\tt (N)ew seed} sets a new seed for the random number generator. As this is a deterministtic rule, if you set the seed to the same number, all simulations will be repeatable.
+\item {\tt (D)ata} brings back the results of the simulation. If, for example, you took a histogram or did a spectral analysis, the data is replaced in the Browser. This command gets it back. This command allows you to apply many different analyses to your data without losing it.
+\item {\tt (C)ompute} brings up the menu for range integration. After you have integrated over the range (and you can range over any parameter without changing it; if it is a noisy system it will compute many sample paths); the mean and variance are computed pointwise. You access them with the {\tt (M)ean} and {\tt (V)ariance} items that appear in the menu
+\item {\tt (H)istogram} allows you to bin any quantity and produce a histogram. The binned data is in the first two columns of the browser. The {\tt condition} choice lets you add additional conditions on other variables, say, in a Markov process with many states, you might want to look at the histogram only in a particular state. 
+\item {\tt (O)ld hist}, brings back the histogram if you have used the {\tt Data} command. Not sure why I even have this; in the old days, maybe, computers were too slow.
+\item {\tt (F)ourier} takes the FFT of the quantity you have chosen. The first column is the frequency, the second the cosine term, the third the sine term.  
+\item {\tt (P)ower} returns the absolute value of the FFT in the second column and the phase in the third. For example if there is a peak at the frequency 0.133, this means that the period is about 7.5 in the units of the model.
+\item {\tt f(I)t data} is quite complicated. See the documentation file for details. Roughly, you specify a data file whose first column has equally spaced time points, and second etc columns contain data. You must specify the total number of columns, even if you don't use all of them.  Type a comma or space-separated list of variables to fit, and the corresponding list of columns, e.g. to fit x to column 3 and y to column 5, you write x,y on the left and 3,5 on the right. Give a list of parameters and variables (initial data can be varied) whos values you want to change to fit the data.  The numbet of points in the data file should be specified. You should set the integration time to match that of your data.  Tolerance determines when the least squares isnt changing significantly; epsilon is for numerically getting the variational equations, and maxiter is the maximum iterations. The default values are OK. If you get failure, increase maxiter or sometime just run a few times. You should always start with a reasonable initial guess.
+\item {\tt (S)tat } will return the mean and standard deviation of a column of data in the data browser
+\item {\tt (L)iapunov} computes the maximal Liapunov exponent of a computed solutions to your ODE. You can range over parameters and the exponent will be saved along with the value of the parameter.
+\item {\tt st(A)utocor} is a specialty function that will plot the spike-time autocorrelation. Try running {\tt qif-noise.ode} and then clicking on this function. Choose 200 bins from -100 to 100 and pick {\tt t} as the variable. Plot {\tt V vs t} and you will see the spike time autocorrelogram. 
+\item {\tt Xcorrel etc} does a auto/cross correlation using a direct method or the FFT. (FFT is fast but sometimes has artifacts). The first two columns contain the result. Choose the bin number and the variable(s). For example, if you have integrated with an output time step of 0.05, then picking a bin of 1001 ({\tt XPP} will make it odd), then you will get a cross correlation with 500 negative and 500 positive times and when plotted will range from -25 (500*.05) to 25.
+\item {\tt spEc dns} computes various types of spectral density estimates for your system. You can do a PSD, cross PSD, or coherence (normalized cross PSD). Choose the window size and the window type as well as the variables. Small windows give you more estimates to average over but the spectral resolution is crude. 
+\item {\tt (2)D histogram} allows you to produce histograms in two variables. The first two columns of the Browser contain the bins and the third column, the fraction of points. 2D histograms are normalized unlike 1D, for some reason :-)
+\end{itemize}
+\item {\tt (P)oincare map} allows you to compute stroboscopic plots. The choices are {\tt (N)one}, {\tt (S)ection}, {\tt (M)ax/min}, {\tt (P)eriod}.  Section will output when a specified quantity crosses the section from above or below; Max/min will output when the derivative of a specified quantity changes sign; Period is like Section, but the time column is replaced by the interval between crossings instead of the time of the crossing. You will get a dialog box that asks for the variable (it can be an auxiliary quantity or a variable), the value of the section, the direction, and whether you want to stop the integration when the section is hit. The direction is +1 if the variable crosses below or +1 for maximum; -1 for crossing above or from minimum; and 0 for both. 
+\item{\tt r(U)elle plot} allows you to plot shifted versions of variables against each other. Three axes are presented. The shift is a nonnegative integear and corresponds to a shift in rows in the Browser.
+\item{\tt loo(K)up} allows you to edit tables. You can replace them with different ones, etc. The {\tt (V)iew} option will load the table into the first two columns of the Browser. Note you cannot replace a formula style table with a file style and vice versa.
+\item{\tt bnd(V)al} allows you to set parameters for the BVP solver. The BVP solver uses Newton's method, so the meaning of the three parameters is similar to that in {\tt s(I)ng pt ctrl}. 
+\item{\tt (A)veraging} provides a set of tools for weak coupling analysis. 
+\begin{itemize}
+\item {\tt (N)ew adjoint} command will compute the normalized periodic orbit to the adjoint equation obtained by linearizing about an exponentially stable limit cycle, transposing the Jacobi matrix, and multiplying by -1. The user should integrate precisely one period of the limit cycle. If convergence occurs, {\tt XPP} returns the adjoint in each of the corresponding columns. 
+\item {\tt (M)ake H} computes the interaction function:
+\[
+H(\phi) := \frac{1}{T} \int_0^T Z(t)\cdot G(U(t),U(t+\phi))\ dt
+\]
+where $Z(t)$ is the adjoint, $U(t)$ is the periodic orbit, and $G$ is the weak interaction. In typing the right-hand sides, use the variable names for the components of $U(t)$ and their primed counterparts for $U(t+\phi).$ For example, for diffusion of voltage, the right-hand dise is written {\tt V'-V} which means $V(t+\phi)-V(t).$  If you have 4 or more columns, the third and fourth will be replaced by the odd and even parts of the interaction function. The first column is time ($\phi$)  and the second is $H$.  
+\item {\tt (A)djoint,(O)rbit,(H)fun} bring back the previously computed adjoint, orbit, and interaction function, respectively. 
+\item {\tt (P)arameters} allows you to change the parameters for the adjoint computation.
+\end{itemize}
+\item {\tt Esc} gets you out of the numerics menu
+\end{itemize}
+
+
+
+\bigskip
+\noindent{\Large \bf The Browser} is a like a spread-sheet that allows you to look at the numbers, manipulate them and do other things that are fairly useful.
+\begin{itemize}
+\item {\tt Up,Down,PgUp,PgDn,Left,Right,Home,End} aid in navigation; they have obvious keyboard equivalents. 
+
+\item {\tt First, Last, Restore} allow you to mark a segment of data to show in the drawing window. The {\tt Restore} command in the main window ignores this. 
+\item {\tt Find} allows you to find where a chosen variable is closest to a chosen value. The corresponding row is brought to the top line of the Browser. This is useful for finding the maximum and minimum of a variable. Just choose a real big (small) number and it {\tt XPP} will find the closest value. 
+\item{\tt Get} will load the first row of the Browser as the initial data
+\item{\tt Write} will write the entire contents of the Browser to a specified data file in space delimited ascii
+\item{\tt Read} will read data into the Vrowser that is in space delimited ascill
+\item{\tt Table} will create an {\tt XPP} table for the given column of data. You should choose a name, a column and the x-range
+\item{\tt Close} Closes the Browser window
+\item{\tt Del Col} is supposed to delete an added column, but it doesn't work, so don't bother trying :)
+\item{\tt Replace} allows you to replace one column with some formula relating the other columns. Everything is done row by row. For example, if column 2 is {\tt v}and column 3 is {\tt w}, then you could replace {\tt v} by {\tt v+w} and the contents of column 2 would be replaced by the sum of coumns 2 and 3.  You can integrate a colum using the \& symbol and differentiate it using the @ symbol. So replacing {\tt w} with {\tt @w} would replace column three by its numerical derivative. {\tt XPP } uses {\tt NOUT*DELTAT} as the step for the derivative and the integral. The {\tt \&, @} can only be used on isolated variables and cannot be part of a general expression.  
+\item{\tt Unreplace} undoes the most recent replace
+\item{\tt Addcol} lets you create a new named column. The new column can be any valid combintation of the others as in the {\tt Replace} button.
+\end{itemize}
+
+
+\bigskip
+\noindent {\Large \bf Auto Window} is brought up from the {\tt File Auto} command via the main menu. AUTO is a powerful bifurcation/continuation package for which this window is an interface to {\tt XPP.} You should read the regular documentation for how to use this. When running, you can stop AUTO (usually) by either tapping {\tt ESC} or clicking on the {\tt ABORT} button.
+The menu commands are
+\begin{itemize}
+\item {\tt (P)arameter} defines the up to five parameters that AUTO is aware of. You should always set these first. By default, they are the first five parameters in your ODE file.  
+\item {\tt (A)xes} both sets up the plotting axes and also tells AUTO the parameters you wish to continue with:
+\begin{itemize}
+\item {\tt (H)i} will plot the maximum value of the variable vs the parameter. A dialog box asking for windows, dependent variables, and also continuation variables is presented. Note that the window you provide does not affect the range of the continuation however the choice of parameters is exactly the set of parameters that AUTO will use to continue. 
+\item {\tt (N)orm, h(I)-lo,(P)eriod,(A)verage,f(R)equency} are all different things that can be plotted on the y-axis and produce the same dialog box. For {\tt Period,Frequency}, only periodic orbits will be drawn. The {\tt Norm} shows the $L^2$ norm of periodic orbits and fixed points; the {\tt Average} will plot the equilibrium values or the average over a periodic orbit.  
+\item {\tt (Z)oom in, zoom (O)ut} let you control the viewing area with the mouse. 
+\item {\tt (F)it} will automatically choose the dimensions of the plot based on the diagram. It is not particularly smart and is worse than the Fit in the main {\tt XPP} window. 
+\item {\tt (D)efault} is the window that you started with
+\item {\tt (T)wo par} will set AUTO up for a two parameter bifurcation. It requires that you specify the two parameters you wish to continue with. 
+\item {\tt last (1) par, last (2) par} set the window to the last 1-parameter (2-parameter) continuation that you used.
+\end{itemize}   
+\item {\tt (N)umerics} is the main dialog to set numerical parameters for AUTO. The parameters are 
+\begin{itemize}
+\item {\tt Ntst} is the number of mesh intervals used for discretization of the collocation (Increase this if AUTO won't continue)
+\item {\tt Nmax} is maximum number of points for a given branch
+\item {\tt Npr} is how often points will be printed out in entirety. All special points are printed out. A point that is printed out entirely can be used to restart a continuation; regular points cannot be. 
+\item{\tt Ds} is the starting step size for the continuation; the sign determines the direction as well
+\item{\tt Dsmin} is the smalled allowable step size before AUTO will quit (Decrease this if AUTO won't continue).
+\item{\tt Dsmax} is the maximum step size allowed. (Decrease this to get finer plots).
+\item {\tt Par Min, Par max} determine the parameter range over which AUTO will run the continuation
+\item {\tt Norm mi, Norm max} determine the range of the dependent variable over which AUTO will run the continuation 
+\item {\tt Ncol} is the numberof Gauss collocation points per mesh interval $2\le \mbox{Ncol} \le 7$
+\item {\tt EPSL} is the relative tolerance for the parameter in Newton's method (decrease this if AUTO won't continue).
+\item {\tt EPSU} is tolerance for the dependent variable in Newton's method
+\item{\tt EPSS} is the tolerance for the arclength in detecting bifurcations
+\end{itemize}
+\item {\tt (R)un} is a context-dependent menu and the choices depend on the current state of AUTO. Once you have run for the first time, the choices will change. For example, if you find a Hopf bifurcation, then there are 4 choices. Others may have more or less. There are four starting states:
+\begin{itemize}
+\item {\tt (S)teady state} continues from a fixed point. Make sure that you have initial conditions that are right on the fixed point.
+\item {\tt (P)eriodic} continues from a periodic orbit that you have computed for one full cycle.
+\item {\tt (B)dry Value} continues from a solution to  boundary value problem. You should have used the BVP solver in {\tt XPP} to get one good starting solution.
+\item {\tt (H)omoclinic} will try to solver homo/heteroclinic solutions. You should look at the full documentation. The ODE file should include the boundary conditions {\tt hombcs(i)} where $i=0,1,\ldots N-1$ and $N$ is the dimension of your system. You will be asked for the left and right equilibrium equations, the dimension of the unstable and stable manifolds from which you are shooting. For example in the shooting for the Hodgkin-Huxley traveling wave, the dimension is 5 with a  1-dimensional unstable and 4-dimensional stable manifold. 
+\end{itemize} 
+\item {\tt Grab} allows you to move along the diagram. Use the left/right arrow keys and the {\tt Home, End} keys to navigate. Use the {\tt Tab} key to jump to specaillay marked points. Use the up/down arrows to navigate to specific types of special points. Use the mouse to move to a specific location. You can mark a portion of a branch and then have {\tt XPP} solve the ODE for all parameters within the marks. Use the {\tt s} key for the start and the {\tt e} for the end. Type {\tt Esc} to exit the Grab without doing anything and type {\tt return/enter} to Grab the point. If you grab a special point (indicated by a little number in the diagram) then you can run the continuation with this as a startimg point. If you grab a regular point, then the parameter and initial data are loaded into {\tt XPP} and you can then look at the solutions by simulating them.
+\item {\tt Usr period} allows you to mark specified values of your parameter or when the oscillation has a specific period. Just choose how many you want and then type in the values; use {\tt T=35} for example to mark all periodic orbits where the period is 35; use {\tt I=20} to mark all solutions where the continuation parameter, {\tt I} takes the value 20, etc. 
+\item {\tt (C)lear, re(D)raw} erases/redraws the diagram
+\item {\tt (F)ile} produces an additional menu:
+\begin{itemize}
+\item {\tt (I)mport orbit} loads a specially marked orbit into the Browser so you can plot it, etc. Note that you do not have to run the integrator; the orbit is already computed by AUTO.
+\item {\tt (S)ave diagram} saves all the information in the diagram in a special form that you can later reload. I use this without starting the continuation to save the numerical settings as these are also kept. 
+\item {\tt (L)oad diagram} Loads a saved diagram
+\item {\tt (P)ostscript,S(V)G} will produce postcript (SVG) of the current window.
+\item {\tt (R)eset diagram} deletes the entire diagram.
+\item {\tt (C)lear grab} removes the point from the grab buffer. This is useful if you want to restart with a new starting point, but do not want to delete the diagram. AUTO always checks the grab buffer when asked to Run.
+\item {\tt (W)rite pts} writes the $x,y$ coordinates out to a files of the current diagram along with information about the points. Specifically, what is plotted out is {\tt x,y1,y2,type,br} where {\tt x} is the x-axis parameter, and {\tt y1,y2} are the max and min of the y-axis (if you have chosen {\tt Hi-lo} axes). {\tt br} is the branch number. {\tt type=1,2,3,4} for stable equilibria, unstable equilibria, stable periodics, unstable periodics.  These files can be loaded into the main XPP window using the {\tt Freeze Load diagram} command.
+\item {\tt All info} will write out lots of information into a file. Specifically, each row has the following:
+\begin{verbatim}
+type br par1 par2 period uhigh[1..n] ulow[1..n] evr[1] evm[1] ...evr[n] evm[n]
+\end{verbatim} 
+Here {\tt type, br} are as above; {\tt par1 par2} are the values of the two parameters (one will not vary in one-parameter plots, but will in two parameters); {\tt per} is the period of any oscillations; {\tt uhigh[1..n]} are the maxima of the $n$ variables; {\tt ulow}, the minima. The pairs {\tt evr,evm} are the real and imaginary parts of the eigenvalues.
+\item {\tt init (D)ata} will create a file with the initial conditions corresponding to each of the points on the diagram. The first column is the type, the second the branch, the third the parameter, and the remaining columns are the initial data for each variable.
+\item {\tt (T)oggle redraw} will turn on/off redrawing of the diagram. Sometimes (in Windows, especially), XPP will redraw the diagram dozens of times which can be really time consuming. This sort of fixes it.
+\item {\tt auto ra(N)ge} will let you run a range of simulations in XPP using data from one of the branches in your diagram that you have marked (see {\tt Grab}).When you click on this, the Range Dialog will come up. Ignore the questions about the range of parameters etc, a this will be done automatically based on the part of the diagram you grabbed. Then let it rip and it will do a standard range integration using the parameters and initial data from the diagram   
+\item {\tt se(L)ect 2Par pt} allows you to pick pairs of parameters from the two-parameter view. Click anywhere in the window and as you move the mouse, the parameter values are shown at the bottom of the window. When you release the button, the last values are stored. Clicking on this menu command will copy them to the XPP parameter window.
+\item {\tt draw laBled} sets flags that will import the orbits from labeled points and automatically draw them in the XPP window. You can erase before drawing each one or just overwrite. You can also toggle this off. 
+\end{itemize}
+
+\end{itemize}
+
+\bigskip
+\noindent {\Large \bf Animation window}
+
+The animaton window is evoked with the {\tt Viewaxes Toon} click. The animator reads an animation script, usually called {\tt something.ani}. I will first decribe the scripting commands and then the controls. Most of the commands put simple geometric structures on the screen and their size, shape, color, and position can all be dependent on the dynamic variables in your ODE. Several other commands determine the global nature of the animation. The {\tt grab} command may be the coolest one in the box, as this lets you manipulate objects in the animation window such that they can change the parameters and initial data in the ODE. 
+
+
+\begin{description}
+\item{\tt dimension xlo;ylo;xhi;yho}
+\item{\tt speed} delay
+\item{\tt transient}
+\item{\tt permanent}
+\item{\tt line x1;y1;x2;y2;color;thickness}
+\item{\tt rline x1;y1;color;thickness}
+\item{\tt rect x1;y1;x2;y2;color;thickness}
+\item{\tt frect x1;y1;x2;y2;color}
+\item{\tt circ x1;y1;rad;color;thickness}
+\item{\tt fcirc x1;y1;rad;color}
+\item{\tt ellip x1;y1;rx;ry;color;thickness}
+\item{\tt fellip x1;y1;rx;ry;color}
+\item{\tt comet x1;y1;type;n;color}
+\item{\tt text x1;y1;s}
+\item{\tt vtext x1;y1;s;z}
+\item{\tt settext size;font;color}
+\item{\tt xnull x1;y1;x2;y2;color;id}
+\item{\tt ynull x1;y1;x2;y2;color;id}
+\item{\tt grab x1;x2;d}
+
+\noindent {\tt \{u1=f1(mouse\_x,mouse\_y);...;un=fn(mouse\_x,mouse\_y)\}}
+
+\noindent {\tt \{v1=g1(mouse\_x,mouse\_y,mouse\_vx,mouse\_vy);...;runnow=[0|1]\}}
+\item{\tt done}
+\end{description}
+
+All commands can be abbreviated to their first three letters and case
+is ignored. At startup the dimension of the animation window in user
+coordinates is (0,0) at the bottom left and (1,1) at the top
+right. Thus the point (0.5,0.5) is the center no matter what the
+actual size of the window on the screen.  {\tt Color} is described by either
+a floating point number between 0 and 1 with 0 corresponding to red
+and 1 to violet. When described as a floating point number, it can be
+a formula that depends on the variables. In all the commands, the
+color is optional {\em except} {\tt settext.}  The other way of
+describing color is to use names which all start with the \$
+symbol. The names are:
+{\tt \$WHITE, \$RED, \$REDORANGE, \$ORANGE, \$YELLOWORANGE,
+                    \$YELLOW, \$YELLOWGREEN, \$GREEN, \$BLUEGREEN,
+		      \$BLUE,\$PURPLE, \$BLACK}.
+
+The {\tt transient} and {\tt permanent} declarations tell the animator
+whether the coordinates have to be evaluated at every time or if they
+are fixed for all time.  The default when the file is loaded is {\tt
+transient.}  Thus, these are just toggles between the two different
+types of objects. 
+
+The number following the {\tt speed} declaration must be a nonnegative
+integer. It tells the animator how many milliseconds to wait between
+pictures. 
+
+The {\tt dimension} command requires 4 numbers following it. They are
+the coordinates of the lower left corner and the upper right. The
+defaults are (0,0) and (1,1).  
+
+The {\tt settext} command tells the animator what size and color to
+make the next text output. The size must be an integer, {\tt \{
+0,1,2,3,4 \} } with 0 the smallest and 4 the biggest. The font is
+either {\tt roman} or {\tt symbol.}  The color must be a named color
+and not one that is evaluated. 
+
+Most of the rest of the  commands put something on the screen. 
+\begin{itemize}
+
+\item {\tt line x1;y1;x2;y2;color;thickness }  draws a line from {\tt (x1,y1)} 
+to {\tt (x2,y2)} in user coordinates.  These four numbers can be any
+expression that involves variables and fixed variables from your
+simulation. They are evaluated at each time step (unless the line is
+{\tt permanent}) and this is scaled to be drawn in the window.  The
+{\tt color} is optional and can either be a named color or an
+expression that is to be evaluated. The {\tt thickness} is also
+optional but if you want to include this, you must include the {\tt
+color} as well. {\tt thickness} is any nonnegative integer and will
+result in a thicker line. 
+
+\item {\tt rline x1;y1;color;thickness } is similar to the {\tt line}
+command, but a line is drawn from the endpoints of the last line drawn
+to {\tt (xold+x1,yold+y1)} which becomes then new last point. All other options
+are the same. This is thus a ``relative'' line.
+
+\item {\tt rect x1;y1;x2;y2;color;thickness } draws a rectangle with
+lower corner {\tt (x1,y1)} to upper corner {\tt (x2,y2)} with optional
+color and thickness. 
+
+\item {\tt frect x1;y1;x2;y2;color } draws a filled rectangle with
+lower corner {\tt (x1,y1)} to upper corner {\tt (x2,y2)} with optional
+color. 
+
+\item {\tt circ x1;y1;rad;color;thick } draws a circle with radius {\tt rad}
+centered at {\tt (x1,y1)} with optional
+color and thickness.
+
+\item {\tt fcirc x1;y1;rad;color } draws a filled circle with radius {\tt rad}
+centered at {\tt (x1,y1)} with optional color.
+
+\item {\tt ellip x1;y1;rx;ry;color } draws an ellipse with radii {\tt rx,ry}
+centered at {\tt (x1,y1)} with optional
+color and thickness. 
+
+\item {\tt fellip x1;y1;rx;ry;color } draws a filled ellipse with
+radii {\tt rx,ry}  centered at {\tt (x1,y1)} with optional
+color. 
+
+\item {\tt comet x1;y1;type;n;color} keeps a history of the last {\tt
+n} points drawn and renders them in the optional {\tt color}. If {\tt
+type} is non-negative, then the last n points are drawn as a line with
+thickness in pixels of the magnitude of {\tt type}.  If {\tt type} is
+negative, filled circles are drawn with a radius of {\tt -thick} in
+pixels.
+
+\item {\tt text x1;y1;s} draws a string {\tt s} at position {\tt
+(x1,y1)} with the current color and text properties. Only the
+coordinates can depend on the current values. 
+
+\item {\tt vtext x1;y1;s;z} draws a string {\tt s} followed by
+the floating point value {\tt z} at position {\tt
+(x1,y1)} with the current color and text properties. Thus, you can
+print out the current time or value of a variable at any given time.
+
+\item{\tt xnull x1;y1;x2;y2;color;id} uses the nullclines that you
+have already computed in your animation.  You can use the static
+nullclines by just choosing {\tt -1} for the {\tt id} parameter.  To
+use dynamic nullclines, you must compute a range of nullclines using
+the {\tt Nullcline Freeze Range} command.  The parameter {\tt id} runs from
+0 to N where N is the number of nullclines that you have computed in
+the range dialog.  The animator converts {\tt id} to an integer and
+tests whether it is in the range and then loads the appropriate
+nullcline. The {\tt ynull} command is
+identical. The parameters {\tt x1,y1,x2,y2} tell the animator the
+window in which the nullclines are defined.  These should be the
+lower-left and upper right corners of the phaseplane where the
+nullclines were computed.
+\item {\tt grab x;y;d} allows you to manipulate an object on the screen. Typically the object will be determined by {\tt x,y}. The parameter {\tt d} draws an X at the position {\tt x,y} so when you invoke the Grab button in the animation window you will see the X and use the mouse to click on the object. The first line that follows the {\tt grab} command tells the animator what to change while you are dragging the mouse (with the button down).  You have access to the mouse coordinates in the frame of the animation window. The second line tells you what to do when the mouse is released. You have access to the mouse velocity as well. You can set {\tt runnow} equal to 1 if you want to run the ODE as soon as you release the mouse. Set {\tt runnow=0} to not run immediately. As examples of {\tt grab}, see the odel files, {\tt pendx.ode,idoublepend.ode} and the corrsponding animation files {\tt pendx.ani,idoublepend.ani}
+\end{itemize}
+
+\bigskip
+{\Large \bf Animation controls}
+
+\noindent When you bring up the animation window {\tt Viewaxes Toon}, a new window appears. The first thing you should do is load an animation file. (You can load the file at the same time as you load the ODE file using the {\tt -anifile filename.ani } command line argument.) Use the {\tt File} button. Don't worry if the animation file you make has an error. Generally, you can load a file over and over agan to experiment and build it up.
+
+In the upper right is a checkbox. If you check this, then whenever you run a simulation, the animation will run simultaneously. It slows the integration down, so you probably don't want to do this all the time.
+
+ Assuming you have run the ODE and loaded an animation, the {\tt Go} button will start the animation. The {\tt Fast,Slow} buttons speed up or slow down the animation. The {\tt Pause} stops it in which case the {\tt Go} picks up where you paused. {\tt Reset} moves to the start of the simulation. The {\tt >>>>,<<<<} step forward/back one frame.  The {\tt Close} button kills the animation window.  The {\tt Skip} button lets you skip frames (useful to make smaller animation files).
+
+The {\tt MPEG} button lets you make a series of PPM files that you could then sew together to make a movie of the animation. More usefully, by choosing the animated gif option, you can make a movie directly. Once you have clicked this option, {\tt Reset} and then {\tt Run} the animation. When completed, there will be a file called {\tt anim.gif}. If you want to make more animations, rename it.  
+
+The {\tt Grab} button allows you to interact with the animation, if you have added the appropriate code to the {\tt .ani} file.  When you click {\tt Grab}, all the grabble objects show up with a cross on them. Use you mouse to click and hold one of them and move it; the object will move as you move the mouse. When you release it, depending on the code in the file, the ODE will run using, possibly, the position and the velocity of the mouse motion to determine initial data.    
+
+\bigskip
+{\Large \bf Array plot}
+
+The array plot is a way to view many variables as once as they vary in time; it is useful for PDEs etc.  There are two ways to get the array plot: {\tt Viewaxes  Array} from the main menu; or, from the {\tt Initial Data} window. The latter is the easiest. Suppose that you have variables named {\tt u0,u1,...,u199}. In the {\tt Init data} window, each variable has a little box next to it. If you  wanted to plot all of them as a function of time, click next to {\tt u0}, scroll all the way down and click next to {\tt u199}; then click thre {\tt arry} button. This will bring up the array plot. Time runs down, color codes the magnitude, and the variables run across.  To edit the ranges, etc, click on the {\tt Edit} button.  This will bring up a dialog box. If you invoke the array plot via the {\tt Viewaxes Array} method, you will get the same dialog box. The entries in the dialog box tell you how to set up the plot: {\tt Column 1} is the first variable; {\tt Ncols} is the total number of columns ({\tt Colskip} lets you plot every other one or every third etc if your ODE is organized as, say {\tt u0,v0,w0,u1,v1,w1,...} in which case, you'd set the number of columns to 600 and the skip to 3).  {\tt Nrows} refers to the number of rows you will plot and {\tt Rowskip} lets you skip over them. {\tt Zmin,Zmax} define the color scale range; the maximum and minimum of the variables being plotted. {\tt Autoplot} will redraw automatically if needed. The other buttons are: {\tt Redraw} (obvious), {\tt Close} (obvious); {\tt GIF} will make a gif of the current view; {\tt Print} lets you create a postscript file of the current plot (you tell it the labels and the file name; Render determines the color code which I forget); {\tt Fit} will automatically adjust the {\tt Zmax,Zmin}. {\tt Range} allows you to range through parameters or intial conditions to produce  either a series of still gifs or a single animated gif file. You can choose the name, whether stills ({\tt Still=1}) or movie ({\tt Still=0}) as well as whether you want the parameter written on the image ({\tt Tag=1}). The {\tt Range integrate} dialog comes up and you can fill that in as usual.  
+  
+
+
+\end{document}
+

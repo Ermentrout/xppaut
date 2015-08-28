@@ -1,0 +1,487 @@
+<HTML>
+<HEAD>
+<TITLE>xppodes</TITLE>
+</HEAD>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+<P>
+<center>
+<h1>Structure of ODE files</h1> 
+</center>
+</DIV>
+
+<P>
+All ODE files are just text files which consist of a series of
+definitions and directives to the <B>XPP</B> parser. The order in which the
+definitions are given is usually unimportant with one <B>major
+exception</B>. So-called fixed or temporary variables are evaluated in
+the order in which they are defined.  Thus, you should <B>never</B> use
+a named fix variable before it is defined as this will lead to some
+rather bizarre results when you attempt to solve an ODE. ODE files are
+all line oriented with a limit of 1024 characters per line. You can
+use the standard line continuation symbol <b> \ </b>.  Here are all
+the possible ODE file directives:
+<DL>
+<DD><B>#</B>:  comment line. This is ignored by <B>XPP</B>   
+ <p>
+<dt></dt><hr><p><DD><B>''</B>: A comment that is extracted and can be displayed in a
+separate window. 
+<p>
+<dt></dt><hr><p><DD><a name=action> <B>'' {a=1,b=2,...}</B></a>: A comment with some ``action''
+associated with it.  When these comments are displayed in the comment
+window, an <B>* </B> appears next to them.  When clicked by the user,
+various initial conditions, parameters, and XPP internal options can
+be set. 
+ <p>
+<dt></dt><hr><p><DD><B>!</B><TT>name=formula</TT> This defines a <EM>derived</EM>
+parameter, <TT>name</TT> whose values could depend on other
+parameters. These do not appear in the parameter list since they are
+presumably tied to the other parameters. Ecah time you change a
+parameter, they also are updated. 
+ <p>
+<dt></dt><hr><p><DD><B>options</B> <TT>filename</TT>:  Insert a file name with common
+options. This is include only for backward compatibility
+and is generally obsolete.
+ <p>
+
+<dt></dt><hr><p><DD><B>name(t+1)=</B><TT>formula</TT> or
+ <p>
+
+<dt></dt><hr><p><DD><B>dname/dt=<TT>formula</TT></B> or
+ <p>
+
+<dt></dt><hr><p><DD><B>name'=</B><TT>formula</TT>: Define a differential/difference equation
+dependent variable, <B>name</B> and the <TT>formula</TT> defining its
+right-handside. For example
+<PRE>
+x'=-x+sin(t)
+z(t+1)=z*(4-z)
+dw/dt=1-cos(w)+(1+cos(w))*a
+</PRE>
+
+<p>
+<dt></dt><hr><p><DD><B>name(t)=</B><TT>formula</TT> or
+ <p>
+<dt></dt><hr><p><DD><B>volterra </B><TT>name = formula</TT>: Define a Volterra integral
+equation for the variable <B>name</B>. For example 
+<PRE>
+y(t)=int{exp(-t)#x}
+y'=-y + a int{exp(-(t-t'))*max(y-1/(1+(t-t')^2),0)}
+y(t)=int[.5]{1#y}
+</PRE>
+The <b> # </b>  symbol means a convolution and <b>[a]</b> multiplies the integrand by
+<p> <center> <h3> (t-t')<sup>-a</sup> </h3> </center> <p> 
+<p>
+
+<dt></dt><hr><p><DD><B>markov</B> <TT>name</TT> <TT>nstates</TT> 
+
+<table COLS=4 WIDTH="40%"  >
+<tr>
+<td>{0}</td>
+
+<td>{P<sub>0,1</sub>}</td>
+
+<td><b> ...</b></td>
+
+<td>{P<sub>0,N-1</sub>}</td>
+</tr>
+
+<tr>
+<td>{P<sub>1,0</sub>}</td>
+
+<td>{0}</td>
+
+<td><b> ...</b></td>
+
+<td>{P<sub>1,N-1</sub>}</td>
+</tr>
+
+<tr>
+<td><b> ...</b> </td>
+
+<td><b> ...</b> </td>
+
+<td><b>...</b></td>
+
+<td><b>...</b></td>
+</tr>
+
+<tr >
+<td>{P<sub>N-1,0</sub>}</td>
+
+<td>{P<sub>N-1,1</sub>}</td>
+
+<td><b>...</b></td>
+
+<td >{P<sub>N-1,N-1</sub>}</td>
+</tr> 
+</table>
+<P></P>
+This defines a Markov variable, <B>name</B> which has <TT>nstates</TT>
+states. Then following is the transition table as a series of formulas
+that are delimited by the curly brackets <b> { } </b>.  The diagonal
+entries are ignored but should still contain a number or formula. For
+example:
+<PRE>
+markov z 2
+{0} {alpha(v)}
+{beta(v)} {0}
+</PRE>
+defines a two-state Markov process with transition from state 0 to 1 determined by the rate <tt> alpha(v) </tt> and the transition from 1 to 0 determoined by <tt> beta(v) </tt>
+<p>
+<dt></dt><hr><p><DD><B>aux</B> name=formula defines a named quantity, <B>name</B>
+which appears in the data browser and is available for plotting. Note
+that <B>auxiliary</B> variables are not known internally to <B>XPP</B> so
+that you can't use them  in formulas
+ <p>
+<dt></dt><hr><p><DD><B>name=</B> <TT>formula</TT> defines an internal or quantity which
+can be used in other formulas. This <TT>fixed</TT> variable serves the
+same function as temporary quantities in C code.
+<p>
+<dt></dt><hr><p><DD><B>par </B> <TT>name1=value1, name2=value2, ...</TT> defines
+named parameters with default values. These can later be altered and
+varied in <B>XPP</B>.  <B>Never put spaces between the name, value, and
+equal sign</B>. For example:
+<PRE>
+par a=1,b=2,c=2,big_g=20
+</PRE>
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>number </B> <TT>name1=value1, name2=value2, ...</TT> defines
+named parameters with default values. These are fixed and cannot be
+changed in <B>XPP</B>. For example:
+<PRE>
+number faraday=96485,rgas=8.3147,tabs0=273.15
+</PRE>
+ <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>name(x,y,...)</B>=<TT>f(x,y,...)</TT> defines a function of up
+to 9 variables.  This function can be used in any right-hand side or
+other functions. For example:
+<PRE>
+f(x)=if(x&gt;1)then(1/ln(x/(x-1)))else(0)
+g(v,w)=2v^2(1-w)-w/10
+</PRE>
+ <p>
+<DT></DT>
+<dt></dt><hr><p><DD><a name=table> <B>table</B> </a> <TT>name filename</TT> defines a lookup table called
+<B>name</B> defined the values found in the file, <B>filename</B>. This
+behaves as a one variable function which uses linear interpolation on
+the values of the tabulated file. The file has the structure:
+<PRE>
+npts
+xlo
+xhi
+y(xlo)
+...
+y(xhi)
+</PRE>
+The domain of the function is <b> [x<sub>lo</sub>,x<sub>hi</sub>]</b>
+<p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>table</B> <TT>% name npts xlo xhi f(t)</TT> defines a
+precomputed table called <B>name</B> using <B>npts</B> and evaluating
+<B>f(t)</B> at <b> t=x<sub>lo</sub>,...,x<sub>hi</sub> </b>
+For example:
+<PRE>
+table h % 101 0 6.283 sin(t)+.6+.4*cos(t)+.2*sin(2*t)
+</PRE> 
+Tables are automatically
+re-evaluated whenever you change parameters unless you turn off the
+AUTOEVALUATE flag from within <b> XPP </b> or in the ODE file with
+<pre>
+@ autoeval=0
+</pre>
+ <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>wiener</B> <TT>name1, name2, ...</TT>  defines a series of
+normally distributed random variables with mean 0 and standard
+deviation <b> sqrt(dt) </b> where <b> dt </b>
+is the internal time step. The
+advantage of using <B>wiener</B> is that when you change the time-step,
+the magnitude of these variables is automatically adjusted.
+ <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>global</B> <TT>sign condition {name1=form1;...}</TT> defines a
+global flag allowing <B>XPP</B> to implement delta functions.  If <B>sign=1</B> and <B>condition</B> changes from negative to positive or
+if <B>sign=-1</B> and <B>condition</B> changes from positive to
+negative, or if <B>sign=0</B> and <B>condition</B> vanishes identically,
+then each of the variables, <B>name</B>  is immediately changed to the
+value of <B>formula</B>.  For example:
+<PRE>
+global 1 x-1 {x=0;y=y+a*sin(y)}
+</PRE>
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>init</B> <TT>name1=val1,name2=val2,...</TT> sets the initial
+data of <B>name</B> to the number <B>val</B>.  
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>name(0)</B><TT>= expression</TT> sets the initial value of <B>name</B> to the expression. If <B>name</B> is a delay-differential
+equation variable, then if <B>expression</B> is a function of time,
+<B>t</B>, then <B>name(t)</B> is set to the function for <b> -M &lt; t &lt; 0 </b>  where <b> M </b> 
+is the maximum delay. For example:
+<PRE>
+x'=-delay(x,2)
+x(0)=sin(t)
+</PRE>
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>bdry</B> <TT>expression</TT> defines a boundary condition at the
+start or the end of an interval.  If the variable name is primed, then
+it refers to the end of the interval, otherwise to the start of the
+interval. For example:
+<PRE>
+bdry u'-v-1
+</PRE>
+forces the boundary condition <b>u(L)-v(0)-1=0</b> 
+where  <b> [0,L] </b> is the
+interval for the ODE.
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>0=</B> <TT>expression</TT> defines an algebraic condition for
+differential-algebric equations. 
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>solve</B> <TT>name=expression</TT> tells <B>XPP</B> to solve the
+algebraic conditions for the variable <B>name</B> with initial guess
+<B>expression</B>.  For example:
+<PRE>
+x'=-y
+init x=0
+0=y+exp(y)-x
+solv y=-.56715
+</PRE>
+Solves the DAE <b>x'=-y</b> 
+where <b> y+e^y=x </b> 
+Note that there is no closed
+form inverse of <b> y+e^y. </b> 
+</DD> <p>
+<DT></DT>
+<dt></dt><hr><p><DD><B>special</B> <TT>name=FUN(...)</TT> defines a one-dimensional 
+array <B>name</B> that represents a special summation involving an
+array of variables and a table.  <B>FUN</B> can be one of the
+following:
+<p>
+<uL>
+<li><B>conv</B>(type,n,m,w,u):
+<BR><P><center> 
+<b>
+ name(j)= sum(w(m+i)shift(u,j+i),i=-m..m), j=0,...,n-1
+</b> </center>
+<p>
+<BR CLEAR="ALL">
+<P></P>
+where <b> w </b> 
+is a <a href=#table> table </a>  of length <b> 2m+1 </b>
+and <B>type={even,0,periodic}</B> determines how <b> u(j+i) </b> 
+ is defined for <b> j+i &lt;0 </b> and <b> j+1 &gt; n-1 </b>
+<p>
+
+<li><B>fconv</B>(type,n,m,w,u,v,f):
+<BR><P>
+<center>
+<b>
+ name(j)= sum(w(m+i)f[shift(u,j+i),shift(v,j)],i=-m..m), j=0,...,n-1
+</b> </center>
+<p>
+<BR CLEAR="ALL">
+<P>
+
+<li><B>sparse</B>(n,m,w,l,u) evaluates to
+<BR><P>
+<center><b>
+ name(j)= sum(w[j m + i]shift(u,c[j m + i]),i=0..m-1), j=0,...,n-1
+</b> </center>
+<p>
+where <b> w </b>
+ is a table of values of length <b> m n </b> 
+and <b> c </b> 
+is a table of indices of
+length <b> m n </b> 
+<p>
+<li><B>fsparse</B>(n,m,w,l,u,v,f) evaluates to
+<p><center>
+<b>
+ name(j)= sum(w[j m + i]f(shift(u,c[j m + i]),shift(v,j)),i=0..m-1), j=0,...,n-1
+</b> </center>
+<P></P> 
+<li><B>mmult</B>(m,n,w,u) evaluates to:
+<BR><P>
+<center>
+<b>
+ name(j)=sum(w(i + m j)*u(i),i=0..m-1), j=0,...,n-1
+</b>
+</center>
+<p>
+In other words, it returns the product of an <b> n &times; m </b>  matrix with a <b> m </b> dimensional vector.
+<P></P>
+
+<li><B>fmmult</B>(m,n,w,u,v,f) evaluates to:
+<BR><P>
+<center>
+<b> 
+name(j)=sum(w(i + m j)*f(u(i),v(j)),i=0..m-1), j=0,...,n-1
+</b>
+</center>
+<p>
+</ul>
+These can then be used in right-hand sides of ODEs.  For example
+<PRE>
+table w % 21 -10 10 exp(-abs(t))
+special k=conv(even,101,21,w,u0)
+u[0..100]'=-u[j]+f(k([j]))
+</PRE>
+Here <TT>k</TT> evaluates as the discrete convolution of <b> 
+exp(-|x|) </b> 
+with the array <b> u. </b> 
+<p>
+<dt></dt> <hr> <p> <dd> <b>only</b> <tt> x1,x2,... </tt> write <i>only</i> 
+the listed variables to the output for batch integration.
+<p>
+<dt></dt><hr><p><DD><B>set</B> <TT>name {x1=z1,x2=z2,...,}</TT> defines a named set of
+declarations including parameter values, initial data, and options,
+which can be invoked while running <B>XPP</B> with the <TT>File</TT> <TT>Get
+par set</TT> command. For example:
+<PRE>
+set hopf {a=.3,x=1.2,b=9}
+</PRE>
+ <p>
+<dt></dt><hr><p><DD><B>@</B> <TT>opt1=val1,opt2=val2,...</TT> sets various internal
+<B>XPP</B> options. For example:
+<PRE>
+@ maxstor=100000,total=1000,dt=.02
+</PRE> 
+See <a href=xppopt.html> OPTIONS </a> for a complete list of options.
+<p>
+<dt></dt><hr><p><DD><B>anything[j1..j2]</B> <TT>expr[j]</TT> is expanded by <B>XPP</B> into <b> j<sub>2</sub>-j<sub>1</sub>+1 </b>
+statements e.g.
+<PRE>
+x[1..4]'=-x[j]+[j]
+</PRE>
+is expanded into:
+<PRE>
+x1'=-x1+1
+x2'=-x2+2
+x3'=-x3+3
+x4'=-x4+4
+</PRE>
+</DD> <p>
+<dt></dt><hr><p><DD><B>%[j1..j2]</B> expands all following statements until
+another <B>%</B> is encountered as above. For example:
+<PRE>
+%[1..4]
+x[j]'=-y[j]-x[j-1]
+y[j]'=x[j]
+%
+</PRE>
+is expanded into:
+<PRE>
+x1'=-y1-x0
+y1'=x1
+x2'=-y2-x1
+y2'=x2
+x3'=-y3-x2
+y3'=x3
+x4'=-y4-x3
+y4'=x4
+</PRE>
+</dd>
+<P>
+ <p>
+<dt></dt><hr> <p> <dd> <b> export </b><code> {x1,x2,...,xn} {y1,...,yn} </code> sends and receives variables and parameters to and from dynamically loaded libraries. 
+<a href=xppdll.html> Click here for details. </a> <p>
+</dd> 
+<dt></dt><hr><p><DD><B>done</B> tells <B>XPP</B> the file is complete.
+</DD> <p>
+</DL>
+
+<P>
+<hr>
+<hr>
+<center>
+<a name=functs> <h1> Reserved words </h1> </a> 
+</center>
+You should be aware of the following
+keywords that should not be used in your ODE files for anything other
+than their meaning here.
+<PRE>
+sin cos tan atan atan2 sinh cosh tanh
+exp delay ln log log10 t pi if then else
+asin acos heav sign ceil flr ran abs del_shft
+max min normal besselj bessely besseli erf erfc hom_bcs
+arg1 ... arg9  @ $ + - / * ^ ** shift
+| &gt; &lt; == &gt;= &lt;= != not \# int sum of i'
+</PRE>
+
+<P>
+These are mainly self-explanatory. The nonobvious ones are:
+
+<UL>
+<LI><TT>heav(arg1)</TT> the step function, zero if <TT>arg1&lt;0</TT> and 1 otherwise.
+</LI>
+<LI><TT>sign(arg)</TT> which is the sign of the argument (zero has sign 0)
+</LI>
+<LI><TT>ran(arg)</TT> produces a uniformly distributed random number
+between 0 and <TT>arg.</TT>
+</LI>
+<LI><TT>besselj, bessely, besseli  </TT> take two arguments, <b> (n,x) </b> 
+and return <b> J<sub>n</sub>(x) </b> , <b> Y<sub>n</sub>(x) </b>, and <b> I<sub>n</sub>(x) </b>
+respectively, the Bessel functions.
+</LI>
+<LI> <TT>erf(x), erfc(x)</TT> are the error function and the
+complementary function. 
+</LI>
+<LI><TT>normal(arg1,arg2)</TT> produces a normally distributed random number
+with mean <TT>arg1</TT>  and variance <TT>arg2</TT>.
+</LI>
+<LI><TT>max(arg1,arg2)</TT> produces the maximum of the two arguments
+and <TT>min</TT>  is 
+the minimum of them.
+</LI>
+<LI><TT>if(&lt;exp1&gt;)then(&lt;exp2&gt;)else(&lt;exp3&gt;)</TT> evaluates <TT>&lt;exp1&gt; </TT>
+If it is nonzero 
+it evaluates to <TT>&lt;exp2&gt;</TT> otherwise it is  <TT>&lt;exp3&gt;</TT>.  E.g. <TT>if(x&gt;1)then(ln(x))else(x-1)</TT>
+will lead to <TT>ln(2)</TT>  if <TT>x=2</TT>  and  <TT>-1 if x=0.</TT>
+</LI>
+<LI><TT>delay(&lt;var&gt;,&lt;exp&gt;)</TT> returns variable <TT>&lt;var&gt;</TT> delayed by the result of
+ evaluating <TT>&lt;exp&gt;</TT>.  In order to use the delay you must inform
+the program of the maximal possible delay so it can allocate storage.
+<a href=xppnumerics.html#delay> (see the numerics menu) </a>
+</LI>
+<LI><TT>ceil(arg),flr(arg)</TT>  are the integer parts of<TT>&lt;arg&gt;</TT> returning the
+ smallest integer greater than and the largest integer less than <TT>&lt;arg&gt;</TT>.  
+</LI>
+<LI><TT>t </TT> is the current time in the integration of the differential equation.
+</LI>
+<LI><TT>pi</TT>  is <b>3.1415926...</b> 
+</LI>
+<LI><TT>arg1, ..., arg9</TT> are the formal arguments for functions 
+</LI>
+<LI><TT>int, #</TT> concern Volterra equations.
+</LI>
+<LI><TT>shift(&lt;var&gt;,&lt;exp&gt;)</TT> This operator evaluates the expression
+<TT>&lt;exp&gt;</TT> converts it to an integer and then uses this to indirectly
+address a variable whose address is that of <TT>&lt;var&gt;</TT> plus the
+integer value of the expression.  This is a way to imitate arrays in
+XPP.  For example if you defined the sequence of 5 variables, <TT>u0,u1,u2,u3,u4</TT> one right after another, then <TT>shift(u0,2)</TT> would
+return the value of <TT>u2.</TT>
+</LI>
+<LI><TT>del_shft(&lt;var&gt;,&lt;shft&gt;,&lt;delay&gt;).</TT> This operator combines the
+<TT>delay</TT> and the <TT>shift</TT> operators and returns the value of the
+variable <TT>&lt;var&gt;</TT> shifted by <TT>&lt;shft&gt;</TT> at the delayed time given
+by <TT>&lt;delay&gt;</TT>.  It is of limited utility as far as I know, but I
+needed it for a problem, so here it is.  
+</LI>
+<LI><TT>sum(&lt;ex1&gt;,&lt;ex2&gt;)of(&lt;ex3&gt;)</TT> is a way of summing up things.
+The expressions <TT>&lt;ex1&gt;,&lt;ex1&gt;</TT> are evaluated and their integer
+parts are used as the lower and upper limits of the sum.  The index of
+the sum is <TT>i'</TT> so that you cannot have double sums since there is
+only one index.  <TT>&lt;ex3&gt;</TT> is the expression to be summed and will
+generally involve <TT>i'.</TT>  For example  <TT>sum(1,10)of(i')</TT> will
+be evaluated to 55.  Another example combines the sum with the shift
+operator.  <TT>sum(0,4)of(shift(u0,i'))</TT> will sum up <TT>u0</TT> and the
+next four variables that were defined after it. 
+</LI>
+<li> <tt> hom_bcs(&lt;int&gt;) </tt> is used only to tell <b> XPP </b> about
+ heteroclinic and homoclinic connections at boundary points.
+</UL>

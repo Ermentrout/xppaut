@@ -1,0 +1,12 @@
+# example showing the del_shft orperator
+table w % 21 -10 10 exp(-abs(t)/sig)
+par sig=3
+x[0..99]'=1 + k*sum(-10,10)of(w(i')*sin(del_shft(x0,mod(i'+[j],100),tau*abs(i'))-x[j]))
+@ total=50
+par tau=.7
+par k=.2
+@ delay=30
+@ meth=euler,total=300,trans=100
+x[0..99](0)=ran(1)*2*pi
+@ fold=x[0..99]
+done

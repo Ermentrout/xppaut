@@ -1,0 +1,265 @@
+<HTML>
+<HEAD>
+<TITLE>OPTIONS</TITLE>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+<h1> Options </h1>
+<B>XPP</B> enables the user to incorporate
+a large number of options within an ODE file. These have the form:
+<PRE>
+@ opt1=value,opt2=value2,
+</PRE>
+where <TT>opt1</TT> is the name of an option and <TT>value</TT> is the
+assigned value. Almost every option can also be set within <B>XPP</B> from
+the menus. Similarly, most items that you want to set in <B>XPP</B> can be
+set in the ODE file.
+
+<P>
+The following options <EM>can
+only be set outside the program.</EM>  They are:
+
+<UL>
+<LI>MAXSTOR=<TT>integer</TT> sets the total number of time steps that
+will be kept in memory.  The default is 5000.  If you want to perform 
+very long integrations change this to some large number.  
+</LI>
+<LI>BACK= <TT>{Black,White}</TT> sets the background to black or white (deprecated).
+</LI>
+<LI>SMALLFONT=<TT>fontname</TT> where <TT>fontname</TT> is some font available
+to your X-server.  This sets the ``small'' font which is used in the
+Data Browser and in some other windows.  
+</LI>
+<LI>BIGFONT=<TT>fontname</TT> sets the font for all the menus and popups.  
+</LI>
+<LI>SMC={0,...,10} sets the stable manifold color
+</LI>
+<LI>UMC={0,...,10} sets the unstable manifold color
+</LI>
+<LI>XNC={0,...,10} sets the X-nullcline color
+</LI>
+<LI>YNC={0,...,10} sets the Y-nullcline color
+</LI>
+<LI>OUTPUT=filename sets the filename to which you want to write for
+``silent'' integration.  The default is ``output.dat''. 
+</LI>
+<LI> DWCOLOR,MWCOLOR,BACKCOLOR,FORECOLOR=###### Set drawing window,mainwindow,background color,foreground color as a hexadecimal, e.g. FF0000 is pure red, 090909 is medium grey, 000000 is black, FFFFFF is white. </LI>
+<LI> GRADS={0,1} turn off or on gradiens in the XPP buttons </LI>
+<LI> HEIGHT=pixels,WIDTH=pixels, sets the height and width of the main window intially </LI>
+<LI> RUNNOW={0,1} run the simulation as soon as the windows are up (Don't wait for Init conds Go, e.g. </LI>
+<LI> BUT=name:kbs defines button on the top of the main window. You
+can define up to 20 such buttons. They will be colored yellow and when
+you press them, they will execute an XPP keyboard shortcut. For
+example, <b> BUT=Fit:wf</b> will create a button labeled <b>Fit</b>
+and when you proess it, it will be as if you had clicked <b>
+Window/zoom Fit.</b> Most of the menu items are available.
+</UL>
+The remaining options can be set from within the program. They are 
+<DL>
+<DT></DT>
+<DD>Plotting options.
+
+<UL>
+<LI>LT=<TT>int</TT> sets the linetype. It should be less than 2 and
+greater than -6. 
+</LI>
+<LI>XP=name sets the name of the variable to plot on the x-axis.
+The default is <TT>T</TT>, the time-variable.
+</LI>
+<LI>YP=name sets the name of the variable on the y-axis.
+</LI>
+<LI>ZP=name sets the name of the variable on the z-axis (if the plot
+is 3D.) 
+</LI>
+<LI>NPLOT=<TT>int</TT> tells XPP how many plots will be in the opening
+screen. 
+</LI>
+<LI>XP2=name,YP2=name,ZP2=name tells XPP the variables on the axes
+of the second curve; XP8 etc are for the 8th plot. Up to 8 total plots
+can be specified on opening. They will be given different colors.  
+</LI>
+<LI>AXES=<TT>{2,3}</TT> determine whether a 2D or 3D plot will be
+displayed.
+</LI>
+<LI>PHI=value,THETA=value set the angles for the three-dimensional
+plots.
+</LI>
+<LI>XLO=value,YLO=value,XHI=value,YHI=value set the limits for
+two-dimensional plots (defaults are 0,-2,20,2 respectively.) Note that
+for three-dimensional plots, the plot is scaled to a cube with
+vertices that are <B>&plusmn 1</B>  and this cube is rotated and projected onto
+the plane so setting these to <B>&plusmn 2</B> works well for 3D plots.
+</LI>
+<LI>XMAX=value, XMIN=value, YMAX=value, YMIN=value, ZMAX=value, ZMIN=value set
+the scaling for three-d plots.
+</LI>
+</UL>
+</DD>
+<DT></DT>
+<DD> Postscript options 
+<UL>
+<LI> PS_COLOR={0,1} Greyscale or color </LI>
+<LI> PS_FSIZE=fontsize </LI>
+<LI> PS_LW=linewidth </li>
+<LI> PS_FONT=fontname </li>
+</DD>
+<DT></DT>
+
+<DD>Numerical options
+
+<UL>
+<LI>SEED=<TT>int</TT> sets the random number generator seed. 
+</LI>
+<LI>TOTAL=value sets the total amount of time to integrate the
+equations (default is 20).
+</LI>
+<LI>DT=value sets the time step for the integrator (default is 0.05).
+</LI>
+<LI>NJMP=<TT>integer</TT> <EM>or</EM> NOUT=<TT>integer</TT> 
+tells <B>XPP</B> how frequently to output the
+solution to the ODE.  The default is 1, which means at each
+integration step. This is also used to specify a the period for maps in
+the continuation package AUTO.
+</LI>
+<LI>T0=value sets the starting time (default is 0). 
+</LI>
+<LI>TRANS=value tells XPP to integrate until <TT>T=TRANS</TT> and then
+start plotting solutions (default is 0.)
+</LI>
+<LI>NMESH=<TT>integer</TT> sets the mesh size for computing nullclines
+(default is 40).
+</LI>
+<LI>{BANDUP=int, BANDLO=int} sets the upper and lower limits for
+banded systems which use the banded version of the CVODE integrator.
+</LI>
+<LI>METH=<TT>{
+discrete,euler,modeuler,rungekutta,adams,gear,volterra, backeul,
+qualrk,stiff,cvode,5dp,83dp,2rb,ymp}</TT>
+sets the integration method (see below; default is Runge-Kutta.) The
+latter four are the Dormand-Prince integrators and a Rosenbrock (2,3)
+integrator and a symplectic integrator. 
+</LI>
+<LI>DTMIN=value sets the minimum allowable timestep for the Gear
+integrator.
+</LI>
+<LI>DTMAX=value sets the maximum allowable timestep for the Gear
+integrator
+</LI>
+<LI>VMAXPTS=value sets the number of points maintained in for the
+Volterra integral solver. The default is 4000.
+</LI>
+<LI>{ JAC_EPS=value, NEWT_TOL=value, NEWT_ITER=value} set
+parameters for the root finders.
+</LI>
+<LI>ATOLER=value sets the absolute tolerance for several of the 
+integrators.
+</LI>
+<LI>TOLER=value sets the error tolerance for the Gear, adaptive RK,
+and stiff integrators. It is the relative tolerance for CVODE and the
+Dormand-Prince integrators. 
+</LI>
+<LI>BOUND=value sets the maximum bound any plotted variable can
+reach in magnitude. If any plottable quantity exceeds this, the
+integrator will halt with a warning.  The program will not stop
+however (default is 100.)
+</LI>
+<LI>DELAY=value sets the maximum delay allowed in the integration
+(default is 0.)
+</LI>
+<LI>AUTOEVAL=<TT>{0,1}</TT> tells XPP whether or not to automatically
+re-evaluate tables everytime a parameter is changed. The default is 
+to do this. However for random tables, you may want this off. Each
+table can be flagged individually within XPP.
+</LI>
+</UL>
+</DD>
+<DT></DT>
+<DD>Poincare map
+
+<UL>
+<LI>POIMAP=<TT>{ section,maxmin,period} </TT> sets up a Poincare map for
+either sections of a variable, the extrema, or period between events.  
+</LI>
+<LI>POIVAR=name sets the variable name whose section you are
+interested in finding.
+</LI>
+<LI>POIPLN=value is the value of the section; it is a floating
+point.
+</LI>
+<LI>POISGN=<TT>{ 1, -1, 0 }</TT> determines the direction of the
+section.  
+</LI>
+<LI>POISTOP=1 means to stop the integration when the section is
+reached.
+</LI>
+</UL>
+</DD>
+<DT></DT>
+<DD>Range integration
+
+<UL>
+<LI>RANGE=1 means that you want to run a range integration (in batch
+mode). 
+</LI>
+<LI>RANGEOVER=name, RANGESTEP, RANGELOW, RANGEHIGH, RANGERESET=<TT>Yes,No</TT>, RANGEOLDIC=<TT>Yes,No</TT> all correspond to the entries in the
+range integration option.
+</LI>
+<LI> STOCH=1 - set the stochastics flag so the orbits are automatically averaged over successive runs 
+</LI>
+</UL>
+</DD>
+<DT></DT>
+<DD>Phasespace
+
+<UL>
+<LI>TOR_PER=value, defined the period for a toroidal phasespace and
+tellx XPP that there will be some variables on the circle.
+</LI>
+<LI>FOLD=name, tells XPP that the variable &lt;name&gt; is to be
+considered modulo the period.  You can repeat this for many variables.
+</LI>
+</UL>
+</DD>
+<DT></DT>
+<DD>AUTO options. The following AUTO-specific variables can also be
+set: <TT>NTST, NMAX, NPR, DSMIN, DSMAX, DS, EPSS,EPSL,EPSU, PARMIN</TT>,<TT>PARMAX, NORMMIN,
+NORMMAX, AUTOXMIN, AUTOXMAX, AUTOYMIN, AUTOYMAX, AUTOVAR</TT>.  The last
+is the variable to plot on the y-axis. The x-axis variable is always
+the first parameter in the ODE file unless you change it within AUTO. 
+</DD>
+<DT></DT>
+<DD>Miscellaneous
+
+<UL>
+<LI>AUTOEVAL=<TT>{1,0}</TT> tells <B>XPP</B> whether or not to recompute tables whenever parameters are changed.  If you have a table of random connectivuty, you want this turned off (0).
+</LI>
+<LI>BELL=0 turns of the bell for <B>XPP</B>.
+</LI>
+<LI>COLORMAP=<TT>{0,1,2,3,4,5}</TT> switches the color map:
+<DL>
+<DT></DT>
+<DD>0: standard
+</DD>
+<DT></DT>
+<DD>1: periodic
+</DD>
+<DT></DT>
+<DD>2: ``hot''
+</DD>
+<DT></DT>
+<DD>3: ``cool''
+</DD>
+<DT></DT>
+<DD>4: red-blue
+</DD>
+<DT></DT>
+<DD>5: grey
+</DD>
+</DL>
+
+<P>
+</LI>
+</UL>
+</DD>
+</DL>
+</BODY>
+</HTML>

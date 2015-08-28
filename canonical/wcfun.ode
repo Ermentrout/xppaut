@@ -1,0 +1,10 @@
+# lots of nice fixed points
+# try S C with the shoot option and 
+# (u,v) between -.1 and 1.1
+u'=-u+f(aee*u-aie*v-te)
+v'=(-v+f(aei*u-aii*v-ti))/tau
+f(u)=1/(1+exp(-u))
+par aee=20,aei=30,aii=5,aie=10,te=4.5,ti=10
+par tau=.75
+@ xp=u,yp=v,xlo=-.1,xhi=1.1,ylo=-.1,yhi=1.1
+done

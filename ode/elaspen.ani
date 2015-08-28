@@ -1,0 +1,7 @@
+# animation for elastic pendulum
+PERMANENT
+line 0;.5;1;.5;$BLACK;3
+TRANSIENT
+line .5;.5;xb;yb;$BLUE;2
+fcircle xb;yb;.025;$RED
+end

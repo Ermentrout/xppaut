@@ -1,0 +1,227 @@
+\documentclass{article}
+\newcommand{\XPP}{{\sl XPPAUT\, }}
+\begin{document}
+Installation of \XPP is done either by
+downloading the source code and compiling it or downloading one of the
+binary versions. I will give sample installations for UNIX, 
+Windows, and MacOS X. 
+ If you are totally clueless at compiling source code, it is best to
+either have your system administrator install it for you or download a
+precompiled binary for your computer. There are compiled versions
+available for Ubuntu Linux, Windows, and Mac OSX. Installation for the
+iPad/iPhone simply involves downloading it from the iTunes store like any
+other app. All files are currently available at the \XPP website: 
+\begin{verbatim}
+http://www.math.pitt.edu/~bard/xpp/xpp.html
+\end{verbatim} 
+\section{Installation on UNIX} 
+\subsection{Installation from the source code}
+\begin{description}
+\item Create a directory called {\tt
+xppaut} and change to this directory by typing:
+\begin{verbatim}
+mkdir xppaut
+cd xppaut
+\end{verbatim}
+\item{\bf Step 1.} Download the compressed tarred
+source code {\tt xppaut\_latest.tar.gz} into this directory
+ from:
+\begin{verbatim}
+http://www.math.pitt.edu/~bard/xpp/xpp.html
+\end{verbatim}
+
+\item{\bf Step 2.} Uncompress and untar the archive:
+\begin{verbatim}
+tar zxvf xppaut_latest.tar.gz
+\end{verbatim}
+This will create a series of files and subdirectories.
+\item{\bf Step 3.}  Type
+\begin{verbatim}
+make
+\end{verbatim}
+and lots of things will scroll by including occasional warnings (that
+you
+can safely ignore).  If you get no errors, then you probably have
+succeeded in the compilation. If the compilation stops very quickly,
+then you probably you will have to edit the Makefile according to the
+architecture of your computer.  Look at the README file and the
+Makefile which has suggestions for many platforms. 
+\item{\bf Step 4.} If you successfully have compiled the program, then
+you should have a
+file {\tt xppaut} in your directory. To see, type
+\begin{verbatim}
+ls xppaut
+\end{verbatim}
+If you see something like {\tt xppaut*} listed then you have
+succeeded. If you don't see this, then the compilation was
+unsuccessful. Consult the README file for a variety of possible
+fixes. Also, there are many comments in the Makefiles that are
+included with the package. 
+I have not yet found a computer on which I cannot compile the
+program. A common problem is the wrong path to the X Windows
+libraries. {\bf WARNING:} I compile using {\tt -m32} flags that
+compile to a 32 bit architecture. You may try compiling to a 64 bit
+architecture, but I have had lots of problems getting AUTO to run on
+in the 64 bit compiled version, so I advise against it. 
+\item{\bf Step 5.} Once you have
+compiled it, just move the executable to someplace in your path. (The
+usual is {\tt /usr/local/bin} but you must have root privileges to do
+this.) \XPP needs no environment information, however, you can change
+lots of aspects using the  {\tt .xpprc} file which is described below. 
+\item {\bf Step 6.}  If you have root privileges, you can type {\tt
+make install} from the command line and \XPP will be installed in
+default directories. 
+\end{description}
+
+\subsection{Binaries.} I generally compile a version for UBUNTU linux
+and you can find the binary there. It will probably work on any
+Intel-based Linux system.  Download a Linux binary and then create a
+folder (directory) called {\tt xppaut}. Move the downloaded file into
+your directory. Then type 
+\begin{verbatim}
+tar zxvf xppaut7.0-ubuntu32.tgz
+\end{verbatim}
+and you should see the binary {\tt xppaut} which you can move into a
+globally accessible directory if you want such as {\tt
+/usr/local/bin}. (The name of the binary file may be diferent depending on the version.) 
+\subsection{Additional UNIX setup} In some systems, the zooming
+and cursor movement does not always work properly.  In these systems,
+you want to call \XPP with an additional command line argument, e.g., 
+\begin{verbatim}
+xppaut -xorfix file.ode 
+\end{verbatim}
+This will usually fix these problems.
+
+\subsection{Running on Linux.}
+I usually just call \XPP from the command line
+\begin{verbatim}
+xppaut file.ode
+\end{verbatim}
+However, in Ubuntu, it is pretty easy to make it drag and drop. Right
+click on the Desktop and choose the Add Launcher. Then fill in the
+dialog; the only tricky thing is to put the correct command in for
+{\tt xppaut}. It is advisable to include the full path. Then, once you
+have done this, you can drag ODE files onto the launcher or just
+double click it.
+
+
+\section{Native MS Windows} 
+\index{winpp.exe} 
+Just download the program {\tt winpp.zip} into a folder, say {\bf wpp}
+and then use Winzip or a similar program to unzip the file. Create a
+shortcut to {\tt winpp}.  This version does not have all the features
+of the full version. Furthermore, the interface is quite
+different. Many of the equation files will work for this version and
+most of the standard features are extant. I will not maintain this
+version anymore, but it still works and will continue to be available.
+
+\section{X-windows version on Windows.} This is the recommended way
+to run the program in the Windows environment. It is only slightly 
+more difficult to
+install. It does not use the Windows API, 
+but works identically to the UNIX version.
+This looks quite complicated, but that is because I have included even
+the most trivial steps
+
+\begin{enumerate}
+\item Download
+\begin{verbatim}
+
+http://www.math.pitt.edu/~bard/bardware/binary/Xming-20050131-setup.exe
+\end{verbatim}
+\item Once this file is downloaded, double click on it and Allow it to
+open.
+\item You will get the Xming setup wizard. Just follow the directions
+and also let it make a shortcut on your desktop.
+\item Once it is installed, it will probably start,  To make sure the
+X11 server is running, click on the little hidden icon bar at the
+bottom of the screen and you should see a little X. 
+If you don't see the X, try clicking on the Xming icon on your
+Desktop. Check again. Sometimes the server will complain about
+firewalls. You should make sure that it has permission.
+\item Download the latest version of XPP for windows
+\begin{verbatim}
+http://www.math.pitt.edu/~bard/bardware/binary/latest/xppwin.zip
+\end{verbatim}
+\item It will appear in your Downloads section.
+\item Double click on {\tt xppwin} (it is a zip file)
+\item Windows explorer will open and you will see a folder called {\tt
+xppall} 
+\item Click on Extract all files.
+\item {\bf THIS IS IMPORTANT!! For the destination, choose
+C:$\backslash$. DO NOT CHOOSE ANYTHING ELSE!!}
+\item If you did this correctly, the  you should be able to click on
+Computer  or My Computer from the Explorer and see {\tt Local Disk C:}
+\item Double click on{\tt Local Disk C:}  and the {\tt xppall} folder
+should be there. If not see step 9!!!
+\item Double click on the {\tt xppall} folder. 
+\item Find the file called {\tt xpp} (batch file) and create a
+shortcut using the right click. Drag the shortcut to your Desktop.
+\item Now try XPP as follows.  In the {\tt xppall} folder double click
+on the ode folder.
+\item  Drag a file, say, {\tt lorenz.ode}  (lorenz: type ODE-File)
+onto the XPP shortcut on your Desktop and XPP should fire up. If it
+doesn't, then either you did not put {\tt xppall} in the correct
+location, or, the X11 server is not running. 
+\item To edit the ODE file or make your own, right click and use
+wordpad or some other editor. When you save ODEs always save in plain
+text format!! For creating new ODE files, I recommend NotePad, but
+always save as a plain text.  The extension doesn't matter to {\tt
+XPP} so you can save it as {\tt .txt} if you want.
+\end{enumerate}
+
+
+\section{Mac OS-X}
+Here is how to install the binary application on a Mac.
+
+\begin{enumerate}
+\item NOTE! As of Mountain Lion (OSX 10.8), the X11 server is no longer part of the installed OS. So you have to go get X11. Here is what Apple says: 
+\begin{verbatim}
+X11 is not included with Mountain Lion, but X11 server and client libraries for OS X Mountain Lion are available from the XQuartz project: http://xquartz.macosforge.org. You should use XQuartz version 2.7.2 or later. 
+\end{verbatim}
+\item  Go to 
+\begin{verbatim}
+http://www.math.pitt.edu/~bard/bardware/binary/latest/
+\end{verbatim}
+\item Find the file that corresponds to the mac. It will have a name
+like {\tt xppaut7.0-osx.dmg}
+\item Click on this file, then it will download the binary file  
+\item Depending on where you save your Downloads (I save them in
+Downloads), you should open this (Click on the Finder to open the
+Downloads folder.) 
+\item Double click on the xppaut DMG file (for me  it was called {\tt
+xpp7.0-osx.dmg} ) and a new folder will appear, {\tt xppmac}. 
+\item  Drag this folder to your desktop
+\item Double click on the folder and a new Finder window will open. 
+\item Drag the little xpp icon (with the image of the pink and grey
+cockatoo) to your dock
+\item Open a new finder window (File New Finder window or Command+N)
+\item Click on the Applications in the new Finder.
+\item Drag the file {\tt xppaut} from the {\tt xppmac} Folder to the
+Applications folder.
+\item Now you are set to test it!
+\item In the {\tt xppmac} folder, click on the {\tt ode} folder. Drag
+an "ode" file (for example {\tt lin.ode} onto the little cockatoo icon
+on the dock. It may ask your permission, go ahead and say yes.
+\item If all is good, the Mac will automatically start up the X11
+Server and then run XPP!
+\item If this fails, then look in the Applications/Utilities Folder to
+make sure you have X11. If not, you will have to install it from the
+original disk. Recent versions of the OS (up to Lion but not Mountain Lion)  do this automatically.
+\item To run from the command line, start a terminal program {\tt
+Applications/Utilities/Terminal} and from the terminal type {\tt
+/Applications/xppaut} and it will fire up. (You should probably put {\tt XPPAUT} in your path if you plan on doing things from the command line!)
+\end{enumerate}
+
+{\bf NOTE.} The version that is the default was compiled under version
+10.7 of the OS and will not work with 10.4,10.5, etc. I will try to
+maintain versions of {\tt xppaut} compiled on the older OS's. If you
+look at the folder created from the DMG, {\tt xppmac}, you may find
+ files compatible with older versions of the OS. Rename the appropriate  file  {\tt xppaut} and put it in /Applications
+  
+
+
+
+\section{iPhone and iPad.}
+Go to the App store, look for XPP, and install it on your device!
+\end{document}

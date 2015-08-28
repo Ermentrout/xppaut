@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>XPP - NULLCLINES</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+<a href="xppcont.html">Back</a> | <a href="xppdfield.html">Next</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1><b>Nullclines </b> </h1>This option allows you to draw the
+nullclines of systems.  Nullclines are curves where the right-hand
+sides vanish. Their intersections show fixed points.
+They are most useful for two-dimensional
+models, but XPP lets you draw them for any model.  The constraints are
+the same as in the <a href=xppdfield.html>direction fields</a> option.
+The menu has 6 items: <p> 
+<ul>
+<li> <b> (N)ew </b> draws a new set of nullclines.<p>
+<li> <b> (R)estore </b> restores the most recently computed set.<p>
+<li> <b> (A)uto </b> turns on a flag that makes XPP redraw them every
+time it is necessary because some other window obscured them.<p> 
+<li> <b> (M)anual </b> turns this flag off so that you must restore them manually.  The X-axis nullcline is red and the Y-axis nullcline is green.<p>
+<li> <b>(F)reeze </b> allows you to freeze and play back multiple nullclines<p> 
+<ul>
+	<li> <b>(F)reeze </b> freezes the current nullclines <p>
+	<li> <b>(D)elete all </b> deletes all frozen nullclines<p>
+	<li> <b>(R)ange </b> lets you vary a parameter through some range,
+	computes the nullclines and stores them <p>
+	<li> <b>(A)nimate </b> redraws all the frozen nullclines erasing the
+screen between each one. The user specifies a delay between
+	drawing. <p>  
+</ul>
+<li> <b> (S)ave </b>saves the nullclines into a file. They can then be
+plotted using other software. <p> <b> NOTE: </b> The way that XPP computes
+nullclines (by computing zero contours of a two-variable function)
+means that the nullclines are composed of a series of small line
+segments. This means that if you try to plot them as a continuous
+curve, your plotting program will produce garbage. Thus, you should
+plot them as points and not draw line segments between them. The data
+file produced has 4 columns. The first two are the <b>x </b> nullcline and
+the second two are the <b>y</b> nullcline. <p>Data is as follows:
+<pre>
+xnx1 xny1 ynx1 yny1
+xnx2 xny2 ynx2 yny2
+...
+</pre>
+There are an even number of entries. <p> The <b>x </b> nullcline consists of
+segments <tt> (xnx1,xny1),(xnx2,xny2) </tt> between pairs of
+points. Similarly for the <b>y</b> nullcline.
+ 
+ </ul>
+<p>

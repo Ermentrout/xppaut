@@ -1,0 +1,28 @@
+# gberg.ode 
+# A <<real>> boundary value problem whose solution represents a 
+# rotating spiral wave solution to a two-dimensional partial 
+# differential equation.  There are 3 dynamic variables and 
+# a free shooting parameter -- omeg --
+# Since 4 boundary conditions must be satisfied, there must be 4
+# variables and thus the free parameter is treated
+# dynamically
+init a=0.0118  ap=1.18  k=0  omeg=-0.19,s=.01  
+par d=0.177  q=0.5  sig=3  
+# the odes...
+a'=ap
+ap'=a*k*k-ap/s+a/(s^2)-a*(1-a*a)/d
+k'=-k/s-2*k*ap/a-(omeg+q*a*a)/d
+omeg'=0
+s'=1
+# the boundary conditions
+# left end - need to be a bit careful since it is singular
+bndry  a-s*ap
+bndry  k
+bdry s-.01
+# right end - note primes here refer to value at the right end
+bndry  ap'
+bndry  k'
+# set it up for the user
+@ xhi=1,total=1,dt=.001
+done
+

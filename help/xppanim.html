@@ -1,0 +1,282 @@
+<html>
+<head>
+<title>ANIMATION</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xpphelp.html">Contents</a>
+<hr>
+<H1>
+Toons
+</H1>
+To create an animation, just do the following:
+
+<P>
+
+<UL>
+<LI>Run the numerical simulation for however long you need it or run it once the toon is loaded.
+<p>
+<LI>Using a text editor create a description of the animation using
+the little scripting language described <a href="#script"> below </a>.
+<p>
+<LI>Click on the <TT>(V)iew axes</TT> <TT>(T)oon</TT> menu item from the
+main XPP window to bring up the <a href="#awin"> animation window</a>.
+<p>
+<LI>Click on the <TT>File</TT> item in the animation window that pops
+up and give it the name of your script file.
+<p>
+<LI>If the file is OK, click on <TT>Go</TT> item and the animation will
+begin.
+<p>
+<li> Click on the little box in the upper right for animation on the fly -- the animation runs along with the simulation!
+</UL>
+
+<H2><A NAME="awin">
+The animation window</A>
+</H2>
+A resizeable window will pop up when you choose the <TT>Toon</TT> item
+form the <TT>Viewaxes</TT> submenu. This has 10 buttons on it. They are
+
+<UL>
+<LI><B>File</B> Click on this to load a new animation
+file. Hereafter, I will call these <B>ani</B> files. The usual
+extension will be <B>filename.ani</B>.  
+<p>
+<LI><B>Go</B> Click on here after you have loaded an ani file and it
+will run.
+<p>
+<LI><B>Reset</B> This moves the animation back to the beginning
+<p>
+<LI><B>Fast</B> speeds up the animation
+<p>
+<LI><B>Slow</B> slows it down
+<p>
+<LI><B>Pause</B> pauses the animation. <B>Go</B> restarts it from
+where it started. This is very sluggish and it takes a long time to
+respond to it. I hope to fix this someday.
+<p>
+<LI><B>Skip</B> sets the numbers of frames to skip
+<p>
+<LI><B>&#187;&#187;&#187;&#187;</B> Move forward one frame
+<p>
+<LI><B>&#171;&#171;&#171;&#171;</B> Move back one frame
+<p>
+<LI><B>Mpeg</B> Store a series of ppm files for use with the
+mpeg_encode program. This takes a ton of disk space.  Better yet, use
+the <B>anigif</B> option which creates an animated gif file.  600
+frames can be as little as 500K so it wont eat up disk space.
+</LI>
+</UL>
+Some computer systems cannot produce the required amount of graphics
+memory for a pixmap and if this happens, you cannot currently run the
+animation. You will be told this and the animation window will never
+appear. 
+
+<P>
+<HR>
+<H2><A NAME="script">
+ DASL: Dynamical Animation Scripting Language</A>
+</H2>
+In order to use the animation components of XPP, you must first
+describe the animation that you want to do. This is done by creating a
+script with a text editor that describes the animation. You describe
+the coordinates and colors of a number of simple geometric
+objects. The coordinates and colors of these objects can depend on the
+values of the variables (both regular and fixed, but not auxiliary) at
+a given time. The animation then runs through the output of the
+numerical solution and draws the objects based on that output. I will
+first list all the commands and then give some examples. 
+
+<P>
+Basically,
+there are two different types of objects: (i) transient and (ii)
+permanent. Transient objects have coordinates that are recomputed at
+every time as they are changing with the output of the
+simulation. Permanent objects are computed once and are fixed through
+the duration of the simulation. The objects themselves are simple
+geometric figures and text that can be put together to form the
+animation.
+
+<P>
+Each line in the script file consists of a command or object followed
+by a list of coordinates that must be separated by semicolons. For
+some objects, there are other descriptors which can be optional.
+Since color is important in visualization, there are two ways a color
+can be described. Either as a formula which is computed to yield a
+number between 0 and 1 or as an actual color name started with the
+dollar sign symbol, $. The <TT>ani</TT> file consists of a lines of
+commands and objects which are loaded into XPP and played back on the
+animation window. Here are the commands:
+<DL>
+<DT></DT>
+<DD><B>dimension</B> xlo;ylo;xhi;yho
+<p></dd>
+<DT></DT>
+<DD><B>speed</B> delay
+<p></dd>
+<DT></DT>
+<DD><B>transient</B>
+<p></dd>
+<DT></DT>
+<DD><B>permanent</B>
+<p></dd>
+<DT></DT>
+<DD><B>line</B> x1;y1;x2;y2;color;thickness
+<p></dd>
+<DT></DT>
+<DD><B>rline</B> x1;y1;color;thickness
+<p></dd>
+<DT></DT>
+<DD><B>rect</B> x1;y1;x2;y2;color;thickness
+<p></dd>
+<DT></DT>
+<DD><B>frect</B> x1;y1;x2;y2;color
+<p></dd>
+<DT></DT>
+<DD><B>circ</B> x1;y1;rad;color;thickness
+<p></dd>
+<DT></DT>
+<DD><B>fcirc</B> x1;y1;rad;color
+<p></dd>
+<DT></DT>
+<DD><B>ellip</B> x1;y1;rx;ry;color;thickness
+<p></dd>
+<DT></DT>
+<DD><B>fellip</B> x1;y1;rx;ry;color
+<p></dd>
+<DT></DT>
+<DD><B>comet</B> x1;y1;type;n;color
+<p></dd>
+<DT></DT>
+<DD><B>text</B> x1;y1;s
+<p></dd>
+<DT></DT>
+<DD><B>vtext</B> x1;y1;s;z
+<p></dd>
+<DT></DT>
+<DD><B>settext</B> size;font;color
+<p></dd>
+<DT></DT>
+<DD><B>end</B>
+<p></dd>
+</DL>
+
+<P>
+All commands can be abbreviated to their first three letters and case
+is ignored. At startup the dimension of the animation window in user
+coordinates is (0,0) at the bottom left and (1,1) at the top
+right. Thus the point (0.5,0.5) is the center no matter what the
+actual size of the window on the screen.  <B>Color</B> is described by either
+a floating point number between 0 and 1 with 0 corresponding to red
+and 1 to violet. When described as a floating point number, it can be
+a formula that depends on the variables. In all the commands, the
+color is optional <EM>except</EM> <B>settext.</B>  The other way of
+describing color is to use names which all start with the $
+symbol. The names are:
+<B>$WHITE, $RED, $REDORANGE, $ORANGE, $YELLOWORANGE,
+                    $YELLOW, $YELLOWGREEN, $GREEN, $BLUEGREEN,
+		      $BLUE,$PURPLE, $BLACK</B>.
+
+<P>
+The <B>transient</B> and <B>permanent</B> declarations tell the animator
+whether the coordinates have to be evaluated at every time or if they
+are fixed for all time.  The default when the file is loaded is <B>transient.</B>  Thus, these are just toggles between the two different
+types of objects. 
+
+<P>
+The number following the <B>speed</B> declaration must be a nonnegative
+integer. It tells tha animator how many milliseconds to wait between
+pictures. 
+
+<P>
+The <B>dimension</B> command requires 4 numbers following it. They are
+the coordinates of the lower left corner and the upper right. The
+defaults are (0,0) and (1,1).  
+
+<P>
+The <B>settext</B> command tells the animator what size and color to
+make the next text output. The size must be an integer, <B>{
+0,1,2,3,4 } </B> with 0 the smallest and 4 the biggest. The font is
+either <B>roman</B> or <B>symbol.</B>  The color must be a named color
+and not one that is evaluated. 
+
+<P>
+The remaining ten commands all put something on the screen. 
+
+<UL>
+<LI><B>line x1;y1;x2;y2;color;thickness </B>  draws a line from <B>(x1,y1)</B> 
+to <B>(x2,y2)</B> in user coordinates.  These four numbers can be any
+expression that involves variables and fixed variables from your
+simulation. They are evaluated at each time step (unless the line is
+<B>permanent</B>) and this is scaled to be drawn in the window.  The
+<B>color</B> is optional and can either be a named color or an
+expression that is to be evaluated. The <B>thickness</B> is also
+optional but if you want to include this, you must include the <B>color</B> as well. <B>thickness</B> is any nonnegative integer and will
+result in a thicker line. 
+
+<P>
+</LI>
+<LI><B>rline x1;y1;color;thickness </B> is similar to the <B>line</B>
+command, but a line is drawn from the endpoints of the last line drawn
+to <B>(xold+x1,yold+y1)</B> which becomes then new last point. All other options
+are the same. This is thus a ``relative'' line.
+
+<P>
+</LI>
+<LI><B>rect x1;y1;x2;y2;color;thickness </B> draws a rectangle with
+lower corner <B>(x1,y1)</B> to upper corner <B>(x2,y2)</B> with optional
+color and thickness. 
+
+<P>
+</LI>
+<LI><B>frect x1;y1;x2;y2;color </B> draws a filled rectangle with
+lower corner <B>(x1,y1)</B> to upper corner <B>(x2,y2)</B> with optional
+color. 
+
+<P>
+</LI>
+<LI><B>circ x1;y1;rad;color;thick </B> draws a circle with radius <B>rad</B>
+centered at <B>(x1,y1)</B> with optional
+color and thickness.
+
+<P>
+</LI>
+<LI><B>fcirc x1;y1;rad;color </B> draws a filled circle with radius <B>rad</B>
+centered at <B>(x1,y1)</B> with optional color.
+
+<P>
+</LI>
+<LI><B>ellip x1;y1;rx;ry;color </B> draws an ellipse with radii <B>rx,ry</B>
+centered at <B>(x1,y1)</B> with optional
+color and thickness. 
+
+<P>
+</LI>
+<LI><B>fellip x1;y1;rx;ry;color </B> draws a filled ellipse with
+radii <B>rx,ry</B>  centered at <B>(x1,y1)</B> with optional
+color. 
+
+<P>
+</LI>
+<LI><B>comet x1;y1;type;n;color</B> keeps a history of the last <TT>n</TT> points drawn and renders them in the optional <TT>color</TT>. If <TT>type</TT> is non-negative, then the last n points are drawn as a line with
+thickness in pixels of the magnitude of <TT>type</TT>.  If <TT>type</TT> is
+negative, filled circles are drawn with a radius of <TT>-thick</TT> in
+pixels.
+
+<P>
+</LI>
+<LI><B>text x1;y1;s</B> draws a string <B>s</B> at position <B>(x1,y1)</B> with the current color and text properties. Only the
+coordinates can depend on the current values. 
+
+<P>
+</LI>
+<LI><B>vtext x1;y1;s;z</B> draws a string <B>s</B> followed by
+the floating point value <B>z</B> at position <B>(x1,y1)</B> with the current color and text properties. Thus, you can
+print out the current time or value of a variable at any given time.
+</LI>
+</UL>
+
+<P>
+<EM>REMARK.</EM>  As with lines in ODE files, it is possible to create
+arrays of commands using the cobination of the <B>[i1..i2] </B>
+construction. Some examples are shown below. 

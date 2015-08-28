@@ -1,0 +1,13 @@
+#paramters to be varied to see the effect of fitcurve
+
+param k=1
+
+#equations
+
+a'=-k*a
+
+#intial conditions
+
+init a=1
+
+done

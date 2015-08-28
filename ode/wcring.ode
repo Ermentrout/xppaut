@@ -1,0 +1,6 @@
+# chain of 20 neurons
+param a=.25,beta=.31415926
+u[0..19]'=-u[j]+f(a*sum(0,19)of(cos(beta*([j]-i'))*shift(u0,i')))
+f(x)=tanh(x)
+init u0=.5
+done

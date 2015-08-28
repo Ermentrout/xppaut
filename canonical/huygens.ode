@@ -1,0 +1,33 @@
+# Huygens pendulums
+# x is position of the cart, p1,p2 are angles of the pendulum
+# v, q1,q2  are velocities
+par g=9.8,l=1,mp=1,mc=1
+par fp=.1,fc=.1
+par k=0.1
+# from Bennett et al PRS A 2002 458 563
+#
+0=p1dd+fp*q1+(g/l)*sin(p1)+xdd*cos(p1)/l
+0=p2dd+fp*q2+(g/l)*sin(p2)+xdd*cos(p2)/l
+0=(mc+2*mp)*xdd+fc*v+k*x+mp*l*(cos(p1)*p1dd-sin(p1)*q1^2+cos(p2)*p2dd-sin(p2)*q2^2)
+solv p1dd=0
+solv p2dd=0
+solve xdd=0
+#
+#
+# dynamics
+x'=v
+v'=xdd
+p1'=q1
+q1'=p1dd
+p2'=q2
+q2'=p2dd
+# escapement mechanism
+global -1 p1+p0 {q1=(1-c)*abs(q1)+eps}
+global 1 p1-p0 {q1=-(1-c)*abs(q1)-eps}
+global -1 p2+p0 {q2=(1-c)*abs(q2)+eps}
+global 1 p2-p0 {q2=-(1-c)*abs(q2)-eps}
+par p0=.5
+init p1=1.5,p2=1.8
+par c=.1,eps=.3
+#
+done

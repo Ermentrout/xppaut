@@ -1,0 +1,4 @@
+v'=-v+i
+par i=1.2
+global 1 v-1 {v=-.5}
+done

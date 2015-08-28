@@ -1,0 +1,228 @@
+<html>
+<head>
+<title>XPP - DLL</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+ <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Using DLLs</h1>
+
+<p>
+
+For compilers which allow dynamic linking, it is possible to use
+external C programs to speed up the right-hand sides etc. This also
+lets you create complicated right-hand sides that would be difficult
+to do with the XPP parser. Here are the steps you need to do this. 
+<ol>
+<li> Write some C-code for the right-hand sides. Here is the form of
+the code:
+<p>
+<font color=#CC33CC> <pre>
+#include <math.h>
+f1(double *in,double *out,int nin,int nout,double *var,double *con)
+{
+
+
+}
+f2(double *in,double *out,int nin,int nout,double *var,double *con)
+{
+
+}
+
+...
+</pre></font>
+<p>
+You can define as many of these functions as you want within one
+file. The parameters <b> in </b> are passed by XPP to the
+function. The parameters <b> out </b> are what the function computes
+and passes back to XPP. The integers <b> nin,nout </b> are junt the
+number of such passed parameters. I never use them. 
+The array <b> con </b> contains all your parameters in the order you
+defined them in the ODE file
+starting with <b> con[2] </b> and the array <b> var </b>  contains the time
+variable, followed by the state variables, and then the fixed
+variables.  Thus, you could directly communicate with all the
+variables or parameters.  
+<li> Next compile to code into a shared library. Here is what I type
+<font color=#CC33CC>
+<pre>
+gcc -shared -fpic -o pp.so pp.c 
+</pre> </font>
+where <b> pp.c </b> is what I called the C file.
+<li> Next write an ODE file that can take advantage of this using
+the <code> export {} {} </code> statement to send out and read in what
+is needed. 
+<li> Run XPP and use the <b> File Edit Load-DLL </b> command to load
+in the library and tell XPP which function to call. For the latter,
+typing <b> f1 </b> would implement the first bit of code while typing
+<b>f2</b> uses the second. You can change both the function and the
+library while XPP is running. 
+<li> If all goes well, then XPP will run with the hard-coded RHS.
+</ol>
+<p>
+<hr>
+<h3> Example 1 </h3>
+
+I will implement a predator-prey model:
+<p><i>
+<center>
+ x' = x((x+c)(1-x)-y) <p>
+ y' = y(x-a) <p>
+</center>
+</i>
+
+I will pass in the value of the parameters and the variables and get
+back the values of the right-hand sides. 
+<p>
+Here is the ODE file:
+<font color=#CC33CC> <pre>
+# pp.ode with dlls
+#
+# xp,yp are the right-hand sides
+x'=xp
+y'=yp
+# a,b are parameters
+par a=.4,c=0
+init x=.1,y=.2
+# dummies to allocate storage
+xp=0
+yp=0
+# here is the main communication
+export {a,c,x,y} {xp,yp}
+@ total=50
+done
+
+</pre></font>
+The parameters and current values of the variables are passed in via
+the first <b> {} </b> in the export statement.  The second <b> {} </b>
+passes back values for the fixed variables, <b> xp,yp </b> which are
+the right-hand sides. You have to define these in XPP so I usually set
+them to zero. 
+<p>
+Next I write the C code for the right-hand sides: 
+<font color=#CC33CC>
+<pre>
+/* pp.c for DLL
+ */
+#include <math.h>
+
+/* some defines for readability */
+
+#define a in[0]
+#define c in[1]
+#define x in[2]
+#define y in[3]
+
+#define xp out[0]
+#define yp out[1]
+
+pp(double * in,double *out, int nin,int nout, double *var,double *con)
+{
+  xp=x*((x+c)*(1-x)-y);
+  yp=y*(x-a);
+}
+
+</pre>
+</font>
+I have added a few defines to make it easier to read and write. 
+<p>
+
+I compile this as
+<font color=#CC33CC><pre>
+gcc -shared -fpic -o pp.so pp.c
+</pre></font>
+
+This should give me a file called <b> pp.so </b> which is a shared
+labrary. 
+<p>
+I run the ODE file with XPP. I click on <b> File Edit Load-DLL </b>
+and choose the file <b> pp.so </b> and <b> pp </b> for the function
+name (since that is what I called it in the C file).
+<p>
+Then let it rip to see the solution.
+
+<hr>
+
+<h3> Example 2 - an array </h3>
+
+This next example reads the variables and passes the right-hand side
+directly to the array <b> var </b> since the <b> export </b> directive
+cannot pass arrays in any simple manner.  The equation is the
+discretization of the bistable front: <p>  <i>
+u<sub>0</sub>' = f(u<sub>0</sub>)+d(u<sub>1</sub> - u<sub>0</sub>) <p>
+u<sub>80</sub>' = f(u<sub>80</sub>)+d(u<sub>79</sub> - u<sub>80</sub>)
+<p>
+u<sub>j</sub>' = f(u<sub>j</sub>)+d(u<sub>j-1</sub> - 2u<sub>j</sub>
++u<sub>j+1</sub> ) </i> for <i> j=1,...,79 <p> </i>  
+
+<p>
+
+Here is the ODE file
+<font color=#CC33CC> <pre>
+# wave front in bistable RD model
+u[0..80]'=up[j]
+up[0..80]=0
+par a=.1,d=.25,n=80
+init u[0..4]=1
+export {a,d}
+@ total=400,nout=2
+done
+</pre> </font>
+<p>
+Note that only the parameters are exported and nothing is sent back
+throught the <b> export </b> statement.  I have set the total to 400
+and plot every other point.
+<p>
+Next, I write the C code:
+<font color=#CC33CC> <pre>
+#include <math.h>
+
+double f(double x,double a)
+{
+  return  x*(1-x)*(x-a);
+}
+
+front(double *in,double *out, int nin, int nout, double *var, double *con)
+{
+  int i;
+  double a=in[0];
+  double d=in[1];
+  double *x=var+1;
+  double *xp=x+81;
+  xp[0]=f(x[0],a)+d*(x[1]-x[0]);
+  xp[80]=f(x[80],a)+d*(x[79]-x[80]);
+  for(i=1;i<80;i++)
+    xp[i]=f(x[i],a)+d*(x[i+1]-2*x[i]+x[i-1]);
+}
+</pre>
+</font>
+<p>
+Note how I pass the inputs to the pointer <b>x</b> and the outputs to
+the pointer <b>xp</b> which respectively point to the elements
+<b>var[1]</b> and <b>var[82]</b>  
+<p>
+Compile this  
+<font color=#CC33CC><pre>
+gcc -shared -fpic -o front.so front.c
+</pre></font>
+
+<p> Now run <b> front.ode</b>, click on <b> File Edit Load DLL </b>
+and load <b> front.so </b> choosing the function <b> front</b>. Let it
+rip.  
+<p>
+I compared this to a normal ODE file 
+<font color=#CC33CC> <pre>
+# wave front in bistable RD model
+f(u)=u*(1-u)*(u-a)
+u[0..80]'=up[j]
+up0=f(u0)+d*(u1-u0)
+up[1..79]=f(u[j])+d*(u[j-1]+u[j+1]-2*u[j])
+up80=f(u80)+d*(u79-u80)
+par a=.1,d=.25,n=81
+init u[0..4]=1
+@ total=400,nout=2
+done
+</pre> </font>
+and get about a two-fold increase in speed.
+

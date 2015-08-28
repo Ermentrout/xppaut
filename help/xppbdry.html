@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>XPP - BVP SOLVER</title>
+</head>
+<body bgcolor="#ffffff" link="#330099" alink="#FF3300" vlink="#330099">
+
+<a href="xpp3d.html">Back</a> | <a href="xpphelp.html">Contents</a>
+<hr>
+<h1>Boundry Value Problem Solver</h1> This invokes the boundary value solver which uses numerical shooting. There are 4 choices. <p>
+<ul> 
+
+<li> <b>(S)how</b>  This shows the successive results of the shooting, erases the screen at the end and redraws the last solution.  XPP uses the currently selected numerical integation method, the current starting point, <b> T0 </b> as the left end time and  <b> T0+TEND </b> as the right end. These are set in the <a href="xppnumerics.html"> Numerics </a> menu. Thus, if the interval of interest is  (2.5,6)then set <b> T0=2.5 </b> and <b> TEND=3.5 </b> in the numerics menu.  <p>
+<li> <b>(N)o show</b> <br> This is as above but will not show intermediate solutions.<p>
+<li> <b>(R)ange</b> <br> This allows you to range over a parameter keeping starting or  ending values of each of the variables.  A dialog box appears asking you for <br><ul>
+<li> the parameter to vary,
+<li> the starting value,
+<li> the end value,
+<li> the number of steps,
+<li> You will be asked if you want to cycle color which means that the results of each successful solution to the  BVP will appear in different colors,
+<li> <b>side</b> tells the program whether to save the initial <b>(0)</b> or final<b>(1)</b> values of the solution. <br> </ul>
+As the program progresses, you will see the current parameter in the info window under the main screen.  You can abort the current step by pressing (Esc) and the whole process by pressing (/). <p> 
+
+<li> <b>(P)eriodic</b> <br> Periodic boundary conditions can be solved thru the usual methods, but one then must write an addition equation for the frequency parameter.  This option eliminates that need so that a 2-D
+autonomous system need not be suspended into a 3D one. A dialog box appears and  you will be asked for 
+<ul>
+<li> the name of the adjustable parameter for frequency,
+<li> the section variable and section. This is an additional condition that must be satisfied, namely, <i>x(0)=x_0 </i> where <i>x</i> is the section variable and <i> x_0 </i> is the section. 
+<li> Choose <b> yes </b>if you want
+the progress shown. <p> 
+</ul>
+<li> <b> (H)omoclinic</b> <p>
+ This lets you tell XPP which variables carry the values of the fixed
+ points as well as the dimensions of the stable and unstable manifolds. Left and right fixed points are requested (for homoclinics they are the same.) You also must tell the number of unstable eigenvalues on the left and stable on the right.   
+</ul>

@@ -1,0 +1,6 @@
+# fish.ani
+# lamprey swimmer -- oscchain.ode
+line 0;.5;.04*cos(an1);.5+.04*sin(an1);$BLACK;3
+rline .04*cos(an[2..20]);.04*sin(an[j]);$BLACK;3
+END
+

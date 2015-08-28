@@ -1,0 +1,49 @@
+
+#Hey, define your roller coaster track here!
+#Use parametric equations in M.
+xM(t) = (2+cos(3*t))*sin(2*t)
+zM(t)= (2+cos(3*t))*cos(2*t)
+
+#Now calculate and put the derivatives of your
+#parametric equations here:
+xMdM(t) =(xm(t+.01)-xm(t-.01))/(.02) 
+zMdM(t) =(zm(t+.01)-zm(t-.01))/(.02)
+
+par alpha=3,beta=1,gamma=1,delta=0
+param drag=.1
+param mass=1
+param g=1
+# scale mouse velocity a little as it is too sensitive
+par sv=.25
+init M=0,X=0,Z=3
+init L=0,Lalt=1
+
+#Shouldn't need to modify too much below...
+
+normM(M) = sqrt(xMdM(M)^2 + zMdM(M)^2)
+mdt(M) = Lalt/normM(M)
+
+dX/dt=xMdM(M)*mdt(M)
+dZ/dt=zMdM(M)*mdt(M)
+dM/dt=mdt(M)
+dL/dt=Lalt
+#Thanks to Newton!
+dLalt/dt=(1/mass)*((-g*zMdM(M)/normM(M)) - drag*Lalt)
+
+set Sun     {g=274.13} 	
+set Mercury {g=3.59}	
+set Venus   {g=8.87}    
+set Earth   {g=9.81}    
+set Moon    {g=1.62}    
+set Mars    {g=3.77}   
+set Jupiter {g=25.95}
+set Saturn  {g=11.08}    
+set Uranus  {g=10.67}    
+set Neptune {g=14.07} 
+set Pluto   {g=0.42}
+ 
+@ XP=X,YP=Z,XLO=-3.25,XHI=3.25,YLO=-3.25,YHI=3.25
+@ bounds=100000
+@ dt=.05,meth=cvode,tol=1e-10,atol=1e-10
+@ total=50
+done

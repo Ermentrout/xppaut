@@ -1,0 +1,21 @@
+#
+# library
+#
+MYLIB=example
+MYLIB_OBJ=funexample.o
+
+$(MYLIB): $(MYLIB_OBJ)
+	$(CC) -shared -o libexample.so  $(MYLIB_OBJ)
+
+
+funexample.o:  funexample.c
+	$(CC) -fpic -c funexample.c
+	
+# 
+# export LD_LIBRARY_PATH=.
+#
+
+
+
+
+

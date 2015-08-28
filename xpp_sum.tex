@@ -1,0 +1,595 @@
+\documentstyle{article}
+\setlength{\topmargin}{-.5 in}
+\setlength{\oddsidemargin}{ 0.1 in}
+\setlength{\textheight}{ 8.75 in}
+\setlength{\textwidth}{6.8in}
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\beqa}{\begin{eqnarray}}
+\newcommand{\eeqa}{\end{eqnarray}}
+\newcommand{\bvb}{\begin{verbatim}}
+\newcommand{\evb}{\end{verbatim}}
+\newcommand{\beqann}{\begin{eqnarray*}}
+\newcommand{\eeqann}{\end{eqnarray*}}
+\newcommand{\nn}{\mbox{${\nonumber}$}}
+\newcommand{\labeq}[1]{\label{eq:#1}}
+\newcommand{\refeq}[1]{(\ref{eq:#1})}
+\begin{document}
+\begin{center} {\Large XPP Commands} \\
+Bard Ermentrout   ---  Dec 2012
+\end{center}
+
+\begin{center} {\large ODE File Format}\end{center}
+\begin{verbatim}
+# comment line - name of file, etc
+#include filename   
+d<name>/dt=<formula>
+<name>'=<formula>
+<name>(t)=<formula>
+volt <name>=<formula>
+<name>(t+1)=<formula>
+x[n1..n2]' = ...[j] [j-1] ... <--  Arrays
+%[i1..i2]
+u[j]'=...
+v[j]'=...
+% 
+markov <name> <nstates> <init>
+  {t01} {t02} ... {t0k-1}
+  {t10} ...
+  ...
+  {tk-1,0} ... {tk-1 k-1}
+
+aux <name>=<formula>
+!<name>=<formula> <--  parameters defined as formulae
+<name>=<formula>
+parameter <name1>=<value1>,<name2>=<value2>, ...
+wiener <name1>, <name2>, ...
+number <name1>=<value1>,<name2>=<value2>, ...
+<name>(<x1>,<x2>,...,<xn>)=<formula>
+table <name> <filename>
+table <name> % <npts> <xlo> <xhi> <function(t)>
+global sign {condition} {name1=form1;...}
+init <name>=<value>,...
+<name>(0)=<value> or <expr> <--  delay initial conditions
+bdry <expression>
+0= <expression>    <---  For DAEs
+solv <name>=<expression> <------ For DAEs
+special <name>=conv(type,npts,ncon,wgt,rootname)
+	       fconv(type,npts,ncon,wgt,rootname,root2,function)
+	       sparse(npts,ncon,wgt,index,rootname)
+	       fsparse(npts,ncon,wgt,index,rootname,root2,function)
+               fftcon(type,npts,wgt,rootname)
+               mmult(ncol,nrow,matrix,rootname)
+               fmmult(ncol,nrow,matrix,root1,root2,f)
+               findext(type,n,skip,root)
+               gill(meth,rxn_list)
+          
+export {x1,x2,....} {x1p,x2p,..}     
+# comments
+@ <name>=<value>, ...
+set <name> {x1=z1,x2=z2,...}
+only <name1>,<name2>,...
+options <filename>
+" {z=3,b=3,...} Some nice text   <---  Active comments 
+done
+\end{verbatim}
+{\bf Remarks}
+\begin{itemize}\itemsep -.05in
+\item ODEs are put in as {\tt name'=expression} or {\tt dname/dt=expression}. Note you can use this notation for maps as well or use {\tt name(t+1)=expression}
+\item {\tt name=expression} allows you to use {\tt name} in many locations and to build up more comples expressions. The order in which they are written is the order in which they are evaluated, so don't use an expression using a name that hasn't yet been defined.
+\item Array expressions such as {\tt x[1..10]'=...[j]...} are expanded as {\tt x1'=...1..} etc. The {\tt [j]} is expanded into a number. You can use some minimal arithmetic as well such as {\tt [j+1],[j-1],[j*2]} etc. 
+\item {\tt x[0..99](0)=sin(2*pi*[j]/100)} is a way to initialize anarray ODE    
+\item {\tt markov <name> <n> <init> } sets up a continuous Markov process with {\tt n} states and whos $n\times n$ transition matrix follows with entries delimited with the braces {\tt \{, \}}. The diagonal entries should just be 0 as they are ignored. The starting state is given by {\tt <init>}.  
+\item {\tt aux} quantities are extra stuff you might want to plot.
+\item {\tt parameters} are named quantities that you can change within the program
+\item {\tt numbers} are named quantities that are invisible to the user and cannot be changed
+\item {\tt !name=...} defines a named quantity whose value depends on other numbers an parameters, but not variables, as these named quantities are only computed when you change parameters.       
+\item {\tt wiener } defines as set of Wiener processes 
+\item {\tt table } reads in function in the form of a table or you can define it within the ODE file; The file version of a table starts with three numbers, the number of values; the low; and the high; followed by the y-values.  The x values are equally spaced from low to high. Tables are treated as functions of one variable with a linear interpolation as the default. If you want a cubic spline then the initial number in the file should have an ``s'' in front of it and if you want piecewise constant then put an ``i'' in front of the number.  The function form of the table uses the {\tt \%} followed by three numbers as with the file format and then a formula using the independent variable {\tt t}. So {\tt table s \% 51 -25 25 exp(-abs(t))/2} will produce a tabular function such that {\tt s(5)} would return $\exp(-5)/2.$  Other values are interpolated. Tables are very useful for networks. 
+\item While rather clumsy in notation, you can initialize a delay equation via {\tt x(0)=f(t)} to set the values of $x$ for $-\tau\le t<0.$ Delay initial data is zero by default.  
+\item The {\tt global} declaration includes two special quantities. Inside the braces, if you type {\tt arret=value}, the integration will stop if the {\tt value} is not zero. This way you can stop an integration if a particular event happens. The other declaration is {\tt out\_put=value} which will overide the {\tt transient} (see the numerics menu)  and allow you to plot (when {\tt value} is nonzero), but only when the events occur.  
+\item In the {\tt global} the {\tt sign} is {\tt \{0,1,-1\}}. 0 means the condition must be met exactly at the point it was checked. It is a good way to set initial conditions as expressions, eg {\tt global 0 t \{x=sin(1)\} }
+\item {\tt bdry <expression>} is a way to set boundary conditions for the boundary value solver. The BVP solver tries to zero the expression. Use the names of your variables for the left end conditions and primed versions for the right ends. (see {\tt gberg.ode}). 
+\item The pair {\tt 0= <expression>} amd {\tt solve <name>=<expression>} set up differential algebraic equations. The lines starting with {\tt 0=} will solve for the variables in the {\tt solv} lines to make the expressions zero. See {\tt huygens.ode} for an example where three accelerations are solved for to get the dynamics of two pendulums on a cart.
+\item {\tt export} is used to communicate with a dynamically loaded library compiled from some C code.  See {\tt tstdll.ode}.
+\item {\tt only} is useful for silent mode (no GUI) as this puts out a bunch of data in a file. {\tt only} restricts the output to specified set of variables
+\item {\tt set} creates a bunch of settings for numerics, variables, parameters that you can call by name within XPP.
+\item {\tt Active comments} allow you to create a little tutorial where you take care of changing parameters, numerics, etc. See {\tt lecar.ode} for an example.
+
+\end{itemize}
+\noindent {\bf INTEGRAL EQUATIONS}
+ 
+The general integral equation
+\[
+	u(t)=f(t)+\int_0^t K(t,s,u(s))ds
+\]
+becomes
+\begin{verbatim}
+u = f(t) + int{K(t,t',u)}
+\end{verbatim}
+The convolution equation:
+\[
+ v(t) = \exp(-t) + \int_0^t e^{-(t-s)^2}v(s) ds
+\]
+would be written as:
+\begin{verbatim}
+v(t) = exp(-t) + int{exp(-t^2)#v}
+\end{verbatim}
+If one wants to solve, say,
+\[
+ u(t) = exp(-t) + \int^t_0 (t-t')^{-mu} K(t,t',u(t'))dt'
+\]
+the form is:
+\begin{verbatim}
+u(t)= exp(-t) + int[mu]{K(t,t',u}
+\end{verbatim}
+and for convolutions, use the form:
+\begin{verbatim}
+u(t)= exp(-t) + int[mu]{w(t)#u}
+\end{verbatim}
+\noindent
+{\bf NETWORKS}
+\begin{verbatim}
+special zip=conv(type,npts,ncon,wgt,root)
+\end{verbatim}
+where {\tt root} is the name of a variable and {\tt wgt} is a table,
+produces an array {\tt zip} with {\tt npts}:
+\[
+\hbox{zip}[i] =\sum_{j=-\hbox{ncon}}^{\hbox{ncon}}\hbox{wgt}[j+ncon]
+\hbox{root}[i+j] 
+\]
+\begin{verbatim}
+special bob=fftconv(type,npts,wgt,root)
+\end{verbatim}
+is similar to the {\tt conv} operation, but uses the FFT to do it. The {\tt type} should be {\tt odd} or {\tt periodic}. The size of the {\tt wgt} table should be either {\tt npts} or {\tt 2 npts}.
+The {\tt sparse} network has the syntax:
+\begin{verbatim}
+special zip=sparse(npts,ncon,wgt,index,root)
+\end{verbatim}
+where {\tt wgt} and {\tt index} are tables with at least {\tt npts *
+ncon} entries.   The array {\tt index} returns the indices of the
+offsets to with which to connect and the array {\tt wgt} is the
+coupling strength. The return is
+\begin{verbatim}
+zip[i] = sum(j=0;j<ncon) w[i*ncon+j]*root[k]
+k = index[i*ncon+j] 
+\end{verbatim}
+The other two types of networks allow more complicated interactions:
+\begin{verbatim}
+special zip=fconv(type,npts,ncon,wgt,root1,root2,f)
+\end{verbatim}
+evaluates as 
+\begin{verbatim}
+zip[i]=sum(j=-ncon;j=ncon) wgt[ncon+j]*f(root1[i+j],root2[i])
+\end{verbatim}
+and 
+\begin{verbatim}
+special zip=fsparse(npts,ncon,wgt,index,root1,root2,f)
+\end{verbatim}
+evaluates as 
+\begin{verbatim}
+zip[i]=sum(j=0;j<ncon) wgt[ncon*i+j]*f(root1[k],root2[i])
+k = index[i*ncon+j] 
+\end{verbatim}
+Matrix multiplication is also possible:
+\begin{verbatim}
+special k=mmult(n,m,w,u)
+\end{verbatim}
+returns a vector {\tt k}  of length {\tt m } defined as
+\begin{verbatim}
+k(j)=sum(i=0;i<n)w(i+nj)u(i)
+\end{verbatim}
+while
+ \begin{verbatim}
+special k=fmmult(n,m,w,u,v,f)
+\end{verbatim} 
+returns
+\begin{verbatim}
+k(j)=sum(i=0;i<n)w(i+nj)f(u(i),v(j))
+\end{verbatim}
+
+\begin{verbatim}
+special z=findext(type,n,skip,root)
+\end{verbatim}
+finds the extreme values of a list of {\tt n} variables starting at {\tt root} and skipping every {\tt skip} one.  {\tt type=1,-1,0} according as to whether you want the max, min, or both. In any case, {\tt z(0), z(2)} are the max and min and {\tt z(1),z(3)} are the index of the max and min.  
+
+\medskip
+
+\noindent{\bf OPTIONS}
+The format for changing the options is:
+\begin{verbatim}
+@ name1=value1, name2=value2, ...
+\end{verbatim}
+where {\tt name} is one of the following and {\tt value} is either an
+integer, floating point, or string.  (All names can be upper or lower
+case). 
+\begin{itemize}\itemsep -.05in
+\item QUIET={\tt 0,1} dont print out stuff
+\item LOGFILE={\tt filename} store prontouts in logfile
+\item MAXSTOR={\tt integer} sets the total number of time steps that
+will be kept in memory.  The default is 5000.  If you want to perform 
+very long integrations change this to some large number.  
+\item FORECOLOR={\tt rrggbb} sets the hexidecimal frame color, and text menu color.
+\item BACKCOLOR={\tt rrggbb} sets the background color on the menus, sliders, dialogs, and buttons
+\item MWCOLOR={\tt rrggbb}  sets the background color for the main frame in the popups.  
+\item DWCOLOR={\tt rrggbb} sets the color of the drawing window and the browser numerical displays
+\item BACKIMAGE={\tt file.xbm} sets the back image. The format is the not generally readily found X11-bitmap format. On the mac, you can use some unix tools like gimp, xv, or ImageMagick.  
+\item SMALLFONT={\tt fontname} where {\tt fontname} is some font available
+to your X-server.  This sets the ``small'' font which is used in the
+Data Browser and in some other windows.  
+\item BIGFONT={\tt fontname} sets the font for all the menus and popups.  
+\item SMC=\{0,...,10\} sets the stable manifold color. These colors correspond to the colors available when plotting in XPP and are roughly, {\tt ``black'',red,redorange,orange,yelloworange,yello,yellowgreen,green,bluegreen,blue,purple} Here ``black'' means the FORECOLOR.
+\item UMC=\{0,...,10\} sets the unstable manifold color
+\item XNC=\{0,...,10\} sets the X-nullcline color
+\item YNC=\{0,...,10\} sets the Y-nullcline color
+\item SEC,UEC,SPC,UPC=color set the colors for the screen on AUTO for stable eq, unstable eq, stable per, unstable per.
+\item OUTPUT=filename sets the filename to which you want to write for
+``silent'' integration.  The default is ``output.dat''. 
+
+\item GRADS=\{0,1\} turn off or on gradients in the XPP buttons </LI>
+\item HEIGHT=pixels,WIDTH=pixels, sets the height and width of the main window intially 
+\item RUNNOW=1 run the simulation as soon as the windows are up (Don't wait for Init conds Go, e.g.
+\item BUT=name:kbs defines button on the top of the main window. You
+can define up to 20 such buttons. They will appear across the top  when
+you press them, they will execute an XPP keyboard shortcut. For
+example,  {\bf BUT=Fit:wf} will create a button labeled {\bf Fit}
+and when you press it, it will be as if you had clicked {\bf 
+Window/zoom Fit}.  Most of the menu items are available.
+\end{itemize}
+
+The remaining options can be set from within the program. They are 
+
+\begin{itemize}\itemsep -.05in
+\item LT={\tt int} sets the linetype. It should be less than 2 and
+greater than -6. 
+\item SEED={\tt int} sets the random number generator seed. 
+ \item XP=name sets the name of the variable to plot on the x-axis.
+The default is {\tt T}, the time-variable.
+\item YP=name sets the name of the variable on the y-axis.
+\item ZP=name sets the name of the variable on the z-axis (if the plot
+is 3D.) 
+\item COLORMAP={\tt 0,1,2,3,4,5} sets the colormap
+\item NPLOT={\tt int} tells XPP how many plots will be in the opening
+screen. 
+\item XP2=name,YP2=name,ZP2=name tells XPP the variables on the axes
+of the second curve; XP8 etc are for the 8th plot. Up to 8 total plots
+can be specified on opening. They will be given different colors.  
+\item MULTIWIN={\tt 0,1}, puts multiple windows up and one each of the NPLOT curves in them. 
+\item SIMPLOT={\tt 0,1} turns on the simultaneous plot flag for multiple windows
+\item XHI2=value,YHI2=value,XLO2=value,YLO2=values dimensions the extra windows up to 8. 
+\item AXES={\tt \{2,3\}} determine whether a 2D or 3D plot will be
+displayed.
+\item COLORIZE=1,COLORVIA={\tt name}, COLORLO={\tt value}, COLORHI={\tt value} all set the colorization of trajectories and in the {\tt Numerics colorcode} command. If {\tt name} is {\tt speed}, then colorcoding will be via velocity.
+\item TOTAL=value sets the total amount of time to integrate the
+equations (default is 20).
+\item DT=value sets the time step for the integrator (default is 0.05).
+\item NJMP={\tt integer} tells XPP how frequently to output the
+solution to the ODE.  The default is 1, which means at each
+integration step.
+\item T0=value sets the starting time (default is 0). 
+\item TRANS=value tells XPP to integrate until {\tt T=TRANS} and then
+start plotting solutions (default is 0.)
+\item NMESH={\tt integer} sets the mesh size for computing nullclines
+(default is 40).
+\item DFGRID={\tt integer} sets the grid size for direction fields, flows etc (default is 10);
+\item METH={\tt \{
+discrete,euler,modeuler,rungekutta,adams,gear,volterra, backeul,
+qualrk,stiff,cvode,5dp,83dp,2rb,ymp\}}
+sets the integration method (default is Runge-Kutta.)
+\item DTMIN=value sets the minimum allowable timestep for the Gear
+integrator.
+\item DTMAX=value sets the maximum allowable timestep for the Gear
+integrator
+\item VMAXPTS=value sets the number of points maintained in for the
+Volterra integral solver. The default is 4000.
+\item \{ JAC\_EPS=value, NEWT\_TOL=value, NEWT\_ITER=value\} set
+parameters for the root finders.
+\item ATOLER=value sets the absolute tolerance for CVODE.
+\item TOLER=value sets the error tolerance for the Gear, adaptive RK,
+and stiff integrators. It is the relative tolerance for CVODE. 
+\item BOUND=value sets the maximum bound any plotted variable can
+reach in magnitude. If any plottable quantity exceeds this, the
+integrator will halt with a warning.  The program will not stop
+however (default is 100.)
+\item DELAY=value sets the maximum delay allowed in the integration
+(default is 0.)
+\item BANDUP={\tt int}, BANDLO={\tt int} bandwidths for the Jacobian computation. 
+\item PHI=value,THETA=value set the angles for the three-dimensional
+plots.
+\item XLO=value,YLO=value,XHI=value,YHI=value set the limits for
+two-dimensional plots (defaults are 0,-2,20,2 respectively.) Note that
+for three-dimensional plots, the plot is scaled to a cube with
+vertices that are $\pm1$ and this cube is rotated and projected onto
+the plane so setting these to $\pm2$ works well for 3D plots.
+\item
+XMAX=value, XMIN=value, YMAX=value, YMIN=value, ZMAX=value, ZMIN=value set
+the scaling for three-d plots.
+\item POIMAP={\tt \{ section,maxmin, period\} } sets up a Poincare map for
+either sections of a variable, the extrema, or period.  
+\item POIVAR=name sets the variable name whose section you are
+interested in finding.
+\item POIPLN=value is the value of the section; it is a floating
+point.
+\item POISGN={\tt \{ 1, -1, 0 \}} determines the direction of the
+section.  
+\item POISTOP=1 means to stop the integration when the section is
+reached.
+\item RANGE=1 means that you want to run a range integration (in batch
+mode). 
+\item RANGEOVER=name, RANGESTEP=number, RANGELOW=number, RANGEHIGH=number,
+  RANGERESET={\tt Yes,No}, RANGEOLDIC={\tt Yes,No} all correspond to 
+the entries in the range integration option.
+\item TOR\_PER=value, defined the period for a toroidal phasespace and
+tellx XPP that there will be some variables on the circle.
+\item FOLD=name, tells XPP that the variable <name> is to be
+considered modulo the period.  You can repeat this for many variables.
+\item PS\_Font={\tt fontname},PS\_LW={\tt linewidth},PS\_FSIZE={\tt fontsize},PS\_COLOR={\tt 0,1} sets up postscript options.
+\item S1={\tt name}, SLO1={\tt number},SHI1={\tt number} sets the variables, parameters associated with a slider and their low and high values. Use S2,S3 for the other sliders
+\item STOCH={\tt 1,2} set the stochastic flag. Set up a range and use this to compute the mean etc of an ensemble of trajectories for batch mode integration. 1 returns the mean and 2 the variance.
+\item POSTPROCESS={\tt 1,2,3,4,5,6} is for batch integration and allows you to process your data as follows: 1-histogram, 2-Fourier,3-Power,4-Power spectral density, 5-cross spectrum, 6-coherence.
+\item HISTHI={\tt number},HISTLO={\tt number},HISTBINS={\tt number}, HISTCOL={\tt variable name}, sets up the relevant quantitues for a batch histogram; used in conjunction with POSTPROCESS.
+\item SPECCOL={\tt name}, SPECCOL2={\tt name}, SPECWIDTH={\tt number}, SPECWIN={\tt 0,1,2,3,4} (corresponding to square,parabolic,hamming,bartlett, or hanning windows), sets up relevant spectral stuff for use in conjunction with postprocessing.
+\item AUTO-stuff. The following AUTO-specific variables can also be
+set: {\tt NTST, NMAX, NPR, DSMIN, DSMAX, DS, PARMIN, PARMAX, NORMMIN,
+NORMMAX, AUTOXMIN, AUTOXMAX, AUTOYMIN, AUTOYMAX, AUTOVAR}.  The last
+is the variable to plot on the y-axis. The x-axis variable is always
+the first parameter in the ODE file unless you change it within AUTO. 
+\item DLL\_LIB={\tt file} Dynamically linked library
+\item  DLL\_FUN={\tt name} Dynamically linked function.
+\item DFDRAW ={\tt 1, 2, or 3} will force the drawing of direction fields on batch plots; 1 is unscaled, 2 is scaled, and 3 is colorized.
+\item NCDRAW={\tt 1} forces the drawing of nullclines in batch plots
+\end{itemize}
+
+\bigskip 
+\noindent {\bf COLOR MEANING} 0-Foreground color; 1-Red; 2-Red Orange; 3-Orange;
+4-Yellow Orange; 5-Yellow; 6-Yellow Green; 7-Green; 8-Blue Green; 9-Blue;
+10-Purple.
+
+\bigskip
+\noindent {\bf KEYWORDS}
+You should be aware of the following
+keywords that should not be used in your ODE files for anything other
+than their meaning here.
+\begin{verbatim}
+sin cos tan atan atan2 sinh cosh tanh
+exp delay ln log log10 t pi if then else
+asin acos heav sign mod flr ran abs del\_shft 
+max min normal besselj bessely besseli erf erfc poisson
+lgamma arg1 ... arg9  @ $ + - / * ^ ** shift
+| > < == >= <= != not \# int sum of i'
+\end{verbatim}
+
+
+
+
+These are mainly self-explanatory. The nonobvious ones are:
+\begin{itemize}\itemsep -.05in
+\item {\tt heav(arg1)} the step function, zero if {\tt arg1<0} and 1 otherwise.
+\item {\tt sign(arg)} which is the sign of the argument (zero has sign 0)
+\item {\tt ran(arg)} produces a uniformly distributed random number
+between 0 and {\tt arg.}
+\item {\tt besselj, bessely, besseli  } take two arguments, $n,x$ and return
+$J_n(x)$ $Y_n(x),I_n(x)$ the Bessel functions.
+\item { \tt erf(x), erfc(x)} are the error function and the
+complementary function. 
+\item {\tt lgamma(x)} is the log of the gamma function. 
+\item {\tt normal(arg1,arg2)} produces a normally distributed random number
+with mean {\tt arg1}  and variance {\tt arg2}.
+\item {\tt poisson(arg)} produces the number of events from a Poisson process with parameter {\tt arg}.  It is a random number.  
+\item {\tt max(arg1,arg2)} produces the maximum of the two arguments
+and {\tt min}  is 
+the minimum of them.
+\item {\tt if(<exp1>)then(<exp2>)else(<exp3>)} evaluates {\tt <exp1> }
+If it is nonzero 
+it evaluates to {\tt <exp2>} otherwise it is { \tt <exp3>}.  E.g. {\tt if(x>1)then(ln(x))else(x-1)}
+will lead to {\tt ln(2)}  if {\tt x=2}  and { \tt -1 if x=0.}
+\item {\tt delay(<var>,<exp>)} returns variable {\tt <var>} delayed by the result of
+ evaluating {\tt <exp>}.  In order to use the delay you must inform
+the program of the maximal possible delay so it can allocate storage.
+\item {\tt del\_shft(<var>,<shft>,<delay>).} This operator combines the
+{\tt delay} and the {\tt shift} operators and returns the value of the
+variable {\tt <var>} shifted by {\tt <shft>} at the delayed time given
+by {\tt <delay>}.
+\item {\tt mod(arg1,arg2)} is {\tt arg1} modulo {\tt arg2}
+\item {\tt  flr(arg)}  is the integer part of{\tt  <arg>} returning the largest integer less than {\tt <arg>}.  
+\item  {\tt t } is the current time in the integration of the differential equation.
+\item {\tt  pi}  is $\pi.$ 
+\item {\tt arg1, ..., arg9} are the formal arguments for functions 
+\item {\tt int, \#} concern Volterra equations.
+\item {\tt shift(<var>,<exp>)} This operator evaluates the expression
+{\tt <exp>} converts it to an integer and then uses this to indirectly
+address a variable whose address is that of {\tt <var>} plus the
+integer value of the expression.  This is a way to imitate arrays in
+XPP.  For example if you defined the sequence of 5 variables, {\tt
+u0,u1,u2,u3,u4} one right after another, then {\tt shift(u0,2)} would
+return the value of {\tt u2.} 
+\item {\tt sum(<ex1>,<ex2>)of(<ex3>)} is a way of summing up things.
+The expressions {\tt <ex1>,<ex1>} are evaluated and their integer
+parts are used as the lower and upper limits of the sum.  The index of
+the sum is {\tt i'} so that you cannot have double sums since there is
+only one index.  {\tt <ex3>} is the expression to be summed and will
+generally involve {\tt i'.}  For example  {\tt sum(1,10)of(i')} will
+be evaluated to 55.  Another example combines the sum with the shift
+operator.  {\tt sum(0,4)of(shift(u0,i'))} will sum up {\tt u0} and the
+next four variables that were defined after it.  
+\end{itemize}
+
+
+
+
+\medskip
+\noindent Add a {\tt .xpprc} file to set your favorite options, e.g
+\begin{verbatim}
+@ bell=0,grads=0,dwcolor=eeddff
+@ bigfont=lucidasanstypewriter-bold-14
+\end{verbatim}
+
+\medskip
+
+\begin{center} {\large Command line arguments}\end{center}
+
+\medskip
+There are many command line arguments for Xpp.  While some options affect the appearance of the GUI, other options provide an API for Xpp.  Using the API, other programs or scripts can interact with Xpp in a batch mode.  This can be useful for processing many files or runs. 
+
+The command line arguments are: 
+\begin{description}
+\item{-xorfix} This changes the way rubber-band drawing for zooms and
+other things is done. If you do not see a box when you zoom in, you
+should run XPP with this argument.
+\item{-convert}  This allows you to convert old style parser format to
+the new style which is much more readable. The program creates a file
+with the same name as the input file but with the extension {\tt .new}
+appended. It works on on the examples I have tried but it is still in
+beta testing.
+\item{-silent} This allows you to run XPP's integrators without using
+the X-windows stuff.  The result of the integration is saved to a file
+called ``output.dat'' but this can be changed. The length of
+integration, methods, Poincare sections, etc, are all specified in
+either the options file (see section \ref{optfiles})
+ or in the internal options. Note that when you run a range integration
+in silent mode, if the parameter {\tt RANGERESET} is {\tt yes} (the default) 
+then a new output file will be opened for each integration. Thus, if you range 
+over 50 values, you will get 50 output files named e.g. {\tt output.dat.0}, 
+{\tt output.dat.1}, etc. If you have set {\tt RANGERESET=no}, then only
+one file is produced.
+\item{-allwin} tells XPP to make the parameter window, browser, etc
+immediately visible.
+\item{-setfile {\bf filename}} loads the setfile, {\bf setfile} after
+loading up the  ODE file.
+\item{-newseed} uses the machine time to re-seed the random number
+generator. 
+\item{-ee} makes the TAB and RETURN in dialogs act like those in
+Windoze. By default, they are reversed.  
+%NEW OPTIONS HERE...
+\item{-white} This swaps foreground and background colors. 
+\item{-runnow} This runs ode file immediately upon startup (implied by -silent)
+\item{-bigfont \emph{font}} This uses the big font whose name is given. Note:  On  typical  X  Window  installations the command xlsfonts lists
+       available fonts.  For example, the following  command  lists  only  the
+       available fixed width fonts:
+\begin{center}\ttfamily\begin{minipage}{55ex}
+              xlsfonts \textbar~ grep -i -e "typewriter" \textbackslash \\
+                     $~~$ -e "mono" -e "\^[0-9]x[0-9]" \textbackslash \\
+                     $~~$ -e "fixed" -e "-c-" -e "-m-" \textbar~ sort
+\end{minipage}\end{center}
+Since X fonts often have long unwieldy names wildcards may be used.  For example, the font with the name
+\begin{center}\ttfamily
+	-b\&h-lucidatypewriter-medium-r-normal-sans-24-240-75-75-m-140-iso10646-1
+\end{center}
+may be specified more simply by using wildcards
+\begin{center}\ttfamily
+*lucidatypewriter*sans*24*
+\end{center}
+\item{-smallfont \emph{font}} This uses the small font whose name is given.
+\item{-parfile \emph{filename}} This loads parameters from the named file.The format for a {\ttfamily{.par}} file is illustrated below for {\ttfamily{lecar.ode}} (found in the examples {\ttfamily{/ode}} folder).  The first line must give the number of parameters specified in the file followed by {\ttfamily{Number params}}.  Each parameter value is given on a separate line and followed by its name which must be the same as a parameter name in the {\ttfamily{.ode}} file. 
+\begin{center}
+\begin{minipage}{55ex}
+\begin{center}An Example {\ttfamily{lecar.par}}:
+\end{center}\ttfamily
+\begin{tabular}{ll}
+\multicolumn{2}{l}{12 Number params}\\
+0.0 & iapp\\
+.333 & phi\\
+-.01 & v1\\
+0.15 & v2\\
+0.1 & v3\\
+0.145 & v4\\
+1.33 & gca\\
+-.7 & vk\\
+-.5 & vl\\
+2.0 & gk\\
+.5 & gl\\
+1 & om
+\end{tabular}
+\end{minipage}
+\end{center}
+\item{-outfile \emph{filename}} This sends output to this file (default is output.dat).  The format for an {\ttfamily{.out}} file is illustrated below for {\ttfamily{lecar.ode}} (found in the examples {\ttfamily{/ode}} folder).  Note that the first column is reserved for time values while the remaining columns correspond to the ordered variables defined in the {\ttfamily{.ode}} file.  
+\begin{center}
+\begin{minipage}{55ex}
+\begin{center}An Example {\ttfamily{lecar.out}}:
+\end{center}\ttfamily
+\begin{tabular}{lll}
+0 & -0.36059999 & 0.0911 \\
+0.050000001 & -0.36620989 & 0.087350026 \\ 
+0.1 & -0.3715646 & 0.083690271 \\
+0.15000001 & -0.37667379 & 0.080124266 \\ 
+0.2 & -0.38154718 & 0.076654971 \\
+0.25 & -0.38619456 & 0.073284775 \\ 
+\vdots & \vdots & \vdots\\
+\end{tabular}
+\end{minipage}
+\end{center}
+The first corresponds to time, the second column to the first variable in the {\ttfamily{lecar.ode}} file, which is $V$, and the thrid column corresponds to the second variable in the {\ttfamily{.ode}} file, which is $W$. 
+\item{-icfile \emph{filename}} This loads initial conditions from the named file. Initial conditions are expected for any variables which include differential equation, Wiener, and Markov variables.  The format for an {\ttfamily{.ic}} file is illustrated below for {\ttfamily{lecar.ode}} (found in the examples {\ttfamily{/ode}} folder).  
+\begin{center}
+\begin{minipage}{55ex}
+\begin{center}An Example {\ttfamily{lecar.ic}}:
+\end{center}\ttfamily
+\begin{tabular}{l}
+-0.3606\\
+0.0911 \\
+\end{tabular}
+\end{minipage}
+\end{center}
+The first initial condition will be mapped to the first variable in the {\ttfamily{lecar.ode}} file, which is $V$, and the second value will be mapped to the second variable in the {\ttfamily{.ode}} file, which is $W$. 
+\item{-forecolor \emph{color}} This sets the hexadecimal color (e.g. 000000) for foreground in the GUI.
+\item{-backcolor \emph{color}} This sets the hexadecimal color (e.g. EDE9E3) for background in the GUI.
+\item{-mwcolor \emph{color}} This sets the hexadecimal color (e.g. 808080) for the main window in the GUI.
+\item{-dwcolor \emph{color}} This sets the hexadecimal color (e.g. FFFFFF) for the drawing window in the GUI.
+\item{-backimage \emph{filename}} This sets the name of bitmap file (.xbm) to tile in background. Several .xbm files are included 
+in the Xpp installation folders, but you may also create your own. 
+\begin{center}\begin{minipage}{65ex}
+For example, the following text saved to a file named {\ttfamily{stipple2.xbm}}
+can be loaded to impart a stippled background.
+\begin{center}\ttfamily\begin{minipage}{40ex}
+\#define stipple2\_width 2 \\
+\#define stipple2\_height 2 \\
+static char stipple2\_bits[] = \{ \\
+$~~$ 0x02,0x01\};
+\end{minipage}\end{center}
+\end{minipage}\end{center}
+\item{-grads \emph{B}} This specifies if color gradients will (B=1) or will not (B=0) be used in the GUI buttons.
+\item{-width  \emph{N}} This specifies this minimum width in pixels of main window of the GUI. The value $N$ should be an integer no larger than your screen's physical width.
+\item{-height \emph{N}} This specifies this minimum height in pixels of main window of the GUI. The value $N$ should be an integer no larger than your screen's physical height.              
+\item{-bell \emph{B}} This determines if the system bell on events will (B=1) or will not (B=0) be used.  This can be especially useful
+for users requiring increased visiblilty or to assist people with disabilities.  In addition, most OS can be configured to use a ``visual beep''
+so that the screen will \emph{flash} on certain Xpp events. 
+\item{-internset \emph{B}} This specifies that internal sets will (B=1) or will not (B=0) be run during batch run
+\item{-uset \emph{setname}}  This names an internal set to be run during batch run.  Multiple -uset can be given on the same command line.
+\item{-rset \emph{setname}} This names an internal set that should \underline{not} be run during batch run. Multiple -rset can be given on the same command line.
+\item{-include \emph{filename}} This names a file which will be included along with the selected {\ttfamily{.ode}} file (see {\ttfamily{include}} directive in {\ttfamily{.ode}} file format).
+\item{-qsets} This simply queries the names of internal sets and the results are saved to OUTFILE.  This feature can allow 
+external programs or scipts to access information about an .ode model. 
+\item{-qpars} This simply queries the  parameters and the results are saved to OUTFILE.  This feature can allow 
+external programs or scipts to access information about an .ode model.
+\item{-qics} This simply queries the initial conditions and the results are saved to OUTFILE.  This feature can allow 
+external programs or scipts to access information about an .ode model.          
+ \item{-quiet \emph{B}}  This specifies that verbose log messages will (B=0) or will not be (B=1) written
+\item{-logfile \emph{filename}} This names the file to which verbose log messages are written. 
+\item{-anifile \emph{filename}} This loads an Xpp animation (.ani) from the named file at start-up.  This can be useful for
+teaching demonstrations.
+\item{-mkplot} This is used in conjunction with the -silent option and will produce a plot that has an appropriate name. (It will be named after the ODE file if only one plot is to be produced; otherwise, a number will be appended.) The plot types are currently SVG and PS (Postscript is default).
+\item {-noout} will not write an output data file in batch mode. Use this along with -mkplot to supress the generation of data.
+\item {-plotfmt} \emph{ps|svg} sets the plot type format to be  postscript or SVG.
+\item{-version} This outputs the version of Xpp.
+\end{description}
+The only other thing on the command line should be the file name.  
+Thus, 
+\begin{verbatim}
+xppaut test.ode -xorfix -convert
+\end{verbatim}
+will convert {\tt test.ode} to the new format and run it with the {\tt
+xorfix}.
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+

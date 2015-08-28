@@ -1,0 +1,43 @@
+File: ode/lecar.ode 
+
+ Equations... 
+dV/dT=(IAPP+GL*(VL-V)+GK*W*(VK-V)-ICA)
+dW/dT=(LAMN(V)*(NINF(V)-W))
+
+where ...
+ICA = GCA*MINF(V)*(V-1)   
+
+User-defined functions:
+MINF(V) = .5*(1+TANH((V-V1)/V2))  
+NINF(V) = .5*(1+TANH((V-V3)/V4))  
+LAMN(V) =  PHI*COSH((V-V3)/(2*V4))  
+
+
+ Numerical parameters ...
+NJMP=1  NMESH=40 METHOD=Runge-Kutta EVEC_ITER=100 
+BVP_EPS=1e-05,BVP_TOL=1e-05,BVP_MAXIT=20 
+DT=0.05 T0=0 TRANS=0 TEND=30 BOUND=100 DELAY=0 MaxPts=4000
+EVEC_ERR=0.001, NEWT_ERR=0.001 HMIN=1e-12 HMAX=1 TOLER=0.001 
+POIMAP=0 POIVAR=V POIPLN=0 POISGN=1 
+
+
+ Delay strings ...
+0.0
+0.0
+
+
+ BCs ...
+0=0
+0=0
+
+
+ ICs ...
+V=1
+W=0.006970866560677969
+
+
+ Parameters ...
+iapp=0.2   phi=0.333   v1=-0.01   v2=0.15   
+v3=0.1   v4=0.145   gca=1   vk=-0.7   
+vl=-0.5   gk=2   gl=0.5   om=1   
+

@@ -1,0 +1,11 @@
+# damped pendulum pend.ode
+dx/dt = xp
+dxp/dt = (-mu*xp-m*g*sin(x))/(m*l)
+param m=10,mu=2,g=9.8,l=1
+param scale=0.0083333
+# some stuff for the animator
+th(x,y)=atan2(x-.5,.5-y)
+thdot(x,y,xp,yp)=(xp*(.5-y)+yp*(x-.5))/((x-.5)^2+(y-.5)^2)
+# use pendx.ani
+@ bounds=100000
+done

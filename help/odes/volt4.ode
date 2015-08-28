@@ -1,0 +1,3 @@
+# singular integral equation
+u(t)=exp(-t)-int[.25]{exp(-t)#sin(u)}
+done

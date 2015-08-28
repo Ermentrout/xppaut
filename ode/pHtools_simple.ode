@@ -1,0 +1,8 @@
+#Demonstrates basic syntax of the module
+#We create a buffer calculate its initial pH and then exit
+
+mksol mysol
+addtosol mysol {'Lactic',0.01,'Malic',0.01,'NaBenzoate',0.01}
+pHsol mysol pH pHrhs
+
+done
