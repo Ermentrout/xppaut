@@ -484,6 +484,7 @@ if(XPPBatch){
      if_needed_load_par();
      if_needed_load_ic();
      if_needed_select_sets();
+     if_needed_load_ext_options();
      set_extra_graphs();
        set_colorization_stuff();
 
@@ -537,7 +538,7 @@ test_color_info();
   if_needed_load_set();
   if_needed_load_par();
   if_needed_load_ic();
-  
+  if_needed_load_ext_options();
 if(use_ani_file)
 {
 	new_vcr();

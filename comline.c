@@ -7,7 +7,7 @@
 #include <string.h>
 /* command-line stuff for xpp */
 #include <stdio.h>
-#define NCMD 42 /* add new commands as needed  */
+#define NCMD 43 /* add new commands as needed  */
 
 #define MAKEC 0
 #define XORFX 1
@@ -51,6 +51,7 @@
 #define DFDRAW 39
 #define NCDRAW 40
 #define DEFINE 41
+#define READSET 42
 
 extern OptionsSet notAlreadySet;
 
@@ -74,7 +75,8 @@ char parfilename[XPP_MAX_NAME];
 char icfilename[XPP_MAX_NAME];
 char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
 
-
+char readsetfile[XPP_MAX_NAME];
+int externaloptionsflag=0;
 int NincludedFiles=0;
 extern char UserBlack[8];
 extern char UserWhite[8];
@@ -178,10 +180,11 @@ VOCAB my_cmd[NCMD]=
   {"-version",8},
   {"-mkplot",7},
   {"-plotfmt",8},
-  {"-noout",5},
+  {"-noout",6},
   {"-dfdraw",7},
   {"-ncdraw",7},
-  {"-def",3}
+  {"-def",4},
+  {"-readset",8},
  };
 
 
@@ -420,11 +423,35 @@ int argc;
      set_option("NCDRAW",argv[i+1],1,NULL);
      i++;
    }
+   if(k==28){
+     strcpy(readsetfile,argv[i+1]);
+     i++;
+     externaloptionsflag=1;
+
+   }
   
  }
 }
 
 
+int if_needed_load_ext_options()
+{
+  FILE *fp;
+  char myopts[1024];
+  /*   printf("flag=%d file=%s\n",externaloptionsflag,readsetfile); */
+  if(!externaloptionsflag)
+    return 1;
+  fp=fopen(readsetfile,"r");
+  if(fp==NULL){
+    plintf("%s external set not found\n",readsetfile);
+    return 0;
+  }
+  fgets(myopts,1024,fp);
+  plintf("Got this string: {%s}\n",myopts);
+  extract_action(myopts);
+  fclose(fp);
+  return 1;
+}
 int if_needed_select_sets()
 {
 	if(!select_intern_sets){return 1;}
@@ -607,6 +634,8 @@ int parse_it(com)
       return 26;
     case NCDRAW:
       return 27;
+    case READSET:
+      return 28;
     case QSETS:
       XPPBatch=1;
       querysets=1;
@@ -665,9 +694,9 @@ int parse_it(com)
      plintf("  -plotfmt <svg|ps>       Set Batch plot format\n");
      plintf("  -mkplot                Do a plot in batch mode \n");
      plintf(" -ncdraw 1               Draw nullclines in batch \n");
-         plintf(" -dfdraw <1|2>       Draw dfields in batch  \n");
+     plintf(" -dfdraw <1|2>       Draw dfields in batch  \n");
      plintf("  -version               Print XPPAUT version and exit \n");
-     
+     plintf("  -readset <filename>   Read in a set file like the internal sets\n");
      plintf("\n");
 
      plintf("Environment variables:\n");

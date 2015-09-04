@@ -24,6 +24,7 @@ int if_needed_select_sets(void);
 int if_needed_load_set(void);
 int if_needed_load_par(void);
 int if_needed_load_ic(void);
+int if_needed_load_ext_options(void);
 int parse_it(char *com);
 
 

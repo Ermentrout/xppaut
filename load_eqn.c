@@ -818,9 +818,9 @@ void add_intern_set(name,does)
 void extract_action(char *ptr)
 {
   char name[256],value[256];
- char tmp[512];
+ char tmp[2048];
   char *junk,*mystring;
-  /* plintf("ptr=%s \n",ptr); */
+  /* plintf("ptr=%s \n",ptr);  */
   strcpy(tmp,ptr);
   junk=get_first(tmp," ");
   if (junk == NULL)
