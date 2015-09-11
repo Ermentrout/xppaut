@@ -516,8 +516,8 @@ int add_spec_fun(name,rhs)
        init_net(my_net[ind].values,ntot);
     my_net[ind].weight=my_table[iwgt].y;
     my_net[ind].type=ntype;
-    my_net[ind].root=ivar;
-    my_net[ind].root2=ivar2;
+    my_net[ind].root=my_net[ind].f[0]; /* this is strange - I am adding the compiled names */
+    my_net[ind].root2=my_net[ind].f[1];
     my_net[ind].n=ntot;
     my_net[ind].ncon=ncon;
     plintf(" Added net %s type %d len=%d x %d using %s %s(var[%d],var[%d]) \n",
@@ -596,8 +596,8 @@ int add_spec_fun(name,rhs)
     my_net[ind].index=my_table[iind].y;
 
     my_net[ind].type=ntype;
-    my_net[ind].root=ivar;
-    my_net[ind].root2=ivar2;
+    my_net[ind].root=my_net[ind].f[0]; /* this is strange - I am adding the compiled names */
+    my_net[ind].root2=my_net[ind].f[1];
     my_net[ind].n=ntot;
     my_net[ind].ncon=ncon;
     plintf(" Sparse %s len=%d x %d using %s %s(var[%d],var[%d]) and %s\n",
@@ -772,13 +772,16 @@ int add_spec_fun(name,rhs)
       plintf(" bad function %s \n",fname);
       return 0;
     }
+    /*for(i=0;i<elen;i++)
+      printf("%d %d \n",i,my_net[ind].f[i]);
+    */
     my_net[ind].values=(double *)malloc((ncon+1)*sizeof(double));
     init_net(my_net[ind].values,ncon);
     my_net[ind].weight=my_table[iwgt].y;
 
     my_net[ind].type=ntype;
-    my_net[ind].root=ivar;
-    my_net[ind].root2=ivar2;
+    my_net[ind].root=my_net[ind].f[0]; /* this is strange - I am adding the compiled names */
+    my_net[ind].root2=my_net[ind].f[1];
     my_net[ind].n=ncon;
     my_net[ind].ncon=ntot;
     plintf(" Added fmmult %s len=%d x %d using %s %s(var[%d],var[%d])\n",
@@ -1158,13 +1161,14 @@ int ind;
    int n=my_net[ind].n,*f;
    int ncon=my_net[ind].ncon;
    double *w,*y,*cc,*values,*yp,*tau;
-   int twon=2*n,root2=my_net[ind].root2;
+   int twon=2*n,root=my_net[ind].root,root2=my_net[ind].root2;
    cc=my_net[ind].index;
    w=my_net[ind].weight;
    values=my_net[ind].values;
-   y=&variables[my_net[ind].root];
+   /*  y=&variables[my_net[ind].root]; */
    switch(my_net[ind].type){
    case FINDEXT:
+     y=&variables[root];
      mmt=my_net[ind].iwgt;
      skip=ncon;
      imax=0;
@@ -1212,6 +1216,7 @@ int ind;
      one_gill_step(my_net[ind].iwgt,my_net[ind].root,my_net[ind].gcom,my_net[ind].values);
      break;
    case CONVE:
+     y=&variables[root];
      for(i=0;i<n;i++){
        sum=0.0;
        for(j=-ncon;j<=ncon;j++){
@@ -1225,7 +1230,7 @@ int ind;
      }
      break;
      case CONV0:
-
+     y=&variables[root];
      for(i=0;i<n;i++){
        sum=0.0;
        for(j=-ncon;j<=ncon;j++){
@@ -1237,6 +1242,7 @@ int ind;
      }
      break;
      case CONVP:
+     y=&variables[root];
      for(i=0;i<n;i++){
        sum=0.0;
        for(j=-ncon;j<=ncon;j++){
@@ -1247,11 +1253,12 @@ int ind;
      }
      break;
    case FFTCONP:
+     y=&variables[root];
     fft_conv(0,n,values,y,my_net[ind].fftr,my_net[ind].ffti,my_net[ind].dr,my_net[ind].di);
     break;
    
    case FFTCON0:
-           
+     y=&variables[root];           
       fft_conv(1,n,values,y,my_net[ind].fftr,my_net[ind].ffti,my_net[ind].dr,my_net[ind].di);
     break;
 
@@ -1271,6 +1278,7 @@ int ind;
      }
      break;
    case MMULT:
+     y=&variables[root];
      for(j=0;j<n;j++){
        sum=0.0;
        for(i=0;i<ncon;i++){
@@ -1295,6 +1303,7 @@ int ind;
      }  
       break;
    case SPARSE:
+     y=&variables[root];
      for(i=0;i<n;i++){
        sum=0.0;
        for(j=0;j<ncon;j++){
@@ -1310,17 +1319,16 @@ int ind;
      /*     f stuff  */           
    case FCONVE:
      f=my_net[ind].f;
-     yp=&variables[root2];
+
      for(i=0;i<n;i++){
        sum=0.0;
-       /*f[3]=(int)(&yp[i]);*/
-       f[3]=lround(yp[i]);
+       f[1]=root+i;
        for(j=-ncon;j<=ncon;j++){
 	 k=abs(i+j);
 	 if(k<twon){
 	   if(k>=n)k=abs(twon-2-k);
-           /*f[1]=(int)(&y[k]);*/
-	   f[1]=lround(y[k]);
+           f[0]=root2+k;
+
 	   z=evaluate(f);
 	   sum+=(w[j+ncon]*z);
 	 }
@@ -1330,16 +1338,15 @@ int ind;
      break;
    case FCONV0:
      f=my_net[ind].f;
-     yp=&variables[root2];
+     
      for(i=0;i<n;i++){
        sum=0.0;
-       /*f[3]=(int)(&yp[i]);*/
-       f[3]=lround(yp[i]);
+       f[1]=root+i;
        for(j=-ncon;j<=ncon;j++){
 	 k=i+j;
 	 if(k<n&&k>=0){
-	   /*f[1]=(int)(&y[k]);*/
-	   f[1]=lround(y[k]);
+	
+	   f[0]=root2+k;
 	   z=evaluate(f);
 	   sum+=(w[j+ncon]*z);
 	 }
@@ -1349,15 +1356,13 @@ int ind;
      break;
    case FCONVP:
      f=my_net[ind].f;
-     yp=&variables[root2];
+
      for(i=0;i<n;i++){
-       /*f[3]=(int)(&yp[i]);*/
-       f[3]=lround(yp[i]);
+       f[1]=root+i;
        sum=0.0;
        for(j=-ncon;j<=ncon;j++){
 	 k=((twon+i+j)%n);
-	 /*f[1]=(int)(&y[k]);*/
-	 f[1]=lround(y[k]);
+	 f[0]=root2+k;
 	 z=evaluate(f);
 	 sum+=(w[j+ncon]*z);
        }
@@ -1366,17 +1371,15 @@ int ind;
      break;
    case FSPARSE:
      f=my_net[ind].f;
-     yp=&variables[root2];
+
      for(i=0;i<n;i++){
-       /*f[3]=(int)(&yp[i]);*/
-       f[3]=lround(yp[i]);
+       f[1]=root+i;
        sum=0.0;
        for(j=0;j<ncon;j++){
 	 ij=i*ncon+j;
 	 k=(int)cc[ij];
          if(k>=0){
-	   /*f[1]=(int)(&y[k]);*/
-	   f[1]=lround(y[k]);
+	   f[0]=root2+k;
 	   z=evaluate(f);
 	   sum+=(w[ij]*z);
 	 }
@@ -1386,19 +1389,22 @@ int ind;
      break;
    case FMMULT:
      f=my_net[ind].f;
-     yp=&variables[root2];
+
      for(j=0;j<n;j++){
-       /*f[3]=(int)(&yp[j]);*/
-       f[3]=lround(yp[j]);
+
+       f[1]=root+j;
+
        sum=0.0;
        for(i=0;i<ncon;i++){
 	 ij=j*ncon+i;
-	 /*f[1]=(int)(&y[i]);*/
-	 f[1]=lround(y[i]);
+
+         f[0]=root2+i;
+         
 	 z=evaluate(f);
+
 	 sum+=(w[ij]*z);
        }
-       
+
        values[j]=sum;
      }
      break;
