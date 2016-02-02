@@ -1,4 +1,0 @@
-x'=a*int{exp(-(t-t0)^2)#x*(1-x)}
-par a=2.5,t0=1
-init x=.2
-done
