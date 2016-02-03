@@ -2350,7 +2350,7 @@ poi:    for(i=0;i<NEQ;i++)oldx[i]=x[i];
      
           if(!(fabs(*t)<TRANS)&&Xup)
 	  {
-             plot_the_graphs(xv,xvold,NODE,NEQ,fabs(dt*NJMP),torcross);
+	    plot_the_graphs(xv,xvold,NODE,NEQ,fabs(dt*NJMP),torcross,0);
 
 	  }
 
@@ -2494,7 +2494,7 @@ int ip,np=MyGraph->nvars;
 }
 	
 
-void plot_the_graphs(float *xv,float *xvold,int node,int neq,double ddt,int *tc)
+void plot_the_graphs(float *xv,float *xvold,int node,int neq,double ddt,int *tc,int flag)
 {
   int i;
   int ic=current_pop;
@@ -2505,10 +2505,10 @@ void plot_the_graphs(float *xv,float *xvold,int node,int neq,double ddt,int *tc)
  
  
  for(i=0;i<num_pops;i++){
-     make_active(ActiveWinList[i]);
+   make_active(ActiveWinList[i],flag);
      plot_one_graph(xv,xvold,node,neq,ddt,tc);
  }
- make_active(ic);
+ make_active(ic,flag);
 }
 
 void plot_one_graph(float *xv,float *xvold,int node,int neq,double ddt,int *tc)

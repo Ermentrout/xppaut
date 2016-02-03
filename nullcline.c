@@ -29,11 +29,14 @@
 #define DING ping
 #define MAX_NULL 10000
 
+int OutPutNC=0;
 extern int SuppressBounds;
 extern GRAPH *MyGraph;
 extern int PltFmtFlag;
 extern FILE *svgfile;
 
+int NCSuppress=0;
+int DFSuppress=0;
 int DFBatch=0;
 int NCBatch=0;
 extern int XPPBatch;
@@ -54,7 +57,7 @@ int NULL_HERE,num_x_n,num_y_n,num_index,
 float null_dist,*X_n,*Y_n,*saver,*NTop,*NBot;
 extern int NMESH,NODE,NJMP,NMarkov,FIX_VAR,NEQ;
 float fnull();
-int DF_GRID=10,DF_FLAG=0,DF_IX=-1,DF_IY=-1;
+int DF_GRID=16,DF_FLAG=0,DF_IX=-1,DF_IY=-1;
 int DFIELD_TYPE=0;
 
 int DOING_DFIELD=0;
@@ -92,8 +95,34 @@ void froz_cline_stuff_com(int i)
   }
  }
 
-	
+
+void silent_dfields()
+{
+  
+  if(DFBatch==5 ||DFBatch==4){
+    DFSuppress=1;
+    init_ps();
+    do_batch_dfield();
+    DFSuppress=0;
+  }
+}	
 		 
+void silent_nullclines()
+{
+  FILE *fp;
+  if(NCBatch!=2)return;
+  NCSuppress=1;
+  new_clines_com(0);
+  fp=fopen("nullclines.dat","w");
+  if(fp==NULL){
+    plintf("Cannot open nullcline file\n");
+    return;
+  }
+  dump_clines(fp,X_n,num_x_n,Y_n,num_y_n);
+  fclose(fp);
+  NCSuppress=0;
+}
+
 
 void do_range_clines()
 {
@@ -376,11 +405,16 @@ void get_max_dfield(y,ydot,u0,v0,du,dv,n,inx,iny,mdf)
 }
 /*  all the nifty 2D stuff here    */
 
+
 void do_batch_nclines()
 {
   if(!XPPBatch)return;
   if(!NCBatch)return;
-  new_clines_com(0); 
+  if(NCBatch==1){
+    new_clines_com(0);
+    return;
+  }
+  
 }
 void set_colorization_stuff()
 {
@@ -413,6 +447,21 @@ void do_batch_dfield()
     DF_IY=MyGraph->yv[0];
     redraw_dfield();
     return;
+
+   case 4:
+    DF_FLAG=1;
+    DFIELD_TYPE=1;
+    DF_IX=MyGraph->xv[0];
+    DF_IY=MyGraph->yv[0];
+    redraw_dfield();
+    return;
+  case 5:
+    DF_FLAG=1;
+    DFIELD_TYPE=0;
+    DF_IX=MyGraph->xv[0];
+    DF_IY=MyGraph->yv[0];
+    redraw_dfield();
+    return;
   }
 }
 void redraw_dfield()
@@ -422,7 +471,7 @@ void redraw_dfield()
   int iny=MyGraph->yv[0]-1;
   double y[MAXODE],ydot[MAXODE],xv1,xv2;
   float v1[MAXODE],v2[MAXODE];
-  
+  FILE *fp;
 
   double amp,mdf;
 
@@ -434,16 +483,21 @@ void redraw_dfield()
      MyGraph->TimeFlag||MyGraph->xv[0]==MyGraph->yv[0]||MyGraph->ThreeDFlag
      || DF_IX!=MyGraph->xv[0]||DF_IY!=MyGraph->yv[0])
     return;
-  
+  if(DFSuppress==1){
+    fp=fopen("dirfields.dat","w");
+    if(fp==NULL)return;
+  }
+
   du=(MyGraph->xhi-MyGraph->xlo)/(double)grid;
   dv=(MyGraph->yhi-MyGraph->ylo)/(double)grid;
   
   dup =(double)(DRight-DLeft)/(double)grid;
-  dvp=(double)(DTop-DBottom)/(double)grid; 
+  dvp=(double)(DTop-DBottom)/(double)grid;
+  /* printf("dup=%g dvp=  %g \n",dup,dvp); */
   dz=hypot(dup,dvp)*(.25+.75*DFIELD_TYPE);
   u0=MyGraph->xlo;
   v0=MyGraph->ylo;
-  set_linestyle(MyGraph->color[0]);
+  if(!DFSuppress)set_linestyle(MyGraph->color[0]);
   get_ic(2,y);
   get_max_dfield(y,ydot,u0,v0,du,dv,grid,inx,iny,&mdf);
      if (PltFmtFlag==SVGFMT)
@@ -464,9 +518,9 @@ void redraw_dfield()
 	  v1[k+1]=(float)y[k];
 	  v2[k+1]=v1[k+1]+(float)ydot[k];
 	}
-	comp_color(v1,v2,NODE,1.0);
+	if(!DFSuppress)comp_color(v1,v2,NODE,1.0);
       }
-      if(DF_FLAG==1){
+      if(DF_FLAG==1||DF_FLAG==4){
 	scale_dxdy(ydot[inx],ydot[iny],&dxp,&dyp);
 	if(DFIELD_TYPE==1)
 	  {
@@ -482,8 +536,15 @@ void redraw_dfield()
 	}
 	xv1=y[inx]+ydot[inx]*dz;
 	xv2=y[iny]+ydot[iny]*dz;
-        bead_abs((float)xv1,(float)xv2);
-	line_abs((float)y[inx],(float)y[iny],(float)xv1,(float)xv2);
+        if(!DFSuppress){
+	  bead_abs((float)xv1,(float)xv2);
+	  line_abs((float)y[inx],(float)y[iny],(float)xv1,(float)xv2);
+	}
+	else{
+          /*  printf("dz=%g x0=%g y0=%g\n",dz,ydot[inx],ydot[iny]); */
+
+	  fprintf(fp,"%g %g %g %g\n",y[inx],y[iny],xv1,xv2);
+	}
       }
       if(DF_FLAG==2&&j>0&&i<grid){
 	frect_abs((float)y[inx],(float)y[iny],(float)du,(float)dv);
@@ -496,6 +557,9 @@ void redraw_dfield()
      	    DOING_DFIELD=0;
   	   fprintf(svgfile,"</g>\n");
      } 
+     if(DFSuppress==1)
+       fclose(fp);
+     DFSuppress=0;
 }
 
 void direct_field_com(int c)
@@ -839,12 +903,12 @@ void new_clines_com(int c)
   }
   
   WHICH_CRV=null_ix;
-  set_linestyle(col1);
+  if(!NCSuppress)set_linestyle(col1);
   new_nullcline(course,xmin,y_bot,xmax,y_tp,X_n,&num_x_n);
   ping();
   
   WHICH_CRV=null_iy;
-  set_linestyle(col2);
+  if(!NCSuppress)set_linestyle(col2);
   new_nullcline(course,xmin,y_bot,xmax,y_tp,Y_n,&num_y_n);
   ping();
   
@@ -922,7 +986,7 @@ Pt p1,p2,p3,p4;
 
 
  if(count==2){
-   line_abs(x[0],y[0],x[1],y[1]);
+   if(!NCSuppress)line_abs(x[0],y[0],x[1],y[1]);
    stor_null(x[0],y[0],x[1],y[1]);
  }
  

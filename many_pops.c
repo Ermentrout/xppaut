@@ -1274,12 +1274,12 @@ int graph_used(int i)
  return graph[i].Use;
 } 
 
-void make_active(int i)
+void make_active(int i,int flag)
 {
  current_pop=i;
  MyGraph=&graph[current_pop];
   draw_win=MyGraph->w;
-  get_draw_area();
+  get_draw_area_flag(flag);
 }
 
 void select_window(w)

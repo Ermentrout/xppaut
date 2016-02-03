@@ -117,14 +117,29 @@ void set_scale(x1,y1,x2,y2)
 }
 
 
-
+/* SLUGGISH??? */
 
 void get_draw_area()
+{
+  get_draw_area_flag(1);
+}
+void get_draw_area_flag(int flag)
 {
   int x,y;
   unsigned int w,h,bw,de;
   Window root;
-  XGetGeometry(display,draw_win,&root,&x,&y,&w,&h,&bw,&de);
+  if(flag==1)
+    {
+      XGetGeometry(display,draw_win,&root,&x,&y,&w,&h,&bw,&de);
+      MyGraph->x11Wid=w;
+      MyGraph->x11Hgt=h;
+    }
+  else
+    {
+    
+    w=MyGraph->x11Wid;
+    h=MyGraph->x11Hgt;
+  }
   /* plintf(" geom:+%d+%d:%dx%d\n",x,y,w,h); */
   XDMax=w;
   YDMax=h;
@@ -569,7 +584,7 @@ void set_extra_graphs()
     /*  printf(" %g %g %g %g \n",X_LO[i+1],X_HI[i+1],Y_LO[i+1],Y_HI[i+1]); */
   }
   set_active_windows();
-  make_active(0); 
+  make_active(0,1); 
   }
 }
 

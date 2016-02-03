@@ -1,0 +1,123 @@
+<html>
+<head>
+<title> XPPAUT - MAC INSTALL </title>
+</head>
+<body bgcolor="#FFFFFF" link="#330099" alink="#FF3300" vlink="#330099">
+
+<center> <h1>XPP MAC INSTALL</h1> </center>
+<p>
+<!--
+<p><br>
+<table BORDER=0 WIDTH="100%" >
+<tr>
+<td ALIGN=LEFT BGCOLOR="#52799E">
+ <b><font face="Helvetica, Arial"><font color="#FFFFFF"><font size=+1>Contents</font></font></font></b></td>
+</tr>
+</table>
+-->
+
+These instructions were obtained from <a href=https://docs.math.osu.edu/mac/how-tos/install-xpp-xppaut-mac/> the OSU math department web site </a>
+<ul>
+
+<li> Step 1: You must have XQuartz installed. This was the default on earlier OSX versions up until 10.7. You now have to get it from <a href=http://www.xquartz.org/> here </a> where you can download and install it. Confirm that you have the Icon for XQuartz in your Applications folder (it could also be under Utilities).
+
+
+<li> Step 2:
+<ul> 
+<li> a. Since you have found this folder, then you probably have successfully downloaded XPP from <a href=http://www.math.pitt.edu/~bard/bardware/binary/latest/xppmac.dmg> here </a>
+<li> b. Open the xppaut.dmg file by double clicking on it. You will find a folder there called xppmac. Drag that to your Desktop
+<li> c. Open the xppmac folder and drag the file xppaut and xpp.app to your Applications folder. You can also make a shortcut by dragging to the the Dock
+</ul>
+
+<li> Step 3: Double click on the XPP parrot icon
+<ul>
+<li> a. If you receive a prompt warning that "xpp" was downloaded from the internet and asking "Are you sure you want to open it?", click the "open" button.
+<li> b. If you receive a prompt stating that "'xpp' can't be opened because it is from an unidentified developer", click the "OK" button and follow these additional steps:
+<ul>
+   <li> i. Open "System Preferences" from the Finder Applications folder, then click the "Security & Privacy" icon.
+   <li> ii. Next to the message stating "xpp" was blocked frm opening, click the "Open Anyway" button, accepting any additional warnings / prompts and then closing the System Preferences window.
+   <li>iii. Double-click the XPP parrot icon in the Finder Applications folder to open the program.
+</ul>
+
+<li> Step 4. To use XPP, Drag and Drop an ODE file (from the ode/ folder, e.g.)
+</ul> 
+
+<p>
+<hline>
+
+<b> The best way to use XPP is from the command line as this gives you many more options and much more flexibility.  </b> <p>
+
+Here is how to do it. 
+<ul>
+<li> Click on the XQuartz Icon in your Dock. Then click on the Applications Terminal menu item on the menus. This will bring up a new terminal window. For me, the default font is way way too small, so with your mouse in the window, press the control key and put two fingers on the mouse pad to bring up a little menu to get a bigger font. (I like the Huge font) 
+<li> The default for the XTerm is to be in your Home directory. If you did what I said earlier, then you should have the xppmac folder on your Desktop. Navigate to the ode folder by typing:
+<p><code>
+cd  <p>
+cd Desktop/xppmac/ode <p>
+ls *.ode
+<p>
+</code>
+The second command just lists all the ODE files.  If you are going to use XPP a lot, it is good to maintain different folders with the ODEs and other files like table files and set files all together.  This way you can always navigate to them and run XPP from the command line. For now, you can just keep hem here.
+<li> Now just type:
+<p>
+<code>
+/Applications/xppaut lecar.ode <p>
+</code>
+to fire up the old lecar.ode model in XPP
+</ul>
+<p>
+<hline>
+<h2> <center> Customizing defaults </center> </h2
+<p>
+You may want to customize your defaults so that XPP looks the way you want it to when you run it. I generally get rid of some defaults (such as the Bell) and make the fonts bigger so I can see them.  This is done by creating a plain text file in your HOME directory called <code> .xpprc </code>. You can use textedit to create the file (or your favorite editor) but make sure it is plain text and make sure that the <code> .txt </code> extension is left off. I provide the following example (<code> example.xpprc </code>):
+<p>
+<code>
+@ bell=0,grads=0,dwcolor=ffffee,forecolor=222200 <p>
+@ bigfont=lucidasanstypewriter-bold-14 <p>
+@ ps_lw=15,ps_color=1,ps_font=Helvetica,ps_fsize=18 <p>
+@ nmax=2000,npr=500,ntst=60 <p>
+@ tutorial=0 <p>
+</code>
+<p>
+This automatically turns the bell off, the fancy menus (grads) off, and the tutorial off. I also change the drawing window color from white to a kind of ivory and the drawing foreground color to a brown. I also use much bigger fonts and change some of the AUTO defaults. Finally I change some of the postscript defaults.  You can find out more about these options in the <b> xpp_sum.pdf </b> document.   
+
+ The only way to change the fonts and the colors of XPP is via the <code> .xpprc </code> file or through the command line since these are processed before the X11 server starts. Sorry. 
+<p>
+<hline>
+<p>
+<center>
+<h2> Creating your own ODE files </h2>
+</center>
+ODE files are just descriptions of what you want to solve.  They are plain text files that have the extension <code> .ode </code> but can have any extension yiu want as XPP ignores it.  There are a few rules that are really important to understand:
+<ul>
+<li>  XPP is case-insensitive so that <code> aBc </code> and <code> ABC </code> are the same to XPP.  
+<li> There should be a space after the "@" symbol in all options statements
+<li> It is generally bad to put spaces between parameter/initial conditions and their values (although this is now OK), so write <code> iapp=0.1 </code> instead of <code> iapp = 0.1 </code>
+<li> Any line beginning with <code> # </code> is a comment
+<li> Always end your ODE file with <code> done </code>   If you do you can write lots of instructions after this that will be ignored by the program but may be useful for the user who reads the ODE file.
+<li> There is a specific order to the way things are evaluated in ODEs. 
+<ul>
+<li> Expressions of the form <code> name=expression </code> are evaluated first and in the order they are written, so if one expression makes a reference to another, then make sure they are ordered appropriately
+<li> Expressions like <code> special name=expression </code> like convolutions etc.
+<li> Differential algebraic expressions
+<li> Calls to C code via the <code> export </code> command
+<li> Right hand sides of the ODEs
+<li> Auxilliary quantities
+</ul>
+</ul> 
+
+Look at the many examples to see how to construct your own ODE files. 
+
+<h5> There are many XPP tutorials out there to help you get started </h5>
+
+<h2> <center> Problems </center></h2>
+<ul>
+<li> You see something like "Illegal Instruction". In this case, you are probably using a version of the OS that is older than 10.7.5.  You probably should upgrade to the most recent OS. It is possible for me to make a binary for some older machines, so in this case contact me. </li>
+<li> Error like "Display not found."  You may not have X11 up and running. If you do have it up and running, then it is possible that you need to set the correct DISPLAY. Consult your administrator
+</li>
+</ul> 
+
+</body>
+</html>
+
+

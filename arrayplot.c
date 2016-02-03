@@ -249,11 +249,11 @@ void do_array_plot_events(ev)
     break;
   */
   case MotionNotify:
-    if(ev.xany.window==aplot.wplot);
+    if(ev.xany.window==aplot.wplot){
     /*printf("%d\n",ev.xmotion.y-first_aplot_press); */
     aplot.nstart=aplot.nstart-ev.xmotion.y+first_aplot_press;
     if(aplot.nstart<0)aplot.nstart=0;
-    redraw_aplot(aplot);
+    redraw_aplot(aplot);}
     break;
   case ConfigureNotify:
     if(ev.xconfigure.window!=aplot.base)return;
@@ -276,7 +276,7 @@ void do_array_plot_events(ev)
     if(ev.xany.window==aplot.wplot)
       first_aplot_press=ev.xbutton.y;
     /*apbutton(ev.xbutton.window,aplot);*/
-    apbutton(ev.xbutton.window);
+      apbutton(ev.xbutton.window);
     break;
   }
 }

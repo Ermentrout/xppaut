@@ -1,0 +1,7 @@
+par p=.3,e=1
+par a=1,c=1,d1=1,d2=1,q=1,b=3
+x1'=-(a+d1)*x1+b*x2/(c+x2)
+x2'=a*x1-d2*x2-heav(x2-p)*q*e*x2
+@ xp=x1,yp=x2,xlo=-.2,xhi=2,ylo=-.2,yhi=2
+@ nmesh=100,dt=.02
+d

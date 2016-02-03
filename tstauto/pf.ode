@@ -1,0 +1,10 @@
+# load this in XPP
+# click File AUTO, in Autom Run Steady ststr
+x'=r*x-x^3
+p r=-1
+init x=0
+@ dsmax=.1,parmin=-2,parmax=2
+@ autoxmin=-1.25,autoxmax=2
+@ autoymin=-2,autoymax=2
+@ autovar=x
+d

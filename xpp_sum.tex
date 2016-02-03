@@ -15,8 +15,8 @@
 \newcommand{\labeq}[1]{\label{eq:#1}}
 \newcommand{\refeq}[1]{(\ref{eq:#1})}
 \begin{document}
-\begin{center} {\Large XPP ODE file info} \\
-Bard Ermentrout   ---  July 2015
+\begin{center} {\Large XPP Commands} \\
+Bard Ermentrout   ---  Dec 2012
 \end{center}
 
 \begin{center} {\large ODE File Format}\end{center}
@@ -54,7 +54,18 @@ init <name>=<value>,...
 bdry <expression>
 0= <expression>    <---  For DAEs
 solv <name>=<expression> <------ For DAEs
-special <name>=stuff(.....)   <---- see below under NETWORKS
+special <name>=conv(type,npts,ncon,wgt,rootname)
+	       fconv(type,npts,ncon,wgt,rootname,root2,function)
+	       sparse(npts,ncon,wgt,index,rootname)
+	       fsparse(npts,ncon,wgt,index,rootname,root2,function)
+               fftcon(type,npts,wgt,rootname)
+               mmult(ncol,nrow,matrix,rootname)
+               fmmult(ncol,nrow,matrix,root1,root2,f)
+               findext(type,n,skip,root)
+               gill(meth,rxn_list)
+               delmmult(n,m,w,tau,root)
+               delsparse(m,nc,w,index,tau,root)
+          
 export {x1,x2,....} {x1p,x2p,..}     
 # comments
 @ <name>=<value>, ...
@@ -67,7 +78,7 @@ done
 {\bf Remarks}
 \begin{itemize}\itemsep -.05in
 \item ODEs are put in as {\tt name'=expression} or {\tt dname/dt=expression}. Note you can use this notation for maps as well or use {\tt name(t+1)=expression}
-\item {\tt name=expression} allows you to use {\tt name} in many locations and to build up more comples expressions. The order in which they are written is the order in which they are evaluated, so don't use an expression using a name that hasn't yet been defined. These are called {\bf fixed variables}.
+\item {\tt name=expression} allows you to use {\tt name} in many locations and to build up more comples expressions. The order in which they are written is the order in which they are evaluated, so don't use an expression using a name that hasn't yet been defined.
 \item Array expressions such as {\tt x[1..10]'=...[j]...} are expanded as {\tt x1'=...1..} etc. The {\tt [j]} is expanded into a number. You can use some minimal arithmetic as well such as {\tt [j+1],[j-1],[j*2]} etc. 
 \item {\tt x[0..99](0)=sin(2*pi*[j]/100)} is a way to initialize anarray ODE    
 \item {\tt markov <name> <n> <init> } sets up a continuous Markov process with {\tt n} states and whos $n\times n$ transition matrix follows with entries delimited with the braces {\tt \{, \}}. The diagonal entries should just be 0 as they are ignored. The starting state is given by {\tt <init>}.  
@@ -87,17 +98,7 @@ done
 \item {\tt set} creates a bunch of settings for numerics, variables, parameters that you can call by name within XPP.
 \item {\tt Active comments} allow you to create a little tutorial where you take care of changing parameters, numerics, etc. You involke this in XPP with the File Printsrc command. See {\tt lecar.ode} for an example.
 
-\item {\bf ORDER OF EVALUATION.}  Unfortunately, the order of expressions matters and also, some types of expression are evaluated before others, no matter where they are in the ODE file. Within a type of expression, expressions are evaluated in the order in which they are written. The ordering is:
-\begin{enumerate}
-\item Fixed variables; that is anything of the form {\tt name=expression}. These are evaluated in the written order
-\item Network or {\tt special} expressions.  Thus, these can depend on fixed variables, but not vice versa
-\item DAE's. That is anything that is in the {\tt solve} type of expression
-\item Exported expressions (These can override the values of FIXED variables) that are evaluated with external C libraries
-\item The actual right-hand sides of the ODEs
-\end{enumerate}
-\item {\bf Storage order}  Time, ODE variables,Fixed variables, Markov variables
 \end{itemize}
-
 \noindent {\bf INTEGRAL EQUATIONS}
  
 The general integral equation
@@ -155,6 +156,7 @@ coupling strength. The return is
 zip[i] = sum(j=0;j<ncon) w[i*ncon+j]*root[k]
 k = index[i*ncon+j] 
 \end{verbatim}
+The other two types of networks allow more complicated interactions:
 \begin{verbatim}
 special zip=fconv(type,npts,ncon,wgt,root1,root2,f)
 \end{verbatim}
@@ -192,34 +194,23 @@ k(j)=sum(i=0;i<n)w(i+nj)f(u(i),v(j))
 special z=findext(type,n,skip,root)
 \end{verbatim}
 finds the extreme values of a list of {\tt n} variables starting at {\tt root} and skipping every {\tt skip} one.  {\tt type=1,-1,0} according as to whether you want the max, min, or both. In any case, {\tt z(0), z(2)} are the max and min and {\tt z(1),z(3)} are the index of the max and min.  See {\tt kohonen.ode} for an example of this.  
+
 \begin{verbatim}
-special k= delmmult(n,m,w,tau,root)
+special k=delmmult(n,m,w,tau,u0)
 \end{verbatim}
-multiplies a matrix, {\tt w} times delayed {\tt tau} variables {\tt root}:
+returns the $m$ values
+\[
+k(i)=\sum_{j=0}^{m-1} \mbox{w}[i m + j] u[j](t-\mbox{tau}[i m + j])
+\]
+
+
 \begin{verbatim}
-k(j)=sum(i=0;i<n)w[i+nj ]delay(root(i),tau[i+nj])
+special k=delsparse(m,n,w,l,tau,root)
 \end{verbatim}
-\begin{verbatim}
-special k=delsparse(m,nc,w,index,tau,root)
-\end{verbatim}
-returns
-\begin{verbatim}
-k(j)=sum(i=0;i<nc) w[i+nc*j] delay(root(index[i+nc*j]),tau[i+nc * j])
-\end{verbatim}
-There is another way to communicate with C programs:
-\begin{verbatim}     
-special ydot=import(soname,sofun,nret,root,w1,w2,...wm)
-\end{verbatim}  
-Here {\tt soname}  is shared object library say {\tt MLNET.SO}, 
-{\tt sofun }  is shared object function, say {\tt MLNET},  
- {\tt nret} is the number of return values,
- {\tt root} is the name of the first variable, and {\tt w1,w2,...} are tables that can be passed to the function.
-The shared C function has the form
-\begin{verbatim}
-SOFUN(int nret, int root, double *con, double *var, double *z[50],double *ydot)
-\end{verbatim}
-where {\tt *z[50]}  contains a list of pointers to the weights: {\tt  z[0] -> w1, .... }  Note 50 is hard coded and because of a quirk in the XPP parser, the function name and the shared library MUST BE CAPITALIZED. That is the actual file name must be all capitals and so, too, the function. See the example {\tt mlnet.c, mlcpu.ode} 
- 
+returns the $m$ values
+\[
+k(i)=\sum_{j=0}^{n-1} \mbox{w}[i n  + j] u[l(i n +j)](t-\mbox{tau}[i m + j])
+\]
 
 \medskip
 
@@ -459,7 +450,7 @@ next four variables that were defined after it.
 \medskip
 There are many command line arguments for Xpp.  While some options affect the appearance of the GUI, other options provide an API for Xpp.  Using the API, other programs or scripts can interact with Xpp in a batch mode.  This can be useful for processing many files or runs. 
 
-The command line arguments are: 
+The command line arguments are listed below in the order in which they were written. There are several that are pretty much useless but I have kept them for posterity. 
 \begin{description}
 \item{-xorfix} This changes the way rubber-band drawing for zooms and
 other things is done. If you do not see a box when you zoom in, you
@@ -508,7 +499,7 @@ may be specified more simply by using wildcards
 *lucidatypewriter*sans*24*
 \end{center}
 \item{-smallfont \emph{font}} This uses the small font whose name is given.
-\item{-parfile \emph{filename}} This loads parameters from the named file.The format for a {\ttfamily{.par}} file is illustrated below for {\ttfamily{lecar.ode}} (found in the examples {\ttfamily{/ode}} folder).  The first line must give the number of parameters specified in the file followed by {\ttfamily{Number params}}.  Each parameter value is given on a separate line and followed by its name which must be the same as a parameter name in the {\ttfamily{.ode}} file. 
+\item{-parfile \emph{filename}} This loads parameters from the named file. The format for a {\ttfamily{.par}} file is illustrated below for {\ttfamily{lecar.ode}} (found in the examples {\ttfamily{/ode}} folder).  The first line must give the number of parameters specified in the file followed by {\ttfamily{Number params}}.  Each parameter value is given on a separate line and followed by its name which must be the same as a parameter name in the {\ttfamily{.ode}} file. 
 \begin{center}
 \begin{minipage}{55ex}
 \begin{center}An Example {\ttfamily{lecar.par}}:
@@ -559,12 +550,11 @@ The first corresponds to time, the second column to the first variable in the {\
 \end{minipage}
 \end{center}
 The first initial condition will be mapped to the first variable in the {\ttfamily{lecar.ode}} file, which is $V$, and the second value will be mapped to the second variable in the {\ttfamily{.ode}} file, which is $W$. 
-\item{-forecolor \emph{color}} This sets the hexadecimal color (e.g. 000000) for foreground in the GUI.
-\item{-backcolor \emph{color}} This sets the hexadecimal color (e.g. EDE9E3) for background in the GUI.
-\item{-mwcolor \emph{color}} This sets the hexadecimal color (e.g. 808080) for the main window in the GUI.
-\item{-dwcolor \emph{color}} This sets the hexadecimal color (e.g. FFFFFF) for the drawing window in the GUI.
-\item{-backimage \emph{filename}} This sets the name of bitmap file (.xbm) to tile in background. Several .xbm files are included 
-in the Xpp installation folders, but you may also create your own. 
+\item{-forecolor \emph{color}} This sets the RGB hexadecimal color (e.g. 000000) for foreground in the GUI. The foregrouns is all the characters on the menus and the default drawing color. There are lots of web sites that give listings of hexadecimal color codes. Just look them up or experiment. The first two digits are red, then green, then blue. So, for example, 660066 is a rather deep purple.  
+\item{-backcolor \emph{color}} This sets the hexadecimal color (e.g. EDE9E3) for background in the GUI. The backcolor is the color of the data browser, sliders, and menu backgrounds.
+\item{-mwcolor \emph{color}} This sets the hexadecimal color (e.g. 808080) for the main window in the GUI. The main window color is the area surrounding the windows, sliders, and menus.
+\item{-dwcolor \emph{color}} This sets the hexadecimal color (e.g. FFFFFF) for the drawing window in the GUI. This is the colow of all the drawing windows in AUTO and XPP. 
+\item{-backimage \emph{filename}} This sets the name of bitmap file (.xbm) to tile in background. Several .xbm files are included in the Xpp installation folders, but you may also create your own. 
 \begin{center}\begin{minipage}{65ex}
 For example, the following text saved to a file named {\ttfamily{stipple2.xbm}}
 can be loaded to impart a stippled background.
@@ -575,11 +565,12 @@ static char stipple2\_bits[] = \{ \\
 $~~$ 0x02,0x01\};
 \end{minipage}\end{center}
 \end{minipage}\end{center}
-\item{-grads \emph{B}} This specifies if color gradients will (B=1) or will not (B=0) be used in the GUI buttons.
+xbm is an odd format but there are some conversion programs out there. convert(.exe) will work and runs on all platforms. 
+\item{-grads \emph{B}} This specifies if color gradients will (B=1) or will not (B=0) be used in the GUI buttons. I don't like them so turn them off as they slow the redrawing of the menus down. 
 \item{-width  \emph{N}} This specifies this minimum width in pixels of main window of the GUI. The value $N$ should be an integer no larger than your screen's physical width.
 \item{-height \emph{N}} This specifies this minimum height in pixels of main window of the GUI. The value $N$ should be an integer no larger than your screen's physical height.              
 \item{-bell \emph{B}} This determines if the system bell on events will (B=1) or will not (B=0) be used.  This can be especially useful
-for users requiring increased visiblilty or to assist people with disabilities.  In addition, most OS can be configured to use a ``visual beep''
+for users requiring increased visibility or to assist people with disabilities.  In addition, most OS can be configured to use a ``visual beep''
 so that the screen will \emph{flash} on certain Xpp events. 
 \item{-internset \emph{B}} This specifies that internal sets will (B=1) or will not (B=0) be run during batch run
 \item{-uset \emph{setname}}  This names an internal set to be run during batch run.  Multiple -uset can be given on the same command line.
@@ -599,6 +590,29 @@ teaching demonstrations.
 \item {-noout} will not write an output data file in batch mode. Use this along with -mkplot to supress the generation of data.
 \item {-plotfmt} \emph{ps|svg} sets the plot type format to be  postscript or SVG.
 \item{-version} This outputs the version of Xpp.
+\item {-ncdraw \emph{k}} If you are creating a figure and want the nullclines, then set {\em k=1}. Obviously, the ode file must be set up so that there are variables on the two axes and the dimensions of the plot are what you want.  If you want the nullclines to be dumped to a file, use {\em k=2} and the {\ttfamily -silent} option.  The file is always called {\ttfamily nullclines.dat}. The file format is a bit strange but designed to work with gnuplot. The X-nullcline is drawn first followed by the Y-nullcline. Look at an example to see the format. For example the following will compute the nullclines, dump them to a file and will not save the output of a run of the ode:
+\begin{verbatim}
+xppaut lecar.ode -noout -silent -ncdraw 2
+\end{verbatim}  
+On the other hand to create a plot try this:
+\begin{verbatim}
+xppaut lecar.ode -noout -silent -ncdraw 1 -dfdraw 1 -mkplot 
+\end{verbatim}
+\item {-dfdraw \emph{k}} will draw the direction fields in the same manner as the nullclines above. \emph{k=1,2,3} will draw unscales, scaled, or colorized versions on your plot  while \emph{k=4,5} will output the coordinates of the scaled or unscaled to a file called {\ttfamily dirfields.dat}. 
+\item {-readset \emph{filename}} allows you to load anything that can be written in an internal set file; that is, OPTIONS, PARAMETERS, INITIAL CONDITIONS.  The file consists of one line (up to 1024 characters). For example; the file (call it {\ttfamily tst.opt}) consists of the line:
+\begin{verbatim}
+iapp=0.1;phi=.05;total=500
+\end{verbatim} 
+Then the command line to run XPP would be:
+\begin{verbatim}
+xppaut lecar.ode -readset test.opt
+\end{verbatim}
+This could also be run in silent mode as well as combining with other options like -silent or -mkplot.
+\item {-with \emph{string}} is exactly the same as the previous command but now all the options etc are contained in the string which should be delimited by quotes. DO NOT USE ANY SPACES!!!.  So, for example:
+\begin{verbatim}
+xppaut lecar.ode -with "iapp=0.1;phi=0.05;total=1000" -runnow
+\end{verbatim}
+will run XPP setting some parameters and the total time.  
 \end{description}
 The only other thing on the command line should be the file name.  
 Thus, 

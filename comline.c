@@ -715,8 +715,8 @@ int parse_it(com)
      plintf("  -anifile <filename>    Load an animation code file (.ani) \n");
      plintf("  -plotfmt <svg|ps>       Set Batch plot format\n");
      plintf("  -mkplot                Do a plot in batch mode \n");
-     plintf(" -ncdraw 1               Draw nullclines in batch \n");
-     plintf(" -dfdraw <1|2>       Draw dfields in batch  \n");
+     plintf(" -ncdraw 1|2               Draw nullclines in batch (1) to file (2) \n");
+     plintf(" -dfdraw 1-5       Draw dfields in batch (1-3) to file (4-5)  \n");
      plintf("  -version               Print XPPAUT version and exit \n");
      plintf("  -readset <filename>   Read in a set file like the internal sets\n");
      plintf("  -with string   String must be surrounded with quotes; anything that is in an internal set is valid\n");

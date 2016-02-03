@@ -226,11 +226,11 @@ void drw_all_scrns(){
  }
  
  for(i=0;i<num_pops;i++){
-   make_active(ActiveWinList[i]);
+   make_active(ActiveWinList[i],1);
    redraw_all();
  }
  
- make_active(ic);
+ make_active(ic,1);
  hi_lite(draw_win);
 }
  
@@ -245,11 +245,11 @@ void clr_all_scrns()
  }
  
  for(i=0;i<num_pops;i++){
-   make_active(ActiveWinList[i]);
+   make_active(ActiveWinList[i],1);
    clr_scrn();
  }
  
- make_active(ic);
+ make_active(ic,1);
  hi_lite(draw_win);
 }
 

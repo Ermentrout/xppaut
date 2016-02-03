@@ -1,7 +1,0 @@
-x'=y
-y'=x
-b x-y'
-b y-1
-@ total=1
-done
-
