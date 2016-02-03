@@ -33,6 +33,7 @@
 #include "pop_list.h"
 
 
+
 #include "menudrive.h"
 #include <stdlib.h> 
 #include <stdio.h>
@@ -50,6 +51,8 @@
 #include "xpplim.h"
 #include "autlim.h"
 #include "xAuto.h" 
+
+#define MAXLINELENGTH 100000
 #define PACK_AUTO 0
 #define PACK_LBF 1
 #define PARAM_BOX 1
@@ -165,7 +168,7 @@ int auto_var=0;
 
 int is_3_there=0;
 
-int load_all_labeled_orbits=1;
+int load_all_labeled_orbits=0;
 
 
 ROTCHK blrtn;
@@ -494,7 +497,7 @@ char *old,*new;
  FILE *fo,*fn;
  FILE *ft;
  int c;
-
+ /*  printf("Appending old=%s new=%s\n",old,new); */
  fo=fopen(old,"r");
  fn=fopen(new,"r");
  if(fn==NULL){
@@ -2274,9 +2277,9 @@ int get_homo_info(int flg,int *nun,int *nst,double *ul, double *ur)
   return flag;
 }
 
-void auto_extend_homoclinic()
+void three_parameter_homoclinic()
 {
-   Auto.irs=grabpt.lab;
+Auto.irs=grabpt.lab;
   Auto.itp=grabpt.itp;
 
       TypeOfCalc=HO2;
@@ -2284,7 +2287,7 @@ void auto_extend_homoclinic()
   NewPeriodFlag=1;
   Auto.ips=9;
 
-  Auto.nfpar=2;
+  Auto.nfpar=3;
   Auto.ilp=0;
   Auto.isw=1;
   Auto.isp=0;
@@ -2302,6 +2305,42 @@ void auto_extend_homoclinic()
 
   
 }
+
+
+
+
+
+void auto_extend_homoclinic()
+{
+   Auto.irs=grabpt.lab;
+  Auto.itp=grabpt.itp;
+
+      TypeOfCalc=HO2;
+  AutoTwoParam=HO2;
+  NewPeriodFlag=1;
+  Auto.ips=9;
+
+  Auto.nfpar=2;
+  Auto.ilp=1;
+  Auto.isw=1;
+  Auto.isp=0;
+  Auto.nbc=0;
+  
+  if(HomoFlag==1)
+    xAuto.iequib=1;
+  if(HomoFlag==2)
+    xAuto.iequib=-2;
+
+  
+  
+  do_auto(OPEN_3,APPEND,Auto.itp);
+
+
+  
+}
+
+
+
     
 void auto_start_at_homoclinic()
 {
@@ -2317,7 +2356,7 @@ void auto_start_at_homoclinic()
   Auto.ips=9;
 
   Auto.nfpar=2;
-  Auto.ilp=0; /* maybe 1 someday also in extend homo, but for now, no 3 param allowed */
+  Auto.ilp=1; /* maybe 1 someday also in extend homo, but for now, no 3 param allowed    */
   Auto.isw=1;
   Auto.isp=0;
   Auto.nbc=0;
@@ -2357,7 +2396,8 @@ void auto_new_per() /* same for extending periodic  */
       TypeOfCalc=PE1;
   Auto.irs=grabpt.lab;
   Auto.itp=grabpt.itp;
-  Auto.nfpar=grabpt.nfpar;
+  /* Auto.nfpar=grabpt.nfpar; */
+  Auto.nfpar=1;
   Auto.ilp=1;
   Auto.isw=1; /* -1 */
   Auto.isp=2;
@@ -2631,6 +2671,7 @@ void load_auto_orbit()
   nstor=ndim;
   if(ndim>NODE)nstor=NODE;
   if(flg==0){
+    printf("Could not find label %d in file %s \n",label,string);
     auto_err("Cant find labeled pt");
     fclose(fp);
     return;
@@ -2842,9 +2883,9 @@ int move_to_label(mylab,nrow,ndim,fp)
 {
   int ibr,ntot,itp,lab,nfpar,isw,ntpl,nar,nskip;
   int i;
-  char line[50000];
+  char line[MAXLINELENGTH];
   while(1){
-    fgets(line,50000,fp);
+    fgets(line,MAXLINELENGTH,fp);
     sscanf(line,"%d%d %d %d %d %d %d %d %d",
 	   &ibr,&ntot,&itp,&lab,&nfpar,&isw,&ntpl,&nar,&nskip);
     if(mylab==lab){
@@ -2853,7 +2894,7 @@ int move_to_label(mylab,nrow,ndim,fp)
       return(1);
     }
     for(i=0;i<nskip;i++)
-      fgets(line,50000,fp);
+      fgets(line,MAXLINELENGTH,fp);
     if(feof(fp))break;
   }
   return(0);

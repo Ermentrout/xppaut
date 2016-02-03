@@ -1,0 +1,11 @@
+# kuramoto with fmmult
+h(x,y)=sin(x-y+a)-sin(a)+b*sin(2*(x-y))
+par a=.5,b=.2
+# linear gradient
+par amp=1,k=1
+table w % 100 0 99 amp*t/100
+table mm % 10000 0 9999 1/100
+special mxh=fmmult(100,100,mm,x0,x0,h)
+x[0..99]'=w([j])+k*mxh([j])
+@ total=100,bound=100000
+d

@@ -1,0 +1,118 @@
+<html>
+<head>
+<title> XPPAUT - WINDOWS INSTALL </title>
+</head>
+<body bgcolor="#FFFFFF" link="#330099" alink="#FF3300" vlink="#330099">
+
+<center> <h1>XPP WINDOWS INSTALL</h1> </center>
+<p>
+<!--
+<p><br>
+<table BORDER=0 WIDTH="100%" >
+<tr>
+<td ALIGN=LEFT BGCOLOR="#52799E">
+ <b><font face="Helvetica, Arial"><font color="#FFFFFF"><font size=+1>Contents</font></font></font></b></td>
+</tr>
+</table>
+-->
+
+These instructions were obtained from <a href=https://docs.math.osu.edu/windows/how-tos/install-xpp-xppaut-windows/> the OSU math department web site </a>
+<ul>
+  <li> Step 0:  If you are just upgrading to the newest XPP version jump to Step 2.
+  <li> Step 1: You must install an X11 server, <a href=http://sourceforge.net/projects/xming/files/latest/download> Xming </a> or you can get an older one from my web page. It is also useful to download the additional X11 fonts from <a href=http://sourceforge.net/projects/xming/files/Xming-fonts/7.5.0.70/Xming-fonts-7-5-0-70-setup.exe/download> here </a>
+    
+    <ul>
+      <li> After downloading the two X11 programs, runs them to install on your computer.  You can use the default / full installation settings for both the Xming program and the Xming fonts - just make sure that the "Normal PuTTY Link SSH client" option is selected in the Xming program installation settings. I usually include a Desktop shortcut.
+
+      <li>  Run the Xming program from <b> (Start) --> All Programs / All Apps --> Xming --> Xming	</b>
+<li> Verify the Xming program is running by looking for the "X" icon in the Windows Taskbar Notifications Area.
+  </ul> 
+
+<li> Step 2: Download <a href=http://www.math.pitt.edu/~bard/bardware/binary/latest/xppwin.zip> XPPAUT "xppwin.zip" </a>
+  <ul>
+
+    <li> Extract / unzip the downloaded "xppwin.zip" file, by right-clicking on the file and then clicking to "Extract All...", which will reveal an "xppall" folder.
+    <li>  Right-click to "Copy" the extracted "xppall" folder, then open your computer's "C:" drive and right-click in a blank space to "Paste" the folder in the root of the "C:" drive. <b> IMPORTANT:</b> The "xppall" folder must be placed so that the full path to the folder is"C:\xppall"
+      <li> Extra Step on Windows 8/10(?):
+        <ul>
+        <li>	  Open the "xppall" folder, find and right-click on the "xppaut.exe" file / application, then click to open its "Properties"
+	<li> On the "General" tab under "Security:", click the "Unblock" button to allow the application to run.
+	<li> Click "OK" to close the properties window
+	</ul>
+      <li> Open the "xppall" folder, find the "xpp - Shortcut" file, right-click on the file to "Copy" the shortcut, and then right-click on a blank space of the Desktop to "Paste" the shortcut on the Desktop.
+
+      <li> To use XPP / XPPAUT, drag and drop ODE files onto the "xpp - Shortcut" on your Desktop.
+  </ul> 
+  </ul>
+<p>
+<hline>
+
+<b> The best way to use XPP is from the command line as this gives you many more options and much more flexibility.  </b> <p>
+
+ Here is how to do it.
+ <ul>
+   <li> Click on "Start" and <i>Search Programs</i> for "command prompt" and click on it to bring up a terminal
+   </li>
+   <li> Click on the terminal to start typing. Navigate to the "xppall" folder by typing:
+     <p>
+       <code> cd C:/xppall </code> <p>
+   </li>
+   <li> Test it by typing:
+     <p>
+       <code> xpp ode/lecar.ode </code> <p>
+       to load up the good old lecar.ode file
+   </li>
+   <li> You can directly access the <code> xppaut.exe </code> file from the command line as well but you should be sure to set the proper X11 Display. The <code> xpp.bat </code> file does this for you as well as setting a HOME directory and some other stuff that is largely irrelevant unless you want to call the help stuff from within XPP. For example, you may want to edit this file to set the HOME directory to, say <code> C:\Users\bard </code> or whatever your HOME is.
+ </ul>
+
+<p>
+<hline>
+<h2> <center> Customizing defaults </center> </h2
+<p>
+You may want to customize your defaults so that XPP looks the way you want it to when you run it. I generally get rid of some defaults (such as the Bell) and make the fonts bigger so I can see them.  This is done by creating a plain text file in your HOME directory called <code> .xpprc </code>. You can use Notepad or any plain text editor to create the file  but make sure it is plain text and make sure that the <code> .txt </code> extension is left off. If you are using the commandline, then there is a very simple text editor called <code> edit </code> that can be called from the commmand line is is perfect for this sort of thing. I provide the following example (<code> .xpprc </code>) in Windows:
+<p>
+<code>
+@ bell=0,grads=0,dwcolor=ffffee,forecolor=222200 <p>
+@ ps_lw=15,ps_color=1,ps_font=Helvetica,ps_fsize=18 <p>
+@ tutorial=0 <p>
+</code>
+<p>
+  This automatically turns the bell off, the fancy menus (grads) off, and the tutorial off. I also change the drawing window color from white to a kind of ivory and the drawing foreground color to a brown.
+  Finally, I change some of the postscript defaults.  You can find out more about these options in the <b> xpp_sum.pdf </b> document.   
+
+  The only way to change the fonts and the colors of XPP is via the <code> .xpprc </code> file or through the command line since these are processed before the X11 server starts. Sorry. 
+
+<p>
+<hline>
+<p>
+<center>
+<h2> Creating your own ODE files </h2>
+</center>
+ODE files are just descriptions of what you want to solve.  They are plain text files that have the extension <code> .ode </code> but can have any extension you want as XPP ignores it.  There are a few rules that are really important to understand:
+<ul>
+<li>  XPP is case-insensitive so that <code> aBc </code> and <code> ABC </code> are the same to XPP.  
+<li> There should be a space after the "@" symbol in all options statements
+<li> It is generally bad to put spaces between parameter/initial conditions and their values (although this is now OK), so write <code> iapp=0.1 </code> instead of <code> iapp = 0.1 </code>
+<li> Any line beginning with <code> # </code> is a comment
+<li> Always end your ODE file with <code> done </code>   If you do you can write lots of instructions after this that will be ignored by the program but may be useful for the user who reads the ODE file.
+<li> There is a specific order to the way things are evaluated in ODEs. 
+<ul>
+<li> Expressions of the form <code> name=expression </code> are evaluated first and in the order they are written, so if one expression makes a reference to another, then make sure they are ordered appropriately
+<li> Expressions like <code> special name=expression </code> like convolutions etc.
+<li> Differential algebraic expressions
+<li> Calls to C code via the <code> export </code> command
+<li> Right hand sides of the ODEs
+<li> Auxilliary quantities
+</ul>
+</ul> 
+
+Look at the many examples to see how to construct your own ODE files. 
+
+<h5> There are many XPP tutorials out there to help you get started </h5>
+
+
+
+</body>
+</html>
+
+

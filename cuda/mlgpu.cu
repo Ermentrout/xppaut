@@ -1,13 +1,15 @@
 /*
  LINUX:
-   nvcc -lcublas -o MLGPU.SO --shared -Xcompiler -fpic mlgpu.cu 
-  export PATH=/usr/local/cuda-7.0/bin:$PATH
+   export PATH=/usr/local/cuda-7.0/bin:$PATH
  export LD_LIBRARY_PATH=/usr/local/cuda-7.0/lib64:$LD_LIBRARY_PATH
+  nvcc -lcublas -o MLGPU.SO --shared -Xcompiler -fpic mlgpu.cu 
+
 
  MAC:
- nvcc -lcublas -o MLGPU.SO --shared -Xcompiler -fpic -Xcompiler -O3 mlgpu.cu
  export PATH=/Developer/NVIDIA/CUDA-7.0/bin:$PATH
 export DYLD_LIBRARY_PATH=/Developer/NVIDIA/CUDA-7.0/lib:$DYLD_LIBRARY_PATH
+nvcc -lcublas -o MLGPU.SO --shared -Xcompiler -fpic -Xcompiler -O3 mlgpu.cu
+
 */
 
 #include <stdio.h>
@@ -100,7 +102,7 @@ __global__ void update_rhs(real *y,real *yp,real *stot, int n)
 }
 
 
-/*  I will assume for now that the weight do not change throughout the simulation
+/*  I will assume for now that the weights do not change throughout the simulation
     so they will only be loaded into the device once
 */
 void allocate_ram(int n, double *w)
@@ -191,7 +193,7 @@ void MLGPU(int nn,int ivar, double *par,double *var,double *z[50],double *ydot)
   copy_par_to_dev(par);
   copy_to_dev(n,z[0],y);
   update_sums(n);
-  update_rhs<<<nblock,128>>>(devy,devyp,devsum,n);
+  update_rhs<<<nblock,NTHREAD>>>(devy,devyp,devsum,n);
   copy_from_dev(ydot,nn);
  
 }

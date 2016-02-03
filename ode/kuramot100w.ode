@@ -1,0 +1,10 @@
+# kuramoto with sums
+h(phi)=sin(phi+a)-sin(a)+b*sin(2*phi)
+par a=.5,b=.2
+# linear gradient
+par amp=1,k=1
+table w % 100 0 99 amp*t/100
+table mm % 10000 0 9999 1/100
+x[0..99]'=w([j])+k*sum(0,99)of(mm([j]*100+i')*h(shift(x0,i')-x[j]))
+@ total=100,bound=100000
+d

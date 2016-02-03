@@ -1079,8 +1079,10 @@ void check_for_xpprc()
   while(!feof(fp)){
     bob[0]='\0';
     fgets(bob,255,fp);
-    if(bob[0]=='@')
+    if(bob[0]=='@'){
       stor_internopts(bob);
+
+    }
   }
   fclose(fp);
 }
@@ -1184,6 +1186,7 @@ void set_option(s1,s2,force,mask)
   if(msc("MWCOLOR",s1)){
     if ((notAlreadySet.UserMainWinColor||force) || ((mask!=NULL)&&(mask->UserMainWinColor==1)))
     {
+      /* printf("Setting MWCOLOR=%s\n",s2); */
         sprintf(UserMainWinColor,"#%s",s2);
 	notAlreadySet.UserMainWinColor=0;
     }

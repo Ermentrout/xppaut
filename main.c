@@ -402,6 +402,9 @@ int argc;
   */
   
   do_comline(argc, argv);
+
+  
+
   /*We need to init_X here if there is no file on command line
   so that a file browser can be opened.
   */
@@ -414,8 +417,8 @@ int argc;
        /*Initialize what's needed to open a browser based on 
        the current options.
        */
-       do_vis_env();
-       set_all_vals();
+       do_vis_env(); 
+	 set_all_vals(); 
        init_X();
        /*       XSynchronize(display,1); */
        /*
@@ -434,8 +437,7 @@ int argc;
   free(tempNS);
   
   init_alloc_info();
-  do_vis_env();
-  
+      do_vis_env();
   set_all_vals();
   
  
@@ -486,9 +488,11 @@ if(XPPBatch){
      if_needed_select_sets();
      if_needed_load_ext_options();
      set_extra_graphs();
-       set_colorization_stuff();
+     set_colorization_stuff();
 
     batch_integrate();
+    silent_nullclines();
+    silent_dfields();
     exit(0);
   }
 
@@ -979,15 +983,9 @@ void xpp_events(XEvent report,int min_wid,int min_hgt)
 	  break;
 	  }
 	  break; */
- case Expose:
- case MapNotify:
  
-	if(report.xany.window==command_pop)put_command("Command:");
-     do_expose(report);
-
-
-   break;
- case ConfigureNotify:
+ case ConfigureNotify: /* this needs to be fixed!!! */
+   /*    printf("CN %ld \n",report.xany.window); */
   resize_par_box(report.xany.window);  
   resize_my_browser(report.xany.window);
    resize_eq_list(report.xany.window);
@@ -1011,7 +1009,14 @@ void xpp_events(XEvent report,int min_wid,int min_hgt)
   }
 
   break;
+ case Expose:
+ case MapNotify:
+   /*  printf("E %ld \n",report.xany.window); */
+	if(report.xany.window==command_pop)put_command("Command:");
+     do_expose(report);
 
+
+   break;
  case KeyPress:
    used=0;
                 box_keypress(report,&used);
@@ -1055,6 +1060,7 @@ void xpp_events(XEvent report,int min_wid,int min_hgt)
    do_motion_events(report);
    break;
  case ButtonRelease:
+
     slide_release(report.xbutton.window);
 
     break;

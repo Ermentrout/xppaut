@@ -43,7 +43,7 @@ void send_halt(double *y, double t);
 void send_output(double *y, double t);
 void do_plot(float *oldxpl, float *oldypl, float *oldzpl, float *xpl, float *ypl, float *zpl);
 void export_data(FILE *fp);
-void plot_the_graphs(float *xv, float *xvold, int node, int neq, double ddt, int *tc);
+void plot_the_graphs(float *xv, float *xvold, int node, int neq, double ddt, int *tc,int flag);
 void plot_one_graph(float *xv, float *xvold, int node, int neq, double ddt, int *tc);
 void restore(int i1, int i2);
 void comp_color(float *v1, float *v2, int n, double dt);

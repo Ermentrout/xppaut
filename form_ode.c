@@ -606,6 +606,7 @@ int compiler(bob,fptr)
   ptr=bob;
   done=1;
   if(bob[0]=='@'){
+    /* printf("Storing opts from formode \n"); */
     stor_internopts(bob);
     if(ConvertStyle)
       fprintf(convertf,"%s\n",bob);
@@ -2247,6 +2248,7 @@ int parse_a_string(s1,v)
     return 0;
   }
   if(s1[0]=='@') {
+    /*    printf("internopts from parse string\n"); */
     stor_internopts(s1);
     return 0;
   }

@@ -4,6 +4,7 @@
 
 void get_scale(double *x1, double *y1, double *x2, double *y2);
 void set_scale(double x1, double y1, double x2, double y2);
+void get_draw_area_flag(int flag);
 void get_draw_area(void);
 void change_current_linestyle(int new, int *old);
 void set_normal_scale(void);

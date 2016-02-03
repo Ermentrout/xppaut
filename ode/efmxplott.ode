@@ -1,5 +1,5 @@
 # plots the rhs of s'
-# gcc -fPIC -dynamiclib -arch i386 efmx.c -o efx.so 
+# gcc -fPIC -dynamiclib efmx.c -o efx.so 
 # File Edit Load-dll - choose efx.so   
 # choose efmx for the function
 #  ibar is the mean input, isig is the SD of the currents
@@ -10,10 +10,11 @@
 # nn is the number of neurons
 par ibar=-.5,isig=.3333,nsig=0,tau=10
 par nit=200,nn=100,ntr=100
-@ meth=discrete,total=5
+@ meth=discrete,total=50
 init s=-1
 s'=s+.08
 sd'=sp
+# plots the time as well
 tim'=tt
 sp=0
 tt=0

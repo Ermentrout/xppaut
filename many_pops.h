@@ -49,7 +49,7 @@ void SmallBase(void);
 void change_plot_vars(int k);
 int check_active_plot(int k);
 int graph_used(int i);
-void make_active(int i);
+void make_active(int i,int flag);
 void select_window(Window w);
 void set_gr_fore(void);
 void set_gr_back(void);
