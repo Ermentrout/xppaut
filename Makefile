@@ -126,7 +126,7 @@ HEADERS = abort.h browse.h do_fit.h iterativ.h my_rhs.h shoot.h \
 	  axes2.h  diagram.h init_conds.h my_pars.h run_auto.h xpplim.h \
 	  band.h  dialog_box.h integrate.h my_ps.h  scrngif.h spgmr.h \
 	  arrayplot.h cv2.h  extra.h load_eqn.h newpars.h struct.h \
-	  array_print.h comline.h endfile.h llnltyps.h newhome.h storage.h 	
+	  array_print.h comline.h llnltyps.h newhome.h storage.h 	
 
 BITMAPS = aniwin.bitmap alert.bitmap bc.bitmap eqns.bitmap info.bitmap ic.bitmap pp.bitmap\
 	  array.bitmap browse.bitmap equilib.bitmap lines.bitmap txtview.bitmap\
