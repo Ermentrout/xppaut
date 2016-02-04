@@ -113,7 +113,7 @@ HEADERS = abort.h browse.h do_fit.h iterativ.h my_rhs.h shoot.h \
 	  adj2.h calc.h  dormpri.h kbs.h  my_svg.h simplenet.h \
 	  aniparse.h choice_box.h edit_rhs.h kinescope.h myfonts.h \
 	  aniparse_avi.h color.h  eig_list.h llnlmath.h mykeydef.h stiff.h \
-	  autevd.h cvband.h fftn.h  local.h  nullcline.h tabular.h \
+	  autevd.h cvband.h fftn.h nullcline.h tabular.h \
 	  autlim.h cvdense.h flags.h  lunch-new.h numerics.h toons.h \
 	  auto.h  cvdiag.h form_ode.h macdirent.h odesol2.h torus.h \
 	  auto_c.h cvode.h  gear.h  macsysdirent.h parser.h tutor.h \
