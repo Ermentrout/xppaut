@@ -1,3 +1,5 @@
+AM_CFLAGS = -Wall
+
 odedir = $(docdir)/examples/ode
 
 dist_ode_DATA = \
@@ -14,8 +16,6 @@ dist_ode_DATA = \
 	atcoaster.ani \
 	atcoaster.ode \
 	bob.ode \
-	bob.so \
-	bobx.so \
 	borcol.ode \
 	cable.ode \
 	chemo.ani \
@@ -48,14 +48,6 @@ dist_ode_DATA = \
 	evelyn.ode \
 	evelyn.ode.set \
 	example.c \
-	example.dylib \
-	example.so \
-	examw.so \
-	examx.c \
-	examx.so \
-	examy.so \
-	examz.so \
-	ex.so \
 	fancylorenz.ode \
 	fhn3d.ode \
 	fhn_noise.ode \
@@ -67,9 +59,7 @@ dist_ode_DATA = \
 	gausvolt.ode \
 	geisel.ode \
 	getmax.c \
-	getmax.so \
 	getmin.c \
-	getmin.so \
 	gill_bruss.ode \
 	greg.ode \
 	hedge.ode \
@@ -159,7 +149,6 @@ dist_ode_DATA = \
 	toy_ok.ode \
 	transient.ode \
 	triple.ode \
-	t.so \
 	tstar.ode \
 	tstdll2.ode \
 	tstdll.ode \
@@ -185,3 +174,25 @@ dist_ode_DATA = \
 	wcstim.ani \
 	wcstim.ode \
 	wta.ode
+
+ode_PROGRAMS = \
+	example.so \
+	getmax.so \
+	getmin.so \
+	nthet.so \
+	t.so
+
+example_so_CFLAGS = -fPIC
+example_so_LDFLAGS = -shared
+
+getmax_so_CFLAGS = -fPIC
+getmax_so_LDFLAGS = -shared
+
+getmin_so_CFLAGS = -fPIC
+getmin_so_LDFLAGS = -shared
+
+nthet_so_CFLAGS = -fPIC
+nthet_so_LDFLAGS = -shared
+
+t_so_CFLAGS = -fPIC
+t_so_LDFLAGS = -shared

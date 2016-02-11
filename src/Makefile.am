@@ -26,21 +26,15 @@ noinst_HEADERS = \
 	newhome.h \
 	stiff.h \
 	adj2.h \
-	cvband.h \
 	f2c.h \
 	lio.h \
 	newpars.h \
 	storage.h \
-	aniparse_avi.h \
-	cvdense.h \
 	fftn.h \
-	llnlmath.h \
 	nullcline.h \
 	struct.h \
 	aniparse.h \
-	cvdiag.h \
 	fio.h \
-	llnltyps.h \
 	numerics.h \
 	sue.h \
 	arrayplot.h \
@@ -50,9 +44,7 @@ noinst_HEADERS = \
 	odesol2.h \
 	tabular.h \
 	array_print.h \
-	cvspgmr.h \
 	fmt.h \
-	local.h \
 	toons.h \
 	autevd.h \
 	dae_fun.h \
@@ -64,7 +56,6 @@ noinst_HEADERS = \
 	delay_handle.h \
 	fp.h \
 	lunch-new.h \
-	parser.h \
 	txtread.h \
 	autlib2.h \
 	del_stab.h \
@@ -73,12 +64,10 @@ noinst_HEADERS = \
 	parserslow.h \
 	uio.h \
 	autlim.h \
-	dense.h \
 	getvar.h \
 	macsysdirent.h \
 	phsplan.h \
 	userbut.h \
-	auto_define.h \
 	derived.h \
 	ggets.h \
 	main.h \
@@ -89,7 +78,6 @@ noinst_HEADERS = \
 	graf_par.h \
 	many_pops.h \
 	pp_shoot.h \
-	vector.h \
 	auto_nox.h \
 	diagram.h \
 	graphics.h \
@@ -108,7 +96,6 @@ noinst_HEADERS = \
 	menu.h \
 	rubber.h \
 	wref.h \
-	band.h \
 	dormpri.h \
 	homsup.h \
 	menus.h \
@@ -133,7 +120,6 @@ noinst_HEADERS = \
 	shoot.h \
 	xpplim.h \
 	close.h \
-	endfile.h \
 	iterativ.h \
 	my_ps.h \
 	simplenet.h \
@@ -141,7 +127,6 @@ noinst_HEADERS = \
 	err.h \
 	kbs.h \
 	my_rhs.h \
-	spgmr.h \
 	cv2.h \
 	my_svg.h \
 	tutor.h \
@@ -171,6 +156,9 @@ bitmap_headers = \
 	bitmap/pagedn.bitmap \
 	bitmap/pageup.bitmap \
 	bitmap/start.bitmap
+
+xppaut_LDADD = \
+	$(top_builddir)/cvodesrc/libcvode.a \
 
 xppaut_SOURCES = \
 	main.c \
@@ -342,18 +330,7 @@ auto_sources = \
 	flowkm_small.c
 
 cvode_sources = \
-	band.c \
-	cv2.c \
-	cvband.c \
-	cvdense.c \
-	cvdiag.c \
-	cvode.c \
-	cvspgmr.c \
-	dense.c \
-	iterativ.c \
-	llnlmath.c \
-	spgmr.c \
-	vector.c
+	cv2.c
 
 libexample_so_CFLAGS = -fPIC
 libexample_so_LDFLAGS = -shared

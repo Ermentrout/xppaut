@@ -69,9 +69,9 @@ AC_CONFIG_FILES([
     betty/Makefile
     bin/Makefile
     canonical/Makefile
+    cvodesrc/Makefile
     doc/Makefile
     help/Makefile
-    mkavi/Makefile
     ode/Makefile
     share/Makefile
     src/Makefile])

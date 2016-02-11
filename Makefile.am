@@ -2,6 +2,7 @@ SUBDIRS = \
 	betty \
 	bin \
 	canonical \
+	cvodesrc \
 	doc \
 	help \
 	mkavi \

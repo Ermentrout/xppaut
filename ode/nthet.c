@@ -4,7 +4,7 @@ int BoxMullerFlag;
 #define N 500
 double c[N],x[N],xp[N],s[N],sp[N];
 double drand48();
-#define Tpi 6.283185307
+#define TwoPi 6.283185307
 
 
 
@@ -33,7 +33,7 @@ double norm()
   }
 }
 
-rhs(double g,double a, double sig, double tau, double dt,double st)
+void rhs(double g,double a, double sig, double tau, double dt,double st)
 {
   int i;
   for(i=0;i<N;i++){
@@ -42,12 +42,12 @@ rhs(double g,double a, double sig, double tau, double dt,double st)
     sp[i]=exp(-20*(1+c[i]))*(1-s[i])-s[i]/tau;
   }
   for(i=0;i<N;i++){
-    x[i]=fmod(x[i]+dt*xp[i],Tpi); 
+    x[i]=fmod(x[i]+dt*xp[i],TwoPi); 
     s[i]+=dt*sp[i];
   }
 }
 
-one_step(double g,double a, double sig, double tau, double dt,double *stot,int ntran)
+void one_step(double g,double a, double sig, double tau, double dt,double *stot,int ntran)
 {
   int i,j;
   /* try to reach a steady state */
