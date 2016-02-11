@@ -158,7 +158,7 @@ bitmap_headers = \
 	bitmap/start.bitmap
 
 xppaut_LDADD = \
-	$(top_builddir)/cvodesrc/libcvode.a \
+	$(top_builddir)/cvodesrc/libcvode.a
 
 xppaut_SOURCES = \
 	main.c \

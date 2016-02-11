@@ -8,7 +8,6 @@ dist_man_MANS = \
 	xppaut.1
 
 dist_doc_DATA = \
-	changes.txt \
 	install.pdf \
 	tree.pdf \
 	xpp_doc.pdf \
