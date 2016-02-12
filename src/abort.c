@@ -1,23 +1,14 @@
 #include "abort.h"
 
-#include <stdlib.h> 
-
 #include <stdio.h>
+#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "many_pops.h"
-#include "ggets.h"
 
 #include "aniparse.h"
-
-extern Window command_pop;
-extern GC gc,gc_graph,small_gc;
-extern Display *display;
-
-extern int DCURYb,DCURXb,CURY_OFFb;
-extern int DCURYs,DCURXs,CURY_OFFs;
-extern int DCURY,DCURX,CURY_OFF;
-
+#include "ggets.h"
+#include "main.h"
+#include "many_pops.h"
 
 
 int get_command_width()

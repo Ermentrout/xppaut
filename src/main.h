@@ -1,10 +1,18 @@
-#ifndef _main_h__
-
-#define _main_h__
-
+#ifndef XPPAUT_MAIN_H
+#define XPPAUT_MAIN_H
 
 #include <X11/Xlib.h>
 
+/* --- Data --- */
+extern Display *display;
+extern GC gc;
+extern GC font_gc;
+extern GC gc_graph;
+extern GC small_gc;
+extern Window command_pop;
+extern Window info_pop;
+
+/* --- Functions --- */
 void do_main(int argc, char **argv);
 void check_for_quiet(int argc, char **argv);
 void do_vis_env(void);
@@ -30,6 +38,4 @@ void FixWindowSize(Window w, int width, int height, int flag);
 int getxcolors(XWindowAttributes *win_info, XColor **colors);
 void test_color_info(void);
 
-
-#endif
- 
+#endif /* XPPAUT_MAIN_H */
