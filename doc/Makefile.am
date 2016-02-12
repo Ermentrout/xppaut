@@ -1,6 +1,4 @@
-LATEX = latex
-DVIPS = dvips
-PS2PDF = ps2pdf
+PDFLATEX = pdflatex
 
 pkgxbmdir = $(docdir)/xbm
 
@@ -14,12 +12,14 @@ dist_doc_DATA = \
 	xpp_sum.pdf
 
 EXTRA_DIST = \
+	batch.tex \
 	install.tex \
 	tree.tex \
 	xpp_doc.tex \
 	xpp_sum.tex
 
 dist_pkgxbm_DATA = \
+	bitmap/DutchBoy.png \
 	bitmap/feather.xbm \
 	bitmap/galahs.xbm \
 	bitmap/heart.xbm \
@@ -44,13 +44,8 @@ CLEANFILES = \
 	xpp_sum.log \
 	xpp_sum.pdf
 
+.tex.pdf:
+	TEXINPUTS=${builddir}:${srcdir}: $(PDFLATEX) $<
+	TEXINPUTS=${builddir}:${srcdir}: $(PDFLATEX) $<
 
-.tex.dvi:
-	$(LATEX) $<
-	$(LATEX) $<
-
-.dvi.ps:
-	$(DVIPS) -o $@ $<
-
-.ps.pdf:
-	$(PS2PDF) $<
+xpp_doc.pdf: xpp_doc.tex batch.tex bitmap/DutchBoy.png

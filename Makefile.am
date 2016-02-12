@@ -5,7 +5,6 @@ SUBDIRS = \
 	cvodesrc \
 	doc \
 	help \
-	mkavi \
 	ode \
 	share \
 	src

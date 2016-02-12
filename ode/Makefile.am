@@ -91,7 +91,6 @@ dist_ode_DATA = \
 	lamvolt.ode \
 	lecar.ode \
 	lecar.ode.pars \
-	lecar.ode.ps \
 	lecar.ode.set \
 	lecar.ode.svg \
 	lecsimp2.ode \
