@@ -30,7 +30,7 @@
 #include "pp_shoot.h"
 #include "adj2.h"
 #include "txtread.h"
-#include "auto.h"
+#include "auto_nox.h"
 #include "ggets.h"
 
 

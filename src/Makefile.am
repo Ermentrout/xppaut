@@ -26,7 +26,6 @@ noinst_HEADERS = \
 	array_print.h \
 	autevd.h \
 	autlim.h \
-	auto.h \
 	auto_c.h \
 	auto_def2.h \
 	auto_f2c.h \
