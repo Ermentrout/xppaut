@@ -1,8 +1,3 @@
-#include "arrayplot.h"
-#include "array_print.h"
-
-#include <stdlib.h> 
-#include <string.h>
 /*   routines for plotting arrays as functions of time  
 
      makes a window 
@@ -32,68 +27,62 @@
  
 
     and it creates a color plot 
-
 */
+#include "arrayplot.h"
+#ifndef HAVE_WCTYPE_H
+# include <ctype.h>
+#else
+# include <wctype.h>
+#endif
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+#include "array_print.h"
+#include "browse.h"
+#include "color.h"
 #include "ggets.h"
+#include "init_conds.h"
+#include "integrate.h"
+#include "kinescope.h"
+#include "load_eqn.h"
+#include "lunch-new.h"
 #include "main.h"
 #include "many_pops.h"
 #include "pop_list.h"
-#include "kinescope.h"
 #include "scrngif.h"
-#include "lunch-new.h"
-#include "color.h"
-#include "init_conds.h"
-#include "load_eqn.h"
-
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <stdio.h>
-#include <math.h>
-#include <math.h>
-#ifndef WCTYPE
-#include <ctype.h>
-#else
-#include <wctype.h>
-#endif
-#include "bitmap/array.bitmap"
 #include "xpplim.h"
+#include "bitmap/array.bitmap"
+
+/* --- Macros --- */
 #define READEM 1
-#include "browse.h"
 #define MAX_LEN_SBOX 25
 #define FIRSTCOLOR 30
 #define FIX_MIN_SIZE 2
-extern int COLOR;
-extern unsigned int GrFore,GrBack;
-/*extern char this_file[100];*/
-extern char this_file[XPP_MAX_NAME];
-extern Display *display;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF,color_total,screen;
-extern GC gc, small_gc,gc_graph;
+
+#define MYMASK (ButtonPressMask 	|\
+                ButtonReleaseMask   |\
+                KeyPressMask		|\
+                ExposureMask		|\
+                StructureNotifyMask	|\
+                LeaveWindowMask		|\
+                EnterWindowMask)
+
+/* --- Functions --- */
 double atof();
-extern char uvar_names[MAXODE][12];
-extern BROWSER my_browser;
 int aplot_range;
 int aplot_range_count=0;
 char aplot_range_stem[256]="rangearray";
 int aplot_still=1,aplot_tag=0;
 APLOT aplot;
-extern Window draw_win;
 int plot3d_auto_redraw=0;
 FILE *ap_fp;
 GC aplot_gc;
 int first_aplot_press;
 int do_range(double *, int);
-extern double MyData[MAXODE];
-
-#define MYMASK  (ButtonPressMask 	|\
-                ButtonReleaseMask |\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		LeaveWindowMask		|\
-		EnterWindowMask)
-
-
 
 void draw_one_array_plot(char *bob)
 {
@@ -128,6 +117,7 @@ void set_up_aplot_range()
  do_range(x,0);
  }
 }
+
 void fit_aplot()
 {
 double zmax,zmin;
@@ -137,6 +127,7 @@ double zmax,zmin;
   redraw_aplot(aplot);
 
 }
+
 void optimize_aplot(int *plist)
 {
   int i0=plist[0]-1;
@@ -165,9 +156,7 @@ void optimize_aplot(int *plist)
   reset_aplot_axes(aplot);
   redraw_aplot(aplot);
 }
-  
-  
-  
+
 void make_my_aplot(name)
      char *name;
 {

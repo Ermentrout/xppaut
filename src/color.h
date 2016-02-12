@@ -4,6 +4,7 @@
 #include <X11/Xlib.h>
 
 /* --- Data --- */
+extern int COLOR;
 extern int color_total;
 
 /* --- Functions --- */

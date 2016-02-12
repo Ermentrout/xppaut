@@ -6,6 +6,8 @@
 
 /* --- Data --- */
 extern char anifile[XPP_MAX_NAME];
+extern unsigned int GrFore;
+extern unsigned int GrBack;
 extern int TrueColorFlag;
 extern int use_ani_file;
 
