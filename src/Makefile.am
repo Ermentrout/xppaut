@@ -8,7 +8,7 @@ AM_CPPFLAGS = \
 	-DHAVEDLL \
 	-DMYSTR1=$(MAJORVER) \
 	-DMYSTR2=$(MINORVER) \
-	-I$(top_srcdir)/cvodesrc
+	-Icvodesrc
 
 bin_PROGRAMS = \
 	xppaut
@@ -138,7 +138,7 @@ bitmap_headers = \
 	bitmap/txtview.bitmap
 
 xppaut_LDADD = \
-	$(top_builddir)/cvodesrc/libcvode.a
+	cvodesrc/libcvode.a
 
 xppaut_SOURCES = \
 	abort.c \
@@ -218,7 +218,6 @@ xppaut_SOURCES = \
 	z_abs.c \
 	z_exp.c \
 	z_log.c \
-	$(cvode_sources) \
 	$(auto_sources)
 
 libxpp_a_SOURCES = \
@@ -299,7 +298,6 @@ libxpp_a_SOURCES = \
 	z_abs.c \
 	z_exp.c \
 	z_log.c \
-	$(cvode_sources) \
 	$(auto_sources)
 
 auto_sources = \
