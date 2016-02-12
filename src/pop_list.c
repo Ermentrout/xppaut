@@ -3,8 +3,8 @@
 #include "many_pops.h"
 #include "ggets.h"
 #include "menudrive.h"
-#include "info.bitmap"
-#include "alert.bitmap"
+#include "bitmap/info.bitmap"
+#include "bitmap/alert.bitmap"
 #include "browse.h"
 
 void set_window_title(Window win,char *string)

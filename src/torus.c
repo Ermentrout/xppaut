@@ -10,7 +10,7 @@
 #include "ggets.h"
 #include "pop_list.h"
 #include "many_pops.h"
-#include "info.bitmap"
+#include "bitmap/info.bitmap"
 #include "browse.h"
 
 extern int DisplayHeight,DisplayWidth;

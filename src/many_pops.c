@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "help_defs.h"
-#include "graph.bitmap"
+#include "bitmap/graph.bitmap"
 #include "struct.h"
 #include "browse.h"
 #include "init_conds.h"

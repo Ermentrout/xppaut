@@ -73,7 +73,7 @@ want to alter the ordering below
 #include "xpplim.h"
 #include "browse.h"
 #include "toons.h"
-#include "aniwin.bitmap"
+#include "bitmap/aniwin.bitmap"
 
 #define MAX_LEN_SBOX 25
 

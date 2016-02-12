@@ -13,7 +13,7 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
-#include "auto.bitmap"
+#include "bitmap/auto.bitmap"
 #include "newhome.h"
 #include "mykeydef.h"
 #include "xpplim.h"

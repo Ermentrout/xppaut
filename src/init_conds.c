@@ -42,20 +42,20 @@ This also has the clone gadget
 
 #include <time.h>
 #include "xpplim.h"
-#include "ic.bitmap"
-#include "param.bitmap"
-#include "delay.bitmap"
+#include "bitmap/ic.bitmap"
+#include "bitmap/param.bitmap"
+#include "bitmap/delay.bitmap"
 
-#include "filebrowse.bitmap"
-#include "pageup.bitmap"
-#include "pagedn.bitmap"
-#include "lineup.bitmap"
-#include "linedn.bitmap"
-#include "home.bitmap"
-#include "start.bitmap"
+#include "bitmap/filebrowse.bitmap"
+#include "bitmap/pageup.bitmap"
+#include "bitmap/pagedn.bitmap"
+#include "bitmap/lineup.bitmap"
+#include "bitmap/linedn.bitmap"
+#include "bitmap/home.bitmap"
+#include "bitmap/start.bitmap"
 
 
-#include "bc.bitmap"
+#include "bitmap/bc.bitmap"
 #include "shoot.h"
 #include "ggets.h"
 

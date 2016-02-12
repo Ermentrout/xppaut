@@ -28,7 +28,7 @@
 #endif
 
 #include "xpplim.h"
-#include "browse.bitmap"
+#include "bitmap/browse.bitmap"
 #include "newhome.h"
 #include "mykeydef.h"
 

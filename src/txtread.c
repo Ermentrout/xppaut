@@ -25,7 +25,7 @@
 #include <wctype.h>
 #endif
 
-#include "txtview.bitmap"
+#include "bitmap/txtview.bitmap"
 #include "mykeydef.h"
 #define MAXLINES 5000
 #define MAXCOMMENTS 500

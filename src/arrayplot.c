@@ -55,7 +55,7 @@
 #else
 #include <wctype.h>
 #endif
-#include "array.bitmap"
+#include "bitmap/array.bitmap"
 #include "xpplim.h"
 #define READEM 1
 #include "browse.h"

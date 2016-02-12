@@ -21,300 +21,284 @@ check_PROGRAMS = \
 
 noinst_HEADERS = \
 	abort.h \
-	comline.h \
-	extra.h \
-	kinescope.h \
-	newhome.h \
-	stiff.h \
 	adj2.h \
-	f2c.h \
-	lio.h \
-	newpars.h \
-	storage.h \
-	fftn.h \
-	nullcline.h \
-	struct.h \
 	aniparse.h \
-	fio.h \
-	numerics.h \
-	sue.h \
 	arrayplot.h \
-	cvode.h \
-	flags.h \
-	load_eqn.h \
-	odesol2.h \
-	tabular.h \
 	array_print.h \
-	fmt.h \
-	toons.h \
 	autevd.h \
-	dae_fun.h \
-	form_ode.h \
-	lread.h \
-	open.h \
-	torus.h \
-	autlib1.h \
-	delay_handle.h \
-	fp.h \
-	lunch-new.h \
-	txtread.h \
-	autlib2.h \
-	del_stab.h \
-	gear.h \
-	macdirent.h \
-	parserslow.h \
-	uio.h \
 	autlim.h \
-	getvar.h \
-	macsysdirent.h \
-	phsplan.h \
-	userbut.h \
-	derived.h \
-	ggets.h \
-	main.h \
-	pop_list.h \
-	util.h \
 	auto.h \
-	dfe.h \
-	graf_par.h \
-	many_pops.h \
-	pp_shoot.h \
+	auto_c.h \
+	auto_def2.h \
+	auto_f2c.h \
 	auto_nox.h \
-	diagram.h \
-	graphics.h \
-	markov.h \
-	rdfmt.h \
-	volterra2.h \
+	auto_types.h \
 	auto_x11.h \
-	dialog_box.h \
-	help_defs.h \
-	menudrive.h \
-	read_dir.h \
-	volterra.h \
 	axes2.h \
-	do_fit.h \
-	histogram.h \
-	menu.h \
-	rubber.h \
-	wref.h \
-	dormpri.h \
-	homsup.h \
-	menus.h \
-	run_auto.h \
-	wrtfmt.h \
 	browse.h \
-	due.h \
-	iio.h \
-	myfonts.h \
-	scrngif.h \
-	wsfe.h \
 	calc.h \
-	edit_rhs.h \
-	init_conds.h \
-	mykeydef.h \
-	sfe.h \
-	wsne.h \
 	choice_box.h \
-	eig_list.h \
-	integrate.h \
-	my_pars.h \
-	shoot.h \
-	xpplim.h \
-	close.h \
-	iterativ.h \
-	my_ps.h \
-	simplenet.h \
 	color.h \
-	err.h \
+	comline.h \
+	config.h \
+	dae_fun.h \
+	delay_handle.h \
+	del_stab.h \
+	derived.h \
+	diagram.h \
+	dialog_box.h \
+	do_fit.h \
+	dormpri.h \
+	edit_rhs.h \
+	eig_list.h \
+	extra.h \
+	fftn.h \
+	flags.h \
+	form_ode.h \
+	gear.h \
+	getvar.h \
+	ggets.h \
+	graf_par.h \
+	graphics.h \
+	help_defs.h \
+	histogram.h \
+	init_conds.h \
+	integrate.h \
 	kbs.h \
+	kinescope.h \
+	load_eqn.h \
+	lunch-new.h \
+	macdirent.h \
+	macsysdirent.h \
+	main.h \
+	many_pops.h \
+	markov.h \
+	menudrive.h \
+	menu.h \
+	menus.h \
+	myfonts.h \
+	mykeydef.h \
+	my_pars.h \
+	my_ps.h \
 	my_rhs.h \
-	cv2.h \
 	my_svg.h \
+	newhome.h \
+	newpars.h \
+	nullcline.h \
+	numerics.h \
+	odesol2.h \
+	parserslow.h \
+	phsplan.h \
+	pop_list.h \
+	pp_shoot.h \
+	read_dir.h \
+	rubber.h \
+	run_auto.h \
+	scrngif.h \
+	shoot.h \
+	simplenet.h \
+	stiff.h \
+	storage.h \
+	struct.h \
+	tabular.h \
+	toons.h \
+	torus.h \
 	tutor.h \
+	txtread.h \
+	userbut.h \
+	volterra2.h \
+	volterra.h \
+	xAuto.h \
+	xpplim.h \
 	$(bitmap_headers)
 
 bitmap_headers = \
-	bitmap/aniwin.bitmap \
 	bitmap/alert.bitmap \
-	bitmap/bc.bitmap \
-	bitmap/eqns.bitmap \
-	bitmap/info.bitmap \
-	bitmap/ic.bitmap \
-	bitmap/pp.bitmap \
+	bitmap/aniwin.bitmap \
 	bitmap/array.bitmap \
-	bitmap/browse.bitmap \
-	bitmap/equilib.bitmap \
-	bitmap/lines.bitmap \
-	bitmap/txtview.bitmap \
 	bitmap/auto.bitmap \
+	bitmap/bc.bitmap \
+	bitmap/browse.bitmap \
 	bitmap/delay.bitmap \
-	bitmap/graph.bitmap \
-	bitmap/param.bitmap \
+	bitmap/eqns.bitmap \
+	bitmap/equilib.bitmap \
 	bitmap/filebrowse.bitmap \
+	bitmap/graph.bitmap \
 	bitmap/home.bitmap \
+	bitmap/ic.bitmap \
+	bitmap/info.bitmap \
 	bitmap/linedn.bitmap \
+	bitmap/lines.bitmap \
 	bitmap/lineup.bitmap \
 	bitmap/pagedn.bitmap \
 	bitmap/pageup.bitmap \
-	bitmap/start.bitmap
+	bitmap/param.bitmap \
+	bitmap/pp.bitmap \
+	bitmap/start.bitmap \
+	bitmap/txtview.bitmap
 
 xppaut_LDADD = \
 	$(top_builddir)/cvodesrc/libcvode.a
 
 xppaut_SOURCES = \
-	main.c \
-	ggets.c \
-	menu.c \
-	rubber.c \
-	derived.c \
-	many_pops.c \
-	pop_list.c \
-	graphics.c \
-	dialog_box.c \
-	numerics.c \
-	choice_box.c \
-	color.c \
-	init_conds.c \
-	browse.c \
-	kinescope.c \
-	axes2.c \
 	abort.c \
-	parserslow2.c \
-	storage.c \
-	load_eqn.c \
-	form_ode.c \
-	odesol2.c \
-	gear.c \
-	eig_list.c \
-	integrate.c \
-	delay_handle.c \
-	graf_par.c \
-	dormpri.c \
-	my_ps.c \
-	my_svg.c \
-	nullcline.c \
-	torus.c \
-	pp_shoot.c \
-	lunch-new.c \
-	calc.c \
 	adj2.c \
-	my_rhs.c \
-	read_dir.c\
-	volterra2.c \
-	tabular.c \
-	markov.c \
-	histogram.c \
-	comline.c \
-	edit_rhs.c \
-	do_fit.c \
-	flags.c \
-	del_stab.c \
-	stiff.c \
+	aniparse.c \
 	arrayplot.c \
 	array_print.c \
-	aniparse.c \
-	simplenet.c \
+	axes2.c \
+	browse.c \
+	cabs.c \
+	calc.c \
+	choice_box.c \
+	color.c \
+	comline.c \
+	conpar2.c \
 	dae_fun.c \
-	fftn.c \
+	delay_handle.c \
+	del_stab.c \
+	derived.c \
+	dialog_box.c \
+	d_imag.c \
+	d_lg10.c \
+	do_fit.c \
+	dormpri.c \
+	d_sign.c \
+	edit_rhs.c \
+	eig_list.c \
+	eispack.c \
 	extra.c \
-	scrngif.c \
-	nagroutines.c \
-	homsup.c \
-	txtread.c \
+	fftn.c \
+	flags.c \
+	form_ode.c \
+	gear.c \
+	ggets.c \
+	gogoauto.c \
+	graf_par.c \
+	graphics.c \
+	histogram.c \
+	i_dnnt.c \
+	i_nint.c \
+	init_conds.c \
+	integrate.c \
+	kinescope.c \
+	load_eqn.c \
+	lunch-new.c \
+	main.c \
+	many_pops.c \
+	markov.c \
+	menu.c \
 	menudrive.c \
+	my_ps.c \
+	my_rhs.c \
+	my_svg.c \
+	nullcline.c \
+	numerics.c \
+	odesol2.c \
+	parserslow2.c \
+	pop_list.c \
+	pow_dd.c \
+	pow_di.c \
+	pow_ii.c \
+	pp_shoot.c \
+	read_dir.c \
+	r_lg10.c \
+	rubber.c \
+	scrngif.c \
+	setubv2.c \
+	simplenet.c \
+	stiff.c \
+	storage.c \
+	tabular.c \
+	torus.c \
+	txtread.c \
 	userbut.c \
-	Version.c \
-	backspace.c \
-	dfe.c \
-	due.c \
-	iio.c \
-	inquire.c \
-	rewind.c \
-	rsfe.c \
-	rdfmt.c \
-	sue.c \
-	uio.c \
-	wsfe.c \
-	sfe.c \
-	fmt.c \
-	lio.c \
-	lread.c \
-	open.c \
-	close.c \
-	util.c \
-	endfile.c \
-	wrtfmt.c \
-	wref.c \
-	err.c \
-	fmtlib.c \
-	rsne.c \
-	wsne.c \
-	fc77.c \
-	f2cstart.c \
+	volterra2.c \
+	worker2.c \
+	z_abs.c \
+	z_exp.c \
+	z_log.c \
 	$(cvode_sources) \
 	$(auto_sources)
 
 libxpp_a_SOURCES = \
-	main.c \
-	ggets.c \
-	menu.c \
-	rubber.c \
-	derived.c \
-	many_pops.c \
-	pop_list.c \
-	graphics.c \
-	dialog_box.c \
-	numerics.c \
-	choice_box.c \
-	color.c \
-	init_conds.c \
-	browse.c \
-	kinescope.c \
-	axes2.c \
 	abort.c \
-	parserslow2.c \
-	storage.c \
-	load_eqn.c \
-	form_ode.c \
-	odesol2.c \
-	gear.c \
-	eig_list.c \
-	integrate.c \
-	delay_handle.c \
-	graf_par.c \
-	dormpri.c \
-	my_ps.c \
-	my_svg.c \
-	nullcline.c \
-	torus.c \
-	pp_shoot.c \
-	lunch-new.c \
-	calc.c \
 	adj2.c \
-	read_dir.c \
-	volterra2.c \
-	tabular.c \
-	markov.c \
-	histogram.c \
-	comline.c \
-	edit_rhs.c \
-	do_fit.c \
-	flags.c \
-	del_stab.c \
-	stiff.c \
+	aniparse.c \
 	arrayplot.c \
 	array_print.c \
-	aniparse.c \
-	simplenet.c \
+	axes2.c \
+	browse.c \
+	cabs.c \
+	calc.c \
+	choice_box.c \
+	color.c \
+	comline.c \
+	conpar2.c \
 	dae_fun.c \
-	fftn.c \
+	delay_handle.c \
+	del_stab.c \
+	derived.c \
+	dialog_box.c \
+	d_imag.c \
+	d_lg10.c \
+	do_fit.c \
+	dormpri.c \
+	d_sign.c \
+	edit_rhs.c \
+	eig_list.c \
+	eispack.c \
 	extra.c \
-	scrngif.c \
-	nagroutines.c \
-	homsup.c \
-	txtread.c \
+	fftn.c \
+	flags.c \
+	form_ode.c \
+	gear.c \
+	ggets.c \
+	gogoauto.c \
+	graf_par.c \
+	graphics.c \
+	histogram.c \
+	i_dnnt.c \
+	i_nint.c \
+	init_conds.c \
+	integrate.c \
+	kinescope.c \
+	load_eqn.c \
+	lunch-new.c \
+	main.c \
+	many_pops.c \
+	markov.c \
+	menu.c \
 	menudrive.c \
+	my_ps.c \
+	my_rhs.c \
+	my_svg.c \
+	nullcline.c \
+	numerics.c \
+	odesol2.c \
+	parserslow2.c \
+	pop_list.c \
+	pow_dd.c \
+	pow_di.c \
+	pow_ii.c \
+	pp_shoot.c \
+	read_dir.c \
+	r_lg10.c \
+	rubber.c \
+	scrngif.c \
+	setubv2.c \
+	simplenet.c \
+	stiff.c \
+	storage.c \
+	tabular.c \
+	torus.c \
+	txtread.c \
 	userbut.c \
+	volterra2.c \
+	worker2.c \
+	z_abs.c \
+	z_exp.c \
+	z_log.c \
 	$(cvode_sources) \
 	$(auto_sources)
 
@@ -322,16 +306,13 @@ auto_sources = \
 	autlib1.c \
 	autlib2.c \
 	autlib3.c \
+	autlib4.c \
+	autlib5.c \
 	autevd.c \
-	run_auto.c \
 	autpp.c \
 	diagram.c \
 	auto_nox.c \
-	auto_x11.c \
-	flowkm_small.c
-
-cvode_sources = \
-	cv2.c
+	auto_x11.c
 
 libexample_so_CFLAGS = -fPIC
 libexample_so_LDFLAGS = -shared

@@ -13,8 +13,8 @@
 #include <X11/keysymdef.h>
 #include <math.h>
 #include "xpplim.h"
-#include "eqns.bitmap"
-#include "equilib.bitmap"
+#include "bitmap/eqns.bitmap"
+#include "bitmap/equilib.bitmap"
 #include "browse.h"
 
 #include "newhome.h"

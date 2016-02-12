@@ -13,7 +13,7 @@
 #include "init_conds.h"
 #include "kinescope.h"
 #include "main.h"
-#include "alert.bitmap"
+#include "bitmap/alert.bitmap"
 
 #include "graf_par.h"
 #include "integrate.h"
