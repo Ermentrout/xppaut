@@ -1,8 +1,12 @@
-#ifndef _color_h_
-#define _color_h_
+#ifndef XPPAUT_COLOR_H
+#define XPPAUT_COLOR_H
 
 #include <X11/Xlib.h>
 
+/* --- Data --- */
+extern int color_total;
+
+/* --- Functions --- */
 void tst_color(Window w);
 void set_scolor(int col);
 void set_color(int col);
@@ -15,6 +19,4 @@ void get_ps_color(int i, float *r, float *g, float *b);
 void get_svg_color(int i,int *r,int *g,int *b);
 void MakeColormap(void);
 int ColorMap(int i);
-
-
-#endif
+#endif /* XPPAUT_COLOR_H */

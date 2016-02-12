@@ -52,7 +52,7 @@ extern int FIX_VAR,NFUN;
 extern double BVP_TOL,BVP_EPS;
 extern int MaxPoints;
 
- extern char upar_names[MAXPAR][11],this_file[100],delay_string[MAXODE][80];
+ extern char upar_names[MAXPAR][11],this_file[XPP_MAX_NAME],delay_string[MAXODE][80];
  extern char uvar_names[MAXODE][12]; 
  extern char *ode_names[MAXODE],*fix_names[MAXODE];
 

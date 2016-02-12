@@ -1,3 +1,5 @@
+
+
 /***************   NOTES ON MPEG STUFF   ********************
 To prepare for mpeg encoding in order to make your movies
 permanent, I have to do some image manipulation - the main 
@@ -15,14 +17,23 @@ want to alter the ordering below
 ************************************************************/
 #include "aniparse.h"
 
+#ifndef HAVE_WCTYPE_H
+# include <ctype.h>
+#else
+# include <wctype.h>
+#endif
 #include <fcntl.h>
 #include <libgen.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <X11/Xlib.h>
+#include <X11/Xproto.h>
 #include <X11/Xutil.h>
 
 #include "browse.h"
@@ -127,8 +138,7 @@ typedef struct {
   double t1,t2,tstart;
   double vx,vy;
   double vax,vay;
-}
-ANI_MOTION_INFO;
+} ANI_MOTION_INFO;
 
 ANI_MOTION_INFO ami;
 
@@ -138,37 +148,19 @@ int show_grab_points=0;
 int ani_grab_flag=0;
 int who_was_grabbed;
 double get_ivar(int);
- 
-extern double last_ic[MAXODE],T0;
-
-
 /************************8  end grabber **********************/
 
 #define FIRSTCOLOR 30
 int on_the_fly_speed=10;
 int animation_on_the_fly=0;
-extern int TrueColorFlag;
-extern char *color_names[11];
-extern int colorline[];
-extern Display *display;
-extern XFontStruct *symfonts[5],*romfonts[5];
-extern int avsymfonts[5],avromfonts[5];
-extern int color_total,screen;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF,NODE;
-extern int  FIX_VAR,NMarkov;
-extern GC small_gc;
 double evaluate();
 double atof();
-extern BROWSER my_browser;
 
 int aniflag;
 int LastAniColor;
 int ani_line;
-
 int ani_speed=10;
 int ani_speed_inc=2;
-/*extern char this_file[100];*/
-extern char this_file[XPP_MAX_NAME];
 
 double ani_xlo=0,ani_xhi=1,ani_ylo=0,ani_yhi=1;
 double ani_lastx,ani_lasty;
@@ -229,11 +221,6 @@ int ani_text_color;
 int ani_text_font;
 
 GC ani_gc;
-
-extern int use_ani_file;
-extern char anifile[256]; 
-
-
 
 char *get_first(/* char *string,char *src */);
 char *get_next(/* char *src */);

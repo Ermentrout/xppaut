@@ -1,7 +1,13 @@
-#ifndef _graphics_h
-#define _graphics_h
+#ifndef XPPAUT_GRAPHICS_H
+#define XPPAUT_GRAPHICS_H
 
+#include <X11/Xlib.h>
 
+/* --- Data --- */
+extern XFontStruct *romfonts[5];
+extern XFontStruct *symfonts[5];
+
+/* --- Functions --- */
 void get_scale(double *x1, double *y1, double *x2, double *y2);
 void set_scale(double x1, double y1, double x2, double y2);
 void get_draw_area_flag(int flag);
@@ -61,4 +67,4 @@ void eq_symb(double *x, int type);
 void draw_symbol(double x, double y, double size, int my_symb);
 void reset_all_line_type();
 
-#endif
+#endif /* XPPAUT_GRAPHICS_H */

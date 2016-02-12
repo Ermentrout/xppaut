@@ -1,7 +1,10 @@
-#ifndef _graf_par_h_
-#define _graf_par_h_
+#ifndef XPPAUT_GRAF_PAR_H
+#define XPPAUT_GRAF_PAR_H
 
+#include <stdio.h>
+#include <X11/Xlib.h>
 
+/* --- Macros --- */
 #define RUBBOX 0
 #define RUBLINE 1
 
@@ -9,15 +12,12 @@
 #define PSFMT 1
 #define SVGFMT 2
 
-
 #define REAL_SMALL 1.e-6
 #define MAX_LEN_SBOX 25
 #define MAXBIFCRV 100
 #define lmax(a,b) ((a>b) ? a : b)
 
-#include <X11/Xlib.h>
-#include <stdio.h>
-
+/* --- Types --- */
 typedef struct {
   char angle[20];
   char yes[3];
@@ -32,8 +32,10 @@ typedef struct {
   Window w;
 } BD;
 
+/* --- Data --- */
+extern int colorline[12];
 
-
+/* --- Functions --- */
 void change_view_com(int com);
 void ind_to_sym(int ind, char *str);
 void check_flags(void);
@@ -89,4 +91,4 @@ void add_a_curve_com(int c);
 void default_window();
 void dump_ps( int i);
 
-#endif
+#endif /* XPPAUT_GRAF_PAR_H */

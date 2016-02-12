@@ -2,8 +2,13 @@
 #define XPPAUT_MAIN_H
 
 #include <X11/Xlib.h>
+#include "load_eqn.h"
 
 /* --- Data --- */
+extern char anifile[XPP_MAX_NAME];
+extern int TrueColorFlag;
+extern int use_ani_file;
+
 extern Display *display;
 extern GC gc;
 extern GC font_gc;

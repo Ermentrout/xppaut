@@ -155,7 +155,7 @@ int BoxMode;
 
 double atof();
 
-extern char this_file[100];
+extern char this_file[XPP_MAX_NAME];
 
 #define SB_DIM 5
 #define SB_SPC 2

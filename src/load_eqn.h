@@ -1,8 +1,10 @@
-#ifndef _load_eqn_h_
-#define _load_eqn_h_
+#ifndef XPPAUT_LOAD_EQN_H
+#define XPPAUT_LOAD_EQN_H
 
 #include <stdio.h>
+#include "xpplim.h"
 
+/* --- Macros --- */
 /*
 The acutual max filename length is determined by the 
 FILENAME_MAX (see <stdio.h>), and usually 4096 -- but
@@ -20,13 +22,10 @@ override the below definition.
 #endif
 #endif
 
-
-
+/* --- Types --- */
 /*
 Options are set accroding to an order of precedence
-
 command line < mfile < .xpprc < default.opt
-
 Add any options here that you might want to track.
 */
 typedef struct {
@@ -182,13 +181,14 @@ typedef struct {
   int COLORIZE;
   int COLORLO;
   int COLORHI;
+} OptionsSet;
 
+/* --- Data --- */
+extern double last_ic[MAXODE];
+extern char this_file[XPP_MAX_NAME];
+extern char this_internset[XPP_MAX_NAME];
 
-
-
-  } OptionsSet;
-
-
+/* --- Functions --- */
 void dump_torus(FILE *fp, int f);
 void load_eqn(void);
 void set_X_vals(void);
@@ -207,7 +207,4 @@ void split_apart(char *bob, char *name, char *value);
 void check_for_xpprc(void);
 void stor_internopts(char *s1);
 void set_option(char *s1, char *s2,int force,OptionsSet *mask);
-
-
-
-#endif
+#endif /* XPPAUT_LOAD_EQN_H */

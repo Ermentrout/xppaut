@@ -83,7 +83,6 @@ double FreezeKeyX,FreezeKeyY;
 int FreezeKeyFlag,AutoFreezeFlag=0;
 int CurrentCurve=0;
 extern char this_file[XPP_MAX_NAME];
-extern char this_internset[XPP_MAX_NAME];
 
 extern int PltFmtFlag;
 extern char uvar_names[MAXODE][12];

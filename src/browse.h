@@ -1,12 +1,13 @@
-#ifndef _browse_h_
-#define _browse_h_
+#ifndef XPPAUT_BROWSE_H
+#define XPPAUT_BROWSE_H
 
+#include <stdio.h>
+#include <X11/Xlib.h>
+
+/* --- Macros --- */
 #define BMAXCOL 20
 
-#include <X11/Xlib.h>
-#include <stdio.h>
-#include "strutil.h"
-
+/* --- Types --- */
 typedef struct {
 		Window base,upper;
 		Window find,up,down,pgup,pgdn,home,end,left,right;
@@ -24,9 +25,10 @@ typedef struct {
 		int istart,iend;
                 } BROWSER;
 
-/*extern BROWSER my_browser;
-*/
+/* --- Data --- */
+extern BROWSER my_browser;
 
+/* --- Functions --- */
 float **get_browser_data(void);
 void set_browser_data(float **data, int col0);
 float *get_data_col(int c);
@@ -92,7 +94,7 @@ void data_last(BROWSER *b);
 void data_restore(BROWSER *b);
 void get_col_list(char *s, int *cl, int *n);
 
-#endif
+#endif /* XPPAUT_BROWSE_H */
 
 
 

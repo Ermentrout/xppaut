@@ -115,9 +115,7 @@ extern int queryics;
 extern int aplot_range;
 extern int Nintern_2_use;
 extern int AdjRange;
-
 extern Window draw_win;
-extern char this_internset[XPP_MAX_NAME];
 
 int MakePlotFlag=0;
 
@@ -191,7 +189,6 @@ extern char UserOUTFILE[256];
 
 extern double DELAY;
 extern int R_COL;
-extern int colorline[11];
 extern int (*rhs)();
 int STOP_FLAG=0;
 int PSLineStyle;
