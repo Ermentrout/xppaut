@@ -1,17 +1,3 @@
-#include "adj2.h"
-#include "my_rhs.h"
-#include "pop_list.h"
-#include "browse.h"
-#include "ggets.h"
-#include "do_fit.h"
-#include "lunch-new.h"
-#include "gear.h"
-#include "integrate.h"
-#include "parserslow.h"
-
-
-#include <stdlib.h> 
-#include <string.h>
 /*
   this has a bunch of numerical routines
   averaging
@@ -20,34 +6,41 @@
   maximal liapunov exponent
   
 */
+#include "adj2.h"
 
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "browse.h"
+#include "do_fit.h"
+#include "form_ode.h"
+#include "gear.h"
+#include "ggets.h"
+#include "histogram.h"
+#include "integrate.h"
+#include "lunch-new.h"
+#include "my_rhs.h"
+#include "parserslow.h"
+#include "pop_list.h"
 #include "xpplim.h"
 
 
 #define MAX_LEN_SBOX 25
 #define READEM 1
 
+/* --- Functions --- */
 double evaluate();
 double ndrand48();
 
-extern double MyData[MAXODE];
 int (*rhs)();
-extern float **storage;
-extern int storind,FOUR_HERE;
-extern int NODE,INFLAG,NEQ,NJMP,FIX_VAR,NMarkov,nvec;
-extern double TEND;
-extern char uvar_names[MAXODE][12];
-float **my_adj;
+extern int FOUR_HERE;
 int adj_len;
+float **my_adj;
 float **my_h;
 float *my_liap[2];
 
-
-
-extern char *info_message;
 struct {
   int here,col0,ncol,colskip;
   int row0,nrow,rowskip; 
@@ -58,18 +51,11 @@ struct {
 int TRANPOSE_HERE=0;
 int LIAP_FLAG=0;
 int LIAP_N,LIAP_I;
-extern double NEWT_ERR;
 double ADJ_EPS=1.e-8,ADJ_ERR=1.e-3;
 int ADJ_MAXIT=20,ADJ_HERE=0,H_HERE=0,h_len,HODD_EV=0;
 int AdjRange=0;
-extern double DELTA_T,BOUND;
 int *coup_fun[MAXODE];
 char *coup_string[MAXODE];
-
-extern int *my_ode[];
-extern int NSYM,NSYM_START,NCON,NCON_START;
-/* extern Window main_win; */
-extern int DCURY;
 
 void init_trans()
 {

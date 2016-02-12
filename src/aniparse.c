@@ -1,31 +1,3 @@
-#include "aniparse.h"
-#include "color.h"
-#include "parserslow.h"
-#include "form_ode.h"
-#include "my_rhs.h"
-#include "nullcline.h"
-#include "dialog_box.h"
-#include "ggets.h"
-#include "init_conds.h"
-#include "many_pops.h"
-#include "menudrive.h"
-#include "pop_list.h" 
-#include <unistd.h>
-#include "scrngif.h"
-#include "load_eqn.h"
-#include "integrate.h"
-#include "sys/types.h"
-#include "sys/stat.h"
-#include <sys/time.h>
-#include <fcntl.h>
-#include <stdlib.h> 
-#include <string.h>
-#include <libgen.h>
-/*  A simple animator
-   
-*/
-
-
 /***************   NOTES ON MPEG STUFF   ********************
 To prepare for mpeg encoding in order to make your movies
 permanent, I have to do some image manipulation - the main 
@@ -41,6 +13,44 @@ in binary so lobits are blue etc. If the colors seem screwy, then you might
 want to alter the ordering below
 
 ************************************************************/
+#include "aniparse.h"
+
+#include <fcntl.h>
+#include <libgen.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+#include "browse.h"
+#include "color.h"
+#include "dialog_box.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "graf_par.h"
+#include "graphics.h"
+#include "init_conds.h"
+#include "integrate.h"
+#include "load_eqn.h"
+#include "main.h"
+#include "menudrive.h"
+#include "my_rhs.h"
+#include "nullcline.h"
+#include "parserslow.h"
+#include "pop_list.h"
+#include "scrngif.h"
+#include "strutil.h"
+#include "toons.h"
+#include "bitmap/aniwin.bitmap"
+
+/* --- Macros --- */
+/* maximum variables you can change per grabbable */
+#define MAX_GEVENTS 20
+/* max grabbable objects  */
+#define MAX_ANI_GRAB 50
 
 #define INIT_C_SHIFT 0
 
@@ -50,32 +60,10 @@ want to alter the ordering below
 #define MY_GREEN midbits
 #define MY_RED lobits
 #else
-
 #define MY_BLUE lobits
 #define MY_GREEN midbits
 #define MY_RED hibits
 #endif
-
-
-
-/**************************************************************/
-
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xproto.h>
-#include <stdio.h>
-#include <math.h>
-#ifndef WCTYPE
-#include <ctype.h>
-#else
-#include <wctype.h>
-#endif
-#include "xpplim.h"
-#include "browse.h"
-#include "toons.h"
-#include "bitmap/aniwin.bitmap"
-
-#define MAX_LEN_SBOX 25
 
 #define LINE 0
 #define RLINE 1
@@ -87,7 +75,7 @@ want to alter the ordering below
 #define VTEXT 7
 #define ELLIP 9
 #define FELLIP 10
-#define COMET  11
+#define COMET 11
 #define PCURVE 12
 #define AXNULL 13
 #define AYNULL 14
@@ -104,6 +92,33 @@ want to alter the ordering below
 #define DIMENSION 22
 #define COMNT 30
 #define SPEED 23
+
+#ifndef strupr
+void strupr(char *s)
+{
+  int i=0;
+  while(s[i])
+    {
+      if(islower(s[i]))
+        s[i]-=32;
+      i++;
+    }
+}
+#endif
+#ifndef strlwr
+void strlwr(char *s)
+{
+  int i=0;
+  while(s[i])
+    {
+      if(isupper(s[i]))
+        s[i]+=32;
+      i++;
+    }
+}
+#endif
+
+/* --- Types --- */
 /***************  stuff for grabber  *******************/
 typedef struct {
   double x0,y0;

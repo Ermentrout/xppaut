@@ -2,7 +2,7 @@
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
-
+#include <math.h>
 #include "auto_f2c.h"
 #include "auto_c.h"
 /* #include "malloc.h" */

@@ -1,8 +1,13 @@
-#ifndef _integrate_h_
-#define _integrate_h_
+#ifndef XPPAUT_INTEGRATE_H
+#define XPPAUT_INTEGRATE_H
 
 #include <stdio.h>
+#include "xpplim.h"
 
+/* --- Data --- */
+extern double MyData[MAXODE];
+
+/* --- Functions --- */
 void init_ar_ic(void);
 void dump_range(FILE *fp, int f);
 void init_range(void);
@@ -52,5 +57,4 @@ void shoot_easy(double *x);
 void stop_integration(void);
 int stor_full(void);
 int do_auto_range_go();
-
-#endif
+#endif /* XPPAUT_INTEGRATE_H */

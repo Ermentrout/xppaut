@@ -57,7 +57,10 @@ AC_CHECK_FUNCS([ \
     strcasecmp \
     strcspn \
     strdup \
-    strncasecmp])
+    strncasecmp \
+    strupr])
+
+AM_CONDITIONAL([HAVE_STRUPR], [test x$HAVE_STRUPR != x])
 
 MAJORVER=${PACKAGE_VERSION%.*}
 AC_SUBST([MAJORVER])

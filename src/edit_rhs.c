@@ -70,9 +70,6 @@ extern char *ufun_def[MAXUFUN];
 extern char ufun_names[MAXUFUN][12];
 extern int narg_fun[MAXUFUN], *ufun[MAXUFUN];
 
-
-
-extern UFUN_ARG ufun_arg[MAXUFUN];
 extern BC_STRUCT my_bc[MAXODE];
 
 extern int NFUN;

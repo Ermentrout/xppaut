@@ -1,35 +1,27 @@
+#ifndef XPPAUT_FORM_ODE_H
+#define XPPAUT_FORM_ODE_H
 
-#ifndef _form_ode_h
-#define _form_ode_h
-
-#include "xpplim.h"
-#include "newpars.h"
 #include <stdio.h>
+#include "strutil.h"
+#include "newpars.h"
+#include "xpplim.h"
 
+/* --- Macros --- */
 #define MAXVNAM 33
 #define MAXLINES 5000
 
-
-/*void break_up_list(char *rhs);
-void compile_em();
-void free_varinfo();
-void remove_blanks(char *s1);
-void read_a_line(FILE *fp,char *s);
-
-void subsk(char *big,char *new,int k,int flag);
-void free_comments();
-
-void add_comment(char *s);
-void init_varinfo();
-void add_varinfo(int type,char *lhs,char *rhs,int nargs,char args[MAXARG][NAMLEN+1]);
-void stor_internopts(char *s1);
-*/
-
+/* --- Types --- */
 typedef struct {
-  char *name,*value;} FIXINFO;
-  
-  
-  
+    char *name,*value;
+} FIXINFO;
+
+/* --- Data --- */
+extern int FIX_VAR;
+extern int NCON;
+extern int NCON_START;
+extern int NSYM_START;
+
+/* --- Functions --- */
 int make_eqn(void);
 void strip_saveqn(void);
 int disc(char *string);
@@ -90,4 +82,4 @@ void advance_past_first_word(char** sptr);
 char* get_next2(char** tokens_ptr);
 void strcpy_trim(char* dest, char* source);
 void strncpy_trim(char* dest, char* source, int n);
-#endif 
+#endif /* XPPAUT_FORM_ODE_H */

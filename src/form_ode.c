@@ -1,6 +1,6 @@
 #include "form_ode.h"
 #include "aniparse.h"
-
+#include "strutil.h"
 #include "parserslow.h"
 #include "markov.h"
 #include "read_dir.h"
@@ -37,10 +37,11 @@
 #include "shoot.h"
 #include "newpars.h"
 
+/* --- Macros --- */
 #define MAXONLY 1000
-
 #define MAXCOMMENTS 500
 
+/* --- Functions --- */
 int IN_INCLUDED_FILE=0;
 char uvar_names[MAXODE][12];
 char *ode_names[MAXODE];

@@ -1,12 +1,12 @@
-#ifndef _edit_rhs_h_
-#define _edit_rhs_h_
+#ifndef XPP_EDIT_RHS_H
+#define XPP_EDIT_RHS_H
 
 
 #include <X11/Xlib.h>
 #include "xpplim.h"
 #include <stdio.h>
 
-
+/* --- Macros --- */
 #define NEQMAXFOREDIT 20
 #define MAXARG 20
 #define MAX_N_EBOX MAXODE
@@ -16,22 +16,13 @@
 #define FORGET_THIS 3
 #define DONE_THIS 1
 #define RESET_ALL 4
-
 #define MAXUFUN 50
-
-
-
-/*typedef struct {
-  int narg;
-  char args[MAXARG][11];
-} UFUN_ARG;
-*/
-
 
 /*  This is a edit box widget which handles a list of 
 	editable strings  
  */
 
+/* --- Types --- */
 typedef struct {
 		Window base,ok,cancel,reset;
 		Window win[MAX_N_EBOX];
@@ -39,9 +30,9 @@ typedef struct {
 		     value[MAX_N_EBOX][MAX_LEN_EBOX],
 		     rval[MAX_N_EBOX][MAX_LEN_EBOX];
 		int n,hot;
-		} EDIT_BOX;
+} EDIT_BOX;
 
-
+/* --- Functions --- */
 void reset_ebox(EDIT_BOX *sb, int *pos, int *col);
 int do_edit_box(int n, char *title, char **names, char **values);
 void expose_ebox(EDIT_BOX *sb, Window w, int pos, int col);
@@ -55,4 +46,4 @@ void user_fun_info(FILE *fp);
 void edit_functions(void);
 int save_as(void);
 
-#endif
+#endif /* XPP_EDIT_RHS_H */

@@ -5,6 +5,7 @@
 
 #include <X11/Xlib.h>
 #include <stdio.h>
+#include "strutil.h"
 
 typedef struct {
 		Window base,upper;

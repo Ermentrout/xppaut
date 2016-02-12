@@ -3,6 +3,7 @@
 #include "aniparse.h"
 #include "ggets.h"
 #include "markov.h"
+#include "strutil.h"
 #include "parserslow.h"
 #include "tabular.h"
 

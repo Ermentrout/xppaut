@@ -2,7 +2,6 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CPPFLAGS = \
 	-D_XOPEN_SOURCE=600 \
 	-DNOERRNO \
-	-DNON_UNIX_STDIO \
 	-DAUTO \
 	-DCVODE_YES \
 	-DHAVEDLL \
@@ -100,6 +99,7 @@ noinst_HEADERS = \
 	stiff.h \
 	storage.h \
 	struct.h \
+	strutil.h \
 	tabular.h \
 	toons.h \
 	torus.h \
@@ -218,6 +218,7 @@ xppaut_SOURCES = \
 	z_abs.c \
 	z_exp.c \
 	z_log.c \
+	$(strutil_sources) \
 	$(auto_sources)
 
 libxpp_a_SOURCES = \
@@ -298,6 +299,7 @@ libxpp_a_SOURCES = \
 	z_abs.c \
 	z_exp.c \
 	z_log.c \
+	$(strutil_sources) \
 	$(auto_sources)
 
 auto_sources = \
@@ -311,6 +313,12 @@ auto_sources = \
 	diagram.c \
 	auto_nox.c \
 	auto_x11.c
+
+if HAVE_STRUPR
+	strutil_sources =
+else
+	strutil_sources = strutil.c
+endif
 
 libexample_so_CFLAGS = -fPIC
 libexample_so_LDFLAGS = -shared
