@@ -1,11 +1,14 @@
-#ifndef _auto_nox_h_
-#define _auto_nox_h_
+#ifndef XPPAUT_AUTO_NOX_H
+#define XPPAUT_AUTO_NOX_H
 
 #include <stdio.h>
-#include "xpplim.h"
 #include "autlim.h"
+#include "xpplim.h"
+
+/* --- Macros --- */
 #define MAX_AUT_PER 10
 
+/* --- Types --- */
 typedef struct {
   int irot;
   int nrot[1000];
@@ -69,8 +72,10 @@ typedef struct {
   double xmin,ymin,xmax,ymax;
 }  AUTOAX;
 
+/* --- Data --- */
+extern int AutoTwoParam;
 
-
+/* --- Functions --- */
 void colset(int type);
 void pscolset2(int flag2);
 void colset2(int flag2);
@@ -167,4 +172,4 @@ void get_a_row(double *u, double *t, int n, FILE *fp);
 void auto_file(void);
 int check_plot_type(int flag2,int icp1, int icp2);
 
-#endif
+#endif /* XPPAUT_AUTO_NOX_H */

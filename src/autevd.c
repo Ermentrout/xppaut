@@ -1,19 +1,19 @@
+#include "autevd.h"
+#undef abs
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "autevd.h"
-#include "auto_nox.h"
-#include "diagram.h"
-#include "diagram.h"
-#include "gear.h"
-
+#include "autlim.h"
 #include "auto_c.h"
 #include "auto_def2.h"
-#include "autlim.h"
+#include "auto_nox.h"
+#include "diagram.h"
+#include "gear.h"
 #include "xAuto.h"
 
+/* --- Macros --- */
 #define SPECIAL 5
 #define SPER 3
 #define UPER 4
@@ -24,16 +24,14 @@
 #define MAXDIMHET 12
 #define MAXDIMHOM 24
 
-
+/* --- Data --- */
 extern double outperiod[20];
 extern integer UzrPar[20];
 extern int NAutoUzr;
-
 extern ADVAUTO aauto;
-
 XAUTO xAuto;
 
-extern int AutoTwoParam;
+/* --- Functions --- */
 int DiagFlag=0;
 /*typedef struct {double r,i;} ddoublecomplex;
 
@@ -46,7 +44,6 @@ EIGVAL my_ev;
 
 double sign();
 int imin();
-
 
 void init_auto(ndim,nicp,nbc,ips,irs,ilp,ntst,isp,isw,nmx,npr,
 	  ds,dsmin,dsmax,rl0,rl1,a0,a1,
