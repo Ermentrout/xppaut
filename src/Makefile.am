@@ -7,7 +7,8 @@ AM_CPPFLAGS = \
 	-DCVODE_YES \
 	-DHAVEDLL \
 	-DMYSTR1=$(MAJORVER) \
-	-DMYSTR2=$(MINORVER)
+	-DMYSTR2=$(MINORVER) \
+	-I$(top_srcdir)/cvodesrc
 
 bin_PROGRAMS = \
 	xppaut
