@@ -6,5 +6,6 @@ SUBDIRS = \
 	help \
 	ode \
 	share \
-	src \
-	src/cvodesrc
+	src/cvodesrc \
+	src
+
