@@ -69,10 +69,10 @@ AC_CONFIG_FILES([
     betty/Makefile
     bin/Makefile
     canonical/Makefile
-    cvodesrc/Makefile
     doc/Makefile
     help/Makefile
     ode/Makefile
     share/Makefile
-    src/Makefile])
+    src/Makefile
+    src/cvodesrc/Makefile])
 AC_OUTPUT
