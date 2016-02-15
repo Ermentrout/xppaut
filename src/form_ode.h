@@ -20,6 +20,7 @@ extern int FIX_VAR;
 extern int NCON;
 extern int NCON_START;
 extern int NSYM_START;
+extern char uvar_names[MAXODE][12];
 
 /* --- Functions --- */
 int make_eqn(void);

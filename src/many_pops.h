@@ -1,8 +1,13 @@
-#ifndef _many_pops_h
-#define _many_pops_h
+#ifndef XPPAUT_MANY_POPS_H
+#define XPPAUT_MANY_POPS_H
 
 #include <X11/Xlib.h>
+#include "struct.h"
 
+ /* --- Data --- */
+extern GRAPH *MyGraph;
+
+/* --- Functions --- */
 int select_table(void);
 void get_intern_set(void);
 void make_icon(char *icon, int wid, int hgt, Window w);
@@ -60,5 +65,4 @@ void canvas_xy(char *buf);
 void check_draw_button(XEvent ev);
 void set_active_windows();
 
-
-#endif
+#endif /* XPPAUT_MANY_POPS_H */

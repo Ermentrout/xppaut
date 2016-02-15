@@ -1,9 +1,12 @@
+#ifndef XPPAUT_MY_SVG_H
+#define XPPAUT_MY_SVG_H
 
-#ifndef _my_svg_h_
-#define _my_svg_h_
+#include <stdio.h>
 
+/* --- Data --- */
+extern FILE *svgfile;
 
-/* my_ps.c */
+/* --- Functions --- */
 int svg_init(char *filename, int color);
 void svg_stroke(void);
 void svg_do_color(int color);
@@ -25,5 +28,4 @@ void special_put_text_svg(int x, int y, char *str, int size);
 void fancy_svg_text(int x, int y, char *str, int size, int font);
 void svg_text(int x, int y, char *str);
 
-
-#endif
+#endif /* XPPAUT_MY_SVG_H */

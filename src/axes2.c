@@ -1,23 +1,25 @@
-#include  "axes2.h"
-
-#include <stdlib.h> 
-#include <string.h>
  /* All new improved axes !!  */
-
+#include  "axes2.h"
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "xpplim.h"
-#include "struct.h"
+
+#include "form_ode.h"
 #include "ggets.h"
+#include "graf_par.h"
 #include "graphics.h"
 #include "main.h"
 #include "many_pops.h"
-#include "graf_par.h"
+#include "my_ps.h"
+#include "my_svg.h"
+#include "struct.h"
+#include "xpplim.h"
 
-
+/* --- Macros --- */
 #define NOAXES 0
 #define CROSS 1
 #define TAXIS 3
@@ -31,27 +33,10 @@
 #define SIGNIF (0.01)		/* less than one hundredth of a tic mark */
 #define CheckZero(x,tic) (fabs(x) < ((tic) * SIGNIF) ? 0.0 : (x))
 
-
-extern GRAPH *MyGraph;
-extern GC small_gc;
-extern int DCURXs,DCURYs;
-extern Display *display;
-extern Window draw_win;
-extern int DX_0,DY_0,D_WID,D_HGT;
-extern int PltFmtFlag;
-extern char uvar_names[MAXODE][12];
-extern int DLeft,DRight,DTop,DBottom,VTic,HTic,VChar,HChar;
-extern int TextJustify,TextAngle;
-extern double XMin,XMax,YMin,YMax;
-extern int Xup;
-
-
 int DOING_AXES=0;
 int DOING_BOX_AXES=0;
-extern FILE *svgfile;
 
-
-
+/* --- Functions --- */
 void re_title()
 {
  char bob[40];
@@ -166,9 +151,8 @@ void do_axes()
     case 5: Frame_3d(); break;
 
    }
-    if(Xup)SmallBase();
- 
- }
+    if(Xup)SmallBase(); 
+}
 
 void redraw_cube(double theta,double phi)
 {
@@ -194,8 +178,7 @@ void draw_unit_cube()
   line3d(1.,1.,1.,1.,1.,-1.);
   line3d(-1.,1.,1.,-1.,1.,-1.);
   line3d(-1.,-1.,1.,-1.,-1.,-1.);
-  line3d(1.,-1.,1.,1.,-1.,-1.);
-    
+  line3d(1.,-1.,1.,1.,-1.,-1.);    
 }
 
 void Frame_3d()
@@ -279,12 +262,8 @@ void Frame_3d()
   text3d(-1.-dt,-1.-dt,0.0,MyGraph->zlabel);
   TextJustify=0;
   
-  DOING_AXES=0;
-   
+  DOING_AXES=0;  
 }
-
-
-
 
 void Box_axis(x_min,x_max,y_min,y_max,sx,sy,flag)
      double x_min,x_max,y_min,y_max;
@@ -371,7 +350,6 @@ void draw_ytics(s1,start, incr, end)
    {
    	put_text(DLeft-HChar,yt+2*s*VChar,s1);
    }
-
 }
 
 
@@ -402,8 +380,6 @@ void draw_xtics(s2,start, incr, end)
     put_text(xt,yt-(int)(1.25*VChar*s),bob);
   }
   put_text((DLeft+DRight)/2,yt-(int)(2.5*VChar*s),s2);    
-
-
 }
 	 
 

@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include "flags.h"
 
-
-
 #include "main.h"
 #include "ggets.h"
 #include "load_eqn.h"
@@ -19,7 +17,6 @@
 #include "simplenet.h"
 #include "integrate.h"
 #include "newpars.h"
-
 
 #include <stdlib.h>
 #include <stdio.h>
