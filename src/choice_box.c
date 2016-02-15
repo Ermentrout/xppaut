@@ -1,38 +1,31 @@
 #include "choice_box.h"
 
-#include <stdlib.h> 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
-#include <X11/cursorfont.h>
-#include <stdio.h>
+
+#include "browse.h"
+#include "ggets.h"
+#include "pop_list.h"
+#include "struct.h"
+
+/* --- Macros --- */
 #define ALL_DONE 2
 #define DONE_WITH_THIS 1
 #define FORGET_ALL   0
 #define FORGET_THIS 3
-#include "struct.h"
-#include "pop_list.h"
-#include "ggets.h"
-#include "browse.h"
-
-
-
 
 #define EV_MASK (ButtonPressMask 	|\
 		KeyPressMask		|\
 		ExposureMask		|\
 		StructureNotifyMask)
 
-extern Display *display;
-extern Window main_win;
-extern unsigned int MyBackColor,MyForeColor;
-extern int screen;
-extern GC gc;
-extern int xor_flag,DCURY,DCURX,CURY_OFF,CURS_X,CURS_Y;
-
-
+/* --- Functions --- */
 void destroy_choice(p)
 CHOICE_BOX p;
 {
