@@ -5,11 +5,22 @@
 #include "load_eqn.h"
 
 /* --- Data --- */
+extern int allwinvis;
 extern char anifile[XPP_MAX_NAME];
+extern char batchout[256];
+extern int CURY_OFFb;
+extern char big_font_name[100];
+extern char small_font_name[100];
 extern unsigned int GrFore;
 extern unsigned int GrBack;
+extern unsigned int MyDrawWinColor;
+extern unsigned int MyMainWinColor;
+extern OptionsSet notAlreadySet;
 extern int TrueColorFlag;
 extern int use_ani_file;
+extern int use_intern_sets;
+extern char UserOUTFILE[256];
+extern int XPPBatch;
 extern int Xup;
 
 extern Display *display;

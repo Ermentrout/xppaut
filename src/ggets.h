@@ -1,12 +1,16 @@
-
-#ifndef _ggets_h
-#define _ggets_h
+#ifndef XPPAUT_GGETS_H
+#define XPPAUT_GGETS_H
 
 #include <X11/Xlib.h>
 
+/* --- Macros --- */
 #define MaxIncludeFiles 10
 #define ClickTime 200
 
+/* --- Data --- */
+extern int MSStyle;
+
+/* --- Functions --- */
 void ping(void);
 void reset_graphics(void);
 void blank_screen(Window w);
@@ -46,6 +50,4 @@ void do_backspace(int *pos, char *value, int *col, Window w);
 void edit_command_string(XEvent ev, char *name, char *value, int *done, int *pos, int *col);
 int new_string(char *name, char *value);
 
-
-#endif
- 
+#endif /* XPPAUT_GGETS_H */

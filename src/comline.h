@@ -4,14 +4,7 @@
 
 typedef struct {
   char *name;
-  char *does;
-  unsigned int use;
-} INTERN_SET;
-
-
-typedef struct {
-   char *name;
-   struct SET_NAME * next;
+  struct SET_NAME * next;
 } SET_NAME;
 
 

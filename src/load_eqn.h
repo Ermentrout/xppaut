@@ -23,6 +23,12 @@ override the below definition.
 #endif
 
 /* --- Types --- */
+typedef struct {
+  char *name;
+  char *does;
+  unsigned int use;
+} INTERN_SET;
+
 /*
 Options are set accroding to an order of precedence
 command line < mfile < .xpprc < default.opt
@@ -184,9 +190,16 @@ typedef struct {
 } OptionsSet;
 
 /* --- Data --- */
+extern int BVP_FLAG;
+extern int got_file;
+extern INTERN_SET intern_set[MAX_INTERN_SET];
 extern double last_ic[MAXODE];
+extern int METHOD;
+extern int Nintern_set;
+extern int NJMP;
+extern int RunImmediately;
 extern char this_file[XPP_MAX_NAME];
-extern char this_internset[XPP_MAX_NAME];
+extern int xorfix;
 
 /* --- Functions --- */
 void dump_torus(FILE *fp, int f);

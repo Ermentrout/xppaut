@@ -16,6 +16,7 @@ typedef struct {
 } FIXINFO;
 
 /* --- Data --- */
+extern int ConvertStyle;
 extern int FIX_VAR;
 extern int NCON;
 extern int NCON_START;

@@ -1,12 +1,19 @@
-#include "xpplim.h"
+/* command-line stuff for xpp */
 #include "comline.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "adj2.h"
 #include "ggets.h"
+#include "integrate.h"
 #include "load_eqn.h"
 #include "lunch-new.h"
-#include <stdlib.h> 
-#include <string.h>
-/* command-line stuff for xpp */
-#include <stdio.h>
+#include "main.h"
+#include "xpplim.h"
+
+/* --- Macros --- */
 #define NCMD 44 /* add new commands as needed  */
 
 #define MAKEC 0
@@ -54,88 +61,7 @@
 #define READSET 42
 #define WITH 43
 
-extern OptionsSet notAlreadySet;
-
-extern char big_font_name[100],small_font_name[100];
-extern FILE *logfile;
-extern int XPPVERBOSE;
-extern int SuppressOut;
-extern int RunImmediately;
-extern int PaperWhite;
-extern int MSStyle;
-extern int got_file;
-
-/*
-char setfilename[100];
-char parfilename[100];
-char icfilename[100];
-char includefilename[MaxIncludeFiles][100];
-*/
-char setfilename[XPP_MAX_NAME];
-char parfilename[XPP_MAX_NAME];
-char icfilename[XPP_MAX_NAME];
-char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
-
-char readsetfile[XPP_MAX_NAME];
-int externaloptionsflag=0;
-char externaloptionsstring[1024];
-int NincludedFiles=0;
-extern char UserBlack[8];
-extern char UserWhite[8];
-extern char UserMainWinColor[8];
-extern char UserDrawWinColor[8];
-/*extern char UserBGBitmap[100];*/
-extern char UserBGBitmap[XPP_MAX_NAME];
-
-extern int UserGradients;
-extern int UserMinWidth;
-extern int UserMinHeight;
-extern int UserMinHeight;
-/*extern char UserOUTFILE[256];
-*/
-extern char UserOUTFILE[XPP_MAX_NAME];
-extern int tfBell;
-extern int use_intern_sets;
-extern int use_ani_file;
-/*extern char anifile[256];
-*/
-extern char anifile[XPP_MAX_NAME];
-int select_intern_sets=0;
-
-
-
-extern int Nintern_set;
-int Nintern_2_use=0;
-
-
-SET_NAME *sets2use,*setsNOTuse;
-
-extern INTERN_SET intern_set[MAX_INTERN_SET];
-
-
-/*extern char batchout[256];
-*/
-extern char batchout[XPP_MAX_NAME];
-
-int loadsetfile=0;
-int loadparfile=0;
-int loadicfile=0;
-int loadincludefile=0;
-int querysets=0;
-int querypars=0;
-int queryics=0;
-int dryrun=0;
-/*extern char this_file[100];
-*/
-extern char this_file[XPP_MAX_NAME];
-extern int XPPBatch,MakePlotFlag;
-extern int xorfix;
-extern int newseeed;
-extern int silent;
-extern int allwinvis;
-extern int ConvertStyle;
-int noicon=1;
-int newseed=0;
+/* --- Types --- */
 typedef struct {
   char name[10];
   int len;
@@ -144,7 +70,7 @@ typedef struct {
 
 VOCAB my_cmd[NCMD]=
 {
-  {"-m",3},         
+  {"-m",3},
   {"-xorfix",7},
   {"-silent",7},
   {"-convert",8},
@@ -190,6 +116,31 @@ VOCAB my_cmd[NCMD]=
   {"-with",5},
  };
 
+/* --- Functions --- */
+char setfilename[XPP_MAX_NAME];
+char parfilename[XPP_MAX_NAME];
+char icfilename[XPP_MAX_NAME];
+char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
+
+char readsetfile[XPP_MAX_NAME];
+char externaloptionsstring[1024];
+int externaloptionsflag=0;
+int NincludedFiles=0;
+int select_intern_sets=0;
+int Nintern_2_use=0;
+
+SET_NAME *sets2use,*setsNOTuse;
+
+int loadsetfile=0;
+int loadparfile=0;
+int loadicfile=0;
+int loadincludefile=0;
+int querysets=0;
+int querypars=0;
+int queryics=0;
+int dryrun=0;
+int noicon=1;
+int newseed=0;
 
 int is_set_name(set,nam)
 SET_NAME *set;

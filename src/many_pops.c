@@ -98,16 +98,6 @@ double signum();
 
 Window make_window();
 
-
-
-
-typedef struct {
-  char *name;
-  char *does;
-  unsigned int use;
-} INTERN_SET;
-
-
 typedef struct {
   double xlo,xhi,dx;
   double *y,*x;

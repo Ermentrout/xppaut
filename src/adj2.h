@@ -1,8 +1,12 @@
-#ifndef _adj2_h_
-#define _adj2_h_
+#ifndef XPPAUT_ADJ2_H
+#define XPPAUT_ADJ2_H
 
 #include <stdio.h>
 
+/* --- Data --- */
+extern int silent;
+
+/* --- Functions --- */
 void init_trans(void);
 void dump_transpose_info(FILE *fp, int f);
 int do_transpose(void);
@@ -29,7 +33,4 @@ void do_this_liaprun(int i, double p);
 void norm_vec(double *v, double *mu, int n);
 int hrw_liapunov(double *liap, int batch, double eps);
 
-
-
-#endif
-
+#endif /* XPPAUT_ADJ2_H */

@@ -205,14 +205,8 @@ int PSLineStyle;
          int rtype;
        } range;
 
-
-typedef struct {
-  char *name;
-  char *does;
-  unsigned int use;
-} INTERN_SET;
-
 extern INTERN_SET intern_set[MAX_INTERN_SET];
+extern char this_internset[XPP_MAX_NAME];
 extern int Nintern_set;
 
 

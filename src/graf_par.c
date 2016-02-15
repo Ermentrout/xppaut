@@ -51,6 +51,7 @@ extern double x_3d[2],y_3d[2],z_3d[2];
 /*Default is now color*/
 int PS_Color=1;
 
+extern char this_internset[XPP_MAX_NAME];
 extern char PlotFormat[100];
 
 
