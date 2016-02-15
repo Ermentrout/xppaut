@@ -1,11 +1,14 @@
 #include "color.h"
+
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h> 
-
-
 #include <X11/Xlib.h>
+
 #include "ggets.h"
-#include <math.h>
+#include "main.h"
+
+/* --- Macros --- */
 #define COLOR_SCALE 0
 #define GRAYSCALE 1
 #define RGRAYSCALE 2
@@ -29,28 +32,19 @@
 #define C_GRAY 5
 #define C_CUBHLX 6
 
-extern int Xup;
-
-extern GC gc_graph,small_gc;
-extern Display *display;
-extern int screen;
-extern Window main_win;
- int color_mode=1,color_min,color_total,COLOR,color_max;
-extern int DCURX,DCURY,CURY_OFF,CURS_X,CURS_Y,DCURXs,DCURYs;
-extern unsigned int Black,White;
-extern unsigned int MyBackColor,MyForeColor,GrFore,GrBack;
-int periodic=0,spectral;
-int custom_color=0;
 #define MAX_COLORS 256
 #define COL_TOTAL 200
+
+/* --- Functions --- */
+int color_mode=1,color_min,color_total,COLOR,color_max;
+int periodic=0,spectral;
+int custom_color=0;
 /* int rfun(),gfun(),bfun();
 */
 
 XColor	color[MAX_COLORS];
 /* int	pixel[MAX_COLORS];
  */
-extern int TrueColorFlag;
-
 
 void tst_color(w)
 Window w;

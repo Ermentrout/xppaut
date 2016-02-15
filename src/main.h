@@ -17,6 +17,7 @@ extern GC gc;
 extern GC font_gc;
 extern GC gc_graph;
 extern GC small_gc;
+extern int screen;
 extern Window command_pop;
 extern Window draw_win;
 extern Window info_pop;
