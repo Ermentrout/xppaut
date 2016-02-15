@@ -1,31 +1,26 @@
 #include "calc.h"
 
-#include "ggets.h"
-#include "pop_list.h"
-#include "init_conds.h"
-#include <stdlib.h> 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
+
+#include "browse.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "init_conds.h"
+#include "load_eqn.h"
+#include "parserslow.h"
+#include "pop_list.h"
 #include "xpplim.h"
+
+/* --- Macros --- */
 #define PARAM 1
 #define IC 2
-#include "browse.h"
-
-#include "parserslow.h"
-
-extern int NCON,NSYM,NCON_START,NSYM_START;
-
-
-extern Display *display;
-extern int screen;
-extern GC gc, small_gc;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF;
-
 
 #define MYMASK  (ButtonPressMask 	|\
 		KeyPressMask		|\
