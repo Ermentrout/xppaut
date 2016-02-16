@@ -18,8 +18,10 @@ typedef struct {
 /* --- Data --- */
 extern int ConvertStyle;
 extern int FIX_VAR;
+extern int *my_ode[MAXODE];
 extern int NCON;
 extern int NCON_START;
+extern int NODE;
 extern int NSYM_START;
 extern char uvar_names[MAXODE][12];
 

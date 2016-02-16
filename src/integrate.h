@@ -5,9 +5,10 @@
 #include "xpplim.h"
 
 /* --- Data --- */
+extern int DelayErr;
 extern int MakePlotFlag;
-extern double MyData[MAXODE];
 extern int SuppressOut;
+extern double MyData[MAXODE];
 
 /* --- Functions --- */
 void init_ar_ic(void);

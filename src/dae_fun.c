@@ -1,32 +1,27 @@
-
 #include "dae_fun.h"
-#include "gear.h"
-#include "parserslow.h"
 
-#include "ggets.h"
-#include <stdlib.h> 
-#include <stdio.h>
-#include <string.h>
 #include <math.h>
-#include "xpplim.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "form_ode.h"
+#include "gear.h"
 #include "getvar.h"
+#include "ggets.h"
+#include "integrate.h"
+#include "load_eqn.h"
+#include "parserslow.h"
+#include "xpplim.h"
+
+/* --- Macros --- */
 #define MAXDAE 400
 
-extern double variables[];
-extern int NVAR;
-
-extern int DelayErr;
-
-extern double EVEC_ERR,NEWT_ERR,BOUND;
-extern int EVEC_ITER;
-double evaluate();
-
-extern int NODE,FIX_VAR;
-extern int *my_ode[];
 double sdot();
 
 /*    will have more stuff someday */
 
+/* --- Types --- */
 typedef struct {
   double *work;
   int *iwork;
@@ -39,18 +34,17 @@ typedef struct {
   int *form;
   int index;
   double value,last;
-}SOL_VAR;
+} SOLV_VAR;
 
 typedef struct {
   char *rhs;
   int *form;
 } DAE_EQN;
 
-SOL_VAR svar[MAXDAE];
+SOLV_VAR svar[MAXDAE];
 DAE_EQN aeqn[MAXDAE];
 
 int nsvar=0,naeqn=0;
-
 
 /* this adds an algebraically defined variable  and a formula
    for the first guess */
@@ -106,7 +100,7 @@ int compile_svars()
 {
   int i,f[256],n,k;
   if(nsvar!=naeqn){
-    plintf(" #SOL_VAR(%d) must equal #ALG_EQN(%d) ! \n",nsvar,naeqn);
+    plintf(" #SOLV_VAR(%d) must equal #ALG_EQN(%d) ! \n",nsvar,naeqn);
     return 1;
   }
   

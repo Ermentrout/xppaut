@@ -191,6 +191,7 @@ typedef struct {
 
 /* --- Data --- */
 extern int BVP_FLAG;
+extern int EVEC_ITER;
 extern int got_file;
 extern int METHOD;
 extern int Nintern_set;
@@ -199,6 +200,9 @@ extern int RunImmediately;
 extern int xorfix;
 extern char this_file[XPP_MAX_NAME];
 extern double ATOLER;
+extern double BOUND;
+extern double EVEC_ERR;
+extern double NEWT_ERR;
 extern double TOLER;
 extern double last_ic[MAXODE];
 extern INTERN_SET intern_set[MAX_INTERN_SET];
