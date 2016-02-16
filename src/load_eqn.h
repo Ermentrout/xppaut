@@ -198,11 +198,17 @@ extern int Nintern_set;
 extern int NJMP;
 extern int RunImmediately;
 extern int xorfix;
+
+extern char delay_string[MAXODE][80];
 extern char this_file[XPP_MAX_NAME];
+
 extern double ATOLER;
 extern double BOUND;
+extern double DELAY;
+extern double DELTA_T;
 extern double EVEC_ERR;
 extern double NEWT_ERR;
+extern double T0;
 extern double TOLER;
 extern double last_ic[MAXODE];
 extern INTERN_SET intern_set[MAX_INTERN_SET];

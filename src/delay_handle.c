@@ -1,16 +1,19 @@
+/* This handles the delay stuff */
 #include "delay_handle.h"
-#include "parserslow.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "form_ode.h"
+#include "getvar.h"
 #include "ggets.h"
 #include "integrate.h"
-
-#include <stdlib.h> 
-/*   This handles the delay stuff    */
-
-#include <stdio.h>
-#include <math.h>
+#include "load_eqn.h"
+#include "parserslow.h"
 #include "xpplim.h"
-#include "getvar.h"
 
+/* --- Functions --- */
 double AlphaMax=2,OmegaMax=2;
 
 double *DelayWork;
@@ -23,13 +26,6 @@ double variable_shift[2][MAXODE];
 double delay_list[MAXDELAY];
 
 double evaluate();
-extern double DELTA_T,T0,DELAY;
-extern int NODE,NCON,NSYM,NSYM_START,NCON_START,NMarkov;
- 
-extern char delay_string[MAXODE][80];
-extern double variables[];
-extern int NVAR;
-
 
 double delay_stab_eval(delay,var)  
 /* this returns appropriate values for delay jacobian */ 
