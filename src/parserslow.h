@@ -32,6 +32,7 @@ extern int NSYM;
 extern int NVAR;
 extern UFUN_ARG ufun_arg[MAXUFUN];
 extern double variables[MAXODE1];
+extern double constants[MAXPAR];
 
 /* --- Functions --- */
 void init_rpn(void);

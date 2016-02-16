@@ -194,7 +194,7 @@ xppaut_SOURCES = \
 	nullcline.c \
 	numerics.c \
 	odesol2.c \
-	parserslow2.c \
+	parserslow.c \
 	pop_list.c \
 	pow_dd.c \
 	pow_di.c \
@@ -275,7 +275,7 @@ libxpp_a_SOURCES = \
 	nullcline.c \
 	numerics.c \
 	odesol2.c \
-	parserslow2.c \
+	parserslow.c \
 	pop_list.c \
 	pow_dd.c \
 	pow_di.c \

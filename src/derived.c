@@ -1,17 +1,19 @@
+/* Derived parameter stuff !!  */
 #include "derived.h"
 
-#include <stdlib.h> 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "calc.h"
+#include "form_ode.h"
 #include "ggets.h"
 #include "parserslow.h"
-#include "calc.h"
 
-/* Derived parameter stuff !!  */
+/* --- Macros --- */
 #define MAXDERIVED 200
-extern double constants[];
-extern int NCON;
-double evaluate();
+
+/* --- Types --- */
 typedef struct {
   int index,*form;
   char *rhs;
@@ -20,6 +22,9 @@ typedef struct {
 
 DERIVED derived[MAXDERIVED];
 int nderived=0; 
+
+/* --- Functions --- */
+double evaluate();
 
 /* clean up derived stuff */
 void free_derived()

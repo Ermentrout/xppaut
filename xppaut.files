@@ -168,7 +168,7 @@ src/numerics.h
 src/odesol2.c
 src/odesol2.h
 src/parserslow.h
-src/parserslow2.c
+src/parserslow.c
 src/phsplan.h
 src/pop_list.c
 src/pop_list.h
