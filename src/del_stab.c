@@ -1,36 +1,22 @@
-#include <stdlib.h>
-
-#include "eig_list.h" 
-#include "gear.h"
-#include "ggets.h"
+/* This code takes the determinant of a complex valued matrix */
+#include "del_stab.h"
 
 #include <math.h>
 #include <stdio.h>
-#include "xpplim.h"
-#include "del_stab.h"
+#include <stdlib.h>
 
+#include "delay_handle.h"
+#include "eig_list.h"
+#include "gear.h"
+#include "ggets.h"
+
+#include "xpplim.h"
+
+/* --- Macros --- */
 #define Z(a,b) z[(a)+n*(b)]
 #define DING ping()
-/* this code takes the determinant of a complex valued matrix
-*/
 
-extern double variable_shift[2][MAXODE],AlphaMax,OmegaMax;
-
-extern double delay_list[MAXDELAY];
-extern int NDelay,del_stab_flag,WhichDelay,DelayGrid;
-extern int (*rhs)();
-double amax();
-
-/*typedef struct{
-  double r,i;
-}COMPLEX;
-*/
-
-/* The
- code here replaces the do_sing code if the equation is
-   a delay differential equation. 
-*/
-
+/* --- Functions --- */
 void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
      double *x,eps,err,big;
      int *ierr,n,maxit;
