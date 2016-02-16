@@ -192,14 +192,16 @@ typedef struct {
 /* --- Data --- */
 extern int BVP_FLAG;
 extern int got_file;
-extern INTERN_SET intern_set[MAX_INTERN_SET];
-extern double last_ic[MAXODE];
 extern int METHOD;
 extern int Nintern_set;
 extern int NJMP;
 extern int RunImmediately;
-extern char this_file[XPP_MAX_NAME];
 extern int xorfix;
+extern char this_file[XPP_MAX_NAME];
+extern double ATOLER;
+extern double TOLER;
+extern double last_ic[MAXODE];
+extern INTERN_SET intern_set[MAX_INTERN_SET];
 
 /* --- Functions --- */
 void dump_torus(FILE *fp, int f);

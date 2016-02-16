@@ -1,30 +1,33 @@
 #include "cv2.h"
 
-#include "flags.h"
-#include "my_rhs.h"
-#include "ggets.h"
+
 #include <stdio.h>
 #include <string.h>
-#include "llnltyps.h" /* definitions of types real (set to double) and     */
-                      /* integer (set to int), and the constant FALSE      */
+
+#include "band.h"
+#include "cvband.h"
+#include "cvdense.h"  /* prototype for CVDense, constant DENSE_NJE         */
 #include "cvode.h"    /* prototypes for CVodeMalloc, CVode, and CVodeFree, */
                       /* constants OPT_SIZE, BDF, NEWTON, SV, SUCCESS,     */
                       /* NST, NFE, NSETUPS, NNI, NCFN, NETF                */
-#include "cvdense.h"  /* prototype for CVDense, constant DENSE_NJE         */
-
+#include "dense.h"    /* definitions of type DenseMat, macro DENSE_ELEM    */
+#include "llnltyps.h" /* definitions of types real (set to double) and     */
+                      /* integer (set to int), and the constant FALSE      */
 #include "vector.h"   /* definitions of type N_Vector and macro N_VIth,    */
                       /* prototypes for N_VNew, N_VFree                    */
-#include "dense.h"    /* definitions of type DenseMat, macro DENSE_ELEM    */
-#include "cvband.h"
-#include "band.h"
+
+#include "flags.h"
+#include "ggets.h"
+#include "load_eqn.h"
+#include "my_rhs.h"
+#include "numerics.h"
+
+/* --- Functions --- */
 double cv_ropt[OPT_SIZE];
-  int cv_iopt[OPT_SIZE];
-extern int cv_bandflag,cv_bandupper,cv_bandlower;
+int cv_iopt[OPT_SIZE];
 static void cvf();
 void *cvode_mem;
 N_Vector ycv;
-extern int NFlags;
-extern double TOLER,ATOLER;
 void start_cv(y,t,n,tout,atol,rtol)
      double *y,t,tout,*atol,*rtol;
      int n;
