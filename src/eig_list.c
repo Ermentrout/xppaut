@@ -1,45 +1,33 @@
 #include "eig_list.h"
-#include "many_pops.h"
-#include "pop_list.h"
-#include "ggets.h"
-#include "init_conds.h"
 
-#include <stdlib.h> 
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
-#include <math.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+#include "auto_nox.h"
+#include "browse.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "init_conds.h"
+#include "load_eqn.h"
+#include "many_pops.h"
+#include "mykeydef.h"
+#include "newhome.h"
+#include "parserslow.h"
+#include "pop_list.h"
 #include "xpplim.h"
+
 #include "bitmap/eqns.bitmap"
 #include "bitmap/equilib.bitmap"
-#include "browse.h"
 
-#include "newhome.h"
-
-#include "mykeydef.h"
+/* --- Macros --- */
 #define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
 		return;}
-
-
-
-
-
-
-extern double last_ic[MAXODE];
-extern int noicon;
-extern Display *display;
-extern int screen;
-extern GC gc, small_gc;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF;
-
-extern char uvar_names[MAXODE][12];
-extern char *ode_names[MAXODE];
-extern int METHOD,NEQ,NODE,NMarkov;
-
-extern int EqType[MAXODE];
 
 #define MYMASK  (ButtonPressMask 	|\
 		KeyPressMask		|\
@@ -53,8 +41,7 @@ extern int EqType[MAXODE];
 		  ExposureMask    |\
                   StructureNotifyMask)
 
-
-
+/* --- Types --- */
 struct {
   Window base,stab,rest,top,close,import;
   double y[MAXODE],ev[MAXODE+MAXODE];
@@ -70,10 +57,7 @@ struct{
   
 } eq_list;
 
- 
-extern int HomoFlag,sparity;
-extern double homo_l[100],homo_r[100];
-
+/* --- Functions --- */
 void draw_eq_list(w)
 Window w;
 {
@@ -100,13 +84,6 @@ Window w;
    }
  }
 }
-
-
- 
-   
-
- 
-
 
 void create_eq_list()
 {
@@ -168,7 +145,6 @@ void create_eq_list()
 }
 
 
-
 void eq_list_keypress(ev,used)
  int *used;
  XEvent ev;
@@ -176,8 +152,6 @@ void eq_list_keypress(ev,used)
   Window w=ev.xkey.window;
 
  char ks;
-
-
 *used=0;
 
  if(eq_list.flag==0)return;

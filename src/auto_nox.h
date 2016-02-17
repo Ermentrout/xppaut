@@ -16,7 +16,6 @@ typedef struct {
 } ROTCHK;
 
 typedef struct  {
-
   int exist;
   int ntst,nmx,npr;
   double ds,dsmax,dsmin,rl0,rl1,a0,a1;
@@ -79,8 +78,11 @@ extern int AutoTwoParam;
 extern int load_all_labeled_orbits;
 extern int NAutoPar;
 extern int NAutoUzr;
+extern int sparity;
 extern int TypeOfCalc;
 extern double outperiod[20];
+extern double homo_l[100];
+extern double homo_r[100];
 extern unsigned int DONT_XORCross;
 extern ADVAUTO aauto;
 extern ROTCHK blrtn;
