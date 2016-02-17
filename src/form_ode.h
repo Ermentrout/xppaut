@@ -2,8 +2,9 @@
 #define XPPAUT_FORM_ODE_H
 
 #include <stdio.h>
-#include "strutil.h"
 #include "newpars.h"
+#include "shoot.h"
+#include "strutil.h"
 #include "xpplim.h"
 
 /* --- Macros --- */
@@ -12,12 +13,14 @@
 
 /* --- Types --- */
 typedef struct {
-    char *name,*value;
+	char *name,*value;
 } FIXINFO;
 
 /* --- Data --- */
 extern int ConvertStyle;
+extern int EqType[MAXODE];
 extern int FIX_VAR;
+extern BC_STRUCT my_bc[MAXODE];
 extern int *my_ode[MAXODE];
 extern int NCON;
 extern int NCON_START;

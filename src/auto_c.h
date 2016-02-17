@@ -22,13 +22,15 @@
 #define RSMALL (1.0e-30)
 #define RLARGE (1.0e+30)
 #define HMACH1 (HMACH+1.0e0)
-#define M1SB (NBIFX) 
+#define M1SB (NBIFX)
 #define LEFT (1)
 #define RIGHT (2)
 #define QZMATZ (.FALSE.)
 #define QZEPS1 (0.0E0)
 #define HMACHHO (1.0e-13)
 
+
+extern int fp8_is_open;
 extern FILE *fp2;
 extern FILE *fp3;
 extern FILE *fp7;
@@ -88,8 +90,8 @@ typedef struct {
   /* 36 */ integer ipos;
   /* 37 */ integer lab;
   /* 41 */ integer nicp;
-  /* The following are not set in init_.  
-     They have to do with the old parallel version. */
+  /* The following are not set in init_.
+	 They have to do with the old parallel version. */
   /* 38 */ integer mynode;
   /* 39 */ integer numnodes;
   /* 40 */ integer parallel_flag;
@@ -186,11 +188,11 @@ double time_end(double);
 void allocate_global_memory(const iap_type);
 int init(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *thl, doublereal **thu_pointer, integer *iuz, doublereal *vuz);
 int chdim(iap_type *iap);
-int autoae(iap_type *iap, rap_type *rap, doublereal *par, 
-integer *icp, 
-FUNI_TYPE((*funi)), 
-STPNT_TYPE_AE((*stpnt)), 
-PVLI_TYPE_AE((*pvli)), 
+int autoae(iap_type *iap, rap_type *rap, doublereal *par,
+integer *icp,
+FUNI_TYPE((*funi)),
+STPNT_TYPE_AE((*stpnt)),
+PVLI_TYPE_AE((*pvli)),
 doublereal *thl, doublereal *thu, integer *iuz, doublereal *vuz);
 
 int autobv(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, FUNI_TYPE((*funi)), BCNI_TYPE((*bcni)), ICNI_TYPE((*icni)), STPNT_TYPE_BVP((*stpnt)), PVLI_TYPE_BVP((*pvli)), doublereal *thl, doublereal *thu, integer *iuz, doublereal *vuz);
@@ -427,20 +429,20 @@ int ortran(integer *nm, integer *n, integer *low, integer *igh, doublereal *a, d
 
 
 /* problem defined functions*/
-int func(integer ndim, const doublereal *u, const integer *icp, 
-	 const doublereal *par, integer ijac, 
+int func(integer ndim, const doublereal *u, const integer *icp,
+	 const doublereal *par, integer ijac,
 	 doublereal *f, doublereal *dfdu, doublereal *dfdp);
-int stpnt(integer ndim, doublereal t, 
+int stpnt(integer ndim, doublereal t,
 	  doublereal *u, doublereal *par);
-int bcnd(integer ndim, const doublereal *par, const integer *icp, integer nbc, 
+int bcnd(integer ndim, const doublereal *par, const integer *icp, integer nbc,
 	 const doublereal *u0, const doublereal *u1, integer ijac,
 	 doublereal *f, doublereal *dbc);
-int icnd(integer ndim, const doublereal *par, const integer *icp, integer nint, 
-	 const doublereal *u, const doublereal *uold, const doublereal *udot, 
+int icnd(integer ndim, const doublereal *par, const integer *icp, integer nint,
+	 const doublereal *u, const doublereal *uold, const doublereal *udot,
 	 const doublereal *upold, integer ijac,
 	 doublereal *fi, doublereal *dint);
-int fopt(integer ndim, const doublereal *u, const integer *icp, 
-	 const doublereal *par, integer ijac, 
+int fopt(integer ndim, const doublereal *u, const integer *icp,
+	 const doublereal *par, integer ijac,
 	 doublereal *fs, doublereal *dfdu, doublereal *dfdp);
 int pvls(integer ndim, const doublereal *u, doublereal *par);
 /* conpar.c */
@@ -449,25 +451,25 @@ int conpar(integer *nov, integer *na, integer *nra, integer *nca, doublereal *a,
 /*setubv.c */
 #include "auto_types.h"
 void *setubv_make_aa_bb_cc(void *);
-int setubv(integer ndim, integer ips, integer na, integer ncol, integer nbc, integer nint, integer ncb, integer nrc, integer nra, integer nca, 
-	   FUNI_TYPE((*funi)), BCNI_TYPE((*bcni)), ICNI_TYPE((*icni)), integer ndxloc, iap_type *iap, rap_type *rap, doublereal *par, integer *icp, 
-	   doublereal rds, doublereal *aa, doublereal *bb, doublereal *cc, doublereal *dd, doublereal *fa, doublereal *fc, doublereal *rlcur, 
-	   doublereal *rlold, doublereal *rldot, doublereal *ups, doublereal *uoldps, doublereal *udotps, doublereal *upoldp, doublereal *dups, 
+int setubv(integer ndim, integer ips, integer na, integer ncol, integer nbc, integer nint, integer ncb, integer nrc, integer nra, integer nca,
+	   FUNI_TYPE((*funi)), BCNI_TYPE((*bcni)), ICNI_TYPE((*icni)), integer ndxloc, iap_type *iap, rap_type *rap, doublereal *par, integer *icp,
+	   doublereal rds, doublereal *aa, doublereal *bb, doublereal *cc, doublereal *dd, doublereal *fa, doublereal *fc, doublereal *rlcur,
+	   doublereal *rlold, doublereal *rldot, doublereal *ups, doublereal *uoldps, doublereal *udotps, doublereal *upoldp, doublereal *dups,
 	   doublereal *dtm, doublereal *thl, doublereal *thu, doublereal *p0, doublereal *p1);
 void setubv_parallel_arglist_copy(setubv_parallel_arglist *output, const setubv_parallel_arglist input);
-void setubv_parallel_arglist_constructor(integer ndim, integer ips, integer na, integer ncol, 
-					 integer nbc, integer nint, integer ncb, integer nrc, integer nra, integer nca, 
-					 FUNI_TYPE((*funi)), ICNI_TYPE((*icni)), integer ndxloc, iap_type *iap, rap_type *rap, doublereal *par, 
-					 integer *icp, doublereal *aa, doublereal *bb, 
-					 doublereal *cc, doublereal *dd, doublereal *fa, doublereal *fc, doublereal *ups, 
-					 doublereal *uoldps, doublereal *udotps, 
-					 doublereal *upoldp, doublereal *dtm, 
+void setubv_parallel_arglist_constructor(integer ndim, integer ips, integer na, integer ncol,
+					 integer nbc, integer nint, integer ncb, integer nrc, integer nra, integer nca,
+					 FUNI_TYPE((*funi)), ICNI_TYPE((*icni)), integer ndxloc, iap_type *iap, rap_type *rap, doublereal *par,
+					 integer *icp, doublereal *aa, doublereal *bb,
+					 doublereal *cc, doublereal *dd, doublereal *fa, doublereal *fc, doublereal *ups,
+					 doublereal *uoldps, doublereal *udotps,
+					 doublereal *upoldp, doublereal *dtm,
 					 doublereal *wp, doublereal *wt, doublereal *wi,
 					 doublereal *thu, doublereal *thl, doublereal *rldot, BCNI_TYPE((*bcni)),
 					 setubv_parallel_arglist *data);
 void setubv_make_fa(setubv_parallel_arglist larg);
-void setubv_make_fc_dd(setubv_parallel_arglist larg,doublereal *dups, doublereal *rlcur, 
-		       doublereal *rlold, doublereal rds);
+void setubv_make_fc_dd(setubv_parallel_arglist larg,doublereal *dups, doublereal *rlcur,
+			   doublereal *rlold, doublereal rds);
 
 
 /*worker.c*/

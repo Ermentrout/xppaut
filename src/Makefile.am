@@ -188,6 +188,7 @@ xppaut_SOURCES = \
 	markov.c \
 	menu.c \
 	menudrive.c \
+	menus.c \
 	my_ps.c \
 	my_rhs.c \
 	my_svg.c \
@@ -269,6 +270,7 @@ libxpp_a_SOURCES = \
 	markov.c \
 	menu.c \
 	menudrive.c \
+	menus.c \
 	my_ps.c \
 	my_rhs.c \
 	my_svg.c \

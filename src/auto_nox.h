@@ -73,10 +73,19 @@ typedef struct {
 }  AUTOAX;
 
 /* --- Data --- */
+extern int AutoPar[8];
+extern int Auto_index_to_array[8];
 extern int AutoTwoParam;
+extern int load_all_labeled_orbits;
 extern int NAutoPar;
+extern int NAutoUzr;
 extern int TypeOfCalc;
+extern double outperiod[20];
+extern unsigned int DONT_XORCross;
+extern ADVAUTO aauto;
 extern ROTCHK blrtn;
+extern BIFUR Auto;
+extern GRABPT grabpt;
 
 /* --- Functions --- */
 void colset(int type);

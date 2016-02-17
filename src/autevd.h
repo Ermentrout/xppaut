@@ -13,6 +13,7 @@ typedef struct {
 
 /* --- Data --- */
 extern int DiagFlag;
+extern integer UzrPar[20];
 
 /* --- Functions --- */
 void send_eigen(int ibr, int ntot, int n, doublecomplex *ev);

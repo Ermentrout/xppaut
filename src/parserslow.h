@@ -28,11 +28,17 @@ typedef struct {
 } UFUN_ARG;
 
 /* --- Data --- */
+extern double constants[MAXPAR];
+extern int narg_fun[MAXUFUN];
+extern int NFUN;
 extern int NSYM;
 extern int NVAR;
+extern int *ufun[MAXUFUN];
 extern UFUN_ARG ufun_arg[MAXUFUN];
+extern char *ode_names[MAXODE];
+extern char *ufun_def[MAXUFUN];
+extern char ufun_names[MAXUFUN][12];
 extern double variables[MAXODE1];
-extern double constants[MAXPAR];
 
 /* --- Functions --- */
 void init_rpn(void);

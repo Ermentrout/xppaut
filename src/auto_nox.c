@@ -1,55 +1,42 @@
-#include <string.h>
-#include "parserslow.h"
-#include "autevd.h"
-#include "run_auto.h"
 #include "auto_nox.h"
-#include "auto_x11.h"
-#include <libgen.h>
-/* #include "f2c.h" */
-#include "auto_f2c.h"
-#include "auto_c.h"
-#include "graf_par.h"
 
-#include "load_eqn.h"
-
-#include "read_dir.h"
-#include "pp_shoot.h"
-
-#include "read_dir.h"
-/*#include "chunk.h"
-*/
-
-#include "kinescope.h"
-
-#include "parserslow.h"
-/*#include "graf_par.h"
-*/
-#include "ggets.h"
-
-#include "init_conds.h"
-#include "diagram.h"
-#include "many_pops.h"
-#include "browse.h"
-#include "pop_list.h"
-
-
-
-#include "menudrive.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#ifndef WCTYPE
-#include <ctype.h>
+#ifndef HAVE_WCTYPE_H
+# include <ctype.h>
 #else
-#include <wctype.h>
+# include <wctype.h>
 #endif
+#include <libgen.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "axes2.h"
-#include "graphics.h"
-
-#include "xpplim.h"
+#include "autevd.h"
 #include "autlim.h"
+#include "auto_c.h"
+#include "auto_f2c.h"
+#include "auto_x11.h"
+#include "axes2.h"
+#include "browse.h"
+#include "derived.h"
+#include "diagram.h"
+#include "ggets.h"
+#include "graf_par.h"
+#include "graphics.h"
+#include "init_conds.h"
+#include "integrate.h"
+#include "kinescope.h"
+#include "load_eqn.h"
+#include "many_pops.h"
+#include "menudrive.h"
+#include "menus.h"
+#include "my_ps.h"
+#include "my_rhs.h"
+#include "parserslow.h"
+#include "pop_list.h"
+#include "pp_shoot.h"
+#include "read_dir.h"
+#include "run_auto.h"
 #include "xAuto.h"
 
 #define MAXLINELENGTH 100000
@@ -109,31 +96,9 @@ int TypeOfCalc=0;
 #define CUEQ 2
 
 #define DISCRETE 0
-extern XAUTO xAuto;
-extern int leng[MAXODE];
-extern int PS_Color;
-extern double TOR_PERIOD;
-extern float **storage;
-extern int storind;
-extern double constants[];
-extern int PointType;
-extern int xorfix;
-extern int NoBreakLine;
-extern char *auto_hint[],*aaxes_hint[],*afile_hint[],*arun_hint[],*no_hint[];
-extern int BVP_FLAG;
 
-extern int fp8_is_open;
-extern FILE *fp8;
+XAUTO xAuto;
 
-
-/*extern char *strdup(const char *s);
-*/
-
-extern int AutoRedrawFlag;
-extern int FLOWK;
-extern int mark_flag;
-extern int mark_ibrs,mark_ibre;
-extern int mark_ipts,mark_ipte;
 int SEc=20;
 int UEc=0;
 int SPc=26;
@@ -172,24 +137,12 @@ int load_all_labeled_orbits=0;
 
 
 ROTCHK blrtn;
-
-
-
-
 GRABPT grabpt;
 
-extern double MyData[MAXODE];
-extern DIAGRAM *bifd;
-
-extern int NBifs;
 int AutoTwoParam=0;
 int NAutoPar=8;
 int Auto_index_to_array[8];
 int AutoPar[8];
-
-
-extern int TipsFlag;
-extern unsigned int MyBackColor,MyForeColor,GrFore,GrBack;
 
 void auto_scroll_window();
 double atof();
@@ -201,9 +154,6 @@ int NAutoUzr;
 char *get_first();
 char *get_next();
 
-/*extern char this_file[100];*/
-extern char this_file[XPP_MAX_NAME];
-
 char this_auto_file[200];
 char fort3[200];
 char fort7[200];
@@ -211,27 +161,16 @@ char fort8[200];
 char fort9[200];
 char TMPSWAP[200];
 
-
-extern char uvar_names[MAXODE][12];
-extern char upar_names[MAXPAR][11];
-extern int NUPAR;
 unsigned int DONT_XORCross=0;
 
 
 double XfromAuto,YfromAuto;
 int FromAutoFlag=0;
 
-extern int NODE,NEQ;
-extern int METHOD;
-
 int HomoFlag=0;
 int sparity=0;
 double homo_l[100],homo_r[100];
 double HOMO_SHIFT=0.0;
-extern char uvar_names[MAXODE][12];
-
-extern int storind;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF;
 
 BIFUR Auto;
 ADVAUTO aauto;
