@@ -1,25 +1,17 @@
 #include "flags.h"
 
-#include "cv2.h"
-#include "stiff.h"
-#include "derived.h"
-#include "dormpri.h"
-#include "gear.h"
-#include "ggets.h"
-#include "init_conds.h"
-#include "integrate.h"
-#include "parserslow.h"
-
-#include <stdlib.h> 
-#include <strings.h>
-#include <string.h>
-#include <stdio.h>
 #include <math.h>
-#include "xpplim.h"
-#include "getvar.h"
-#define MY_DBL_EPS 5e-16
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 
+#include "getvar.h"
 #include "odesol2.h"
+#include "parserslow.h"
+#include "pop_list.h"
+
+#define MY_DBL_EPS 5e-16
 
 /*  this is a new (Summer 1995) addition to XPP that allows one to
     do things like delta functions and other discontinuous
@@ -84,7 +76,6 @@ type =3 halt
 
 #define MAX_EVENTS 20 /*  this is the maximum number of events per flag */
 
-extern char upar_names[MAXPAR][11];
 typedef struct {
   double f0,f1;
   double tstar;
@@ -108,8 +99,6 @@ FLAG flag[MAXFLAG];
 int NFlags=0;
 
 double STOL=1.e-10;
-extern double variables[];
-extern int NVAR;
 double evaluate(); 
 int add_global(cond,sign,rest)
      char *cond;
