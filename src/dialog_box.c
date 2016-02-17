@@ -1,22 +1,26 @@
 #include "dialog_box.h"
 
-#include "many_pops.h"
-#include "ggets.h"
-#include <stdlib.h> 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <X11/cursorfont.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
-#include <X11/cursorfont.h>
-#include <stdio.h>
-#include <math.h>
+
+#include "browse.h"
+#include "ggets.h"
+#include "main.h"
+#include "many_pops.h"
+#include "struct.h"
+
+/* --- Macros --- */
 #define ALL_DONE 2
 #define DONE_WITH_THIS 1
 #define FORGET_ALL   0
 #define FORGET_THIS 3
-#include "struct.h"
-#include "browse.h"
 
 #define EV_MASK (ButtonPressMask 	|\
 		KeyPressMask		|\
@@ -28,19 +32,10 @@
 		ExposureMask		|\
 		StructureNotifyMask	|\
 		EnterWindowMask		|\
-		LeaveWindowMask)	
+		LeaveWindowMask)
 
-
-
-
-extern Display *display;
-extern Window main_win;
-extern unsigned int MyBackColor,MyForeColor;
-extern int screen;
-extern GC gc;
-extern int xor_flag,DCURY,DCURX,CURY_OFF,CURS_X,CURS_Y;
 double atof();
- Window make_window();
+Window make_window();
 
 int get_dialog(wname,name,value,ok,cancel,max)
 char *wname,*name,*value,*ok,*cancel;
@@ -55,7 +50,7 @@ int max;
  int status;
   XTextProperty winname;
 
- 
+
 
  DIALOG d;
  strcpy(d.mes_s,name);
@@ -65,20 +60,20 @@ int max;
  d.base=XCreateSimpleWindow(display,RootWindow(display,screen),0,0,
 	lm+lv+20,30+2*DCURY,2,MyForeColor,MyBackColor);
  XStringListToTextProperty(&wname,1,&winname);
- 
+
  XClassHint class_hints;
  class_hints.res_name="";
  class_hints.res_class="";
- 
- 
+
+
  XSetWMProperties(display,d.base,&winname,NULL,NULL,0,NULL,NULL,&class_hints);
- 
+
  d.mes=XCreateSimpleWindow(display,d.base,5,5,lm,DCURY+8,1,MyBackColor,MyBackColor);
  d.input=XCreateSimpleWindow(display,d.base,10+lm,5,lv,DCURY+8,1,MyBackColor,MyBackColor);
  d.ok=XCreateSimpleWindow(display,d.base,5,10+DCURY,lo+4,DCURY+8,1,MyForeColor,MyBackColor);
  d.cancel=XCreateSimpleWindow(display,d.base,
 	5+lo+10,10+DCURY,lc+4,DCURY+8,1,MyForeColor,MyBackColor);
- 
+
 	XSelectInput(display,d.base,EV_MASK);
 	XSelectInput(display,d.input,EV_MASK);
 	XSelectInput(display,d.mes,EV_MASK);
@@ -99,9 +94,9 @@ int max;
  {
  status=dialog_event_loop(&d,max,&pos,&colm);
   if(status!=-1)break;
- } 
+ }
   XSelectInput(display,d.cancel,EV_MASK);
-  	 XSelectInput(display,d.ok,EV_MASK);
+	 XSelectInput(display,d.ok,EV_MASK);
 
  waitasec(ClickTime);
  XDestroySubwindows(display,d.base);
@@ -110,7 +105,7 @@ int max;
  if(status==ALL_DONE||status==DONE_WITH_THIS)
  strcpy(value,d.input_s);
  return(status);
-}   
+}
 
 int dialog_event_loop(d,max,pos,col)
 DIALOG *d;
@@ -123,7 +118,7 @@ DIALOG *d;
  XEvent ev;
 
  XNextEvent(display,&ev);
- 
+
   switch(ev.type){
 	case ConfigureNotify:
 	case Expose:
@@ -134,44 +129,44 @@ DIALOG *d;
 	case ButtonPress:
 		if(ev.xbutton.window==d->ok)
 		{
-	
+
 		status=ALL_DONE;
 		}
 		if(ev.xbutton.window==d->cancel)
 		{
 			status=FORGET_ALL;
 		}
-                if(ev.xbutton.window==d->input)
+				if(ev.xbutton.window==d->input)
 		XSetInputFocus(display,d->input,RevertToParent,CurrentTime);
 		break;
 
 		case EnterNotify:
-			     if(ev.xcrossing.window==d->ok||
+				 if(ev.xcrossing.window==d->ok||
 				ev.xcrossing.window==d->cancel	)
-			     XSetWindowBorderWidth(display,
+				 XSetWindowBorderWidth(display,
 				ev.xcrossing.window,2);
-			     break;
+				 break;
 		case LeaveNotify:
-			    if(ev.xcrossing.window==d->ok||
+				if(ev.xcrossing.window==d->ok||
 				ev.xcrossing.window==d->cancel	)
-			     XSetWindowBorderWidth(display,
+				 XSetWindowBorderWidth(display,
 				ev.xcrossing.window,1);
 			   break;
-	
-	case KeyPress:
-	        ch=get_key_press(&ev);
-	        edit_window(d->input,pos,d->input_s,col,&done,ch);
-	        if(done==-1)status=FORGET_ALL;
-	        if(done==1||done==2)status=DONE_WITH_THIS;
-		
-             		break;
-         }
-         return(status);
- }
- 
 
-  
-   
+	case KeyPress:
+			ch=get_key_press(&ev);
+			edit_window(d->input,pos,d->input_s,col,&done,ch);
+			if(done==-1)status=FORGET_ALL;
+			if(done==1||done==2)status=DONE_WITH_THIS;
+
+					break;
+		 }
+		 return(status);
+ }
+
+
+
+
 
 void display_dialog(w,d,pos,col)
 Window w;
@@ -186,9 +181,9 @@ int pos,col;
 	XDrawString(display,w,gc,0,CURY_OFF+1,d.mes_s,strlen(d.mes_s));
   if(w==d.input){
 	XDrawString(display,w,gc,0,CURY_OFF,d.input_s,strlen(d.input_s));
-        put_cursor_at(w,col,0);
+		put_cursor_at(w,col,0);
 	/* showchar('_',DCURX*strlen(d.input_s),0,d.input); */
-      } 
+	  }
 }
 /*  Uses Dialog boxes for input of numbers  */
 /*
@@ -200,7 +195,7 @@ double *value;
  char tvalue[100];
  int status;
  sprintf(tvalue,"%.16g",*value);
- 
+
  status=get_dialog(name,name,tvalue,"Ok","Cancel",30);
  if(status==FORGET_ALL||strlen(tvalue)==0)return;
  if(tvalue[0]=='%')
@@ -224,4 +219,4 @@ int *value;
  *value=atoi(tvalue);
  }
  */
- 
+

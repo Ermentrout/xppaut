@@ -8,11 +8,16 @@
 extern int allwinvis;
 extern char anifile[XPP_MAX_NAME];
 extern char batchout[256];
+extern int CURY_OFF;
 extern int CURY_OFFb;
+extern int DCURX;
+extern int DCURY;
 extern char big_font_name[100];
 extern char small_font_name[100];
 extern unsigned int GrFore;
 extern unsigned int GrBack;
+extern unsigned int MyBackColor;
+extern unsigned int MyForeColor;
 extern unsigned int MyDrawWinColor;
 extern unsigned int MyMainWinColor;
 extern OptionsSet notAlreadySet;
