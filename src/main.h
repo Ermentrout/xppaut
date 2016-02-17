@@ -27,6 +27,8 @@ extern int use_intern_sets;
 extern char UserOUTFILE[256];
 extern int XPPBatch;
 extern int Xup;
+extern float xppvermaj;
+extern float xppvermin;
 
 extern Display *display;
 extern GC gc;

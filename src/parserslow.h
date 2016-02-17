@@ -29,9 +29,12 @@ typedef struct {
 
 /* --- Data --- */
 extern double constants[MAXPAR];
+extern int ERROUT;
 extern int narg_fun[MAXUFUN];
 extern int NFUN;
+extern int NKernel;
 extern int NSYM;
+extern int NTable;
 extern int NVAR;
 extern int *ufun[MAXUFUN];
 extern UFUN_ARG ufun_arg[MAXUFUN];

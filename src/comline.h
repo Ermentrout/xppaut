@@ -1,14 +1,22 @@
-#ifndef _comline_h_
-#define _comline_h_
+#ifndef XPPAUT_COMLINE_H
+#define XPPAUT_COMLINE_H
 
+#include "ggets.h"
+#include "load_eqn.h"
 
+/* --- Types --- */
 typedef struct {
   char *name;
   struct SET_NAME * next;
 } SET_NAME;
 
+/* --- Data --- */
+extern char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
+extern int loadincludefile;
+extern int NincludedFiles;
+extern int noicon;
 
-
+/* --- Functions --- */
 int is_set_name(SET_NAME *set, char *nam);
 SET_NAME *add_set(SET_NAME *set, char *nam);
 SET_NAME *rm_set(SET_NAME *set, char *nam);
@@ -20,5 +28,4 @@ int if_needed_load_ic(void);
 int if_needed_load_ext_options(void);
 int parse_it(char *com);
 
-
-#endif
+#endif /* XPPAUT_COMLINE_H */

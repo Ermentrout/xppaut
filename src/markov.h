@@ -5,6 +5,7 @@
 
 /* --- Data --- */
 extern int storind;
+extern int NWiener;
 
 /* --- Functions --- */
 void add_wiener(int index);

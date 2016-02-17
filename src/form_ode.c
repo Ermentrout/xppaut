@@ -1,38 +1,37 @@
 #include "form_ode.h"
-#include "aniparse.h"
-#include "strutil.h"
-#include "parserslow.h"
-#include "markov.h"
-#include "read_dir.h"
-#include <unistd.h>
-#include "flags.h"
 
-#include "main.h"
-#include "ggets.h"
-#include "load_eqn.h"
+#ifndef HAVE_WCTYPE_H
+# include <ctype.h>
+#else
+# include <wctype.h>
+#endif
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "aniparse.h"
+#include "browse.h"
+#include "comline.h"
 #include "dae_fun.h"
 #include "derived.h"
 #include "extra.h"
-#include "browse.h"
-#include "simplenet.h"
+#include "flags.h"
+#include "ggets.h"
+#include "init_conds.h"
 #include "integrate.h"
-#include "newpars.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#ifndef WCTYPE
-#include <ctype.h>
-#else
-#include <wctype.h>
-#endif
-
-#include "xpplim.h"
-
+#include "load_eqn.h"
+#include "main.h"
+#include "markov.h"
 #include "my_pars.h"
-#include "shoot.h"
 #include "newpars.h"
+#include "parserslow.h"
+#include "read_dir.h"
+#include "shoot.h"
+#include "simplenet.h"
+#include "strutil.h"
+#include "xpplim.h"
 
 /* --- Macros --- */
 #define MAXONLY 1000
@@ -45,12 +44,6 @@ char *ode_names[MAXODE];
 char upar_names[MAXPAR][11];
 char *save_eqn[MAXLINES];
 double default_val[MAXPAR];
-extern int NODE;
-extern int NUPAR;
-extern int NLINES;
-extern int IN_VARS;
-extern int leng[MAXODE];
-extern int NincludedFiles;
 
 VAR_INFO *my_varinfo;
 int start_var_info=0;
@@ -65,15 +58,6 @@ typedef struct {
 } ACTION;
 
 char errmsg[256];
-extern int XPPBatch;
-extern int file_selector();
-extern int loadincludefile;
-/*extern char includefilename[MaxIncludeFiles][100];*/
-extern char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
-extern double initialize_pH();
-extern double initialize_ionicstr();
-extern void deblank();
-
 char *onlylist[MAXONLY];
 int *plotlist;
 int N_only=0,N_plist;
@@ -83,26 +67,19 @@ ACTION *orig_comments;
 int orig_ncomments=0;
 int is_a_map=0;
 int n_comments=0;
- extern char delay_string[MAXODE][80];
 BC_STRUCT my_bc[MAXODE];
 
-
 double default_ic[MAXODE];
-extern double last_ic[];
 int NODE,NUPAR,NLINES;
 int PrimeStart;
 int NCON_START,NSYM_START;
- int BVP_NL,BVP_NR,BVP_N;
- extern int BVP_FLAG;
+int BVP_NL,BVP_NR,BVP_N;
 
 #define cstringmaj MYSTR1
 #define cstringmin MYSTR2
-extern float xppvermaj,xppvermin; 
 
 int ConvertStyle=0;
 FILE *convertf;
-extern int ERROUT;
- extern int NTable;
 int OldStyle=1;
 int NCON_ORIG,NSYM_ORIG;
 int IN_VARS;
@@ -111,31 +88,17 @@ int NMarkov;
 int FIX_VAR;
 
 int ICREATE=0;
-extern int NEQ,NVAR,NKernel;
-extern int NFUN;
 int NEQ_MIN;
-extern int NCON,NSYM;
-extern int NWiener;
-/*extern char this_file[100];
-*/
-extern char this_file[XPP_MAX_NAME];
-extern char options[100];
 int EqType[MAXODE];
 int Naux=0;
 char aux_names[MAXODE][12];
 
 int NUMODES=0,NUMFIX=0,NUMPARAM=0,NUMMARK=0,NUMAUX=0,NUMVOLT=0,NUMSOL=0;
 
-
 FIXINFO fixinfo[MAXODE];
-extern char cur_dir[];
-
-
-extern FILEINFO my_ff;
 
 char *get_first(/* char *string,char *src */);
 char *get_next(/* char *src */);
-
 char *getsi();
 double atof();
 

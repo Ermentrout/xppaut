@@ -194,12 +194,14 @@ extern int BVP_FLAG;
 extern int EVEC_ITER;
 extern int got_file;
 extern int METHOD;
+extern int NEQ;
 extern int Nintern_set;
 extern int NJMP;
 extern int RunImmediately;
 extern int xorfix;
 
 extern char delay_string[MAXODE][80];
+extern char options[100];
 extern char this_file[XPP_MAX_NAME];
 
 extern double ATOLER;

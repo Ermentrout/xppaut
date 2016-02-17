@@ -17,6 +17,7 @@ typedef struct {
 
 /* --- Data --- */
 extern char cur_dir[MAXPATHLEN];
+extern FILEINFO my_ff;
 
 /* --- Functions --- */
 void free_finfo(FILEINFO *ff);
