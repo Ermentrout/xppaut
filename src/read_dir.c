@@ -1,12 +1,3 @@
-#include "read_dir.h"
-
-#include <unistd.h>
-#include "ggets.h"
-#include <stdlib.h> 
-#include <string.h>
-#include "load_eqn.h"
-
-
 /* OSX note:
 
 IGNORE THIS -- I have included the relevant files !!  July 2002
@@ -42,24 +33,19 @@ statement to call your local copy of sysdirent.h
 (These occur in the {\tt struct dirent}  declaration)
 and save the file.
 
-
-
 */
-/*#ifdef MACOSX
-#include "macdirent.h"
-#else
-#include <dirent.h>
-#endif
-*/
+
+#include "read_dir.h"
+
 #include <dirent.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-/*Let's try to be consistent with file name buffer sizes and
-any strings that may hold a path name (e.g. dialog message etc.)*/
-/*#define MAXPATHLEN 1024*/
-#define MAXPATHLEN XPP_MAX_NAME
-
+#include "ggets.h"
+#include "load_eqn.h"
 
 #define EOS '\0'
 #define NENTRIES 100

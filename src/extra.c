@@ -1,11 +1,4 @@
-#include "extra.h"
 
-#include "init_conds.h"
-#include "ggets.h"
-#include "read_dir.h"
-#include "parserslow.h"
-#include <stdlib.h> 
-#include <string.h>
 /* this is a way to communicate XPP with other stuff
 
 # complex right-hand sides
@@ -18,13 +11,19 @@ y'=yp
 export {x,y} {xp,yp}
  
 */
-
-
-
-
+#include "config.h"
+#include "extra.h"
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "ggets.h"
+#include "init_conds.h"
+#include "parserslow.h"
+#include "read_dir.h"
+
 #define PAR 0
 #define VAR 1
 char dll_lib[256];
@@ -43,10 +42,6 @@ typedef struct
 
 IN_OUT in_out;
 
-extern double variables[], constants[];
-
-extern char cur_dir[];
-
 typedef struct {
   char libname[1024];
   char libfile[256];
@@ -55,7 +50,7 @@ typedef struct {
 } DLFUN;
 
 DLFUN dlf;
-#ifdef HAVEDLL 
+#ifdef HAVE_LIBDL
 /* this loads a dynamically linked library of the 
    users choice
 */
@@ -168,26 +163,23 @@ void get_import_values(int n, double *ydot, char *soname, char *sofun,
 {
 
 }
-load_new_dll()
+
+void load_new_dll()
 {
 
 }
-my_fun(double *in, double *out, int nin,int nout,double *v,double *c)
+
+
+int my_fun(double *in, double *out, int nin,int nout,double *v,double *c)
 {
-
-
-
+    return 0;
 }
 
-auto_load_dll()
+void auto_load_dll()
 {
 
 }
 #endif
-
-
-
-
 
 void do_in_out()
 {

@@ -4,7 +4,6 @@ AM_CPPFLAGS = \
 	-DNOERRNO \
 	-DAUTO \
 	-DCVODE_YES \
-	-DHAVEDLL \
 	-DMYSTR1=$(MAJORVER) \
 	-DMYSTR2=$(MINORVER) \
 	-Icvodesrc
