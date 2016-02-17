@@ -6,6 +6,7 @@
 /* --- Data --- */
 extern double AlphaMax;
 extern int del_stab_flag;
+extern int DelayFlag;
 extern int DelayGrid;
 extern double delay_list[MAXDELAY];
 extern int NDelay;
