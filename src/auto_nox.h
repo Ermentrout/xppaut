@@ -74,6 +74,9 @@ typedef struct {
 
 /* --- Data --- */
 extern int AutoTwoParam;
+extern int NAutoPar;
+extern int TypeOfCalc;
+extern ROTCHK blrtn;
 
 /* --- Functions --- */
 void colset(int type);

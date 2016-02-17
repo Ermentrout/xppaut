@@ -7,6 +7,7 @@ extern int LastPSY;
 extern int LastPtLine;
 extern int NoBreakLine;
 extern int PltFmtFlag;
+extern int PS_Color;
 extern int PSColorFlag;
 extern char PS_FONT[100];
 extern int PS_FONTSIZE;

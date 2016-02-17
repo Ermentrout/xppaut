@@ -1,9 +1,12 @@
-#ifndef _markov_h_
-#define _markov_h_
+#ifndef XPPAUT_MARKOV_H
+#define XPPAUT_MARKOV_H
 
 #include <stdio.h>
 
-/* markov.c */
+/* --- Data --- */
+extern int storind;
+
+/* --- Functions --- */
 void add_wiener(int index);
 void set_wieners(double dt, double *x, double t);
 void add_markov(int nstate, char *name);
@@ -32,5 +35,4 @@ double ndrand48(void);
 void nsrand48(int seed);
 double ran1(long *idum);
 
-
-#endif
+#endif /* XPPAUT_MARKOV_H */

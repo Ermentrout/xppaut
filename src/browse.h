@@ -13,20 +13,21 @@ typedef struct {
 		Window find,up,down,pgup,pgdn,home,end,left,right;
 		Window first,last,restore,write,get,close;
 		Window load,repl,unrepl,table,addcol,delcol;
-                Window main;
-                Window label[BMAXCOL];
-                Window time;
-                Window hint;
+				Window main;
+				Window label[BMAXCOL];
+				Window time;
+				Window hint;
 		char hinttxt[256];
 		int dataflag,xflag;
 		int col0,row0,ncol,nrow;
 		int maxrow,maxcol;
-                float **data;
+				float **data;
 		int istart,iend;
-                } BROWSER;
+				} BROWSER;
 
 /* --- Data --- */
 extern BROWSER my_browser;
+extern float **storage;
 
 /* --- Functions --- */
 float **get_browser_data(void);
