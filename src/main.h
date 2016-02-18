@@ -34,6 +34,7 @@ extern float xppvermin;
 extern int batch_range;
 extern int CURY_OFF;
 extern int CURY_OFFb;
+extern int CURY_OFFs;
 extern int DCURX;
 extern int DCURXs;
 extern int DCURY;
