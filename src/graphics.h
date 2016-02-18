@@ -15,6 +15,7 @@ extern int HChar, VChar;
 extern int HTic, VTic;
 extern int PointRadius;
 extern int PointType;
+extern int TextAngle;
 extern int TextJustify;
 
 extern XFontStruct *romfonts[5];
