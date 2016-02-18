@@ -20,6 +20,7 @@ extern double ColorViaHi;
 extern double ColorViaLo;
 extern int ColorizeFlag;
 extern char ColorVia[15];
+extern int DF_FLAG;
 extern int DF_GRID;
 extern int DFBatch;
 extern int NCBatch;

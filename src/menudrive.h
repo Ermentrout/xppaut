@@ -18,7 +18,7 @@
 #define M_ID 12
 #define M_IB 13
 
-#define MAX_M_I 13 
+#define MAX_M_I 13
 
 
 #define M_C  20
@@ -223,7 +223,17 @@
 #define M_UE 409
 #define M_UC 410
 
+/* --- Types --- */
+typedef struct {
+	Window w;
+	char text[256];
+	int here;
+} MSGBOXSTRUCT;
 
+/* --- Data --- */
+extern MSGBOXSTRUCT MsgBox;
+
+/* --- Functions --- */
 void xpp_hlp(void);
 void MessageBox(char *m);
 void RedrawMessageBox(Window w);

@@ -33,6 +33,7 @@ typedef struct {
 } BD;
 
 /* --- Data --- */
+extern int AutoFreezeFlag;
 extern int colorline[12];
 
 /* --- Functions --- */
