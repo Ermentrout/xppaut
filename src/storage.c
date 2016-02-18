@@ -1,30 +1,30 @@
-
 #include "storage.h"
-#include "ggets.h"
-#include <stdlib.h> 
-#include <stdio.h>
-#include "xpplim.h"
-float **storage;
-double *WORK;
-int MAXSTOR,storind;
-int IWORK[10000];
-extern int NODE,NMarkov;
-extern int METHOD;
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "form_ode.h"
+#include "ggets.h"
+#include "integrate.h"
+#include "load_eqn.h"
+#include "markov.h"
+#include "xpplim.h"
+
+/* --- Macros --- */
 #define BACKEUL 7
 #define VOLTERRA 6
 #define STIFF 9
 #define GEAR 5
 #define RB23 13
 #define SYMPLECT 14
-typedef struct 
-{
-  int nvec,node;
-  double *x;
-} XPPVEC;
 
-extern XPPVEC xpv;
+/* --- Data --- */
+float **storage;
+double *WORK;
+int MAXSTOR,storind;
+int IWORK[10000];
 
+/* --- Functions --- */
 void init_alloc_info()
 {
   int i;
@@ -33,7 +33,7 @@ void init_alloc_info()
   xpv.x=(double *)malloc((xpv.nvec+xpv.node)*sizeof(double));
   /* plintf(" node=%d nvec=%d \n",xpv.node,xpv.nvec); */
   for(i=xpv.node;i<(xpv.nvec+xpv.node);i++)
-    xpv.x[i]=0.0;
+	xpv.x[i]=0.0;
 }
 
 void alloc_meth()
@@ -42,43 +42,43 @@ void alloc_meth()
   int sz=30*nn;
   switch(METHOD){
   case STIFF:
-     sz=2*nn*nn+13*nn+100;
-    
-     break;
+	 sz=2*nn*nn+13*nn+100;
+
+	 break;
   case GEAR:
-    sz=30*nn+nn*nn+100;
-    break;
+	sz=30*nn+nn*nn+100;
+	break;
   case BACKEUL:
   case VOLTERRA:
-    sz=10*nn+nn*nn+100;
-    break;
+	sz=10*nn+nn*nn+100;
+	break;
   case RB23:
-    sz=12*nn+100+nn*nn;
-    break;
+	sz=12*nn+100+nn*nn;
+	break;
   }
   if(WORK)
-    free(WORK);
+	free(WORK);
   WORK=(double *)malloc(sz*sizeof(double));
   /* plintf(" I have allocated %d doubles \n",sz); */
 }
-    
+
 int reallocstor(int ncol,int nrow)
 {
   int i=0;
   while((storage[i]=(float *)realloc(storage[i],nrow*sizeof(float)))!=NULL){
    i++;
    if(i==ncol)return 1;
-   }  
+   }
    err_msg("Cannot allocate sufficient storage");
    return 0;
 }
-  
+
 void init_stor(nrow,ncol)
 int nrow,ncol;
 {
  int i;
  /* WORK=(double *)malloc(WORKSIZE*sizeof(double));
-    if(WORK!=NULL){ */
+	if(WORK!=NULL){ */
 WORK=NULL;
  storage=(float **)malloc((MAXODE+1)*sizeof(float *));
  MAXSTOR=nrow;
@@ -89,7 +89,7 @@ WORK=NULL;
    i++;
    if(i==ncol)return;
    }
- 
+
  }
  /*  } */
  /*  plintf("col=%d\n",i); */
@@ -105,10 +105,10 @@ int ncol;
   for(i=0;i<ncol;i++)free(storage[i]);
   free(storage);
   if(WORK)free(WORK);
-  
+
 }
 
- 
+
 
 
 
