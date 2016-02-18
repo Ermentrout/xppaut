@@ -190,11 +190,46 @@ typedef struct {
 } OptionsSet;
 
 /* --- Data --- */
+extern char delay_string[MAXODE][80];
+extern char options[100];
+extern char this_file[XPP_MAX_NAME];
+extern char this_internset[XPP_MAX_NAME];
+
+extern double ATOLER;
+extern double BOUND;
+extern double BVP_EPS;
+extern double BVP_TOL;
+extern double DELAY;
+extern double DELTA_T;
+extern double EVEC_ERR;
+extern double HMAX;
+extern double HMIN;
+extern double last_ic[MAXODE];
+extern double MY_XHI;
+extern double MY_XLO;
+extern double MY_YHI;
+extern double MY_YLO;
+extern double NEWT_ERR;
+extern double POIPLN;
+extern double T0;
+extern double TEND;
+extern double TOLER;
+extern double TRANS;
+extern double X_HI[10];
+extern double X_LO[10];
+extern double Y_HI[10];
+extern double Y_LO[10];
+extern double x_3d[2];
+extern double y_3d[2];
+extern double z_3d[2];
+
 extern int AXES;
 extern int BVP_FLAG;
+extern int BVP_MAXIT;
 extern int ENDSING;
 extern int EVEC_ITER;
 extern int got_file;
+extern int INFLAG;
 extern int IXPLT;
 extern int IYPLT;
 extern int IZPLT;
@@ -205,43 +240,21 @@ extern int METHOD;
 extern int MultiWin;
 extern int NEQ;
 extern int Nintern_set;
+extern int NMESH;
 extern int NPltV;
 extern int NJMP;
 extern int PAR_FOL;
 extern int PAUSER;
 extern int PLOT_3D;
+extern int POIMAP;
+extern int POISGN;
+extern int POIVAR;
 extern int RunImmediately;
 extern int SHOOT;
+extern int SOS;
 extern int START_LINE_TYPE;
 extern int TIMPLOT;
 extern int xorfix;
-
-extern char delay_string[MAXODE][80];
-extern char options[100];
-extern char this_file[XPP_MAX_NAME];
-extern char this_internset[XPP_MAX_NAME];
-
-extern double ATOLER;
-extern double BOUND;
-extern double DELAY;
-extern double DELTA_T;
-extern double EVEC_ERR;
-extern double MY_XHI;
-extern double MY_XLO;
-extern double MY_YHI;
-extern double MY_YLO;
-extern double NEWT_ERR;
-extern double T0;
-extern double TOLER;
-extern double last_ic[MAXODE];
-extern double X_HI[10];
-extern double X_LO[10];
-extern double Y_HI[10];
-extern double Y_LO[10];
-extern double x_3d[2];
-extern double y_3d[2];
-extern double z_3d[2];
-
 
 extern INTERN_SET intern_set[MAX_INTERN_SET];
 extern FILE *logfile;

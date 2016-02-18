@@ -1,12 +1,13 @@
-#ifndef _init_conds_h_
-#define _init_conds_h_
+#ifndef XPPAUT_INIT_CONDS_H
+#define XPPAUT_INIT_CONDS_H
 
 #include <X11/Xlib.h>
 #include "read_dir.h"
 
-
-
+/* --- Macros --- */
 #define FILESELNWIN 10
+
+/* --- Types --- */
 typedef struct {
  int n,n0,here;
  Window base,cancel,ok,up,dn,pgup,pgdn,file,wild,w[FILESELNWIN],dir,home,start;
@@ -26,7 +27,7 @@ typedef struct {
 } SCROLL_LIST;
 
 typedef struct {
-  int use,pos,l; 
+  int use,pos,l;
   char parname[20];
   double lo,hi,val;
   int hgt;
@@ -35,33 +36,37 @@ typedef struct {
 } PAR_SLIDER;
 
 typedef struct {
-  		int use,type;
-		int n;
-		Window base;
-                Window cancel,ok,def,go;
-		Window *w;
-                Window *we;
-                char **value;
-                int mc,*off,*pos;
-		} BoxListold;
+	int use,type;
+	int n;
+	Window base;
+	Window cancel,ok,def,go;
+	Window *w;
+	Window *we;
+	char **value;
+	int mc,*off,*pos;
+} BoxListold;
 
 typedef struct {
-  		int use,type,xuse;
+		int use,type,xuse;
 		int n,n0;
-                int nwin,minwid,minhgt;
-                Window up,dn;
-                Window pgup,pgdn;
+		int nwin,minwid,minhgt;
+		Window up,dn;
+		Window pgup,pgdn;
 		Window base;
-                Window cancel,ok,def,go,close;
-                Window xvt,pp,arr;
+		Window cancel,ok,def,go,close;
+		Window xvt,pp,arr;
 		Window *w;
-                Window *we;
-                Window *ck;
-                char **value,*iname,*wname;
-                int *isck;
-                int mc,*off,*pos;
-		} BoxList;
+		Window *we;
+		Window *ck;
+		char **value,*iname,*wname;
+		int *isck;
+		int mc,*off,*pos;
+} BoxList;
 
+/* --- Data --- */
+extern BoxList ParamBox;
+
+/* --- Functions --- */
 void create_scroll_list(Window base, int x, int y, int width, int height, SCROLL_LIST *sl);
 void free_scroll_list(SCROLL_LIST *sl);
 void add_scroll_item(char *v, SCROLL_LIST *sl);
@@ -150,4 +155,4 @@ int to_float(char *s, double *z);
 void set_value_from_box(BoxList *b, int i);
 void load_entire_box(BoxList *b);
 
-#endif
+#endif /* XPPAUT_INIT_CONDS_H */

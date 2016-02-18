@@ -32,7 +32,7 @@ typedef struct  {
   int uzrpar[MAX_AUT_PER];
   double epsl,epsu,epss;
   int ncol;
-}BIFUR;
+} BIFUR;
 
 typedef struct {
   int iad;
@@ -69,7 +69,7 @@ typedef struct diagram {
 typedef struct {
   int plot,var,icp1,icp2,icp3,icp4,icp5;
   double xmin,ymin,xmax,ymax;
-}  AUTOAX;
+} AUTOAX;
 
 /* --- Data --- */
 extern char fort3[200];

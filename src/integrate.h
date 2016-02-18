@@ -50,10 +50,13 @@ typedef struct {
 } XPPVEC;
 
 /* --- Data --- */
+extern double LastTime;
 extern double MyData[MAXODE];
+extern double MyTime;
 
 extern int DelayErr;
 extern int MakePlotFlag;
+extern int MyStart;
 extern int SuppressBounds;
 extern int SuppressOut;
 

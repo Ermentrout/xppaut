@@ -32,6 +32,7 @@ extern int NEQ_MIN;
 extern int NLINES;
 extern int NODE;
 extern int NSYM_START;
+extern int NUPAR;
 
 extern int *my_ode[MAXODE];
 extern int *plotlist;
@@ -39,6 +40,7 @@ extern int *plotlist;
 extern double default_ic[MAXODE];
 extern double default_val[MAXPAR];
 
+extern FIXINFO fixinfo[MAXODE];
 extern BC_STRUCT my_bc[MAXODE];
 
 /* --- Functions --- */
