@@ -1,19 +1,18 @@
-#include <stdlib.h> 
-#include <math.h>
-#include "xpplim.h"
 #include "stiff.h"
+
+#include <math.h>
+#include <stdlib.h>
+
 #include "flags.h"
 #include "gear.h"
 #include "markov.h"
 
-
-extern int NFlags;
+/* --- Macros --- */
 #define RKQS 8
 #define STIFF 9
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define SIGN(a,b) ((b)>=0.0 ? fabs(a):-fabs(a))
-/* #define MAXODE 100 */
 #define SAFETY 0.9
 #define GROW 1.5
 #define PGROW -0.25
@@ -50,11 +49,12 @@ extern int NFlags;
 #define PGROW2 -0.2
 #define PSHRNK2 -0.25
 #define ERRCON2 1.89e-4
+
+/* --- Functions --- */
 double sdot();
-extern int (*rhs)();
 void jacobn(x,y,dfdx,dermat,eps,work,n)
-     double x,*y,*dermat,*dfdx,eps,*work;
-     int n;
+	 double x,*y,*dermat,*dfdx,eps,*work;
+	 int n;
 {
  int i,j;
  double r;
@@ -72,34 +72,34 @@ void jacobn(x,y,dfdx,dermat,eps,work,n)
  }
   for(i=0;i<n;i++)
   {
-    ytemp=y[i];
-    r=eps*MAX(eps,fabs(ytemp));
-    y[i]=ytemp+r;
-    rhs(x,y,ynew,n);
-    for(j=0;j<n;j++)
-    {
-    dermat[j*n+i]=(ynew[j]-yval[j])/r;
-    /* plintf(" %g ",dermat[j*n+i]); */
-    }
-    y[i]=ytemp;
+	ytemp=y[i];
+	r=eps*MAX(eps,fabs(ytemp));
+	y[i]=ytemp+r;
+	rhs(x,y,ynew,n);
+	for(j=0;j<n;j++)
+	{
+	dermat[j*n+i]=(ynew[j]-yval[j])/r;
+	/* plintf(" %g ",dermat[j*n+i]); */
+	}
+	y[i]=ytemp;
 
   }
 }
 
 int adaptive(ystart,nvar,xs,x2,eps,hguess,hmin,work,ier,epjac,iflag,jstart)
-     double *ystart,*xs,x2,eps,*hguess,hmin,*work,epjac;
-     int nvar,*ier,iflag,*jstart;
+	 double *ystart,*xs,x2,eps,*hguess,hmin,*work,epjac;
+	 int nvar,*ier,iflag,*jstart;
 {
   if(NFlags==0)
-    return(gadaptive(ystart,nvar,xs,x2,eps,
-		     hguess,hmin,work,ier,epjac,iflag,jstart));
+	return(gadaptive(ystart,nvar,xs,x2,eps,
+			 hguess,hmin,work,ier,epjac,iflag,jstart));
   return(one_flag_step_adap(ystart,nvar,xs,x2,eps,hguess,
-			    hmin,work,ier,epjac,iflag,jstart));
+				hmin,work,ier,epjac,iflag,jstart));
 }
-   
+
 int gadaptive(ystart,nvar,xs,x2,eps,hguess,hmin,work,ier,epjac,iflag,jstart)
-     double *ystart,*xs,x2,eps,*hguess,hmin,*work,epjac;
-     int nvar,*ier,iflag,*jstart;
+	 double *ystart,*xs,x2,eps,*hguess,hmin,*work,epjac;
+	 int nvar,*ier,iflag,*jstart;
 {
   double h1=*hguess;
   int nstp,i;
@@ -116,39 +116,39 @@ int gadaptive(ystart,nvar,xs,x2,eps,hguess,hmin,work,ier,epjac,iflag,jstart)
   *ier=0;
   for (i=0;i<nvar;i++) y[i]=ystart[i];
   for(nstp=1;nstp<=MAXSTP;nstp++){
-    rhs(x,y,dydx,nvar);
-    for(i=0;i<nvar;i++)
-      if(iflag==STIFF)
+	rhs(x,y,dydx,nvar);
+	for(i=0;i<nvar;i++)
+	  if(iflag==STIFF)
 	yscal[i]=MAX(1,fabs(y[i]));
-      else
-	yscal[i]=fabs(y[i])+fabs(dydx[i]*h)+TINY; 
-    if ((x+h-x2)*(x+h-x1) > 0.0) h=x2-x;
-    if(iflag==STIFF)
-      stiff(y,dydx,nvar,&x,h,eps,yscal,&hdid,&hnext,work2,epjac,ier);
-    else
-      rkqs(y,dydx,nvar,&x,h,eps,yscal,&hdid,&hnext,work2,ier); 
-    if(*ier>0)return -1;
-    if ((x-x2)*(x2-x1) >= 0.0) 
-      {
+	  else
+	yscal[i]=fabs(y[i])+fabs(dydx[i]*h)+TINY;
+	if ((x+h-x2)*(x+h-x1) > 0.0) h=x2-x;
+	if(iflag==STIFF)
+	  stiff(y,dydx,nvar,&x,h,eps,yscal,&hdid,&hnext,work2,epjac,ier);
+	else
+	  rkqs(y,dydx,nvar,&x,h,eps,yscal,&hdid,&hnext,work2,ier);
+	if(*ier>0)return -1;
+	if ((x-x2)*(x2-x1) >= 0.0)
+	  {
 	for (i=0;i<nvar;i++) ystart[i]=y[i];
-        *hguess=SIGN(hnext,x2-x1);
+		*hguess=SIGN(hnext,x2-x1);
 	*xs=x2;
 	return 0;
-      }
-    if (fabs(hnext) <= hmin) {
-     
-      *ier=2;
-      return -1;
-    }
-    h=hnext;
-    
+	  }
+	if (fabs(hnext) <= hmin) {
+
+	  *ier=2;
+	  return -1;
+	}
+	h=hnext;
+
   }
-  
+
   *ier=3;
   return -1;
 }
-  
-  
+
+
 
 
 /*  Need work size of 2n^2+12n  */
@@ -159,8 +159,8 @@ int n,*ier;
 {
 
 	int i,j,jtry,indx[700];
-        int info;
-      	double errmax,h,xsav,*a,*dfdx,*dfdy,*dysav,*err;
+		int info;
+		double errmax,h,xsav,*a,*dfdx,*dfdy,*dysav,*err;
 	double *g1,*g2,*g3,*g4,*ysav,*work2;
 	*ier=0;
 	a=work;
@@ -173,9 +173,9 @@ int n,*ier;
 	g3=g2+n;
 	g4=g3+n;
 	ysav=g4+n;
-        work2=ysav+n;
+		work2=ysav+n;
 	xsav=(*x);
-        
+
 	for (i=0;i<n;i++) {
 		ysav[i]=y[i];
 		dysav[i]=dydx[i];
@@ -189,8 +189,8 @@ int n,*ier;
 		}
 		sgefa(a,n,n,indx,&info);
 		if(info!=-1){
-		 
-                  *ier=-1;
+
+				  *ier=-1;
 		  return -1;
 		}
 
@@ -220,28 +220,28 @@ int n,*ier;
 		}
 		*x=xsav+h;
 		if (*x == xsav) {
-		         
-		       	 *ier=1;
-		       	 return -1;
-			       }
+
+				 *ier=1;
+				 return -1;
+				   }
 		errmax=0.0;
-                
+
 		for (i=0;i<n;i++) errmax=MAX(errmax,fabs(err[i]/yscal[i]));
 		errmax /= eps;
 		if (errmax <= 1.0) {
 		  *hdid=h;
-		  *hnext=(errmax > ERRCON ? SAFETY*h*pow(errmax,PGROW) : GROW*h);          
-                  
+		  *hnext=(errmax > ERRCON ? SAFETY*h*pow(errmax,PGROW) : GROW*h);
+
 		  return 0;
 		} else {
 		  *hnext=SAFETY*h*pow(errmax,PSHRNK);
 		  h=(h >= 0.0 ? MAX(*hnext,SHRNK*h) : MIN(*hnext,SHRNK*h));
 		}
 	}
-         
-        *ier=4;
-       return -1;
-	
+
+		*ier=4;
+	   return -1;
+
 }
 
 
@@ -251,8 +251,8 @@ int n,*ier;
 
 
 int rkqs(y,dydx,n,x,htry,eps,yscal,hdid,hnext,work,ier)
-     double *hdid,*hnext,*x,*dydx,eps,htry,*y,*yscal,*work;
-     int n,*ier;
+	 double *hdid,*hnext,*x,*dydx,eps,htry,*y,*yscal,*work;
+	 int n,*ier;
 {
   int i;
   double errmax,h,htemp,xnew,*yerr,*ytemp;
@@ -263,27 +263,27 @@ int rkqs(y,dydx,n,x,htry,eps,yscal,hdid,hnext,work,ier)
   h=htry;
   *ier=0;
   for (;;) {
-    rkck(y,dydx,n,*x,h,ytemp,yerr,work2);
-    errmax=0.0;
-    for (i=0;i<n;i++) errmax=MAX(errmax,fabs(yerr[i]/yscal[i]));
-    errmax /= eps;
-    if (errmax > 1.0) {
-      htemp=SAFETY*h*pow(errmax,PSHRNK2);
-      h=(h >= 0.0 ? MAX(htemp,0.1*h) : MIN(htemp,0.1*h));
-      xnew=(*x)+h;
-      if (xnew == *x) {
-	
+	rkck(y,dydx,n,*x,h,ytemp,yerr,work2);
+	errmax=0.0;
+	for (i=0;i<n;i++) errmax=MAX(errmax,fabs(yerr[i]/yscal[i]));
+	errmax /= eps;
+	if (errmax > 1.0) {
+	  htemp=SAFETY*h*pow(errmax,PSHRNK2);
+	  h=(h >= 0.0 ? MAX(htemp,0.1*h) : MIN(htemp,0.1*h));
+	  xnew=(*x)+h;
+	  if (xnew == *x) {
+
 	*ier=1;
 	return -1;
-      }
-      continue;
-    } else {
-      if (errmax > ERRCON2) *hnext=SAFETY*h*pow(errmax,PGROW2);
-      else *hnext=5.0*h;
-      *x += (*hdid=h);
-      for (i=0;i<n;i++) y[i]=ytemp[i];
-      break;
-    }
+	  }
+	  continue;
+	} else {
+	  if (errmax > ERRCON2) *hnext=SAFETY*h*pow(errmax,PGROW2);
+	  else *hnext=5.0*h;
+	  *x += (*hdid=h);
+	  for (i=0;i<n;i++) y[i]=ytemp[i];
+	  break;
+	}
   }
   return 0;
 }
@@ -292,8 +292,8 @@ int rkqs(y,dydx,n,x,htry,eps,yscal,hdid,hnext,work,ier)
 
 /* This takes one step of Cash-Karp RK method */
 void rkck(y,dydx,n,x,h,yout,yerr,work)
-     double *dydx,h,x,*y,*yerr,*yout,*work;
-     int n;
+	 double *dydx,h,x,*y,*yerr,*yout,*work;
+	 int n;
 {
   int i;
   static double a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
