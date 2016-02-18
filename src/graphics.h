@@ -8,6 +8,8 @@ extern double XMin, YMin, XMax, YMax;
 extern double PHI0;
 extern double THETA0;
 
+extern int avromfonts[5];
+extern int avsymfonts[5];
 extern int DBottom, DLeft, DRight, DTop;
 extern int HChar, VChar;
 extern int HTic, VTic;

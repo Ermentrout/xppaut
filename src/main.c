@@ -1,47 +1,3 @@
-#include "main.h"
-
-#include "aniparse.h"
-#include "adj2.h"
-#include "storage.h"
-#include "load_eqn.h"
-#include "ggets.h"
-#include "many_pops.h"
-#include "read_dir.h"
-#include "comline.h"
-#include "simplenet.h"
-#include "dae_fun.h"
-#include "auto_x11.h"
-#include "auto_nox.h"
-#include "extra.h"
-#include "menudrive.h"
-#include "init_conds.h"
-#include "graphics.h"
-#include "integrate.h"
-#include "numerics.h"
-#include "form_ode.h"
-#include "pop_list.h"
-#include "arrayplot.h"
-#include "menu.h"
-#include "userbut.h"
-#include "color.h"
-#include "eig_list.h"
-#include "txtread.h"
-#include "edit_rhs.h"
-#include "axes2.h"
-#include "do_fit.h"
-#include "graf_par.h"
-#include "auto_x11.h"
-
-
-#include "nullcline.h"
-#include "lunch-new.h"
-
-#include "calc.h"
-#include <stdlib.h>
-
-
-
-
 /*
 	Copyright (C) 2002-2015  Bard Ermentrout & Daniel Dougherty
 
@@ -60,63 +16,80 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	The author can be contacted at
-	 bard@pitt.edu
-
+	bard@pitt.edu
 */
+#include "main.h"
 
-
-
+#include <dirent.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <X11/cursorfont.h>
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/Xos.h>
 #include <X11/Xproto.h>
-#include <X11/Xatom.h>
-/* #include <X11/bitmaps/icon> */
-#include <math.h>
-#include "bitmap/pp.bitmap"
-#include <stdio.h>
-/* #include <errno.h> */
-#include "help_defs.h"
-#include "browse.h"
-#include "struct.h"
-#include <dirent.h>
+#include <X11/Xutil.h>
 
+#include "adj2.h"
+#include "aniparse.h"
+#include "arrayplot.h"
+#include "auto_nox.h"
+#include "auto_x11.h"
+#include "axes2.h"
+#include "browse.h"
+#include "calc.h"
+#include "color.h"
+#include "comline.h"
+#include "dae_fun.h"
+#include "do_fit.h"
+#include "edit_rhs.h"
+#include "eig_list.h"
+#include "extra.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "graf_par.h"
+#include "graphics.h"
+#include "help_defs.h"
+#include "init_conds.h"
+#include "integrate.h"
+#include "load_eqn.h"
+#include "lunch-new.h"
+#include "many_pops.h"
+#include "menu.h"
+#include "menudrive.h"
+#include "myfonts.h"
+#include "nullcline.h"
+#include "numerics.h"
+#include "pop_list.h"
+#include "read_dir.h"
+#include "simplenet.h"
+#include "storage.h"
+#include "struct.h"
+#include "txtread.h"
+#include "userbut.h"
+
+#include "bitmap/pp.bitmap"
+
+/* --- Macros --- */
 #define FIX_SIZE 3
 #define FIX_MIN_SIZE 2
 #define FIX_MAX_SIZE 1
 #define lowbit(x) ((x) & (~(x) + 1))
-
 #define TOPBUTTONCOLOR 27
-
-#include <X11/cursorfont.h>
 #define BITMAPDEPTH 1
 #define TOO_SMALL 0
 #define BIG_ENOUGH 1
-
-#include "myfonts.h"
-
 #define cstringmaj MYSTR1
 #define cstringmin MYSTR2
-
-#ifdef NOERRNO
-int errno;
-#endif
 
 int allwinvis=0;
 int use_intern_sets=1;
 int use_ani_file=0;
-/*char anifile[256]; */
 char anifile[XPP_MAX_NAME];
-extern int ani_grab_flag;
 
 float xppvermaj,xppvermin;
 
-/*extern char this_file[100];*/
-extern char this_file[XPP_MAX_NAME];
-extern int METHOD,storind;
-extern XFontStruct *symfonts[5],*romfonts[5];
-extern int avsymfonts[5],avromfonts[5];
-extern int RunImmediately;
 int Xup,TipsFlag=1;
 Atom deleteWindowAtom=0;
 int XPPBatch=0,batch_range=0;
@@ -132,7 +105,6 @@ char big_font_name[100],small_font_name[100];
 char PlotFormat[100];
 
 int PaperWhite=-1;
-extern int DF_FLAG;
 char mycommand[100];
 
 Window TopButton[6];
@@ -144,13 +116,11 @@ Window make_input_strip();
 Window main_win;
 Window command_pop,info_pop;
 GC gc, gc_graph,small_gc, font_gc;
-extern int help_menu,current_pop;
 unsigned int Black,White;
 char UserBlack[8];
 char UserWhite[8];
 char UserMainWinColor[8];
 char UserDrawWinColor[8];
-/*char UserBGBitmap[100];*/
 char UserBGBitmap[XPP_MAX_NAME];
 
 int UserGradients=-1;
@@ -158,10 +128,8 @@ int UserMinWidth=0,UserMinHeight=0;
 unsigned int MyBackColor,MyForeColor,MyMainWinColor,MyDrawWinColor;
 unsigned int GrFore,GrBack;
 int SCALEX,SCALEY;
-extern int COLOR;
 Display *display;
 int screen;
-extern int periodic;
 int DCURYb,DCURXb,CURY_OFFb;
 int DCURYs,DCURXs,CURY_OFFs;
 int DCURY,DCURX,CURY_OFF;
@@ -169,7 +137,6 @@ FILE *logfile;
 int XPPVERBOSE=1;
 int OVERRIDE_QUIET=0;
 int OVERRIDE_LOGFILE=0;
-extern BROWSER my_browser;
 int tfBell;
 
 int SLIDER1=-1;

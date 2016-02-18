@@ -1,7 +1,6 @@
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CPPFLAGS = \
 	-D_XOPEN_SOURCE=600 \
-	-DNOERRNO \
 	-DAUTO \
 	-DCVODE_YES \
 	-DMYSTR1=$(MAJORVER) \

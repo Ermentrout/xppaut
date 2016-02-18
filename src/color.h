@@ -7,6 +7,7 @@
 extern int COLOR;
 extern int color_total;
 extern int custom_color;
+extern int periodic;
 
 /* --- Functions --- */
 void tst_color(Window w);

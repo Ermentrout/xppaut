@@ -1,9 +1,12 @@
-#ifndef _xppmenu_h_
-#define _xppmenu_h_
+#ifndef XPPAUT_MENU_H
+#define XPPAUT_MENU_H
 
 #include <X11/Xlib.h>
 
+/* --- Data --- */
+extern int help_menu;
 
+/* --- Functions --- */
 void flash(int num);
 void add_menu(Window base, int j, int n, char **names, char *key, char **hint);
 void create_the_menus(Window base);
@@ -17,4 +20,4 @@ void menu_expose(Window win);
 void menu_button(Window win);
 void draw_help(void);
 
-#endif
+#endif /* XPPAUT_MENU_H */
