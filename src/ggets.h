@@ -8,8 +8,10 @@
 #define ClickTime 200
 
 /* --- Data --- */
-extern int MSStyle;
 extern char *info_message;
+
+extern int MSStyle;
+extern int xor_flag;
 
 /* --- Functions --- */
 void ping(void);
