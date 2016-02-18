@@ -1,35 +1,28 @@
-#include "menus.h"
 #include "menu.h"
-#include "main.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xos.h>
-#include <X11/Xatom.h>
 #include <X11/cursorfont.h>
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <X11/Xos.h>
+#include <X11/Xutil.h>
 
 #include "ggets.h"
+#include "main.h"
 #include "many_pops.h"
-#include "pop_list.h"
-
 #include "menudrive.h"
+#include "menus.h"
+#include "pop_list.h"
 
 int help_menu;
 MENUDEF my_menus[3];
-extern Display *display;
-extern int tfBell,TipsFlag;
-extern int DCURY,DCURX,CURY_OFF,DCURYs,DCURYb;
-extern GC gc;
 Window make_unmapped_window();
 void flash(num)
 int num;
 {
 }
-
-
 
 void add_menu(base,j,n,names,key,hint)
    Window base;
