@@ -23,6 +23,7 @@ extern char ColorVia[15];
 extern int DF_FLAG;
 extern int DF_GRID;
 extern int DFBatch;
+extern int DOING_DFIELD;
 extern int NCBatch;
 extern int XNullColor;
 extern int YNullColor;

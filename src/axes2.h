@@ -1,9 +1,13 @@
-
-#ifndef _axes2_h_
-#define _axes2_h_
+#ifndef XPPAUT_AXES2_H
+#define XPPAUT_AXES2_H
 
 #include <X11/Xlib.h>
 
+/* --- Data --- */
+extern int DOING_AXES;
+extern int DOING_BOX_AXES;
+
+/* --- Functions --- */
 void re_title(void);
 void get_title_str(char *s1, char *s2, char *s3);
 void make_title(char *str);
@@ -19,4 +23,4 @@ void Box_axis(double x_min, double x_max, double y_min, double y_max, char *sx, 
 void draw_ytics(char *s1, double start, double incr, double end);
 void draw_xtics(char *s2, double start, double incr, double end);
 
-#endif
+#endif /* XPPAUT_AXES2_H */
