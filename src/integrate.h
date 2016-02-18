@@ -7,6 +7,7 @@
 /* --- Data --- */
 extern int DelayErr;
 extern int MakePlotFlag;
+extern int SuppressBounds;
 extern int SuppressOut;
 extern double MyData[MAXODE];
 

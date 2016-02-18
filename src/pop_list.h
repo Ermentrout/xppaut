@@ -4,7 +4,7 @@
 
 
 #include "phsplan.h"
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -16,7 +16,7 @@
 
 
 #define MAX_N_SBOX 22
-#define MAX_LEN_SBOX 25 
+#define MAX_LEN_SBOX 25
 
 
 #define FORGET_ALL 0
@@ -31,19 +31,19 @@
 #define EV_MASK (ButtonPressMask 	|\
 		KeyPressMask		|\
 		ExposureMask		|\
-		StructureNotifyMask)	
+		StructureNotifyMask)
 
 #define BUT_MASK (ButtonPressMask 	|\
 		KeyPressMask		|\
 		ExposureMask		|\
 		StructureNotifyMask	|\
 		EnterWindowMask		|\
-		LeaveWindowMask)	
+		LeaveWindowMask)
 
 
 
-	
-	
+
+
 
 
 extern Display *display;
@@ -65,28 +65,27 @@ extern int UserGradients;
 Window make_window();
 Window make_plain_window();
 
-/*  This is a string box widget which handles a list of 
-	editable strings  
+/*  This is a string box widget which handles a list of
+	editable strings
  */
 
 typedef struct {
 		Window base,ok,cancel;
 		Window win[MAX_N_SBOX];
 		char name[MAX_N_SBOX][MAX_LEN_SBOX],
-		     value[MAX_N_SBOX][MAX_LEN_SBOX];
+			 value[MAX_N_SBOX][MAX_LEN_SBOX];
 		int n,hot;
-                int hgt,wid;
-                int hh[MAX_N_SBOX];
+				int hgt,wid;
+				int hh[MAX_N_SBOX];
 		} STRING_BOX;
 
 
 typedef struct {
-               char **list;
-               int n;
+			   char **list;
+			   int n;
 }  SCRBOX_LIST;
 
 extern int NUPAR,NEQ,NODE,NMarkov;
-extern char  upar_names[MAXPAR][11],uvar_names[MAXODE][12];
 extern  char *color_names[];
 SCRBOX_LIST scrbox_list[10];
 
@@ -97,27 +96,27 @@ typedef struct {
 		Window *w;
 		char *title;
 		char **entries;
-                char **hints;
+				char **hints;
 		int n,max;
 		char *key;
 		int hot;
 		} POP_UP;
-		
-   
-typedef struct {
-               Window base,slide,close,text;
-               int i0;
-               int exist,len,nlines;
-               char **list;
-               } TEXTWIN;
+
 
 typedef struct {
-              Window base,slide;
-              Window *w;
-              int nw,nent,i0;
-              int len,exist;
-              char **list;
-              } SCROLLBOX;
+			   Window base,slide,close,text;
+			   int i0;
+			   int exist,len,nlines;
+			   char **list;
+			   } TEXTWIN;
+
+typedef struct {
+			  Window base,slide;
+			  Window *w;
+			  int nw,nent,i0;
+			  int len,exist;
+			  char **list;
+			  } SCROLLBOX;
 
 TEXTWIN mytext;
 #define SB_PLOTTABLE 0

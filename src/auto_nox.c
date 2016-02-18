@@ -20,6 +20,7 @@
 #include "browse.h"
 #include "derived.h"
 #include "diagram.h"
+#include "form_ode.h"
 #include "ggets.h"
 #include "graf_par.h"
 #include "graphics.h"

@@ -10,8 +10,18 @@ extern char anifile[XPP_MAX_NAME];
 extern char batchout[256];
 extern char big_font_name[100];
 extern char PlotFormat[100];
+extern char SLIDER1VAR[20];
+extern char SLIDER2VAR[20];
+extern char SLIDER3VAR[20];
 extern char small_font_name[100];
 extern char UserOUTFILE[256];
+
+extern double SLIDER1LO;
+extern double SLIDER2LO;
+extern double SLIDER3LO;
+extern double SLIDER1HI;
+extern double SLIDER2HI;
+extern double SLIDER3HI;
 
 extern float xppvermaj;
 extern float xppvermin;

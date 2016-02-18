@@ -10,6 +10,7 @@
 
 #include "diagram.h"
 #include "init_conds.h"
+#include "form_ode.h"
 #include "ggets.h"
 #include "main.h"
 #include "menus.h"
