@@ -32,14 +32,13 @@
 #define SIMPMASK (ButtonPressMask |\
 		  KeyPressMask	  |\
 		  ExposureMask    |\
-                  StructureNotifyMask)
+				  StructureNotifyMask)
 
 
 
 
 double calculate(/* char * */);
 double evaluate();
-extern double last_ic[MAXODE];
 
 struct {
   Window base,quit,answer;
@@ -109,7 +108,7 @@ void quit_calc()
 {
  my_calc.use=0;
  XSelectInput(display,my_calc.quit,SIMPMASK);
- waitasec(ClickTime); 
+ waitasec(ClickTime);
  XDestroySubwindows(display,my_calc.base);
  XDestroyWindow(display,my_calc.base);
  clr_command();
@@ -141,22 +140,22 @@ void q_calc()
    XNextEvent(display,&ev);
    draw_calc(ev.xany.window);
    if(ev.type==ButtonPress)
-     if(ev.xbutton.window==my_calc.quit)break;
-    if(ev.type== EnterNotify&&ev.xcrossing.window==my_calc.quit)
+	 if(ev.xbutton.window==my_calc.quit)break;
+	if(ev.type== EnterNotify&&ev.xcrossing.window==my_calc.quit)
 	 XSetWindowBorderWidth(display,ev.xcrossing.window,2);
 
 	if(ev.type==LeaveNotify&&ev.xcrossing.window==my_calc.quit)
-	XSetWindowBorderWidth(display,ev.xcrossing.window,1);   
-    edit_command_string(ev,name,value,&done,&pos,&col);
-    if(done==1){
-      flag=do_calc(value,&z);
-      if(flag!=-1)make_calc(z);
-      ini_calc_string(name,value,&pos,&col);
-      done=0;
-    }
+	XSetWindowBorderWidth(display,ev.xcrossing.window,1);
+	edit_command_string(ev,name,value,&done,&pos,&col);
+	if(done==1){
+	  flag=do_calc(value,&z);
+	  if(flag!=-1)make_calc(z);
+	  ini_calc_string(name,value,&pos,&col);
+	  done=0;
+	}
    if(done==-1)break;
  }
-  quit_calc();              
+  quit_calc();
  }
 
 
@@ -165,7 +164,7 @@ char *temp;
 double *z;
  {
  char val[15];
- int ok; 
+ int ok;
  int i;
  double newz;
  if(strlen(temp)==0){
@@ -174,32 +173,32 @@ double *z;
 	}
  if(has_eq(temp,val,&i))
  {
- 
- 
+
+
   newz=calculate(&temp[i],&ok);  /*  calculate quantity  */
- 
+
   if(ok==0)return(-1);
   i=find_user_name(PARAM,val);
   if(i>-1){
-    set_val(val,newz); /* a parameter set to value  */
-    *z=newz;
-    redraw_params();
+	set_val(val,newz); /* a parameter set to value  */
+	*z=newz;
+	redraw_params();
   }
   else {
-    i=find_user_name(IC,val);
-    if(i<0){
-      err_msg("No such name!");
-      return(-1);
-    }
-    set_val(val,newz);
+	i=find_user_name(IC,val);
+	if(i<0){
+	  err_msg("No such name!");
+	  return(-1);
+	}
+	set_val(val,newz);
 
-    last_ic[i]=newz;
-    *z=newz;
-    redraw_ics();
+	last_ic[i]=newz;
+	*z=newz;
+	redraw_ics();
   }
-    return(0);
+	return(0);
 }
-	    
+
   newz=calculate(temp,&ok);
   if(ok==0)return(-1);
  *z=newz;
@@ -228,12 +227,12 @@ int has_eq(z, w, where)
  {
   int com[400],i;
   double z=0.0;
-    if(add_expr(expr,com,&i)){
-     err_msg("Illegal formula ..");
-     *ok=0;
-      goto bye;
+	if(add_expr(expr,com,&i)){
+	 err_msg("Illegal formula ..");
+	 *ok=0;
+	  goto bye;
    }
-    /* fpr_command(com); */
+	/* fpr_command(com); */
   z=evaluate(com);
  *ok=1;
 bye:
