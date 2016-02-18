@@ -86,7 +86,6 @@ noinst_HEADERS = \
 	pp_shoot.h \
 	read_dir.h \
 	rubber.h \
-	run_auto.h \
 	scrngif.h \
 	shoot.h \
 	simplenet.h \
