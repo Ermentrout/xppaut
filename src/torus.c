@@ -1,59 +1,33 @@
 #include "torus.h"
 
-#include <stdlib.h> 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <stdio.h>
-#include <math.h>
-#include "xpplim.h"
-#include "ggets.h"
-#include "pop_list.h"
-#include "many_pops.h"
-#include "bitmap/info.bitmap"
+
 #include "browse.h"
+#include "ggets.h"
+#include "many_pops.h"
+#include "pop_list.h"
 
-extern int DisplayHeight,DisplayWidth;
+#include "bitmap/info.bitmap"
 
+/* --- Macros --- */
 #define EV_MASK (ButtonPressMask 	|\
 		KeyPressMask		|\
 		ExposureMask		|\
-		StructureNotifyMask)	
+		StructureNotifyMask)
 
 #define BUT_MASK (ButtonPressMask 	|\
 		KeyPressMask		|\
 		ExposureMask		|\
 		StructureNotifyMask	|\
 		EnterWindowMask		|\
-		LeaveWindowMask)	
+		LeaveWindowMask)
 
-
-
-	
-		
-extern Display *display;
-
-extern int screen;
-extern GC gc, small_gc;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF;
-	
-
-extern int NUPAR,NODE,NEQ;
-extern char upar_names[MAXPAR][11],uvar_names[MAXODE][12];
-
-extern Window main_win,info_pop;
-extern int TORUS;
-extern double TOR_PERIOD;
-extern int itor[MAXODE];
-
-
-
-struct {
-         Window base,done,cancel;
-	 Window w[MAXODE];
-       } torbox;
-
-
+Torbox torbox;
 
 void do_torus_com(int c)
 {
@@ -62,13 +36,13 @@ void do_torus_com(int c)
  if(c==0||c==2){
    new_float("Period :",&TOR_PERIOD);
    if(TOR_PERIOD<=0.0){
-     err_msg("Choose positive period");
-     return;
+	 err_msg("Choose positive period");
+	 return;
    }
    if(c==0){
-     for(i=0;i<MAXODE;i++)itor[i]=1;
-     TORUS=1;
-     return;
+	 for(i=0;i<MAXODE;i++)itor[i]=1;
+	 TORUS=1;
+	 return;
    }
    /* Choose them   */
    choose_torus();
@@ -77,8 +51,8 @@ void do_torus_com(int c)
  for(i=0;i<MAXODE;i++)itor[i]=0;
  TORUS=0;
 }
-     
-  
+
+
 
 
 void draw_tor_var(i)
@@ -90,14 +64,14 @@ int i;
  else sprintf(strng,"   %s",uvar_names[i]);
  XDrawString(display,torbox.w[i],small_gc,0,CURY_OFFs,strng,strlen(strng));
 }
- 
+
 
 void draw_torus_box(win)
 Window win;
 {
  int i;
- 
- 
+
+
  if(win==torbox.cancel){
    XDrawString(display,win,small_gc,5,CURY_OFFs,"Cancel",6);
    return;
@@ -111,7 +85,7 @@ for(i=0;i<NEQ;i++){
   if(win==torbox.w[i])
   draw_tor_var(i);
 }
-}   
+}
 
 void choose_torus()
 {
@@ -120,11 +94,11 @@ void choose_torus()
  do_torus_events();
  for(i=0;i<NEQ;i++)if(itor[i]==1)TORUS=1;
 }
- 
+
 void make_tor_box(title)
 char *title;
 {
- 
+
  int ndn,nac,width,height;
  int nv;
  /*int nh; Not used anywhere*/
@@ -134,20 +108,20 @@ char *title;
  Window base;
  XTextProperty winname;
    XSizeHints size_hints;
- 
+
  nv=4*DisplayHeight/(5*(DCURYs+8));
  /*nh=DisplayWidth/(18*DCURXs);*/
- 
+
  if(NEQ<nv)ndn=NEQ;
  else ndn=nv;
  nac=NEQ/ndn;
  if(nac*ndn<NEQ)nac++;
- 
+
  width=24*DCURXs*nac+10;
  height=3*DCURYs+ndn*(DCURYs+8);
- 
+
  base=make_plain_window(RootWindow(display,screen),0,0,width,height,4);
- 
+
  torbox.base=base;
 XStringListToTextProperty(&title,1,&winname);
  size_hints.flags=PPosition|PSize|PMinSize|PMaxSize;
@@ -159,13 +133,13 @@ XStringListToTextProperty(&title,1,&winname);
  size_hints.min_height=height;
  size_hints.max_width=width;
  size_hints.max_height=height;
- 
+
  XClassHint class_hints;
  class_hints.res_name="";
  class_hints.res_class="";
- 
+
  make_icon((char*)info_bits,info_width,info_height,base);
- 
+
  XSetWMProperties(display,base,&winname,NULL,NULL,0,&size_hints,NULL,&class_hints);
  for(i=0;i<NEQ;i++){
    i1=i/nv;
@@ -195,12 +169,12 @@ void do_torus_events()
  int oldit[MAXODE];
  for(i=0;i<NEQ;i++)oldit[i]=itor[i];
  while(!done){
-   
+
   XNextEvent(display,&ev);
  switch(ev.type){
- 	
+
 	case Expose:
-	
+
 		do_expose(ev);  /*  menus and graphs etc  */
 		draw_torus_box(ev.xany.window);
 		break;
@@ -209,27 +183,27 @@ void do_torus_events()
 		if(ev.xbutton.window==torbox.done){status=1;done=1;break;}
 		if(ev.xbutton.window==torbox.cancel){status=-1;done=1;break;}
 			for(i=0;i<NEQ;i++)
- 		{
+		{
 			if(ev.xbutton.window==torbox.w[i]){
-		        itor[i]=1-itor[i];
+				itor[i]=1-itor[i];
 			draw_tor_var(i);
 			break;
 			}
-                  }
-                  break;
+				  }
+				  break;
 
-        case EnterNotify:
+		case EnterNotify:
 	wt=ev.xcrossing.window;
-        if(wt==torbox.done||wt==torbox.cancel)
+		if(wt==torbox.done||wt==torbox.cancel)
 	 XSetWindowBorderWidth(display,wt,2);
 	break;
 
 	case LeaveNotify:
 	wt=ev.xcrossing.window;
-        if(wt==torbox.done||wt==torbox.cancel)
+		if(wt==torbox.done||wt==torbox.cancel)
 	 XSetWindowBorderWidth(display,wt,1);
 	break;
-	      }
+		  }
 }
 
  if(status==-1){
