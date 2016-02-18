@@ -1,6 +1,5 @@
-#ifndef _simplenet_h_
-#define _simplenet_h_
-
+#ifndef XPPAUTO_SIMPLENET_H
+#define XPPAUTO_SIMPLENET_H
 int get_vector_info();
 double net_interp(double x, int i);
 double network_value(double x, int i);
@@ -19,4 +18,4 @@ int gilparse(char *s, int *ind, int *nn);
 int g_namelist(char *s, char *root, int *flag, int *i1, int *i2);
 
 
-#endif
+#endif /* XPPAUTO_SIMPLENET_H */

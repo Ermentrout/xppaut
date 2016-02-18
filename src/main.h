@@ -33,6 +33,8 @@ extern int XPPBatch;
 extern int XPPVERBOSE;
 extern int Xup;
 
+extern int (*rhs)();
+
 extern unsigned int GrFore;
 extern unsigned int GrBack;
 extern unsigned int MyBackColor;
