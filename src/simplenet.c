@@ -1,16 +1,3 @@
-#include "simplenet.h"
-
-#include "aniparse.h"
-#include "ggets.h"
-#include "markov.h"
-#include "strutil.h"
-#include "parserslow.h"
-#include "tabular.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /*
   n is the number of values to return
   ncon is the number of connections each guy gets
@@ -130,62 +117,30 @@ sofun(int nret, int root, double *con, double *var, double *z[50],double *ydot)
 
 NOTE that the user-defined parameters start at #6 and are in order
 including derived parameters but XPP takes care of this so start at 0
-
-
-
-
 */
-
+#include "simplenet.h"
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "aniparse.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "markov.h"
+#include "parserslow.h"
+#include "strutil.h"
+#include "tabular.h"
+
+/* --- Macros --- */
 #define EVEN 0
 #define ZERO 1
 #define PERIODIC 2
-#define MAXW 50
-extern int NODE,NDELAYS;
-extern double get_delay(int in,double td);
-
-void get_import_values();
-int parse_import();
 #define IC 2
- extern int fftn (int /* ndim */,
-			const int /* dims */[],
-			double /* Re */[],
-			double /* Im */[],
-			int /* isign */,
-			double /* scaling */);
-
-
 /* simple network stuff */
 
 #define MAXVEC 100
-
-typedef struct {
-  char name[20];
-  int root,length,il,ir;
-} VECTORIZER;
-
-
-VECTORIZER my_vec[MAXVEC];
-int n_vector=0;
-
-typedef struct {
-  int type,ncon,n;
-  char name[20];
-  char soname[256],sofun[256];
-
-  int root,root2;
-  int f[20];
-  int iwgt;
-  int *gcom; /* for group commands */
-
-  double *values,*weight,*index,*taud; /* for delays  */
-  double *fftr,*ffti,*dr,*di;
-  double *wgtlist[MAXW];
-} NETWORK;
-
 #define CONVE 0
 #define CONV0 1
 #define CONVP 2
@@ -205,15 +160,18 @@ typedef struct {
 #define DEL_SPAR 41 /* sparse with unequal in degree and delays  */
 #define IMPORT  50 /* not really a network type   */
 
-extern double variables[],constants[];
+
+int n_vector=0;
+VECTORIZER my_vec[MAXVEC];
+NETWORK my_net[MAXNET];
 
 char *get_first(/* char *string,char *src */);
 char *get_next(/* char *src */);
 
 double evaluate();
+void get_import_values();
+int parse_import();
 
-
-NETWORK my_net[MAXNET];
 int n_network=0;
 double net_interp(double x, int i)
 {

@@ -1,6 +1,28 @@
 #ifndef XPPAUT_SIMPLENET_H
 #define XPPAUT_SIMPLENET_H
 
+/* --- Macros --- */
+#define MAXW 50
+
+/* --- Types --- */
+typedef struct {
+  int type,ncon,n;
+  char name[20];
+  char soname[256],sofun[256];
+  int root,root2;
+  int f[20];
+  int iwgt;
+  int *gcom; /* for group commands */
+  double *values,*weight,*index,*taud; /* for delays  */
+  double *fftr,*ffti,*dr,*di;
+  double *wgtlist[MAXW];
+} NETWORK;
+
+typedef struct {
+  char name[20];
+  int root,length,il,ir;
+} VECTORIZER;
+
 /* --- Functions --- */
 int get_vector_info();
 double net_interp(double x, int i);
