@@ -33,6 +33,7 @@ extern char *ufun_def[MAXUFUN];
 extern char ufun_names[MAXUFUN][12];
 
 extern double constants[MAXPAR];
+extern double *Memory[MAXKER];
 extern double variables[MAXODE1];
 
 extern int ERROUT;
@@ -46,6 +47,7 @@ extern int NVAR;
 extern int RandSeed;
 extern int *ufun[MAXUFUN];
 
+extern KERNEL kernel[MAXKER];
 extern UFUN_ARG ufun_arg[MAXUFUN];
 
 /* --- Functions --- */
