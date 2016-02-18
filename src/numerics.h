@@ -1,6 +1,14 @@
 #ifndef XPPAUT_NUMERICS_H
 #define XPPAUT_NUMERICS_H
 
+/* --- Types --- */
+typedef struct {
+  double tmod;
+  int maxvar,sos,type,sign;
+  char section[256];
+  int formula[256];
+} POINCARE_MAP;
+
 /* --- Data --- */
 extern int cv_bandflag;
 extern int cv_bandlower;

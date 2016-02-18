@@ -3,6 +3,7 @@
 
 /* --- Data --- */
 extern int NFlags;
+extern double STOL;
 
 /* --- Functions --- */
 int add_global(char *cond, int sign, char *rest);

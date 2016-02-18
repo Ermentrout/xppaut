@@ -1,29 +1,38 @@
-
+/* The input is primitive and eventually, I want to make it so
+ * that it uses nice windows for input.
+ * For now, I just will let it remain command driven
+ */
 #include "numerics.h"
 
-
-#include "menudrive.h"
-#include <stdlib.h> 
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <math.h>
+
+#include "adj2.h"
 #include "browse.h"
-#include "pop_list.h"
-#include "volterra2.h"
-#include "menu.h"
+#include "color.h"
+#include "delay_handle.h"
+#include "flags.h"
+#include "form_ode.h"
 #include "ggets.h"
+#include "graf_par.h"
+#include "integrate.h"
+#include "load_eqn.h"
+#include "many_pops.h"
+#include "menu.h"
+#include "menudrive.h"
+#include "menus.h"
+#include "parserslow.h"
+#include "pop_list.h"
 #include "pp_shoot.h"
 #include "storage.h"
-#include "delay_handle.h"
-#include "graf_par.h"
-
-extern Window main_win,info_pop;
-extern Display *display;
-extern int DCURY,NDELAYS;
-extern int RandSeed;
 #include "struct.h"
-extern GRAPH *MyGraph;
+#include "volterra2.h"
+
+/* --- Macros --- */
 #define MAX_LEN_SBOX 25
 #define VOLTERRA 6
 #define BACKEUL 7
@@ -36,76 +45,29 @@ extern GRAPH *MyGraph;
 #define RB23 13
 #define SYMPLECT 14
 
-extern int NKernel,MyStart,MaxPoints;
-extern int NFlags;
-extern double STOL;
-extern double MyTime;
-extern char *info_message,*meth_hint[];
-extern int DelayGrid;
-extern double OmegaMax,AlphaMax;
 double atof();
-extern BROWSER my_browser;
 
-/*   This is numerics.c    
+/*   This is numerics.c
  *   The input is primitive and eventually, I want to make it so
-	that it uses nice windows for input. 
+	that it uses nice windows for input.
 	For now, I just will let it remain command driven
 */
 
-typedef struct {
-  double tmod;
-  int maxvar,sos,type,sign;
-  char section[256];
-  int formula[256];
-} POINCARE_MAP;
-
 POINCARE_MAP my_pmap;
 
-
 int (*solver)();
-extern  double DELTA_T,TEND,T0,TRANS,
-	NULL_ERR,EVEC_ERR,NEWT_ERR;
-extern double BOUND,DELAY,TOLER,ATOLER,HMIN,HMAX;
 float *fft_data,*hist_data,color_scale,min_scale;
-extern double POIPLN;
-
-extern double BVP_TOL,BVP_EPS;
-
-
-extern int NMESH,NJMP,METHOD,NC_ITER;
-extern int EVEC_ITER;
-extern int BVP_MAXIT,BVP_NL,BVP_NR;
-
-extern int POIMAP,POIVAR,POISGN,SOS;
-
- extern int HIST,HVAR,hist_ind,FOREVER,INFLAG;
-extern int MaxEulIter;
-extern double EulTol;
-
-extern int AutoEvaluate;
 
 int  gear();
- int discrete();
- int euler();
- int mod_euler();
- int rung_kut();
- int adams();
- int volterra();
- int bak_euler();
- int symplect3();
-
+int discrete();
+int euler();
+int mod_euler();
+int rung_kut();
+int adams();
+int volterra();
+int bak_euler();
+int symplect3();
 int cv_bandflag=0,cv_bandupper=1,cv_bandlower=1;
-extern int COLOR,color_total,color_min;
-extern Window command_pop;
-
-/*   This is the input for the various functions */
-
-/*   I will need access to storage  */
-
-extern float **storage;
-extern int storind;
-
-extern int NODE,NEQ; /* as well as the number of odes etc  */
 
 void chk_volterra()
 {
@@ -122,10 +84,10 @@ void quick_num(int com)
 {
   char key[]="tsrdnviobec";
   if(com>=0&&com<11)
-    get_num_par(key[com]);
+	get_num_par(key[com]);
 }
 
- 
+
 
 void set_total(double total)
 {
@@ -141,9 +103,9 @@ void  get_num_par(ch)
   double temp;
   int tmp;
    switch(ch){
-               case 'a':
-                       make_adj();
-		       break;
+			   case 'a':
+					   make_adj();
+			   break;
 
 		case 't': flash(0);
 			 /* total */
@@ -151,9 +113,9 @@ void  get_num_par(ch)
 			  FOREVER=0;
 			  if(TEND<0)
 			  {
-			    FOREVER=1;
-			    TEND=-TEND;
-                          }
+				FOREVER=1;
+				TEND=-TEND;
+						  }
 
 
 			flash(0);
@@ -170,23 +132,23 @@ void  get_num_par(ch)
 			break;
 		case 'd': flash(3);
 			 /* DT */
-		         temp=DELTA_T;
+				 temp=DELTA_T;
 			 new_float("Delta t :",&DELTA_T);
-		         if(DELTA_T==0.0)DELTA_T=temp;
-		         if(DELAY>0.0) {
+				 if(DELTA_T==0.0)DELTA_T=temp;
+				 if(DELAY>0.0) {
 			  free_delay();
 			  if(alloc_delay(DELAY)){
-			    INFLAG=0; /*  Make sure no last ics allowed */
+				INFLAG=0; /*  Make sure no last ics allowed */
 			  }
 			}
-			  else 
-			    free_delay();
-		       if(NKernel>0){
+			  else
+				free_delay();
+			   if(NKernel>0){
 			 INFLAG=0;
 			 MyStart=1;
 			 alloc_kernels(1);
-		       }
-		       /* if(NMemory>0){
+			   }
+			   /* if(NMemory>0){
 			  make_kernels();
 			  reset_memory();
 			  INFLAG=0;
@@ -197,29 +159,29 @@ void  get_num_par(ch)
 			 /* ncline */
 			 new_int("ncline mesh :",&NMESH);
 			/* new_float("Error :",&NULL_ERR); */
-                          check_pos(&NMESH);
+						  check_pos(&NMESH);
 
 			flash(4);
 			break;
 		case 'v':
-		      /*   new_int("Number Left :", &BVP_NL);
-		         new_int("Number Right :", &BVP_NR); */
-		        
-		         new_int("Maximum iterates :",&BVP_MAXIT);
-		         check_pos(&BVP_MAXIT);
-		         new_float("Tolerance :",&BVP_TOL);
-		         new_float("Epsilon :",&BVP_EPS);
-		         reset_bvp();
-		         break;
+			  /*   new_int("Number Left :", &BVP_NL);
+				 new_int("Number Right :", &BVP_NR); */
+
+				 new_int("Maximum iterates :",&BVP_MAXIT);
+				 check_pos(&BVP_MAXIT);
+				 new_float("Tolerance :",&BVP_TOL);
+				 new_float("Epsilon :",&BVP_EPS);
+				 reset_bvp();
+				 break;
 		case 'i': flash(5);
 			 /* sing pt */
 			 new_int("Maximum iterates :",&EVEC_ITER);
 			 check_pos(&EVEC_ITER);
 			 new_float("Newton tolerance :",&EVEC_ERR);
 			 new_float("Jacobian epsilon :",&NEWT_ERR);
-		       if(NFlags>0)
+			   if(NFlags>0)
 			 new_float("SMIN :",&STOL);
-		       
+
 			flash(5);
 			break;
 		case 'o': flash(6);
@@ -240,9 +202,9 @@ void  get_num_par(ch)
 			 get_method();
 			 if(METHOD==VOLTERRA&&NKernel==0){
 			   err_msg("Volterra only for integral eqns");
-			   METHOD=4; 
+			   METHOD=4;
 			 }
-		       if(NKernel>0)METHOD=VOLTERRA;
+			   if(NKernel>0)METHOD=VOLTERRA;
 			if(METHOD==GEAR||METHOD==RKQS||METHOD==STIFF)
 		{
 		 new_float("Tolerance :",&TOLER);
@@ -251,53 +213,53 @@ void  get_num_par(ch)
 		}
 			if(METHOD==CVODE||METHOD==DP5||METHOD==DP83||METHOD==RB23)
 			  {
-			    new_float("Relative tol:",&TOLER);
-			    new_float("Abs. Toler:",&ATOLER);
+				new_float("Relative tol:",&TOLER);
+				new_float("Abs. Toler:",&ATOLER);
 			  }
 
-		       if(METHOD==BACKEUL||METHOD==VOLTERRA){
+			   if(METHOD==BACKEUL||METHOD==VOLTERRA){
 			 new_float("Tolerance :",&EulTol);
 			 new_int("MaxIter :",&MaxEulIter);
-		       }
-		       if(METHOD==VOLTERRA){
+			   }
+			   if(METHOD==VOLTERRA){
 			 tmp=MaxPoints;
 			 new_int("MaxPoints:",&tmp);
 			 new_int("AutoEval(1=yes) :",&AutoEvaluate);
 			 allocate_volterra(tmp,1);
-		       }
-			 
-		       if(METHOD==CVODE||METHOD==RB23)
+			   }
+
+			   if(METHOD==CVODE||METHOD==RB23)
 			 {
 			   new_int("Banded system(0/1)?",&cv_bandflag);
 			   if(cv_bandflag==1){
-			     new_int("Lower band:",&cv_bandlower);
-			     new_int("Upper band:",&cv_bandupper);
+				 new_int("Lower band:",&cv_bandlower);
+				 new_int("Upper band:",&cv_bandupper);
 			   }
 			 }
-		       if(METHOD==SYMPLECT){
+			   if(METHOD==SYMPLECT){
 			 if((NODE%2)!=0){
 			   err_msg("Symplectic is only for even dimensions");
 			   METHOD=4;
 			 }
-		       }
+			   }
 			flash(8);
 			break;
 		case 'e': flash(9);
 			 /* delay */
-                        if(NDELAYS==0)break;
+						if(NDELAYS==0)break;
 			new_float("Maximal delay :",&DELAY);
-                        new_float("real guess :", &AlphaMax);
-			   new_float("imag guess :", &OmegaMax); 
-		        new_int("DelayGrid :",&DelayGrid);
-		        if(DELAY>0.0) {
+						new_float("real guess :", &AlphaMax);
+			   new_float("imag guess :", &OmegaMax);
+				new_int("DelayGrid :",&DelayGrid);
+				if(DELAY>0.0) {
 			  free_delay();
 			  if(alloc_delay(DELAY)){
-			    INFLAG=0; /*  Make sure no last ics allowed */
+				INFLAG=0; /*  Make sure no last ics allowed */
 			  }
 			}
-			  else 
-			    free_delay();
-			  
+			  else
+				free_delay();
+
 			flash(9);
 			break;
 		case 'c': flash(10);
@@ -306,38 +268,38 @@ void  get_num_par(ch)
 			  set_col_par();
 			flash(10);
 			break;
-		    case 'h': flash(11);
-		          do_stochast();
-		          flash(11);
-		          break;      
+			case 'h': flash(11);
+				  do_stochast();
+				  flash(11);
+				  break;
 		case 'f': flash(11);
 			 /* FFT */
 			flash(11);
 			break;
 		case 'p': flash(12);
 			 /*Poincare map */
-		        get_pmap_pars();
+				get_pmap_pars();
 			flash(12);
 			break;
 		case 'u': flash(13);
 			 /* ruelle */
-                       ruelle();
+					   ruelle();
 			flash(13);
 			break;
 		case 'k': flash(14);
 			 /*lookup table */
-                        new_lookup();
+						new_lookup();
 			flash(14);
 			break;
-		case 27: 
-		       do_meth();
-		      TEND=fabs(TEND);
-		       alloc_meth();
+		case 27:
+			   do_meth();
+			  TEND=fabs(TEND);
+			   alloc_meth();
 			help();
 			break;
 
 		}  /* End num switch */
-	   } 
+	   }
 
 
 void chk_delay()
@@ -345,11 +307,11 @@ void chk_delay()
   if(DELAY>0.0) {
 			  free_delay();
 			  if(alloc_delay(DELAY)){
-			    INFLAG=0; /*  Make sure no last ics allowed */
+				INFLAG=0; /*  Make sure no last ics allowed */
 			  }
 			}
-			  else 
-			    free_delay();
+			  else
+				free_delay();
 }
 
 
@@ -359,7 +321,7 @@ void set_delay()
  if(DELAY>0.0){
    free_delay();
    if(alloc_delay(DELAY)){
-     INFLAG=0;
+	 INFLAG=0;
    }
  }
 }
@@ -417,7 +379,7 @@ SOS=0;
 void meth_dialog()
 {
   /*static char *n[]={"*6Method","Abs tol","Rel Tol","DtMin","DtMax",
-		    "Banded(y/n)","UpperBand","LowerBand"};*/
+			"Banded(y/n)","UpperBand","LowerBand"};*/
    char values[8][MAX_LEN_SBOX];
    sprintf(values[0],"%d",METHOD);
    sprintf(values[1],"%g",ATOLER);
@@ -442,35 +404,35 @@ void compute_one_period(double period,double *x,char *name)
   sprintf(filename,"orbit.%s.dat",name);
   fp=fopen(filename,"w");
   if(fp!=NULL){
-    write_mybrowser_data(fp);
-    fclose(fp);
+	write_mybrowser_data(fp);
+	fclose(fp);
   }
   else{
-    TRANS=ot;
+	TRANS=ot;
   POIMAP=opm;
   TEND=ote;
-   
-    return;
+
+	return;
   }
   new_adjoint();
   sprintf(filename,"adjoint.%s.dat",name);
   fp=fopen(filename,"w");
   if(fp!=NULL){
-    write_mybrowser_data(fp);
-    fclose(fp);
-    data_back();
+	write_mybrowser_data(fp);
+	fclose(fp);
+	data_back();
   }
   new_h_fun(1);
   sprintf(filename,"hfun.%s.dat",name);
   fp=fopen(filename,"w");
   if(fp!=NULL){
-    write_mybrowser_data(fp);
-    fclose(fp);
-    data_back();
+	write_mybrowser_data(fp);
+	fclose(fp);
+	data_back();
   }
-  
+
   reset_browser();
-  
+
 
   TRANS=ot;
   POIMAP=opm;
@@ -489,17 +451,17 @@ void get_pmap_pars_com(int l)
  int status;
  char n1[15];
  int i1=POIVAR;
- 
+
  ch=mkey[l];
 
- 
+
  POIMAP=0;
  if(ch=='s')POIMAP=1;
  if(ch=='m')POIMAP=2;
  if(ch=='p')POIMAP=3;
- 
+
  if(POIMAP==0)return;
-   
+
  ind_to_sym(i1,n1);
  sprintf(values[0],"%s",n1);
  sprintf(values[1],"%.16g",POIPLN);
@@ -507,17 +469,17 @@ void get_pmap_pars_com(int l)
  sprintf(values[3],"%s",yn[SOS]);
  status=do_string_box(4,4,1,"Poincare map",n,values,45);
  if(status!=0){
-              find_variable(values[0],&i1);
-	      if(i1<0) { POIMAP=0;
-                         err_msg("No such section");
+			  find_variable(values[0],&i1);
+		  if(i1<0) { POIMAP=0;
+						 err_msg("No such section");
 			 return;
-		       }
-	      POIVAR=i1;
-	      POISGN=atoi(values[2]);
-	      if(values[3][0]=='Y'||values[3][0]=='y')SOS=1;
-	      else SOS=0;
-	      POIPLN=atof(values[1]);
-	    }
+			   }
+		  POIVAR=i1;
+		  POISGN=atoi(values[2]);
+		  if(values[3][0]=='Y'||values[3][0]=='y')SOS=1;
+		  else SOS=0;
+		  POIPLN=atof(values[1]);
+		}
 
 }
 
@@ -535,14 +497,14 @@ void get_method()
  static char *n[]={"(D)iscrete","(E)uler","(M)od. Euler",
 	"(R)unge-Kutta","(A)dams","(G)ear","(V)olterra","(B)ackEul",
 		 "(Q)ualst.RK4","(S)tiff","(C)Vode","DoPri(5)","DoPri(8)3",
-                 "Rosen(2)3","sYmplectic"};
+				 "Rosen(2)3","sYmplectic"};
  static char key[]="demragvbqsc582y";
 
 #ifdef CVODE_YES
  nmeth=15;
 #else
  nmeth=15;
-#endif 
+#endif
  ch = (char)pop_up_list(&temp,"Method",n,key,nmeth,15,METHOD,10,DCURY+8,
 			meth_hint,info_pop,info_message);
  for(i=0;i<nmeth;i++)
@@ -557,89 +519,89 @@ void user_set_color_par(int flag,char *via,double lo,double hi)
   int ivar;
    MyGraph->min_scale=lo;
   if(hi>lo)
-    MyGraph->color_scale=(hi-lo);
+	MyGraph->color_scale=(hi-lo);
   else
-    MyGraph->color_scale=1;
-  
+	MyGraph->color_scale=1;
+
   if(strncasecmp("speed",via,5)==0)
-    {
-      MyGraph->ColorFlag=1;
-    }
+	{
+	  MyGraph->ColorFlag=1;
+	}
   else
-    {
-      find_variable(via,&ivar);
-      if(ivar>=0){
+	{
+	  find_variable(via,&ivar);
+	  if(ivar>=0){
 	MyGraph->ColorValue=ivar;
 	MyGraph->ColorFlag=2;
-      }
-      else
+	  }
+	  else
 	{
 	  MyGraph->ColorFlag=0; /* no valid colorizing */
 
 	}
-    }
+	}
   if(flag==0){ /* force overwrite  */
-    MyGraph->ColorFlag=0;
-  
+	MyGraph->ColorFlag=0;
+
   }
-  
- 
+
+
 
 }
- 
+
 void set_col_par_com(int i)
    {
-    int j,ivar;
-    double temp[2];
-    float maxder=0.0,minder=0.0,sum=0.0;
-    char ch,name[20];
+	int j,ivar;
+	double temp[2];
+	float maxder=0.0,minder=0.0,sum=0.0;
+	char ch,name[20];
    MyGraph->ColorFlag=i;
    if(MyGraph->ColorFlag==0){
    /* set color to black/white */
-    return;
-    }
-    if(MyGraph->ColorFlag==2){
-      ind_to_sym(MyGraph->ColorValue,name);
-      new_string("Color via:",name);
-      find_variable(name,&ivar);
-      
+	return;
+	}
+	if(MyGraph->ColorFlag==2){
+	  ind_to_sym(MyGraph->ColorValue,name);
+	  new_string("Color via:",name);
+	  find_variable(name,&ivar);
 
-      if(ivar>=0)
+
+	  if(ivar>=0)
 	MyGraph->ColorValue=ivar;
-      else{
-	
+	  else{
+
 	err_msg("No such quantity!");
 	MyGraph->ColorFlag=0;
 	return;
-      }
-    }
-      
-    
+	  }
+	}
+
+
    /*   This will be uncommented    ..... */
-    ch=TwoChoice("(O)ptimize","(C)hoose","Color","oc");
- 
-    if(ch=='c')
-    {
-     temp[0]=MyGraph->min_scale;
-     temp[1]=MyGraph->min_scale+MyGraph->color_scale;
-     new_float("Min :",&temp[0]);
-     new_float("Max :",&temp[1]);
-     if(temp[1]>temp[0]&&((MyGraph->ColorFlag==2)
-     ||(MyGraph->ColorFlag==1&&temp[0]>=0.0)))
-     {
-      MyGraph->min_scale=temp[0];
-      MyGraph->color_scale=(temp[1]-temp[0]);
-     }
-     else{
-       err_msg("Min>=Max or Min<0 error");
-     }
-     return;
-    }
-    if(MyGraph->ColorFlag==1)
-    {
-    if(storind<2)return;
-    maxder=0.0;
-    minder=1.e20;
+	ch=TwoChoice("(O)ptimize","(C)hoose","Color","oc");
+
+	if(ch=='c')
+	{
+	 temp[0]=MyGraph->min_scale;
+	 temp[1]=MyGraph->min_scale+MyGraph->color_scale;
+	 new_float("Min :",&temp[0]);
+	 new_float("Max :",&temp[1]);
+	 if(temp[1]>temp[0]&&((MyGraph->ColorFlag==2)
+	 ||(MyGraph->ColorFlag==1&&temp[0]>=0.0)))
+	 {
+	  MyGraph->min_scale=temp[0];
+	  MyGraph->color_scale=(temp[1]-temp[0]);
+	 }
+	 else{
+	   err_msg("Min>=Max or Min<0 error");
+	 }
+	 return;
+	}
+	if(MyGraph->ColorFlag==1)
+	{
+	if(storind<2)return;
+	maxder=0.0;
+	minder=1.e20;
   for(i=1;i<my_browser.maxrow;i++)
   {
    sum=0.0;
@@ -661,9 +623,9 @@ void set_col_par_com(int i)
   MyGraph->color_scale=(temp[1]-temp[0]);
   if(MyGraph->color_scale==0.0)MyGraph->color_scale=1.0;
  }
-  
+
 }
- 
+
 
 
 void do_meth()
@@ -678,9 +640,9 @@ void do_meth()
   case 4: solver=adams;break;
   case 5: NJMP=1;break;
   case 6: solver=volterra;break;
-  case SYMPLECT: 
-       solver=symplect3;
-       break;
+  case SYMPLECT:
+	   solver=symplect3;
+	   break;
  case BACKEUL: solver=bak_euler;break;
  case RKQS:
  case STIFF:
