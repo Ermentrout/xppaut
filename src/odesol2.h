@@ -1,5 +1,5 @@
-#ifndef _odesol2_h_
-#define _odesol2_h_
+#ifndef XPP_ODESOL2_H
+#define XPP_ODESOL2_H
 
 
 
@@ -24,4 +24,4 @@ void get_band_jac(double *a, double *y, double t, double *ypnew, double *ypold, 
 int bandfac(double *a, int ml, int mr, int n);
 void bandsol(double *a, double *b, int ml, int mr, int n);
 
-#endif
+#endif /* XPP_ODESOL2_H */
