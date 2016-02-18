@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 /* --- Data --- */
+extern int AdjRange;
 extern int silent;
 
 /* --- Functions --- */

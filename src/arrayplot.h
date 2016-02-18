@@ -1,10 +1,10 @@
-#ifndef _arrayplot_h_
-#define _arrayplot_h_
+#ifndef XPPAUT_ARRAYPLOT_H
+#define XPPAUT_ARRAYPLOT_H
 
-#include <X11/Xlib.h>
 #include <stdio.h>
+#include <X11/Xlib.h>
 
-
+/* --- Types --- */
 typedef struct {
   Window base,wclose,wedit,wprint,wstyle,wscale,wmax,wmin,wplot,wredraw,wtime,wgif,wrange,wfit;
   int index0,indexn,alive,nacross,ndown,plotdef;
@@ -15,6 +15,11 @@ typedef struct {
   char xtitle[256],ytitle[256],filename[256],bottom[256];
   int type;
 } APLOT;
+
+/* --- Data --- */
+extern int aplot_range;
+
+/* --- Functions --- */
 void set_acolor(int);
 void tag_aplot(char *);
 void close_aplot_files(void);
@@ -44,4 +49,4 @@ void grab_aplot_screen(APLOT ap);
 void redraw_aplot(APLOT ap);
 void display_aplot(Window w, APLOT ap);
 
-#endif
+#endif /* XPPAUT_ARRAYPLOT_H */

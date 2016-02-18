@@ -5,6 +5,11 @@
 #include "struct.h"
 
  /* --- Data --- */
+extern int ActiveWinList[MAXPOP];
+extern int current_pop;
+extern int num_pops;
+extern int SimulPlotFlag;
+
 extern CURVE frz[MAXFRZ];
 extern GRAPH graph[MAXPOP];
 extern GRAPH *MyGraph;

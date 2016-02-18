@@ -26,6 +26,7 @@ extern double SLIDER3HI;
 extern float xppvermaj;
 extern float xppvermin;
 
+extern int batch_range;
 extern int CURY_OFF;
 extern int CURY_OFFb;
 extern int DCURX;

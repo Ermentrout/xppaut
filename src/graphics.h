@@ -4,12 +4,15 @@
 #include <X11/Xlib.h>
 
 /* --- Data --- */
+extern double XMin, YMin, XMax, YMax;
+
 extern int DBottom, DLeft, DRight, DTop;
 extern int HChar, VChar;
 extern int HTic, VTic;
+extern int PointRadius;
 extern int PointType;
 extern int TextJustify;
-extern double XMin, YMin, XMax, YMax;
+
 extern XFontStruct *romfonts[5];
 extern XFontStruct *symfonts[5];
 

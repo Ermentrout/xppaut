@@ -1,25 +1,22 @@
-#ifndef _aniparse_h_
-#define _aniparse_h_
+#ifndef XPPAUT_ANIPARSE_H
+#define XPPAUT_ANIPARSE_H
 
-
-#include <X11/Xlib.h>
 #include <stdio.h>
+#include <X11/Xlib.h>
 
-/**************  New stuff for the Grabber ***************************/
+/* --- Macros --- */
 #define MAX_GEVENTS 20  /* maximum variables you can change per grabbable */
 #define MAX_ANI_GRAB 50   /* max grabbable objects  */
 
-
+/* --- Types --- */
 typedef struct {  /* tasks have the form {name1=formula1;name2=formula2;...} */
- 
   double vrhs[MAX_GEVENTS];
-  char lhsname[MAX_GEVENTS][11]; 
+  char lhsname[MAX_GEVENTS][11];
   int lhsivar[MAX_GEVENTS];
   int *comrhs[MAX_GEVENTS];
   int runnow;
   int n; /* number of tasks <= MAX_GEVENTS */
 }GRAB_TASK;
-
 
 typedef struct {
   int ok;
@@ -28,8 +25,6 @@ typedef struct {
   GRAB_TASK start,end;
 } ANI_GRAB;
 
-/***************  End of grabber stuff  in header **************/
-
 typedef struct {
   int flag;
  int skip;
@@ -37,7 +32,6 @@ typedef struct {
  char filter[256];
  int aviflag,filflag;
 } MPEG_SAVE;
-
 
 typedef struct {
   int n;
@@ -50,9 +44,13 @@ typedef struct {
   int type, flag;
   int *col,*x1,*y1,*x2,*y2,*who;
   double zcol,zx1,zy1,zx2,zy2,zrad,zval;
-  int zthick,tfont,tsize,tcolor;  
+  int zthick,tfont,tsize,tcolor;
 } ANI_COM;
 
+/* --- Data --- */
+extern int animation_on_the_fly;
+
+/* --- Functions --- */
 void new_vcr(void);
 void create_vcr(char *name);
 void ani_border(Window w, int i);
@@ -143,4 +141,4 @@ int check_ani_pause(XEvent ev);
 void do_ani_slider_motion(Window w,int x);
 void draw_ani_slider(Window w,int x);
 void redraw_ani_slider(void);
-#endif
+#endif /* XPPAUT_ANIPARSE_H */

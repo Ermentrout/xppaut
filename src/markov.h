@@ -4,9 +4,10 @@
 #include <stdio.h>
 
 /* --- Data --- */
-extern int storind;
-extern int NWiener;
 extern int NMarkov;
+extern int NWiener;
+extern int storind;
+extern int STOCH_FLAG;
 
 /* --- Functions --- */
 void add_wiener(int index);
