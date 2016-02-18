@@ -8,10 +8,17 @@
 #include "xpplim.h"
 
 /* --- Macros --- */
-#define MAXVNAM 33
+#define MAXCOMMENTS 500
 #define MAXLINES 5000
+#define MAXONLY 1000
+#define MAXVNAM 33
 
 /* --- Types --- */
+typedef struct {
+  char *text,*action;
+  int aflag;
+} ACTION;
+
 typedef struct {
 	char *name,*value;
 } FIXINFO;
@@ -25,6 +32,7 @@ extern int ConvertStyle;
 extern int EqType[MAXODE];
 extern int FIX_VAR;
 extern int N_plist;
+extern int n_comments;
 extern int NCON;
 extern int NCON_START;
 extern int NDELAYS;
@@ -41,6 +49,7 @@ extern int *plotlist;
 extern double default_ic[MAXODE];
 extern double default_val[MAXPAR];
 
+extern ACTION comments[MAXCOMMENTS];
 extern FILE *convertf;
 extern FIXINFO fixinfo[MAXODE];
 extern BC_STRUCT my_bc[MAXODE];

@@ -1,62 +1,45 @@
-#include <stdlib.h> 
+#include "config.h"
+#include "txtread.h"
+
+#ifndef HAVE_WCTYPE_H
+# include <ctype.h>
+#else
+# include <wctype.h>
+#endif
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
-#include <math.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
+#include "browse.h"
+#include "form_ode.h"
 #include "ggets.h"
 #include "graphics.h"
+#include "init_conds.h"
 #include "load_eqn.h"
+#include "main.h"
+#include "many_pops.h"
+#include "mykeydef.h"
 #include "numerics.h"
 #include "pop_list.h"
-#include "init_conds.h"
-#include "many_pops.h"
-
-#include "txtread.h"
-#include "browse.h"
-
-
-#ifndef WCTYPE
-#include <ctype.h>
-#else
-#include <wctype.h>
-#endif
 
 #include "bitmap/txtview.bitmap"
-#include "mykeydef.h"
-#define MAXLINES 5000
-#define MAXCOMMENTS 500
 
-#define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
-		return;}
-typedef struct {
-  char *text,*action;
-  int aflag;
-} ACTION;
-extern char *save_eqn[MAXLINES];
-extern ACTION comments[MAXCOMMENTS];
-extern int n_comments,NLINES;
-extern int tfBell;
-extern Display *display;
-extern int screen;
-extern GC gc, small_gc;
-extern int DCURX,DCURXs,DCURY,DCURYs,CURY_OFFs,CURY_OFF;
+/* --- Macros --- */
+#define xds(a) {XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
+				return;}
+
 #define MYMASK  (ButtonPressMask 	|\
-                ButtonReleaseMask |\
+				ButtonReleaseMask |\
 		KeyPressMask		|\
 		ExposureMask		|\
 		StructureNotifyMask	|\
 		LeaveWindowMask		|\
 		EnterWindowMask)
-
-typedef struct {
-  Window up,down,pgup,pgdn,kill,home,end,base,text,src,action;
-  int here,first,hgt,wid,nlines,which;
-  int dh,dw;
-} TXTVIEW;
 
 TXTVIEW txtview;
 /*
@@ -86,7 +69,7 @@ void txt_view_events(XEvent ev)
    break;
  case ButtonPress:
    txtview_press(ev.xbutton.window,ev.xbutton.x,ev.xbutton.y);
-    break;   
+	break;
  case KeyPress:
    txtview_keypress(ev);
    break;
@@ -108,18 +91,18 @@ void txtview_keypress(XEvent ev)
    if(ks==PGDN){txtview_press(txtview.pgdn,0,0); return;}
    if(ks==HOME){txtview_press(txtview.home,0,0); return;}
    if(ks==END){txtview_press(txtview.end,0,0); return;}
-   
+
  }
 }
 
-void enter_txtview(Window w,int val) 
+void enter_txtview(Window w,int val)
 {
   if(w==txtview.up||w==txtview.down||w==txtview.pgup||
-     w==txtview.pgdn||w==txtview.home||w==txtview.end||
-     w==txtview.src||w==txtview.action||w==txtview.kill)
-    XSetWindowBorderWidth(display,w,val);
+	 w==txtview.pgdn||w==txtview.home||w==txtview.end||
+	 w==txtview.src||w==txtview.action||w==txtview.kill)
+	XSetWindowBorderWidth(display,w,val);
 }
- 
+
 
 void do_txt_action(char *s)
 {
@@ -146,82 +129,82 @@ void resize_txtview(int w,int h)
 }
 
 void txtview_press(Window w,int x,int y)
-{ 
+{
   int j;
   int nt;
   if(txtview.which==1)
-    nt=n_comments;
+	nt=n_comments;
   else
-    nt=NLINES;
-  
+	nt=NLINES;
+
   if(w==txtview.text){
-    if(txtview.which==0)return;
-    if(x>(2*txtview.dw))return;
-    j=txtview.first+y/txtview.dh;
-    if((j<n_comments)&&(comments[j].aflag>0))
-      do_txt_action(comments[j].action);
-    return;
+	if(txtview.which==0)return;
+	if(x>(2*txtview.dw))return;
+	j=txtview.first+y/txtview.dh;
+	if((j<n_comments)&&(comments[j].aflag>0))
+	  do_txt_action(comments[j].action);
+	return;
   }
 
-  
-  
+
+
   if(w==txtview.up){
-    if(txtview.first>0){
-      txtview.first-=1;
-      redraw_txtview_text();
-    }
+	if(txtview.first>0){
+	  txtview.first-=1;
+	  redraw_txtview_text();
+	}
   }
   if(w==txtview.down){
-    j=txtview.first+1+txtview.nlines;
-    if(j<=nt){
-      txtview.first+=1;
-      redraw_txtview_text();
-    }
+	j=txtview.first+1+txtview.nlines;
+	if(j<=nt){
+	  txtview.first+=1;
+	  redraw_txtview_text();
+	}
   }
   if(w==txtview.home){
-    txtview.first=0;
-    redraw_txtview_text();
+	txtview.first=0;
+	redraw_txtview_text();
   }
   if(w==txtview.end){
-    j=nt-txtview.nlines;
-    if(j>=0){
-      txtview.first=j;
-      redraw_txtview_text();
-    }
+	j=nt-txtview.nlines;
+	if(j>=0){
+	  txtview.first=j;
+	  redraw_txtview_text();
+	}
   }
   if(w==txtview.kill){
-    txtview.here=0;
-    waitasec(ClickTime);
-    XDestroySubwindows(display,txtview.base);
-    XDestroyWindow(display,txtview.base);
+	txtview.here=0;
+	waitasec(ClickTime);
+	XDestroySubwindows(display,txtview.base);
+	XDestroyWindow(display,txtview.base);
   }
   if(w==txtview.pgup){
-    j=txtview.first-txtview.nlines;
-    if(j<0)j=0;
-    txtview.first=j;
-    redraw_txtview_text();
+	j=txtview.first-txtview.nlines;
+	if(j<0)j=0;
+	txtview.first=j;
+	redraw_txtview_text();
   }
-   
+
   if(w==txtview.pgdn){
-    j=txtview.first+txtview.nlines;
-    if(j<nt){
-      txtview.first=j;
-      redraw_txtview_text();
-    }
+	j=txtview.first+txtview.nlines;
+	if(j<nt){
+	  txtview.first=j;
+	  redraw_txtview_text();
+	}
   }
-  
+
   if(w==txtview.src){
-    txtview.which=0;
-    redraw_txtview_text();
+	txtview.which=0;
+	redraw_txtview_text();
   }
-     
+
   if(w==txtview.action){
-    if(n_comments>0){
-      txtview.which=1;
-      redraw_txtview_text();
-    }
+	if(n_comments>0){
+	  txtview.which=1;
+	  redraw_txtview_text();
+	}
   }
-   
+
 }
 
 
@@ -229,25 +212,25 @@ void txtview_press(Window w,int x,int y)
 void redraw_txtview(Window w)
 {
   if(w==txtview.text)
-    redraw_txtview_text();
+	redraw_txtview_text();
   if(w==txtview.up)
-    xds("Up");
+	xds("Up");
   if(w==txtview.down)
-    xds("Down");
+	xds("Down");
   if(w==txtview.pgup)
-    xds("PgUp");
+	xds("PgUp");
   if(w==txtview.pgdn)
-    xds("PgDn");
+	xds("PgDn");
   if(w==txtview.kill)
-    xds("Kill");
+	xds("Kill");
   if(w==txtview.home)
-    xds("Home");  
+	xds("Home");
   if(w==txtview.end)
-    xds("End");
+	xds("End");
   if(w==txtview.src)
-    xds("Source");  
+	xds("Source");
   if(w==txtview.action)
-    xds("Action");
+	xds("Action");
 }
 
 void redraw_txtview_text()
@@ -256,21 +239,21 @@ void redraw_txtview_text()
  XClearWindow(display,txtview.text);
  for(i=0;i<txtview.nlines;i++){
    /* plintf("lines=%d NLINES=%d first=%d \n",
-      txtview.nlines,NLINES,txtview.first); */
+	  txtview.nlines,NLINES,txtview.first); */
    j=i+txtview.first;
    switch(txtview.which){
-   case 0: 
-     if(j<NLINES){
-       XDrawString(display,txtview.text,gc,txtview.dw,i*txtview.dh+CURY_OFFs,
+   case 0:
+	 if(j<NLINES){
+	   XDrawString(display,txtview.text,gc,txtview.dw,i*txtview.dh+CURY_OFFs,
 		   save_eqn[j],strlen(save_eqn[j]));
-       /* plintf("line: %d\n",j); */
-     }
-     break;
+	   /* plintf("line: %d\n",j); */
+	 }
+	 break;
    case 1:
-     if(j<n_comments)
-        XDrawString(display,txtview.text,gc,txtview.dw,i*DCURY+CURY_OFFs,
+	 if(j<n_comments)
+		XDrawString(display,txtview.text,gc,txtview.dw,i*DCURY+CURY_OFFs,
 		   comments[j].text,strlen(comments[j].text));
-     break;
+	 break;
    }
 
  }
@@ -292,7 +275,7 @@ void make_txtview()
   Window base;
  int ww=9*DCURXs,hh=DCURYs+4;
   static char *wname[]={"Text Viewer"},*iname[]={"Txtview"};
-  
+
   /*XWMHints wm_hints;
   */
   XTextProperty winname,iconname;
@@ -301,7 +284,7 @@ void make_txtview()
   base=make_plain_window(RootWindow(display,screen),0,0,minwid,minlen,4);
   txtview.base=base;
   XSelectInput(display,base,ExposureMask|KeyPressMask|ButtonPressMask|
-	       StructureNotifyMask);
+		   StructureNotifyMask);
 
   XStringListToTextProperty(wname,1,&winname);
   XStringListToTextProperty(iname,1,&iconname);
@@ -311,7 +294,7 @@ void make_txtview()
   size_hints.x=0;
   size_hints.y=0;
   /*wm_hints.initial_state=IconicState;
-  wm_hints.flags=StateHint; 
+  wm_hints.flags=StateHint;
   */
   XSetWMProperties(display,base,&winname,&iconname,
 		   NULL,0,&size_hints,NULL,NULL);
