@@ -2,6 +2,7 @@
 #define XPPAUT_STORAGE_H
 
 /* --- Data --- */
+extern int MAXSTOR;
 extern double *WORK;
 
 /* --- Functions --- */

@@ -6,6 +6,7 @@
 /* --- Data --- */
 extern int storind;
 extern int NWiener;
+extern int NMarkov;
 
 /* --- Functions --- */
 void add_wiener(int index);

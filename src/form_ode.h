@@ -17,16 +17,21 @@ typedef struct {
 } FIXINFO;
 
 /* --- Data --- */
+extern char uvar_names[MAXODE][12];
+
 extern int ConvertStyle;
 extern int EqType[MAXODE];
 extern int FIX_VAR;
-extern BC_STRUCT my_bc[MAXODE];
-extern int *my_ode[MAXODE];
+extern int N_plist;
 extern int NCON;
 extern int NCON_START;
 extern int NODE;
 extern int NSYM_START;
-extern char uvar_names[MAXODE][12];
+
+extern int *my_ode[MAXODE];
+extern int *plotlist;
+
+extern BC_STRUCT my_bc[MAXODE];
 
 /* --- Functions --- */
 int make_eqn(void);
