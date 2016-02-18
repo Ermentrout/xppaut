@@ -6,6 +6,7 @@
 /* --- Data --- */
 extern int COLOR;
 extern int color_total;
+extern int custom_color;
 
 /* --- Functions --- */
 void tst_color(Window w);

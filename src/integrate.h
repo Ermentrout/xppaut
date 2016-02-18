@@ -4,12 +4,65 @@
 #include <stdio.h>
 #include "xpplim.h"
 
+/* --- Macros --- */
+#define MAXFP 400
+
+/* --- Types --- */
+typedef struct {
+  int index0,type;
+  char formula[256];
+  int n;
+  char var[20];
+  int j1,j2;
+} ARRAY_IC;
+
+typedef struct {
+	char item[30];
+	int steps,shoot,col,movie,mc;
+	double plow,phigh;
+} EQ_RANGE;
+
+typedef struct {
+  int n;
+  double tol;
+  double xlo[MAXODE],xhi[MAXODE];
+} FIXPTGUESS;
+
+typedef struct {
+  int n,flag;
+  double *x[MAXFP];
+  double *er[MAXFP];
+  double *em[MAXFP];
+  double *x1[MAXFP],*x2[MAXFP],*x3[MAXFP],*x4[MAXFP];
+  int t1,t2,t3,t4;
+} FIXPTLIST;
+
+typedef struct {
+	char item[30],item2[30];
+	int steps,steps2,reset,oldic,index,index2,cycle,type,type2,movie;
+	double plow,phigh,plow2,phigh2;
+	int rtype;
+} RANGE;
+
+typedef struct {
+  int nvec,node;
+  double *x;
+} XPPVEC;
+
 /* --- Data --- */
+extern double MyData[MAXODE];
+
 extern int DelayErr;
 extern int MakePlotFlag;
 extern int SuppressBounds;
 extern int SuppressOut;
-extern double MyData[MAXODE];
+
+extern ARRAY_IC ar_ic[];
+extern EQ_RANGE eq_range;
+extern FIXPTGUESS fixptguess;
+extern FIXPTLIST fixptlist;
+extern RANGE range;
+extern XPPVEC xpv;
 
 /* --- Functions --- */
 void init_ar_ic(void);

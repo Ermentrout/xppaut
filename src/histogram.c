@@ -23,13 +23,6 @@ double ndrand48();
 void mycor(),mycor2();
 float *get_data_col();
 
-typedef struct {
-  int nbins,nbins2,type,col,col2,fftc;
-  double xlo,xhi;
-  double ylo,yhi;
-  char cond[80];
-} HIST_INFO;
-
 int spec_col=1,spec_wid=512,spec_win=2,spec_col2=1,spec_type=0;
 /* type =0 for PSD
    type =1 for crossspectrum

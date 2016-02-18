@@ -1,21 +1,32 @@
-#ifndef _nullcline_h_
-#define _nullcline_h_
-
+#ifndef XPPAUT_NULLCLINE_H
+#define XPPAUT_NULLCLINE_H
 
 #include <stdio.h>
 
+/* --- Types --- */
 typedef struct {
 		float x,y,z;
 		} Pt;
 
 typedef struct nclines {
-                float *xn,*yn;
-                int nmx,nmy;
-                int n_ix,n_iy;
-                struct nclines *n,*p;
+				float *xn,*yn;
+				int nmx,nmy;
+				int n_ix,n_iy;
+				struct nclines *n,*p;
 }  NCLINES;
 
+/* --- Data --- */
+extern double ColorViaHi;
+extern double ColorViaLo;
+extern int ColorizeFlag;
+extern char ColorVia[15];
+extern int DF_GRID;
+extern int DFBatch;
+extern int NCBatch;
+extern int XNullColor;
+extern int YNullColor;
 
+/* --- Functions --- */
 void create_new_cline();
 void froz_cline_stuff_com(int i);
 void do_range_clines(void);
@@ -44,4 +55,4 @@ void do_cline(int ngrid, double x1, double y1, double x2, double y2);
 void do_batch_nclines();
 void do_batch_dfield();
 
-#endif
+#endif /* XPPAUT_NULLCLINE_H */

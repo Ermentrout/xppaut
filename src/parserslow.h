@@ -28,20 +28,25 @@ typedef struct {
 } UFUN_ARG;
 
 /* --- Data --- */
+extern char *ode_names[MAXODE];
+extern char *ufun_def[MAXUFUN];
+extern char ufun_names[MAXUFUN][12];
+
 extern double constants[MAXPAR];
+extern double variables[MAXODE1];
+
 extern int ERROUT;
 extern int narg_fun[MAXUFUN];
+extern int MaxPoints;
 extern int NFUN;
 extern int NKernel;
 extern int NSYM;
 extern int NTable;
 extern int NVAR;
+extern int RandSeed;
 extern int *ufun[MAXUFUN];
+
 extern UFUN_ARG ufun_arg[MAXUFUN];
-extern char *ode_names[MAXODE];
-extern char *ufun_def[MAXUFUN];
-extern char ufun_names[MAXUFUN][12];
-extern double variables[MAXODE1];
 
 /* --- Functions --- */
 void init_rpn(void);

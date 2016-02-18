@@ -1,128 +1,62 @@
 #include "load_eqn.h"
-#include "parserslow.h"
-
-#include "read_dir.h"
-
-#include "main.h"
-#include "ggets.h"
-#include "dae_fun.h"
-#include "derived.h"
-#include "extra.h"
-#include "init_conds.h"
-#include "browse.h"
-#include "txtread.h"
-#include "numerics.h"
-#include "integrate.h"
-#include "adj2.h"
-#include "arrayplot.h"
-#include "lunch-new.h"
-#include "graphics.h"
-
-/*#include "macdirent.h"
-*/
 
 #include <dirent.h>
-#include "userbut.h"
-#include "volterra2.h"
-#include "storage.h"
-#include "tabular.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
+#include "adj2.h"
+#include "arrayplot.h"
+#include "auto_nox.h"
+#include "browse.h"
+#include "color.h"
+#include "dae_fun.h"
+#include "delay_handle.h"
+#include "derived.h"
+#include "extra.h"
+#include "gear.h"
+#include "ggets.h"
+#include "graf_par.h"
+#include "graphics.h"
+#include "histogram.h"
+#include "init_conds.h"
+#include "integrate.h"
+#include "lunch-new.h"
+#include "main.h"
+#include "many_pops.h"
+#include "markov.h"
+#include "my_ps.h"
+#include "nullcline.h"
+#include "numerics.h"
+#include "parserslow.h"
+#include "read_dir.h"
+#include "storage.h"
+#include "strutil.h"
+#include "tabular.h"
+#include "txtread.h"
+#include "userbut.h"
+#include "volterra2.h"
 #include "xpplim.h"
 
+/* --- Macros --- */
 #define PARAM 1
 #define IC 2
-
-
 #define DFNORMAL 1
 #define MAXOPT 1000
 #define READEM 1
 
-extern OptionsSet notAlreadySet;
-
-typedef struct {
-  int nbins,nbins2,type,col,col2,fftc;
-  double xlo,xhi;
-  double ylo,yhi;
-  char cond[80];
-} HIST_INFO;
-
-extern HIST_INFO hist_inf;
-extern int spec_col,spec_wid,spec_win,spec_col2,post_process;
-
-
-
-int nsrand48(int seed);
+void nsrand48(int seed);
 
 char *interopt[MAXOPT];
 int Nopts=0;
 int RunImmediately=0;
-extern char dll_lib[256];
-extern char dll_fun[256];
-extern int dll_flag;
 
-extern char UserBlack[8];
-extern char UserWhite[8];
-extern char UserMainWinColor[8];
-extern char UserDrawWinColor[8];
-/*extern char UserBGBitmap[100];*/
-extern char UserBGBitmap[XPP_MAX_NAME];
-
-extern int UserGradients;
-extern int UserMinWidth;
-extern int UserMinHeight;
-extern int XPPVERBOSE;
-
-extern int OVERRIDE_QUIET;
-extern int OVERRIDE_LOGFILE;
-
-extern int SLIDER1;
-extern int SLIDER2;
-extern int SLIDER3;
-extern char SLIDER1VAR[20];
-extern char SLIDER2VAR[20];
-extern char SLIDER3VAR[20];
-extern double SLIDER1LO;
-extern double SLIDER2LO;
-extern double SLIDER3LO;
-extern double SLIDER1HI;
-extern double SLIDER2HI;
-extern double SLIDER3HI;
-extern double SLIDER1INIT;
-extern double SLIDER2INIT;
-extern double SLIDER3INIT;
-
-extern int NCBatch,DFBatch;
-extern int DF_GRID;
-
-extern int XNullColor,YNullColor,StableManifoldColor,UnstableManifoldColor;
 int IX_PLT[10],IY_PLT[10],IZ_PLT[10],NPltV;
 int MultiWin=0;
-extern int SimulPlotFlag;
 double X_LO[10],Y_LO[10],X_HI[10],Y_HI[10];
 int START_LINE_TYPE=1;
 INTERN_SET intern_set[MAX_INTERN_SET];
 int Nintern_set=0;
-
-extern int STOCH_FLAG;
-extern char uvar_names[MAXODE][12];
-extern struct {
-		 char item[30],item2[30];
-	 int steps,steps2,reset,oldic,index,index2,cycle,type,type2,movie;
-	 double plow,phigh,plow2,phigh2;
-		 int rtype;
-	   } range;
-
-extern int custom_color;
-extern int del_stab_flag;
-extern int MaxPoints;
-extern double THETA0,PHI0;
-extern int tfBell;
-extern int DoTutorial;
-/*void set_option(char *s1,char *s2);
-*/
 
 double atof();
 char *get_first();
@@ -132,38 +66,25 @@ char *get_next();
 	to use them. (Except eqn forming stuff)
  */
 
-extern char batchout[256];
-extern int batch_range;
- double last_ic[MAXODE];
-extern char PlotFormat[100];
- extern char big_font_name[100],small_font_name[100];
- extern int PaperWhite;
-
-extern int PSColorFlag,PS_FONTSIZE,PS_Color;
-extern char PS_FONT[100];
-extern double PS_LW;
-
-extern int SEc,UEc,SPc,UPc;
+double last_ic[MAXODE];
 int (*solver)();
 
- int rung_kut();
- char delay_string[MAXODE][80];
- int itor[MAXODE];
- /*char this_file[100];
- */
- char this_file[XPP_MAX_NAME];
- char this_internset[XPP_MAX_NAME];
- float oldhp_x,oldhp_y,my_pl_wid,my_pl_ht;
- int mov_ind;
- int  storind,STORFLAG,INFLAG,MAXSTOR;
- double x_3d[2],y_3d[2],z_3d[2];
- int IXPLT,IYPLT,IZPLT;
- int AXES,TIMPLOT,PLOT_3D;
- double MY_XLO,MY_YLO,MY_XHI,MY_YHI;
- double TOR_PERIOD=6.2831853071795864770;
- int TORUS=0;
- int NEQ;
- char options[100];
+int rung_kut();
+char delay_string[MAXODE][80];
+int itor[MAXODE];
+char this_file[XPP_MAX_NAME];
+char this_internset[XPP_MAX_NAME];
+float oldhp_x,oldhp_y,my_pl_wid,my_pl_ht;
+int mov_ind;
+int  storind,STORFLAG,INFLAG,MAXSTOR;
+double x_3d[2],y_3d[2],z_3d[2];
+int IXPLT,IYPLT,IZPLT;
+int AXES,TIMPLOT,PLOT_3D;
+double MY_XLO,MY_YLO,MY_XHI,MY_YHI;
+double TOR_PERIOD=6.2831853071795864770;
+int TORUS=0;
+int NEQ;
+char options[100];
 
 /*   Numerical stuff ....   */
 
@@ -174,10 +95,8 @@ int (*solver)();
 
  double POIPLN;
 
- extern int RandSeed;
  int MaxEulIter;
 double EulTol;
-extern int cv_bandflag,cv_bandupper,cv_bandlower;
  int NMESH,NJMP,METHOD,color_flag,NC_ITER;
  int EVEC_ITER;
  int BVP_MAXIT,BVP_FLAG;
@@ -186,29 +105,9 @@ extern int cv_bandflag,cv_bandupper,cv_bandlower;
    int FFT,NULL_HERE,POIEXT;
   int HIST,HVAR,hist_ind,FOREVER;
 
- /*  control of range stuff  */
-
- int PAUSER,ENDSING,SHOOT,PAR_FOL;
-
-
-/*  custon color stuff  */
-
-extern char ColorVia[15];
-extern double ColorViaLo,ColorViaHi;
-extern int ColorizeFlag;
-
-
-/* AUTO STUFF  */
-extern int auto_ntst,auto_nmx,auto_npr,auto_ncol;
-extern double auto_ds,  auto_dsmax,  auto_dsmin;
-extern double auto_rl0,auto_rl1,auto_a0,auto_a1;
-extern double auto_epss,auto_epsl,auto_epsu;
-extern int auto_var;
-extern double auto_xmin,auto_xmax,auto_ymin,auto_ymax;
-
- extern int PltFmtFlag;
-
- int xorfix,silent,got_file;
+/*  control of range stuff  */
+int PAUSER,ENDSING,SHOOT,PAR_FOL;
+int xorfix,silent,got_file;
 
 /*Logical negate OR on options set. Result overwrites the first OptionsSet
 in the argument list.*/

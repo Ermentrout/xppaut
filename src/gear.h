@@ -8,6 +8,9 @@ extern double ShootIC[8][MAXODE];
 
 extern int ShootICFlag;
 extern int ShootIndex;
+extern int StableManifoldColor;
+extern int UnstableManifoldColor;
+
 /* --- Functions --- */
 void silent_fixpt(double *x, double eps, double err, double big, int maxit, int n, double *er, double *em, int *ierr);
 void do_sing(double *x, double eps, double err, double big, int maxit, int n, int *ierr, float *stabinfo);

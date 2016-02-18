@@ -75,7 +75,6 @@
 #define PARAM 1
 #define IC 2
 #define BMAXCOL 20
-#define MAXFP 400
 #define NAR_IC 50
 #define VOLTERRA 6
 #define BACKEUL 7
@@ -91,42 +90,11 @@ int MakePlotFlag=0;
 int ar_ic_defined=0;
 double ndrand48();
 
-typedef struct {
-  int index0,type;
-  char formula[256];
-  int n;
-  char var[20];
-  int j1,j2;
-} ARRAY_IC;
 ARRAY_IC ar_ic[NAR_IC];
-
-typedef struct
-{
-  int n,flag;
-  double *x[MAXFP];
-  double *er[MAXFP];
-  double *em[MAXFP];
-  double *x1[MAXFP],*x2[MAXFP],*x3[MAXFP],*x4[MAXFP];
-  int t1,t2,t3,t4;
-} FIXPTLIST;
-
-FIXPTLIST fixptlist;
-
-typedef struct
-{
-  int n;
-  double tol;
-  double xlo[MAXODE],xhi[MAXODE];
-} FIXPTGUESS;
-
+EQ_RANGE eq_range;
 FIXPTGUESS fixptguess;
-
-typedef struct
-{
-  int nvec,node;
-  double *x;
-} XPPVEC;
-
+FIXPTLIST fixptlist;
+RANGE range;
 XPPVEC xpv;
 int SuppressOut=0;
 int SuppressBounds=0;
@@ -143,18 +111,6 @@ double LastTime;
 
 int STOP_FLAG=0;
 int PSLineStyle;
-struct {
-	char item[30];
-	int steps,shoot,col,movie,mc;
-	double plow,phigh;
-} eq_range;
-
-struct {
-	char item[30],item2[30];
-	int steps,steps2,reset,oldic,index,index2,cycle,type,type2,movie;
-	double plow,phigh,plow2,phigh2;
-	int rtype;
-} range;
 
 int (*solver)();
 
