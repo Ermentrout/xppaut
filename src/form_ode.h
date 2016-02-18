@@ -40,6 +40,7 @@ extern int *plotlist;
 extern double default_ic[MAXODE];
 extern double default_val[MAXPAR];
 
+extern FILE *convertf;
 extern FIXINFO fixinfo[MAXODE];
 extern BC_STRUCT my_bc[MAXODE];
 
