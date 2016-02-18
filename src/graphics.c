@@ -1,21 +1,47 @@
-#include "graphics.h"
-#include "my_ps.h"
-#include "my_svg.h"
+/*  This is an improved graphics driver for XPP
+	It requires only a few commands
+	All positions are integers
 
-#include <stdlib.h> 
+	point(x,y)        Draws point to (x,y) with pointtype PointStyle
+	line(x1,y1,x2,y2) Draws line with linetype LineStyle
+	put_text(x1,y,text)  Draws text with TextAngle, Justify
+	init_device()     Sets up the default for tics, plotting area,
+					  and anything else
+
+
+	close_device()  closes files, etc
+
+	The device is assumed to go from (0,0) to (XDMax,YDMax)
+
+	DLeft,DRight,DTop,DBottom are the actual graph areas
+	VTic Htic are the actual sizes of the tics in device pixels
+	VChar HChar are the height and width used for character spacing
+
+	linetypes   -2  thick plain lines
+				-1  thin plain lines
+
+
+*/
+#include "graphics.h"
+
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "struct.h"
+
+#include "calc.h"
 #include "color.h"
 #include "graf_par.h"
-#include "calc.h"
+#include "load_eqn.h"
+#include "main.h"
 #include "many_pops.h"
+#include "my_ps.h"
+#include "my_svg.h"
+#include "struct.h"
 
-
-
+/* --- Macros --- */
 #define MAXPERPLOT 10
 #define MAXPLOTS 20
 #define DEGTORAD .0174532
@@ -28,72 +54,18 @@
 #define SYMSIZE .00175
 
 double THETA0=45,PHI0=45;
-extern double x_3d[2],y_3d[2],z_3d[2];
-extern int IXPLT,IYPLT,IZPLT;
-extern int AXES,TIMPLOT,PLOT_3D;
-extern int START_LINE_TYPE;
-extern double MY_XLO,MY_YLO,MY_XHI,MY_YHI;
-
-extern int COLOR,colorline[]; 
-extern int DCURXs,DCURYs;
-extern int PltFmtFlag;
-extern unsigned int GrFore,GrBack;
-extern int SCALEX,SCALEY,DCURX,DCURY,xor_flag;
-extern GRAPH graph[MAXPOP];
-extern GRAPH *MyGraph;
-extern GC gc_graph;
 
 int PS_Port=0;
 int DX_0,DY_0,D_WID,D_HGT;
 int D_FLAG;
 int PointRadius=0;
-extern Display *display;
-extern Window win;
-extern Window draw_win;
-extern GC small_gc;
-extern float **storage;
-extern int storind;
 
-char dashes[10][5] = { {0}, {1,6,0}, 
+char dashes[10][5] = { {0}, {1,6,0},
    {0}, {4,2,0}, {1,3,0}, {4,4,0}, {1,5,0}, {4,4,4,1,0}, {4,2,0}, {1,3,0}
    };
 
-extern XFontStruct *small_font;
 XFontStruct *symfonts[5],*romfonts[5];
 int avsymfonts[5],avromfonts[5];
-extern GC font_gc;
-
-extern int IX_PLT[10],IY_PLT[10],IZ_PLT[10],NPltV;
-extern double X_LO[10],Y_LO[10],X_HI[10],Y_HI[10];
-extern int MultiWin;
-extern int Xup;
-
-/*  This is an improved graphics driver for XPP  
-    It requires only a few commands
-    All positions are integers
-   
-    point(x,y)        Draws point to (x,y) with pointtype PointStyle
-    line(x1,y1,x2,y2) Draws line with linetype LineStyle
-    put_text(x1,y,text)  Draws text with TextAngle, Justify
-    init_device()     Sets up the default for tics, plotting area,
-                      and anything else 
-                      
-
-    close_device()  closes files, etc
-
-    The device is assumed to go from (0,0) to (XDMax,YDMax)
-    
-    DLeft,DRight,DTop,DBottom are the actual graph areas
-    VTic Htic are the actual sizes of the tics in device pixels
-    VChar HChar are the height and width used for character spacing
- 
-    linetypes   -2  thick plain lines
-                -1  thin plain lines
-                   
-    
-*/
-
-
 int DLeft,DRight,DTop,DBottom,VTic,HTic,VChar,HChar,XDMax,YDMax;
 double XMin,YMin,XMax,YMax;
 int LineType=0,PointType=-1,TextJustify,TextAngle;
@@ -108,7 +80,7 @@ double *x1,*y1,*x2,*y2;
 }
 
 void set_scale(x1,y1,x2,y2)
-     double x1,y1,x2,y2;
+	 double x1,y1,x2,y2;
 {
   XMin=x1;
   YMin=y1;
@@ -129,16 +101,16 @@ void get_draw_area_flag(int flag)
   unsigned int w,h,bw,de;
   Window root;
   if(flag==1)
-    {
-      XGetGeometry(display,draw_win,&root,&x,&y,&w,&h,&bw,&de);
-      MyGraph->x11Wid=w;
-      MyGraph->x11Hgt=h;
-    }
+	{
+	  XGetGeometry(display,draw_win,&root,&x,&y,&w,&h,&bw,&de);
+	  MyGraph->x11Wid=w;
+	  MyGraph->x11Hgt=h;
+	}
   else
-    {
-    
-    w=MyGraph->x11Wid;
-    h=MyGraph->x11Hgt;
+	{
+
+	w=MyGraph->x11Wid;
+	h=MyGraph->x11Hgt;
   }
   /* plintf(" geom:+%d+%d:%dx%d\n",x,y,w,h); */
   XDMax=w;
@@ -147,7 +119,7 @@ void get_draw_area_flag(int flag)
   HTic=max(w/150,1);
   VChar=DCURYs;  /*max(h/25,1);*/
   HChar=DCURXs; /* max(w/80,1); */
-  
+
   DLeft=12*HChar;
   DRight=XDMax-3*HChar-HTic;
   DBottom=YDMax-1-VChar*7/2;
@@ -165,12 +137,12 @@ void get_draw_area_flag(int flag)
 
 
 void change_current_linestyle(new,old)
-     int new,*old;
+	 int new,*old;
 {
  *old=MyGraph->color[0];
   MyGraph->color[0]=new;
 }
-     
+
 
 void set_normal_scale()
 {
@@ -181,7 +153,7 @@ XMin=MyGraph->xlo;
 }
 
 void point(x,y)
-     int x,y;
+	 int x,y;
 {
   if(PltFmtFlag==PSFMT)ps_point(x,y);
   else if(PltFmtFlag==SVGFMT)svg_point(x,y);
@@ -189,7 +161,7 @@ void point(x,y)
 }
 
 void line(x1,y1,x2,y2)
-     int x1,y1,x2,y2;
+	 int x1,y1,x2,y2;
 {
   /* plintf("l %d %d %d %d \n",x1,y1,x2,y2); */
   if(PltFmtFlag==PSFMT)ps_line(x1,y1,x2,y2);
@@ -199,7 +171,7 @@ void line(x1,y1,x2,y2)
 /* draw a little filled circle */
 
 void bead(x1,y1)
-     int x1,y1;
+	 int x1,y1;
 {
  if(PltFmtFlag==PSFMT)ps_bead(x1,y1);
  else if(PltFmtFlag==SVGFMT)svg_bead(x1,y1);
@@ -207,7 +179,7 @@ void bead(x1,y1)
 }
 
 void frect(x1,y1,w,h)
-     int  x1,y1,w,h;
+	 int  x1,y1,w,h;
 {
   if(PltFmtFlag==PSFMT)ps_frect(x1,y1,w,h);
   else if(PltFmtFlag==SVGFMT)svg_frect(x1,y1,w,h);
@@ -215,8 +187,8 @@ void frect(x1,y1,w,h)
 }
 
 void put_text(x,y,str)
-     int x,y;
-     char *str;
+	 int x,y;
+	 char *str;
 {
   if(PltFmtFlag==PSFMT)ps_text(x,y,str);
   else if(PltFmtFlag==SVGFMT)svg_text(x,y,str);
@@ -244,7 +216,7 @@ void init_ps()
  DBottom=VChar*5/2+1;
   }
   else
-    {
+	{
  YDMax=7200;
  XDMax=5040;
  VTic=63;
@@ -257,7 +229,7 @@ void init_ps()
  DBottom=VChar*5/2+1;
 
 
-    }
+	}
 
 }
 
@@ -276,20 +248,20 @@ void init_svg()
 }
 
 void point_x11(xp,yp)
-     int xp,yp;
+	 int xp,yp;
 {
   int r=PointRadius;
   int  r2 = (int) (r / 1.41421356 + 0.5);
   int wh = 2 * r2;
   if(PointRadius==0)
-    XDrawPoint(display,draw_win,gc_graph,xp,yp);
+	XDrawPoint(display,draw_win,gc_graph,xp,yp);
   else
-    XFillArc(display,draw_win,gc_graph,xp-r2,yp-r2,wh, wh, 0, 360*64);
-    
+	XFillArc(display,draw_win,gc_graph,xp-r2,yp-r2,wh, wh, 0, 360*64);
+
 }
 
 void set_linestyle(ls)
-     int ls;
+	 int ls;
 {
   if(PltFmtFlag==PSFMT)ps_linetype(ls);
   else if(PltFmtFlag==SVGFMT)svg_linetype(ls);
@@ -297,14 +269,14 @@ void set_linestyle(ls)
 }
 
 void set_line_style_x11(ls)
-     int ls;
+	 int ls;
 {
   /*int width=0;*/
   int type=0;
   if(ls==-2){  /*  Border  */
-    set_color(0);
-    XSetLineAttributes(display,gc_graph,2,LineSolid,CapButt,JoinBevel);
-    return;
+	set_color(0);
+	XSetLineAttributes(display,gc_graph,2,LineSolid,CapButt,JoinBevel);
+	return;
   }
  /*width=0;
  */
@@ -317,10 +289,10 @@ void set_line_style_x11(ls)
  if(!COLOR){  /* Mono  */
    ls=(ls%8)+2;
    if(ls==2)
-     type=LineSolid;
+	 type=LineSolid;
    else{
-     type=LineOnOffDash;
-     XSetDashes(display,gc_graph,0,dashes[ls],strlen(dashes[ls]));
+	 type=LineOnOffDash;
+	 XSetDashes(display,gc_graph,0,dashes[ls],strlen(dashes[ls]));
    }
    set_color(0);
    XSetLineAttributes(display,gc_graph,0,type,CapButt,JoinBevel);
@@ -331,28 +303,28 @@ void set_line_style_x11(ls)
   XSetLineAttributes(display,gc_graph,0,LineSolid,CapButt,JoinBevel);
   set_color(colorline[ls]);
 }
-    
+
 void bead_x11(x,y)
-     int x,y;
+	 int x,y;
 {
  XFillArc(display,draw_win,gc_graph,x-2,y-2,4,4,0,360*64);
 }
 
 void rect_x11(x,y,w,h)
-     int x,y,w,h;
+	 int x,y,w,h;
 {
  XFillRectangle(display,draw_win,gc_graph,x,y,w,h);
 }
 
 void line_x11(xp1,yp1,xp2,yp2)
-     int xp1,yp1,xp2,yp2;
+	 int xp1,yp1,xp2,yp2;
 {
   XDrawLine(display,draw_win,gc_graph,xp1,yp1,xp2,yp2);
 }
 
 void put_text_x11(x,y,str)
-     int x,y;
-     char *str;
+	 int x,y;
+	 char *str;
 {
   int sw=strlen(str)*DCURXs;
   switch(TextJustify){
@@ -365,10 +337,10 @@ void put_text_x11(x,y,str)
   XSetForeground(display,small_gc,GrBack);
 }
 
-  
+
 void special_put_text_x11(x,y,str,size)
-     int x,y,size;
-     char *str;
+	 int x,y,size;
+	 char *str;
 {
   int i=0,j=0;
   int cx=x,cy=y;
@@ -378,131 +350,131 @@ void special_put_text_x11(x,y,str,size)
   int sub,sup;
   cs=size;
   if(avromfonts[size]==1){
-    sup=romfonts[size]->ascent;
-    sub=sup/2;
+	sup=romfonts[size]->ascent;
+	sub=sup/2;
 
 
   }
   else {
-    sup=small_font->ascent;
-    sub=sup/2;
+	sup=small_font->ascent;
+	sub=sup/2;
   }
   while(i<n){
-    c=str[i];
-    if(c=='\\'){      
-      i++;
-      c=str[i];
-      tmp[j]=0; /* end the current buffer */
-      
-      fancy_put_text_x11(cx,cy,tmp,cs,cf); /* render the current buffer */
-      if(cf==0){
+	c=str[i];
+	if(c=='\\'){
+	  i++;
+	  c=str[i];
+	  tmp[j]=0; /* end the current buffer */
+
+	  fancy_put_text_x11(cx,cy,tmp,cs,cf); /* render the current buffer */
+	  if(cf==0){
 	if(avromfonts[cs]==1)
 	  dx=XTextWidth(romfonts[cs],tmp,strlen(tmp));
 	else
 	  dx=XTextWidth(small_font,tmp,strlen(tmp));
-      }
-      if(cf==1){
+	  }
+	  if(cf==1){
 	if(avsymfonts[cs]==1)
 	  dx=XTextWidth(symfonts[cs],tmp,strlen(tmp));
 	else
 	  dx=XTextWidth(small_font,tmp,strlen(tmp));
-      }
-      cx+=dx;
-      j=0;
-      if(c=='0'){
+	  }
+	  cx+=dx;
+	  j=0;
+	  if(c=='0'){
 
 	cf=0;
-      }
-      if(c=='n'){
+	  }
+	  if(c=='n'){
 
 	cy=y;
 	cs=size;
-      }
-      if(c=='s'){
+	  }
+	  if(c=='s'){
 
 	cy=cy+sub;
 	if(size>0)
 	  cs=size-1;
-      }
-      if(c=='S'){
+	  }
+	  if(c=='S'){
 
 	if(size>0)
 	  cs=size-1;
 	cy=cy-sup;
-      }
-      if(c=='1'){
+	  }
+	  if(c=='1'){
 
 	cf=1;
-      }
-    
-      i++;
-    }
-    else {
-      tmp[j]=c;
-      j++;
-      i++;
-    }
+	  }
+
+	  i++;
+	}
+	else {
+	  tmp[j]=c;
+	  j++;
+	  i++;
+	}
   }
   tmp[j]=0;
-      fancy_put_text_x11(cx,cy,tmp,cs,cf);
+	  fancy_put_text_x11(cx,cy,tmp,cs,cf);
 }
-    
-      
-      
-    
+
+
+
+
 void fancy_put_text_x11(x,y,str,size,font)
-     int x,y,size,font;
-     char *str;
+	 int x,y,size,font;
+	 char *str;
 {
   /*int yoff;
   */
   if(strlen(str)==0)return;
   switch(font){
-  
-  case 1: 
-    if(avsymfonts[size]==1){
-      XSetFont(display,font_gc,symfonts[size]->fid);
-      /*yoff=symfonts[size]->ascent;*/
-    }
-    else {
-      XSetFont(display,font_gc,small_font->fid);
-      /*yoff=small_font->ascent;*/
-      
-    }
-    XSetForeground(display,font_gc,GrFore);
-    XDrawString(display,draw_win,font_gc,x,y,str,strlen(str));
-   XSetForeground(display,font_gc,GrBack);  
-    break;
-  default: 
-    if(avromfonts[size]==1){
-      XSetFont(display,font_gc,romfonts[size]->fid);
-      /*yoff=romfonts[size]->ascent;*/
-    
-    }
-    else {
-      XSetFont(display,font_gc,small_font->fid);
-      /*yoff=small_font->ascent;*/
-    }
-    XSetForeground(display,font_gc,GrFore);
-    XDrawString(display,draw_win,font_gc,x,y,str,strlen(str));
-    XSetForeground(display,font_gc,GrBack);  
-    break;
+
+  case 1:
+	if(avsymfonts[size]==1){
+	  XSetFont(display,font_gc,symfonts[size]->fid);
+	  /*yoff=symfonts[size]->ascent;*/
+	}
+	else {
+	  XSetFont(display,font_gc,small_font->fid);
+	  /*yoff=small_font->ascent;*/
+
+	}
+	XSetForeground(display,font_gc,GrFore);
+	XDrawString(display,draw_win,font_gc,x,y,str,strlen(str));
+   XSetForeground(display,font_gc,GrBack);
+	break;
+  default:
+	if(avromfonts[size]==1){
+	  XSetFont(display,font_gc,romfonts[size]->fid);
+	  /*yoff=romfonts[size]->ascent;*/
+
+	}
+	else {
+	  XSetFont(display,font_gc,small_font->fid);
+	  /*yoff=small_font->ascent;*/
+	}
+	XSetForeground(display,font_gc,GrFore);
+	XDrawString(display,draw_win,font_gc,x,y,str,strlen(str));
+	XSetForeground(display,font_gc,GrBack);
+	break;
   }
 }
 
 void scale_dxdy(x,y,i,j)
-     float x,y;
-     double *i,*j;
+	 float x,y;
+	 double *i,*j;
 {
   float dx=(DRight-DLeft)/(XMax-XMin);
   float dy=(DTop-DBottom)/(YMax-YMin);
   *i=x*dx;
   *j=y*dy;
-}  
-     
+}
+
 void scale_to_screen(x,y,i,j)  /* not really the screen!  */
-     float x,y;
-     int *i,*j;
+	 float x,y;
+	 int *i,*j;
 {
   float dx=(DRight-DLeft)/(XMax-XMin);
   float dy=(DTop-DBottom)/(YMax-YMin);
@@ -523,7 +495,7 @@ void scale_to_real(i,j,x,y) /* Not needed except for X */
   y1=(float)j1;
   *x=(MyGraph->xhi-MyGraph->xlo)*x1/((float)(DRight-DLeft))+MyGraph->xlo;
   *y=(MyGraph->yhi-MyGraph->ylo)*y1/((float)(DTop-DBottom))+MyGraph->ylo;
-  
+
  }
 
 
@@ -550,7 +522,7 @@ void init_all_graph()
  /*set_extra_graphs();*/
  set_normal_scale();
 
- 
+
 }
 
 void set_extra_graphs()
@@ -558,65 +530,65 @@ void set_extra_graphs()
   int i;
   if(NPltV<2)return;
   if(NPltV>8){
-    NPltV=8;
+	NPltV=8;
   }
   if(MultiWin==0){
-    MyGraph->nvars=NPltV;
-    for(i=1;i<NPltV;i++){
-      MyGraph->xv[i]=IX_PLT[i+1];
-    MyGraph->yv[i]=IY_PLT[i+1];
-    MyGraph->zv[i]=IZ_PLT[i+1];
-    MyGraph->color[i]=i;
-    }
-    return;
+	MyGraph->nvars=NPltV;
+	for(i=1;i<NPltV;i++){
+	  MyGraph->xv[i]=IX_PLT[i+1];
+	MyGraph->yv[i]=IY_PLT[i+1];
+	MyGraph->zv[i]=IZ_PLT[i+1];
+	MyGraph->color[i]=i;
+	}
+	return;
   }
   if(Xup){
   for(i=1;i<NPltV;i++){
-    create_a_pop();
-    graph[i].xv[0]=IX_PLT[i+1];
-    graph[i].yv[0]=IY_PLT[i+1];
-    graph[i].zv[0]=IZ_PLT[i+1]; /* irrelevant probably */
-    graph[i].grtype=0; /* force 2D */
-    graph[i].xlo=X_LO[i+1];
-    graph[i].xhi=X_HI[i+1];
-    graph[i].ylo=Y_LO[i+1];
-    graph[i].yhi=Y_HI[i+1];
-    /*  printf(" %g %g %g %g \n",X_LO[i+1],X_HI[i+1],Y_LO[i+1],Y_HI[i+1]); */
+	create_a_pop();
+	graph[i].xv[0]=IX_PLT[i+1];
+	graph[i].yv[0]=IY_PLT[i+1];
+	graph[i].zv[0]=IZ_PLT[i+1]; /* irrelevant probably */
+	graph[i].grtype=0; /* force 2D */
+	graph[i].xlo=X_LO[i+1];
+	graph[i].xhi=X_HI[i+1];
+	graph[i].ylo=Y_LO[i+1];
+	graph[i].yhi=Y_HI[i+1];
+	/*  printf(" %g %g %g %g \n",X_LO[i+1],X_HI[i+1],Y_LO[i+1],Y_HI[i+1]); */
   }
   set_active_windows();
-  make_active(0,1); 
+  make_active(0,1);
   }
 }
 
 void reset_graph()
 {
   if(AXES>=5)
-    PLOT_3D=1;
+	PLOT_3D=1;
   else
-    PLOT_3D=0;
+	PLOT_3D=0;
   MyGraph->xv[0]=IXPLT;
   MyGraph->yv[0]=IYPLT;
   MyGraph->zv[0]=IZPLT;
    MyGraph->xmax=x_3d[1];
-    MyGraph->ymax=y_3d[1];
-    MyGraph->zmax=z_3d[1];
-    MyGraph->xbar=.5*(x_3d[1]+x_3d[0]);
-    MyGraph->ybar=.5*(y_3d[1]+y_3d[0]);
-    MyGraph->zbar=.5*(z_3d[1]+z_3d[0]);
-    MyGraph->dx=2./(x_3d[1]-x_3d[0]);
-    MyGraph->dy=2./(y_3d[1]-y_3d[0]);
-    MyGraph->dz=2./(z_3d[1]-z_3d[0]);
-    MyGraph->xmin=x_3d[0];
-    MyGraph->ymin=y_3d[0];
-    MyGraph->zmin=z_3d[0];
-    MyGraph->xlo=MY_XLO;
-    MyGraph->ylo=MY_YLO;
-    MyGraph->xhi=MY_XHI;
-    MyGraph->yhi=MY_YHI;
-    MyGraph->grtype=AXES;
-    check_windows();
-    set_normal_scale();
-    redraw_the_graph();
+	MyGraph->ymax=y_3d[1];
+	MyGraph->zmax=z_3d[1];
+	MyGraph->xbar=.5*(x_3d[1]+x_3d[0]);
+	MyGraph->ybar=.5*(y_3d[1]+y_3d[0]);
+	MyGraph->zbar=.5*(z_3d[1]+z_3d[0]);
+	MyGraph->dx=2./(x_3d[1]-x_3d[0]);
+	MyGraph->dy=2./(y_3d[1]-y_3d[0]);
+	MyGraph->dz=2./(z_3d[1]-z_3d[0]);
+	MyGraph->xmin=x_3d[0];
+	MyGraph->ymin=y_3d[0];
+	MyGraph->zmin=z_3d[0];
+	MyGraph->xlo=MY_XLO;
+	MyGraph->ylo=MY_YLO;
+	MyGraph->xhi=MY_XHI;
+	MyGraph->yhi=MY_YHI;
+	MyGraph->grtype=AXES;
+	check_windows();
+	set_normal_scale();
+	redraw_the_graph();
 }
 
 
@@ -640,7 +612,7 @@ if(PLOT_3D)
   AXES=5;
 else
   AXES=0;
-AXES=MyGraph->grtype;  
+AXES=MyGraph->grtype;
 }
 
 void init_graph(i)
@@ -650,73 +622,73 @@ int i;
  if(AXES<=3)AXES=0;
  for(j=0;j<3;j++)
   for(k=0;k<3;k++)
-        if(k==j)graph[i].rm[k][j]=1.0;
+		if(k==j)graph[i].rm[k][j]=1.0;
 	else graph[i].rm[k][j]=0.0;
   graph[i].nvars=1;
   for(j=0;j<MAXPERPLOT;j++){
-        graph[i].xv[j]=IXPLT;
+		graph[i].xv[j]=IXPLT;
 	graph[i].yv[j]=IYPLT;
 	graph[i].zv[j]=IZPLT;
-        graph[i].line[j]=START_LINE_TYPE;
+		graph[i].line[j]=START_LINE_TYPE;
 	graph[i].color[j]=0;
-        }
-     
-    /*sprintf(graph[i].xlabel,"");
-    sprintf(graph[i].ylabel,"");
-    sprintf(graph[i].zlabel,"");
-    */
-    graph[i].xlabel[0]='\0';
-    graph[i].ylabel[0]='\0';
-    graph[i].zlabel[0]='\0';
-    
-    graph[i].Use=0;
-    graph[i].state=0;
-    graph[i].Restore=1;
-    graph[i].Nullrestore=0;
-    graph[i].ZPlane=-1000.0;
-    graph[i].ZView=1000.0;
-    graph[i].PerspFlag=0;
-    graph[i].ThreeDFlag=PLOT_3D;
-    graph[i].TimeFlag=TIMPLOT;
-    graph[i].ColorFlag=0;
-    graph[i].grtype=AXES;
-    graph[i].color_scale=1.0;
-    graph[i].min_scale=0.0;
-    strcpy(graph[i].gr_info,"");
-    graph[i].xmax=x_3d[1];
-    graph[i].ymax=y_3d[1];
-    graph[i].zmax=z_3d[1];
-    graph[i].xbar=.5*(x_3d[1]+x_3d[0]);
-    graph[i].ybar=.5*(y_3d[1]+y_3d[0]);
-    graph[i].zbar=.5*(z_3d[1]+z_3d[0]);
-    graph[i].dx=2./(x_3d[1]-x_3d[0]);
-    graph[i].dy=2./(y_3d[1]-y_3d[0]);
-    graph[i].dz=2./(z_3d[1]-z_3d[0]);
-    graph[i].xmin=x_3d[0];
-    graph[i].ymin=y_3d[0];
-    graph[i].zmin=z_3d[0];
-    graph[i].xorg=0.0;
-    graph[i].yorg=0.0;
-    graph[i].yorg=0.0;
-    graph[i].xorgflag=1;
-    graph[i].yorgflag=1;
-    graph[i].zorgflag=1;
-    graph[i].Theta=THETA0;
-    graph[i].Phi=PHI0;
-    graph[i].xshft=0;
-    graph[i].yshft=0;
-    graph[i].zshft=0;
-    graph[i].xlo=MY_XLO;
-    graph[i].ylo=MY_YLO;
-    graph[i].oldxlo=MY_XLO;
-    graph[i].oldylo=MY_YLO;
-    graph[i].xhi=MY_XHI;
-    graph[i].yhi=MY_YHI;
-    graph[i].oldxhi=MY_XHI;
-    graph[i].oldyhi=MY_YHI;
-    MyGraph=&graph[i];
-    make_rot(THETA0,PHI0);
-    
+		}
+
+	/*sprintf(graph[i].xlabel,"");
+	sprintf(graph[i].ylabel,"");
+	sprintf(graph[i].zlabel,"");
+	*/
+	graph[i].xlabel[0]='\0';
+	graph[i].ylabel[0]='\0';
+	graph[i].zlabel[0]='\0';
+
+	graph[i].Use=0;
+	graph[i].state=0;
+	graph[i].Restore=1;
+	graph[i].Nullrestore=0;
+	graph[i].ZPlane=-1000.0;
+	graph[i].ZView=1000.0;
+	graph[i].PerspFlag=0;
+	graph[i].ThreeDFlag=PLOT_3D;
+	graph[i].TimeFlag=TIMPLOT;
+	graph[i].ColorFlag=0;
+	graph[i].grtype=AXES;
+	graph[i].color_scale=1.0;
+	graph[i].min_scale=0.0;
+	strcpy(graph[i].gr_info,"");
+	graph[i].xmax=x_3d[1];
+	graph[i].ymax=y_3d[1];
+	graph[i].zmax=z_3d[1];
+	graph[i].xbar=.5*(x_3d[1]+x_3d[0]);
+	graph[i].ybar=.5*(y_3d[1]+y_3d[0]);
+	graph[i].zbar=.5*(z_3d[1]+z_3d[0]);
+	graph[i].dx=2./(x_3d[1]-x_3d[0]);
+	graph[i].dy=2./(y_3d[1]-y_3d[0]);
+	graph[i].dz=2./(z_3d[1]-z_3d[0]);
+	graph[i].xmin=x_3d[0];
+	graph[i].ymin=y_3d[0];
+	graph[i].zmin=z_3d[0];
+	graph[i].xorg=0.0;
+	graph[i].yorg=0.0;
+	graph[i].yorg=0.0;
+	graph[i].xorgflag=1;
+	graph[i].yorgflag=1;
+	graph[i].zorgflag=1;
+	graph[i].Theta=THETA0;
+	graph[i].Phi=PHI0;
+	graph[i].xshft=0;
+	graph[i].yshft=0;
+	graph[i].zshft=0;
+	graph[i].xlo=MY_XLO;
+	graph[i].ylo=MY_YLO;
+	graph[i].oldxlo=MY_XLO;
+	graph[i].oldylo=MY_YLO;
+	graph[i].xhi=MY_XHI;
+	graph[i].yhi=MY_YHI;
+	graph[i].oldxhi=MY_XHI;
+	graph[i].oldyhi=MY_YHI;
+	MyGraph=&graph[i];
+	make_rot(THETA0,PHI0);
+
   }
 
 
@@ -730,52 +702,52 @@ int i,l;
  graph[i].Nullrestore=graph[l].Nullrestore;
  for(j=0;j<3;j++)
   for(k=0;k<3;k++)
-        graph[i].rm[k][j]=graph[l].rm[k][j];
+		graph[i].rm[k][j]=graph[l].rm[k][j];
   graph[i].nvars=graph[l].nvars;
   for(j=0;j<MAXPERPLOT;j++){
-        graph[i].xv[j]=graph[l].xv[j];
+		graph[i].xv[j]=graph[l].xv[j];
 	graph[i].yv[j]=graph[l].yv[j];
 	graph[i].zv[j]=graph[l].zv[j];
-        graph[i].line[j]=graph[l].line[j];
+		graph[i].line[j]=graph[l].line[j];
 	graph[i].color[j]=graph[l].color[j];
-        }
+		}
 
-    graph[i].ZPlane=graph[l].ZPlane;
-    graph[i].ZView=graph[l].ZView;
-    graph[i].PerspFlag=graph[l].PerspFlag;
-    graph[i].ThreeDFlag=graph[l].ThreeDFlag;
-    graph[i].TimeFlag=graph[l].TimeFlag;
-    graph[i].ColorFlag=graph[l].ColorFlag;
-    graph[i].grtype=graph[l].grtype;
-    graph[i].color_scale=graph[l].color_scale;
-    graph[i].min_scale=graph[l].min_scale;
+	graph[i].ZPlane=graph[l].ZPlane;
+	graph[i].ZView=graph[l].ZView;
+	graph[i].PerspFlag=graph[l].PerspFlag;
+	graph[i].ThreeDFlag=graph[l].ThreeDFlag;
+	graph[i].TimeFlag=graph[l].TimeFlag;
+	graph[i].ColorFlag=graph[l].ColorFlag;
+	graph[i].grtype=graph[l].grtype;
+	graph[i].color_scale=graph[l].color_scale;
+	graph[i].min_scale=graph[l].min_scale;
 
-    graph[i].xmax=graph[l].xmax;
-    graph[i].xmin=graph[l].xmin;
-    graph[i].ymax=graph[l].ymax;
-    graph[i].ymin=graph[l].ymin;
-    graph[i].zmax=graph[l].zmax;
-    graph[i].zmin=graph[l].zmin;
-    graph[i].xbar=graph[l].xbar;
-    graph[i].dx  =graph[l].dx  ;
-    graph[i].ybar=graph[l].ybar;
-    graph[i].dy  =graph[l].dy  ;
-    graph[i].zbar=graph[l].zbar;
-    graph[i].dz  =graph[l].dz  ;
+	graph[i].xmax=graph[l].xmax;
+	graph[i].xmin=graph[l].xmin;
+	graph[i].ymax=graph[l].ymax;
+	graph[i].ymin=graph[l].ymin;
+	graph[i].zmax=graph[l].zmax;
+	graph[i].zmin=graph[l].zmin;
+	graph[i].xbar=graph[l].xbar;
+	graph[i].dx  =graph[l].dx  ;
+	graph[i].ybar=graph[l].ybar;
+	graph[i].dy  =graph[l].dy  ;
+	graph[i].zbar=graph[l].zbar;
+	graph[i].dz  =graph[l].dz  ;
 
-    graph[i].Theta=graph[l].Theta;
-    graph[i].Phi=graph[l].Phi;
-    graph[i].xshft=graph[l].xshft;
-    graph[i].yshft=graph[l].yshft;
-    graph[i].zshft=graph[l].zshft;
-    graph[i].xlo=graph[l].xlo;
-    graph[i].ylo=graph[l].ylo;
-    graph[i].oldxlo=graph[l].oldxlo;
-    graph[i].oldylo=graph[l].oldylo;
-    graph[i].xhi=graph[l].xhi;
-    graph[i].yhi=graph[l].yhi;
-    graph[i].oldxhi=graph[l].oldxhi;
-    graph[i].oldyhi=graph[l].oldyhi;
+	graph[i].Theta=graph[l].Theta;
+	graph[i].Phi=graph[l].Phi;
+	graph[i].xshft=graph[l].xshft;
+	graph[i].yshft=graph[l].yshft;
+	graph[i].zshft=graph[l].zshft;
+	graph[i].xlo=graph[l].xlo;
+	graph[i].ylo=graph[l].ylo;
+	graph[i].oldxlo=graph[l].oldxlo;
+	graph[i].oldylo=graph[l].oldylo;
+	graph[i].xhi=graph[l].xhi;
+	graph[i].yhi=graph[l].yhi;
+	graph[i].oldxhi=graph[l].oldxhi;
+	graph[i].oldyhi=graph[l].oldyhi;
   }
 
 
@@ -832,7 +804,7 @@ double proj3d(double theta,double phi,double x,double y,double z,int in)
 	vnew[i]=0.0;
 	for(j=0;j<3;j++)vnew[i]=vnew[i]+rm[i][j]*vt[j];
 	}
-  
+
  return vnew[in];
 }
 
@@ -858,7 +830,7 @@ float x2p,y2p,z2p,*xp,*yp;
 }
 
 
-void text3d(x,y,z,s)    
+void text3d(x,y,z,s)
 float x,y,z;
 char *s;
 {
@@ -869,7 +841,7 @@ if(threedproj(x,y,z,&xp,&yp)) text_abs(xp,yp,s);
 
 
 
-void text_3d(x,y,z,s)    
+void text_3d(x,y,z,s)
 float x,y,z;
 char *s;
 {
@@ -917,7 +889,7 @@ float xs1,ys1,zs1,xsp1,ysp1,zsp1;
  rot_3dvec(xsp1,ysp1,zsp1,&xsp,&ysp,&zsp);
  if(MyGraph->PerspFlag)pers_line(xs,ys,zs,xsp,ysp,zsp);
  else
-     line_nabs(xs,ys,xsp,ysp);
+	 line_nabs(xs,ys,xsp,ysp);
  }
 
 
@@ -935,7 +907,7 @@ if(!clip3d(x01,y01,z01,x02,y02,z02,&xs1,&ys1,&zs1,&xsp1,&ysp1,&zsp1))return;
  rot_3dvec(xsp1,ysp1,zsp1,&xsp,&ysp,&zsp);
  if(MyGraph->PerspFlag)pers_line(xs,ys,zs,xsp,ysp,zsp);
  else
-     line_abs(xs,ys,xsp,ysp);
+	 line_abs(xs,ys,xsp,ysp);
  }
 
 
@@ -957,7 +929,7 @@ float xs1,ys1,zs1;
  rot_3dvec(xsp1,ysp1,zsp1,&xsp,&ysp,&zsp);
  if(MyGraph->PerspFlag)pers_line(xs,ys,zs,xsp,ysp,zsp);
  else
-     line_abs(xs,ys,xsp,ysp);
+	 line_abs(xs,ys,xsp,ysp);
  }
 
 void pers_line(x,y,z,xp,yp,zp)
@@ -1011,7 +983,7 @@ void pers_line(x,y,z,xp,yp,zp)
 
 
 void rot_3dvec( x,y, z,
-            xp,yp,zp)
+			xp,yp,zp)
 float x,y,z,*xp,*yp,*zp;
 {
  int i,j;
@@ -1046,7 +1018,7 @@ float x1,y1;
   float x_right=XMax;
   float y_top=YMax;
   float y_bottom=YMin;
-   if((x1>x_right)||(x1<x_left)||(y1>y_top)||(y1<y_bottom))return; 
+   if((x1>x_right)||(x1<x_left)||(y1>y_top)||(y1<y_bottom))return;
   scale_to_screen(x1,y1,&xp,&yp);
   point(xp,yp);
 }
@@ -1054,32 +1026,32 @@ float x1,y1;
 void line_nabs(x1_out, y1_out, x2_out, y2_out)
 float x1_out,y1_out,x2_out,y2_out;
 {
-  
-  
-  
+
+
+
 
   int xp1,yp1,xp2,yp2;
 
-    scale_to_screen(x1_out,y1_out,&xp1,&yp1);
-    scale_to_screen(x2_out,y2_out,&xp2,&yp2);
-    line(xp1,yp1,xp2,yp2);
+	scale_to_screen(x1_out,y1_out,&xp1,&yp1);
+	scale_to_screen(x2_out,y2_out,&xp2,&yp2);
+	line(xp1,yp1,xp2,yp2);
   }
 
 void bead_abs(x1,y1)
-     float x1,y1;
+	 float x1,y1;
 {
   int i1,j1;
   float x_left=XMin;
   float x_right=XMax;
   float y_top=YMax;
   float y_bottom=YMin;
-   if((x1>x_right)||(x1<x_left)||(y1>y_top)||(y1<y_bottom))return; 
+   if((x1>x_right)||(x1<x_left)||(y1>y_top)||(y1<y_bottom))return;
   scale_to_screen(x1,y1,&i1,&j1);
   bead(i1,j1);
 }
 
 void frect_abs(x1,y1,w,h)
-     float x1,y1,w,h;
+	 float x1,y1,w,h;
 {
  int i1,i2,j1,j2;
  int ih,iw;
@@ -1101,9 +1073,9 @@ float x1,x2,y1,y2;
 
   int xp1,yp1,xp2,yp2;
   if(clip(x1,x2,y1,y2,&x1_out,&y1_out,&x2_out,&y2_out)){
-    scale_to_screen(x1_out,y1_out,&xp1,&yp1);
-    scale_to_screen(x2_out,y2_out,&xp2,&yp2);
-    line(xp1,yp1,xp2,yp2);
+	scale_to_screen(x1_out,y1_out,&xp1,&yp1);
+	scale_to_screen(x2_out,y2_out,&xp2,&yp2);
+	line(xp1,yp1,xp2,yp2);
   }
 }
 
@@ -1129,29 +1101,29 @@ void fillintext(char *old,char *new)
    c=old[i];
 
    if(c=='\\'){
-     c2=old[i+1];
-     if(c2!='{')goto na;
-     if(c2=='{'){
-       m=0;
-       i=i+2;
-       while(1){
+	 c2=old[i+1];
+	 if(c2!='{')goto na;
+	 if(c2=='{'){
+	   m=0;
+	   i=i+2;
+	   while(1){
 	 c2=old[i];
 	 if(c2=='}'){
 	   name[m]=0;
 	   ans=do_calc(name,&z);
 	   if(ans!=-1){
-	     sprintf(val,"%g",z);
+		 sprintf(val,"%g",z);
 
-	     for(k=0;k<strlen(val);k++){
-	       new[j]=val[k];
-	       j++;
-	     }
+		 for(k=0;k<strlen(val);k++){
+		   new[j]=val[k];
+		   j++;
+		 }
 
-	     break;
+		 break;
 	   }
 	   else {
-	     new[j]='?';
-	     j++;
+		 new[j]='?';
+		 j++;
 	   }
 	 }
 	 else {
@@ -1164,9 +1136,9 @@ void fillintext(char *old,char *new)
 	   new[j+1]=0;
 	   return;
 	 }
-       }
-     } /* ok - we have found matching and are done */
-     goto nc; /* sometimes its just easier to use the !#$$# goto */
+	   }
+	 } /* ok - we have found matching and are done */
+	 goto nc; /* sometimes its just easier to use the !#$$# goto */
    }
  na:
    new[j]=c;
@@ -1174,26 +1146,26 @@ void fillintext(char *old,char *new)
  nc:  /* normal characters */
    i++;
    if(i>=l)
-     break;
+	 break;
  }
  new[j]=0;
  return;
 }
 
 void fancy_text_abs(x,y,old,size,font)
-     float x,y;
-     int size,font;
-     char *old;
+	 float x,y;
+	 int size,font;
+	 char *old;
 {
   int xp,yp;
   char text[256];
   scale_to_screen(x,y,&xp,&yp);
   fillintext(old,text);
-  if(PltFmtFlag==PSFMT)special_put_text_ps(xp,yp,text,size); 
+  if(PltFmtFlag==PSFMT)special_put_text_ps(xp,yp,text,size);
   else if(PltFmtFlag==SVGFMT)special_put_text_svg(xp,yp,text,size);
   else special_put_text_x11(xp,yp,text,size);
 /* fancy_put_text_x11(xp,yp,text,size,font); */
-    
+
 }
 
 
@@ -1201,9 +1173,9 @@ void fancy_text_abs(x,y,old,size,font)
 
 
 int clip3d( x1, y1, z1, x2, y2, z2,
-          x1p, y1p, z1p, x2p, y2p, z2p)
+		  x1p, y1p, z1p, x2p, y2p, z2p)
 float x1, y1, z1, x2, y2, z2,
-         *x1p, *y1p,*z1p,*x2p, *y2p, *z2p;
+		 *x1p, *y1p,*z1p,*x2p, *y2p, *z2p;
 
 
 {
@@ -1366,15 +1338,15 @@ float x1,y1,x2,y2,*x1_out,*y1_out,*x2_out,*y2_out;
    isum=abs(ix1)+abs(ix2)+abs(iy1)+abs(iy2);
    if(isum==0)return(1); /* both inside window so plottem' */
 
-   if(((ix1==ix2)&&(ix1!=0))||((iy1==iy2)&&(iy1!=0)))return(0); 
+   if(((ix1==ix2)&&(ix1!=0))||((iy1==iy2)&&(iy1!=0)))return(0);
    if(ix1==0) goto C2;
    wv=x_left;
    if(ix1>0) wv=x_right;
    *x1_out=wv;
    yhat=(y1-y2)*(wv-x2)/(x1-x2)+y2;
    if((yhat<=y_top)&&(yhat>=y_bottom)) {
-     *y1_out=yhat;
-     iflag=1;
+	 *y1_out=yhat;
+	 iflag=1;
    goto C3; }
    istack=0;
 C2:
@@ -1384,8 +1356,8 @@ C2:
    *y1_out=wh;
    xhat=(x1-x2)*(wh-y2)/(y1-y2)+x2;
    if((xhat<=x_right)&&(xhat>=x_left)) {
-     *x1_out=xhat;
-     iflag=1; }
+	 *x1_out=xhat;
+	 iflag=1; }
    else istack=0;
 C3:
    istack+=iflag;
@@ -1422,20 +1394,20 @@ double *x;
   float dy=6.0*(float)(MyGraph->yhi-MyGraph->ylo)*SYMSIZE;
  int ix=MyGraph->xv[0]-1,iy=MyGraph->yv[0]-1,iz=MyGraph->zv[0]-1;
   if(MyGraph->TimeFlag)return;
-  set_color(0); 
+  set_color(0);
   if(MyGraph->ThreeDFlag)
   {
    dx=6.0*SYMSIZE/MyGraph->dx;
    dy=6.0*SYMSIZE/MyGraph->dy;
    line_3d((float)x[ix]+dx,(float)x[iy],(float)x[iz],
-           (float)x[ix]-dx,(float)x[iy],(float)x[iz]);
+		   (float)x[ix]-dx,(float)x[iy],(float)x[iz]);
    line_3d((float)x[ix],(float)x[iy]+dy,(float)x[iz],
-           (float)x[ix],(float)x[iy]-dy,(float)x[iz]);
+		   (float)x[ix],(float)x[iy]-dy,(float)x[iz]);
   return;
   }
   draw_symbol((float)x[ix],(float)x[iy],SYMSIZE,type);
   point_abs((float)x[ix],(float)x[iy]);
- 
+
 }
 
 void draw_symbol( x, y, size,my_symb)
@@ -1446,41 +1418,41 @@ int my_symb;
  float dy=(float)(MyGraph->yhi-MyGraph->ylo)*size;
  static int sym_dir[4][48] = {
  /*          box              */
-    {0, -6, -6,1, 12,  0,1,  0, 12,1,-12,  0,
-    1,  0,-12,3,  0,  0,3,  0,  0,3,  0,  0,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0},
+	{0, -6, -6,1, 12,  0,1,  0, 12,1,-12,  0,
+	1,  0,-12,3,  0,  0,3,  0,  0,3,  0,  0,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0},
 
  /*          triangle         */
-    {0, -6, -6,1, 12,  0,1, -6, 12,1, -6,-12,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0},
+	{0, -6, -6,1, 12,  0,1, -6, 12,1, -6,-12,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0},
 
  /*          cross            */
-    {0, -6,  0,1, 12,  0,0, -6, -6,1,  0, 12,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
-    3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0},
+	{0, -6,  0,1, 12,  0,0, -6, -6,1,  0, 12,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0,
+	3,  0,  0,3,  0,  0,3,  0,  0,3,  0,  0},
 
  /*          circle           */
-    {0,  6,  0,1, -1,  3,1, -2,  2,1, -3,  1,
-    1, -3, -1,1, -2, -2,1, -1, -3,1,  1, -3,
-    1,  2, -2,1,  3, -1,1,  3,  1,1,  2,  2,
-    1,  1,  3,3,  0,  0,3,  0,  0,3,  0,  0},
-    };
+	{0,  6,  0,1, -1,  3,1, -2,  2,1, -3,  1,
+	1, -3, -1,1, -2, -2,1, -1, -3,1,  1, -3,
+	1,  2, -2,1,  3, -1,1,  3,  1,1,  2,  2,
+	1,  1,  3,3,  0,  0,3,  0,  0,3,  0,  0},
+	};
   int ind=0,pen=0;
   float x1=x,y1=y,x2,y2;
- 
+
    while(pen!=3)
    {
-    x2=sym_dir[my_symb][3*ind+1]*dx+x1;
-    y2=sym_dir[my_symb][3*ind+2]*dy+y1;
-    pen=sym_dir[my_symb][3*ind];
-    if(pen!=0) line_abs(x1,y1,x2,y2);
-    x1=x2;
-    y1=y2;
-    ind++;
+	x2=sym_dir[my_symb][3*ind+1]*dx+x1;
+	y2=sym_dir[my_symb][3*ind+2]*dy+y1;
+	pen=sym_dir[my_symb][3*ind];
+	if(pen!=0) line_abs(x1,y1,x2,y2);
+	x1=x2;
+	y1=y2;
+	ind++;
    }
 
 }
@@ -1506,8 +1478,8 @@ int my_symb;
 
 
 
-	
-   
+
+
 
 
 

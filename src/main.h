@@ -19,7 +19,9 @@ extern float xppvermin;
 extern int CURY_OFF;
 extern int CURY_OFFb;
 extern int DCURX;
+extern int DCURXs;
 extern int DCURY;
+extern int DCURYs;
 extern int SCALEX;
 extern int SCALEY;
 extern int screen;
@@ -37,17 +39,18 @@ extern unsigned int MyBackColor;
 extern unsigned int MyForeColor;
 extern unsigned int MyDrawWinColor;
 extern unsigned int MyMainWinColor;
-extern OptionsSet notAlreadySet;
-
 
 extern Display *display;
 extern GC gc;
 extern GC font_gc;
 extern GC gc_graph;
 extern GC small_gc;
+extern OptionsSet notAlreadySet;
 extern Window command_pop;
 extern Window draw_win;
 extern Window info_pop;
+extern XFontStruct *big_font;
+extern XFontStruct *small_font;
 
 /* --- Functions --- */
 void do_main(int argc, char **argv);

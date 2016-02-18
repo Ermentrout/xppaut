@@ -6,6 +6,7 @@
 
  /* --- Data --- */
 extern CURVE frz[MAXFRZ];
+extern GRAPH graph[MAXPOP];
 extern GRAPH *MyGraph;
 
 /* --- Functions --- */
