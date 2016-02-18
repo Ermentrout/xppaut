@@ -25,6 +25,7 @@ extern int FIX_VAR;
 extern int N_plist;
 extern int NCON;
 extern int NCON_START;
+extern int NEQ_MIN;
 extern int NODE;
 extern int NSYM_START;
 
