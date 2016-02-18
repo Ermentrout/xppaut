@@ -2,16 +2,19 @@
 #define XPPAUT_MY_PS_H
 
 /* --- Data --- */
+extern char PS_FONT[100];
+
 extern int LastPSX;
 extern int LastPSY;
 extern int LastPtLine;
 extern int NoBreakLine;
 extern int PltFmtFlag;
 extern int PS_Color;
+extern int PS_Port;
 extern int PSColorFlag;
-extern char PS_FONT[100];
 extern int PS_FONTSIZE;
 extern int PSLines;
+
 extern double PS_LW;
 
 /* --- Functions --- */

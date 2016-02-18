@@ -207,6 +207,7 @@ extern int xorfix;
 extern char delay_string[MAXODE][80];
 extern char options[100];
 extern char this_file[XPP_MAX_NAME];
+extern char this_internset[XPP_MAX_NAME];
 
 extern double ATOLER;
 extern double BOUND;
@@ -217,6 +218,11 @@ extern double NEWT_ERR;
 extern double T0;
 extern double TOLER;
 extern double last_ic[MAXODE];
+extern double x_3d[2];
+extern double y_3d[2];
+extern double z_3d[2];
+
+
 extern INTERN_SET intern_set[MAX_INTERN_SET];
 extern FILE *logfile;
 

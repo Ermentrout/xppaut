@@ -8,15 +8,29 @@
 extern int allwinvis;
 extern char anifile[XPP_MAX_NAME];
 extern char batchout[256];
+extern char big_font_name[100];
+extern char PlotFormat[100];
+extern char small_font_name[100];
+extern char UserOUTFILE[256];
+
+extern float xppvermaj;
+extern float xppvermin;
+
 extern int CURY_OFF;
 extern int CURY_OFFb;
 extern int DCURX;
 extern int DCURY;
 extern int SCALEX;
 extern int SCALEY;
+extern int screen;
 extern int tfBell;
-extern char big_font_name[100];
-extern char small_font_name[100];
+extern int TrueColorFlag;
+extern int use_ani_file;
+extern int use_intern_sets;
+extern int XPPBatch;
+extern int XPPVERBOSE;
+extern int Xup;
+
 extern unsigned int GrFore;
 extern unsigned int GrBack;
 extern unsigned int MyBackColor;
@@ -24,22 +38,13 @@ extern unsigned int MyForeColor;
 extern unsigned int MyDrawWinColor;
 extern unsigned int MyMainWinColor;
 extern OptionsSet notAlreadySet;
-extern int TrueColorFlag;
-extern int use_ani_file;
-extern int use_intern_sets;
-extern char UserOUTFILE[256];
-extern int XPPBatch;
-extern int XPPVERBOSE;
-extern int Xup;
-extern float xppvermaj;
-extern float xppvermin;
+
 
 extern Display *display;
 extern GC gc;
 extern GC font_gc;
 extern GC gc_graph;
 extern GC small_gc;
-extern int screen;
 extern Window command_pop;
 extern Window draw_win;
 extern Window info_pop;

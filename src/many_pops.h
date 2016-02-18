@@ -5,6 +5,7 @@
 #include "struct.h"
 
  /* --- Data --- */
+extern CURVE frz[MAXFRZ];
 extern GRAPH *MyGraph;
 
 /* --- Functions --- */
