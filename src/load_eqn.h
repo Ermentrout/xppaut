@@ -6,12 +6,12 @@
 
 /* --- Macros --- */
 /*
-The acutual max filename length is determined by the 
+The acutual max filename length is determined by the
 FILENAME_MAX (see <stdio.h>), and usually 4096 -- but
-this is huge and usually overkill.  On the otherhand 
+this is huge and usually overkill.  On the otherhand
 the old Xpp default string buffer size of 100 is a bit
-restricitive for lengths of filenames. You could also 
-set this define in the Makefile or at compile time to 
+restricitive for lengths of filenames. You could also
+set this define in the Makefile or at compile time to
 override the below definition.
 */
 
@@ -56,7 +56,7 @@ typedef struct {
    int XLO;
    int XHI;
    int YLO;
-   int YHI;  
+   int YHI;
    int UserBlack;
    int UserWhite;
    int UserMainWinColor;
@@ -102,7 +102,7 @@ typedef struct {
    int ZMAX;
    int POIVAR;
    int OUTPUT;
-   int POISGN;  
+   int POISGN;
    int POIEXT;
    int POISTOP;
    int STOCH;
@@ -140,7 +140,7 @@ typedef struct {
    int AUTOYMIN;
    int AUTOVAR;
    int PS_FONT;
-   int PS_LW;   
+   int PS_LW;
    int PS_FSIZE;
    int PS_COLOR;
    int FOREVER;
@@ -191,13 +191,17 @@ typedef struct {
 
 /* --- Data --- */
 extern int BVP_FLAG;
+extern int ENDSING;
 extern int EVEC_ITER;
 extern int got_file;
 extern int METHOD;
 extern int NEQ;
 extern int Nintern_set;
 extern int NJMP;
+extern int PAR_FOL;
+extern int PAUSER;
 extern int RunImmediately;
+extern int SHOOT;
 extern int xorfix;
 
 extern char delay_string[MAXODE][80];
