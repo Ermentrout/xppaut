@@ -37,6 +37,7 @@ extern int CURY_OFFb;
 extern int DCURX;
 extern int DCURXs;
 extern int DCURY;
+extern int DCURYb;
 extern int DCURYs;
 extern int DoTutorial;
 extern int OVERRIDE_LOGFILE;

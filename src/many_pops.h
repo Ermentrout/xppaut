@@ -4,12 +4,29 @@
 #include <X11/Xlib.h>
 #include "struct.h"
 
+/* --- Types --- */
+typedef struct {
+  float xs,ys,xe,ye;
+  double size;
+  short use;
+  Window w;
+  int type, color;
+} GROB;
+
+typedef struct {
+  int type,color;
+  int number,start,skip;
+  double size;
+} MARKINFO;
+
  /* --- Data --- */
 extern int ActiveWinList[MAXPOP];
 extern int current_pop;
 extern int num_pops;
 extern int SimulPlotFlag;
 
+extern GROB grob[];
+extern MARKINFO markinfo;
 extern CURVE frz[MAXFRZ];
 extern GRAPH graph[MAXPOP];
 extern GRAPH *MyGraph;

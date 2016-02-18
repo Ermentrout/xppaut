@@ -1,9 +1,32 @@
+#ifndef XPPAUT_TABULAR_H
+#define XPPAUT_TABULAR_H
 
-#ifndef _tabular_h_
-#define _tabular_h_
+#include "xpplim.h"
 
+/* --- Types --- */
+/* flag=0 if virgin array,
+ * flag=1 if already allocated;
+ * flag=2 for function
+ *
+ * interp=0 for normal interpolation,
+ * interp=1 for 'step'
+ * interp=2 for cubic spline table
+ *
+ * xyvals=1 if both x and y vals are needed
+ * (xyvals=0 is faster lookup )
+ */
+typedef struct {
+  double xlo,xhi,dx;
+  double *y,*x;
+  int n,flag,interp,autoeval;
+  int xyvals;
+  char filename[128],name[12];
+} TABULAR;
 
-/* tabular.c */
+/* --- Data --- */
+extern TABULAR my_table[MAX_TAB];
+
+/* --- Functions --- */
 void set_auto_eval_flags(int f);
 void set_table_name(char *name, int index);
 void view_table(int index);
@@ -19,6 +42,5 @@ int create_fun_table(int npts, double xlo, double xhi, char *formula, int index)
 int load_table(char *filename, int index);
 int get_lookup_len(int i);
 
-
-#endif
+#endif /* XPPAUT_TABULAR_H */
 
