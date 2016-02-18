@@ -33,6 +33,7 @@ extern int NLINES;
 extern int NODE;
 extern int NSYM_START;
 extern int NUPAR;
+extern int PrimeStart;
 
 extern int *my_ode[MAXODE];
 extern int *plotlist;

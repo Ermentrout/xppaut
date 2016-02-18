@@ -1,5 +1,7 @@
-#ifndef XPPAUTO_SIMPLENET_H
-#define XPPAUTO_SIMPLENET_H
+#ifndef XPPAUT_SIMPLENET_H
+#define XPPAUT_SIMPLENET_H
+
+/* --- Functions --- */
 int get_vector_info();
 double net_interp(double x, int i);
 double network_value(double x, int i);
@@ -17,5 +19,4 @@ void fft_conv(int it, int n, double *values, double *yy, double *fftr, double *f
 int gilparse(char *s, int *ind, int *nn);
 int g_namelist(char *s, char *root, int *flag, int *i1, int *i2);
 
-
-#endif /* XPPAUTO_SIMPLENET_H */
+#endif /* XPPAUT_SIMPLENET_H */

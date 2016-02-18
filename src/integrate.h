@@ -57,6 +57,7 @@ extern double MyTime;
 extern int DelayErr;
 extern int MakePlotFlag;
 extern int MyStart;
+extern int RANGE_FLAG;
 extern int SuppressBounds;
 extern int SuppressOut;
 

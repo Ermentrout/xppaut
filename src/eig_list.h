@@ -1,5 +1,5 @@
-#ifndef XPP_EIG_LIST_H
-#define XPP_EIG_LIST_H
+#ifndef XPPAUT_EIG_LIST_H
+#define XPPAUT_EIG_LIST_H
 
 #include <X11/Xlib.h>
 
@@ -18,4 +18,4 @@ void eq_box_button(Window w);
 void create_eq_box(int cp, int cm, int rp, int rm, int im, double *y, double *ev, int n);
 void draw_eq_box(Window w);
 
-#endif /* XPP_EIG_LIST_H */
+#endif /* XPPAUT_EIG_LIST_H */

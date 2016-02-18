@@ -1,5 +1,5 @@
-#ifndef XPP_EDIT_RHS_H
-#define XPP_EDIT_RHS_H
+#ifndef XPPAUT_EDIT_RHS_H
+#define XPPAUT_EDIT_RHS_H
 
 
 #include <X11/Xlib.h>
@@ -18,8 +18,8 @@
 #define RESET_ALL 4
 #define MAXUFUN 50
 
-/*  This is a edit box widget which handles a list of 
-	editable strings  
+/*  This is a edit box widget which handles a list of
+	editable strings
  */
 
 /* --- Types --- */
@@ -27,8 +27,8 @@ typedef struct {
 		Window base,ok,cancel,reset;
 		Window win[MAX_N_EBOX];
 		char name[MAX_N_EBOX][MAX_LEN_EBOX],
-		     value[MAX_N_EBOX][MAX_LEN_EBOX],
-		     rval[MAX_N_EBOX][MAX_LEN_EBOX];
+			 value[MAX_N_EBOX][MAX_LEN_EBOX],
+			 rval[MAX_N_EBOX][MAX_LEN_EBOX];
 		int n,hot;
 } EDIT_BOX;
 
@@ -46,4 +46,4 @@ void user_fun_info(FILE *fp);
 void edit_functions(void);
 int save_as(void);
 
-#endif /* XPP_EDIT_RHS_H */
+#endif /* XPPAUT_EDIT_RHS_H */

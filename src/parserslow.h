@@ -1,5 +1,5 @@
-#ifndef XPP_PARSERSLOW_H
-#define XPP_PARSERSLOW_H
+#ifndef XPPAUT_PARSERSLOW_H
+#define XPPAUT_PARSERSLOW_H
 
 #include "volterra.h"
 #include "xpplim.h"
@@ -75,4 +75,4 @@ void set_ivar(int i, double value);
 double get_ivar(int i);
 int do_num(char *source, char *num, double *value, int *ind);
 void convert(char *source, char *dest);
-#endif /* XPP_PARSERSLOW_H */
+#endif /* XPPAUT_PARSERSLOW_H */
