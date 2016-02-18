@@ -218,6 +218,7 @@ extern double T0;
 extern double TOLER;
 extern double last_ic[MAXODE];
 extern INTERN_SET intern_set[MAX_INTERN_SET];
+extern FILE *logfile;
 
 /* --- Functions --- */
 void dump_torus(FILE *fp, int f);

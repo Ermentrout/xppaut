@@ -27,7 +27,7 @@
 #include "storage.h"
 #include "tabular.h"
 
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "xpplim.h"
@@ -74,7 +74,6 @@ extern int UserGradients;
 extern int UserMinWidth;
 extern int UserMinHeight;
 extern int XPPVERBOSE;
-extern FILE *logfile;
 
 extern int OVERRIDE_QUIET;
 extern int OVERRIDE_LOGFILE;
@@ -108,13 +107,13 @@ INTERN_SET intern_set[MAX_INTERN_SET];
 int Nintern_set=0;
 
 extern int STOCH_FLAG;
-extern char uvar_names[MAXODE][12]; 
+extern char uvar_names[MAXODE][12];
 extern struct {
-         char item[30],item2[30];
+		 char item[30],item2[30];
 	 int steps,steps2,reset,oldic,index,index2,cycle,type,type2,movie;
 	 double plow,phigh,plow2,phigh2;
-         int rtype;
-       } range;
+		 int rtype;
+	   } range;
 
 extern int custom_color;
 extern int del_stab_flag;
@@ -128,13 +127,13 @@ extern int DoTutorial;
 double atof();
 char *get_first();
 char *get_next();
-/*   this file has all of the phaseplane parameters defined   
-     and created.  All other files should use external stuff
-    to use them. (Except eqn forming stuff)
+/*   this file has all of the phaseplane parameters defined
+	 and created.  All other files should use external stuff
+	to use them. (Except eqn forming stuff)
  */
 
 extern char batchout[256];
-extern int batch_range; 
+extern int batch_range;
  double last_ic[MAXODE];
 extern char PlotFormat[100];
  extern char big_font_name[100],small_font_name[100];
@@ -164,7 +163,7 @@ int (*solver)();
  double TOR_PERIOD=6.2831853071795864770;
  int TORUS=0;
  int NEQ;
- char options[100];  
+ char options[100];
 
 /*   Numerical stuff ....   */
 
@@ -236,7 +235,7 @@ void notBothOptions(OptionsSet nasA,OptionsSet nasB)
    nasA.XLO = (nasA.XLO & nasB.XLO);
    nasA.XHI = (nasA.XHI & nasB.XHI);
    nasA.YLO = (nasA.YLO & nasB.YLO);
-   nasA.YHI = (nasA.YHI & nasB.YHI);  
+   nasA.YHI = (nasA.YHI & nasB.YHI);
    nasA.UserBlack = (nasA.UserBlack & nasB.UserBlack);
    nasA.UserWhite = (nasA.UserWhite & nasB.UserWhite);
    nasA.UserMainWinColor = (nasA.UserMainWinColor & nasB.UserMainWinColor);
@@ -282,7 +281,7 @@ void notBothOptions(OptionsSet nasA,OptionsSet nasB)
    nasA.ZMAX = (nasA.ZMAX & nasB.ZMAX);
    nasA.POIVAR = (nasA.POIVAR & nasB.POIVAR);
    nasA.OUTPUT = (nasA.OUTPUT & nasB.OUTPUT);
-   nasA.POISGN = (nasA.POISGN & nasB.POISGN);  
+   nasA.POISGN = (nasA.POISGN & nasB.POISGN);
    nasA.POIEXT = (nasA.POIEXT & nasB.POIEXT);
    nasA.POISTOP = (nasA.POISTOP & nasB.POISTOP);
    nasA.STOCH = (nasA.STOCH & nasB.STOCH);
@@ -320,12 +319,12 @@ void notBothOptions(OptionsSet nasA,OptionsSet nasB)
    nasA.AUTOYMIN = (nasA.AUTOYMIN & nasB.AUTOYMIN);
    nasA.AUTOVAR = (nasA.AUTOVAR & nasB.AUTOVAR);
    nasA.PS_FONT = (nasA.PS_FONT & nasB.PS_FONT);
-   nasA.PS_LW = (nasA.PS_LW  & nasB.PS_LW );   
+   nasA.PS_LW = (nasA.PS_LW  & nasB.PS_LW );
    nasA.PS_FSIZE = (nasA.PS_FSIZE & nasB.PS_FSIZE);
    nasA.PS_COLOR = (nasA.PS_COLOR & nasB.PS_COLOR);
-   nasA.FOREVER = (nasA.FOREVER & nasB.FOREVER); 
-   nasA.BVP_TOL = (nasA.BVP_TOL & nasB.BVP_TOL); 
-   nasA.BVP_EPS = (nasA.BVP_EPS & nasB.BVP_EPS); 
+   nasA.FOREVER = (nasA.FOREVER & nasB.FOREVER);
+   nasA.BVP_TOL = (nasA.BVP_TOL & nasB.BVP_TOL);
+   nasA.BVP_EPS = (nasA.BVP_EPS & nasB.BVP_EPS);
    nasA.BVP_MAXIT = (nasA.BVP_MAXIT & nasB.BVP_MAXIT);
    nasA.BVP_FLAG = (nasA.BVP_FLAG & nasB.BVP_FLAG);
    nasA.SOS = (nasA.SOS & nasB.SOS);
@@ -342,23 +341,23 @@ void notBothOptions(OptionsSet nasA,OptionsSet nasB)
    nasA.NULL_HERE = (nasA.NULL_HERE & nasB.NULL_HERE);
 }
 
-   
+
 
 void dump_torus(fp,f)
-     FILE *fp;
-     int f;
+	 FILE *fp;
+	 int f;
 {
   int i;
   char bob[256];
   if(f==READEM)
-    fgets(bob,255,fp);
+	fgets(bob,255,fp);
   else
-    fprintf(fp,"# Torus information \n");
+	fprintf(fp,"# Torus information \n");
   io_int(&TORUS,fp,f," Torus flag 1=ON");
   io_double(&TOR_PERIOD,fp,f,"Torus period");
   if(TORUS){
-    for(i=0;i<NEQ;i++)
-      io_int(&itor[i],fp,f,uvar_names[i]);
+	for(i=0;i<NEQ;i++)
+	  io_int(&itor[i],fp,f,uvar_names[i]);
   }
 }
 
@@ -383,45 +382,45 @@ void load_eqn()
  if (got_file==1&&(std==0) &&(dp=(struct dirent*)opendir(this_file))!=NULL)
   {
 
-  	no_eqn = 1;
-	okay=0; 	
-	       change_directory(this_file);
-	       okay=make_eqn();
-	       return;
-	
+	no_eqn = 1;
+	okay=0;
+		   change_directory(this_file);
+		   okay=make_eqn();
+		   return;
+
   }
   else
   {
   if(got_file==1&&(fptr=fopen(this_file,"r"))!=NULL)
   {
-    if(std==1)sprintf(this_file,"console");
+	if(std==1)sprintf(this_file,"console");
    okay=get_eqn(fptr);
    if(std==0)
-     fclose(fptr);
-  
+	 fclose(fptr);
+
    if(okay==1)no_eqn=0;
   }
  }
  if(no_eqn)
    {
-     while(okay==0)
-       {
-       	 struct dirent *dp;
+	 while(okay==0)
+	   {
+		 struct dirent *dp;
 	 char odeclassrm[256];
 	 if (getenv("XPPSTART")!=NULL)
 	 {
-	      
-	 	sprintf(odeclassrm,"%s",getenv("XPPSTART"));
-	
+
+		sprintf(odeclassrm,"%s",getenv("XPPSTART"));
+
 		if ((dp=(struct dirent*)opendir(odeclassrm))!=NULL)
 		{
-	 	       change_directory(odeclassrm);
+			   change_directory(odeclassrm);
 		}
 	 }
-	 
+
 	 okay=make_eqn();
-       } 
-   }   
+	   }
+   }
 }
 
 /*
@@ -444,37 +443,37 @@ load_eqn()
   struct dirent *dp;
   if(got_file==1)
   {
-  	if ((dp=opendir(this_file))!=NULL)
+	if ((dp=opendir(this_file))!=NULL)
 	{
-		
+
 		change_directory(this_file);
 		no_eqn=1;
 	}
 	else
 	{
 		if (fptr=fopen(this_file,"r")!=NULL)
-  		{ 
+		{
 		plintf("Here we are 2\n");
 			if(std==1)sprintf(this_file,"console");
-   		plintf("Here we are 4\n");
-   			okay=get_eqn(fptr);
+		plintf("Here we are 4\n");
+			okay=get_eqn(fptr);
 		plintf("Here we are 3\n");
 			if(std==0)
-     			  fclose(fptr); 
-			  
-		        if(okay==1)no_eqn=0;
+				  fclose(fptr);
+
+				if(okay==1)no_eqn=0;
 		}
 	}
   }
   if(no_eqn)
    {
-     while(okay==0)
-       {
+	 while(okay==0)
+	   {
 	 okay=make_eqn();
-       }
-     
+	   }
+
    }
-   
+
 }
 
 */
@@ -485,9 +484,9 @@ void set_X_vals()
 	/*
 	Set up the default look here.
 	*/
-	
+
 	tfBell=1;
- 	/*PaperWhite=0;*/
+	/*PaperWhite=0;*/
 	/*
 	No gradients tends to look cleaner but some
 	may prefer gradients improved contrast/readability.
@@ -497,37 +496,37 @@ void set_X_vals()
 	/*fixed is the new X11 default fixed font. 9x15 is dead and gone.
 	*/
 	if (strlen(big_font_name)==0)
- 	{
+	{
 		strcpy(big_font_name,"fixed");
 	}
-	
+
 	if (strlen(small_font_name)==0)
- 	{
- 		strcpy(small_font_name,"6x13");
+	{
+		strcpy(small_font_name,"6x13");
 	}
-	
+
 	if (strlen(UserBlack)==0)
- 	{
-        	sprintf(UserBlack,"#%s","000000");
+	{
+			sprintf(UserBlack,"#%s","000000");
 	}
-	
+
 	if (strlen(UserWhite)==0)
- 	{
+	{
 		sprintf(UserWhite,"#%s","EDE9E3");
 	}
-	
+
 	if (strlen(UserMainWinColor)==0)
- 	{
+	{
 		sprintf(UserMainWinColor,"#%s","808080");
 	}
-	
+
 	if (strlen(UserDrawWinColor)==0)
- 	{
+	{
 		sprintf(UserDrawWinColor,"#%s","FFFFFF");
 	}
-	
+
 	if (UserGradients<0)
- 	{
+	{
 		UserGradients=1;
 	}
 }
@@ -537,9 +536,9 @@ void set_X_vals()
 void set_all_vals()
 {
  int i;
- 
+
  FILE *fp;
- 
+
  if (notAlreadySet.TIMEPLOT){TIMPLOT=1;notAlreadySet.TIMEPLOT=0;};
  if (notAlreadySet.FOREVER){FOREVER=0;notAlreadySet.FOREVER=0;};
  if (notAlreadySet.BVP_TOL){BVP_TOL=1.e-5;notAlreadySet.BVP_TOL=0;};
@@ -589,30 +588,30 @@ void set_all_vals()
  if (notAlreadySet.XHI){MY_XHI=20.0;x_3d[1]=MY_XHI;notAlreadySet.XHI=0;notAlreadySet.XMAX=0;};
  if (notAlreadySet.YLO){MY_YLO=-1;y_3d[0]=MY_YLO;notAlreadySet.YLO=0;notAlreadySet.YMIN=0;};
  if (notAlreadySet.YHI){MY_YHI=1;y_3d[0]=MY_YHI;notAlreadySet.YHI=0;notAlreadySet.YMAX=0;};
- 
+
  if (notAlreadySet.BOUND){BOUND=100;notAlreadySet.BOUND=0;};
  if (notAlreadySet.MAXSTOR){MAXSTOR=5000;notAlreadySet.MAXSTOR=0;};
  my_pl_wid=10000. ;
  my_pl_ht=7000.  ;
 
- /* TORUS=0; */ 
+ /* TORUS=0; */
  if (notAlreadySet.T0){T0=0.0;notAlreadySet.T0=0;};
  if (notAlreadySet.TRANS){TRANS=0.0;notAlreadySet.TRANS=0;};
  if (notAlreadySet.DT){DELTA_T=.05;notAlreadySet.DT=0;};
- 
+
  if (notAlreadySet.XMIN){x_3d[0]=-12;notAlreadySet.XMIN=0;notAlreadySet.XLO=0;};
  if (notAlreadySet.XMAX){x_3d[1]=12;notAlreadySet.XMAX=0;notAlreadySet.XHI=0;};
  if (notAlreadySet.YMIN){y_3d[0]=-12;notAlreadySet.YMIN=0;notAlreadySet.YLO=0;};
  if (notAlreadySet.YMAX){y_3d[1]=12;notAlreadySet.YMAX=0;notAlreadySet.YHI=0;};
  if (notAlreadySet.ZMIN){z_3d[0]=-12;notAlreadySet.ZMIN=0;};
  if (notAlreadySet.ZMAX){z_3d[1]=12;notAlreadySet.ZMAX=0;};
- 
+
  if (notAlreadySet.TEND){TEND=20.00;notAlreadySet.TEND=0;};
  TOR_PERIOD=6.2831853071795864770;
  if (notAlreadySet.IXPLT){IXPLT=0;notAlreadySet.IXPLT=0;}
  if (notAlreadySet.IYPLT){IYPLT=1;notAlreadySet.IYPLT=0;}
  if (notAlreadySet.IZPLT){IZPLT=1;notAlreadySet.IZPLT=0;}
- 
+
  if (notAlreadySet.NPLOT){
    if (NEQ>2){if(notAlreadySet.IZPLT){IZPLT=2;}}
  NPltV=1;
@@ -629,13 +628,13 @@ void set_all_vals()
  }
  /* internal options go here  */
  set_internopts(NULL);
- 
+
 
  if((fp=fopen(options,"r"))!=NULL)
  {
   read_defaults(fp);
   fclose(fp);
- } 
+ }
 
 
  init_range();
@@ -643,7 +642,7 @@ void set_all_vals()
  init_my_aplot();
  init_txtview();
 
-  chk_volterra();  
+  chk_volterra();
 
 /*                           */
 
@@ -651,7 +650,7 @@ void set_all_vals()
  if(IYPLT>NEQ)IYPLT=NEQ;
  if(IXPLT==0||IYPLT==0)
    TIMPLOT=1;
- else 
+ else
    TIMPLOT=0;
  if(x_3d[0]>=x_3d[1]){
    x_3d[0]=-1;
@@ -678,7 +677,7 @@ if(MY_YLO>=MY_YHI){
    y_3d[0]=MY_YLO;
    x_3d[1]=MY_XHI;
    y_3d[1]=MY_YHI;
- } 
+ }
  init_stor(MAXSTOR,NEQ+1);
  if(AXES>=5)PLOT_3D=1;
  chk_delay(); /* check for delay allocation */
@@ -687,7 +686,7 @@ if(MY_YLO>=MY_YHI){
  alloc_v_memory();  /* allocate stuff for volterra equations */
  alloc_meth();
  arr_ic_start(); /* take care of all predefined array ics */
- 
+
 
 }
 
@@ -701,19 +700,19 @@ void read_defaults(fp)
  ptr=get_first(bob," ");
  if (notAlreadySet.BIG_FONT_NAME)
  {
- 	strcpy(big_font_name,ptr);
+	strcpy(big_font_name,ptr);
 	notAlreadySet.BIG_FONT_NAME=0;
  }
- 
+
  fgets(bob,80,fp);
  ptr=get_first(bob," ");
  if (notAlreadySet.SMALL_FONT_NAME)
  {
-        
- 	strcpy(small_font_name,ptr);
+
+	strcpy(small_font_name,ptr);
 	notAlreadySet.SMALL_FONT_NAME=0;
  }
- 
+
  if (notAlreadySet.PaperWhite){fil_int(fp,&PaperWhite);notAlreadySet.PaperWhite=0;};
  if (notAlreadySet.IXPLT){fil_int(fp,&IXPLT);notAlreadySet.IXPLT=0;};
  if (notAlreadySet.IYPLT){fil_int(fp,&IYPLT);notAlreadySet.IYPLT=0;};
@@ -739,7 +738,7 @@ void read_defaults(fp)
  if (notAlreadySet.YLO){fil_flt(fp,&MY_YLO);notAlreadySet.YLO=0;};
  if (notAlreadySet.YHI){fil_flt(fp,&MY_YHI);notAlreadySet.YHI=0;};
 
- 
+
 }
 
 void fil_flt(fpt,val)
@@ -770,14 +769,14 @@ FILE *fpt;
 
 
 void add_intern_set(name,does)
-     char *name,*does;
+	 char *name,*does;
 {
   char bob[256],ch;
   int i,n,j=Nintern_set,k=0;
   if(Nintern_set>=MAX_INTERN_SET){
    plintf(" %s not added -- too many must be less than %d \n",
 	   name,MAX_INTERN_SET);
-    return;
+	return;
   }
   intern_set[j].use=1;
   n=strlen(name);
@@ -788,17 +787,17 @@ void add_intern_set(name,does)
   bob[1]=' ';
   k=2;
   for(i=0;i<n;i++){
-    ch=does[i];
-    if(ch==','){
-      bob[k]=' ';
-      k++;
-    }
-    if(ch=='}'||ch=='{')
-      continue;
-    if(ch!=','){
-      bob[k]=ch;
-      k++;
-    }
+	ch=does[i];
+	if(ch==','){
+	  bob[k]=' ';
+	  k++;
+	}
+	if(ch=='}'||ch=='{')
+	  continue;
+	if(ch!=','){
+	  bob[k]=ch;
+	  k++;
+	}
   }
   bob[k]=0;
   intern_set[j].does=(char *)malloc(n+3);
@@ -807,7 +806,7 @@ void add_intern_set(name,does)
 	 intern_set[j].name,intern_set[j].does);
   Nintern_set++;
 }
-      
+
 
 void extract_action(char *ptr)
 {
@@ -819,24 +818,24 @@ void extract_action(char *ptr)
   junk=get_first(tmp," ");
   if (junk == NULL)
   {
-  	/*No more tokens--should this throw an error?*/
+	/*No more tokens--should this throw an error?*/
   }
-  
+
   while((mystring=get_next(" ,;\n"))!=NULL){
    split_apart(mystring,name,value);
-      if(strlen(name)>0&&strlen(value)>0)
-       do_intern_set(name,value);
-    } 
+	  if(strlen(name)>0&&strlen(value)>0)
+	   do_intern_set(name,value);
+	}
 }
 
 void extract_internset(j)
-     int j;
+	 int j;
 {
   extract_action(intern_set[j].does);
 }
 
 void do_intern_set(name1,value)
-     char *name1,*value;
+	 char *name1,*value;
 {
   int i;
   char name[20];
@@ -844,16 +843,16 @@ void do_intern_set(name1,value)
 
   i=find_user_name(IC,name);
   if(i>-1){
-    last_ic[i]=atof(value);
+	last_ic[i]=atof(value);
   }
   else {
-    i=find_user_name(PARAM,name);
-    if(i>-1){
-      set_val(name,atof(value));
-    }
-    else {
-      /*     set_option(name,value,0,NULL); */
-      set_option(name,value,1,NULL);
+	i=find_user_name(PARAM,name);
+	if(i>-1){
+	  set_val(name,atof(value));
+	}
+	else {
+	  /*     set_option(name,value,0,NULL); */
+	  set_option(name,value,1,NULL);
    }
   }
  alloc_meth();
@@ -862,7 +861,7 @@ void do_intern_set(name1,value)
 /*  ODE options stuff  here !!   */
 
 int msc(s1,s2)
-     char *s1,*s2;
+	 char *s1,*s2;
 {
 
  int n=strlen(s1),i;
@@ -870,8 +869,8 @@ int msc(s1,s2)
  for(i=0;i<n;i++)
    if(s1[i]!=s2[i])return(0);
  return(1);
-}  
-  
+}
+
 void set_internopts(OptionsSet *mask)
 {
   int i;
@@ -879,84 +878,84 @@ void set_internopts(OptionsSet *mask)
   if(Nopts==0)return;
  /*  parsem here   */
   for(i=0;i<Nopts;i++){
-    ptr=interopt[i];
-    junk=get_first(ptr," ,");
-    if (junk == NULL)
-    {
-    	/*No more tokens.  Should this throw an error?*/
-    }	
-    while((mystring=get_next(" ,\n\r"))!=NULL)
-    {
-      split_apart(mystring,name,value);
-      if(strlen(name)>0&&strlen(value)>0)
-      {
-        /*
+	ptr=interopt[i];
+	junk=get_first(ptr," ,");
+	if (junk == NULL)
+	{
+		/*No more tokens.  Should this throw an error?*/
+	}
+	while((mystring=get_next(" ,\n\r"))!=NULL)
+	{
+	  split_apart(mystring,name,value);
+	  if(strlen(name)>0&&strlen(value)>0)
+	  {
+		/*
 	if (strcmp("mwcolor",name)==0)
 	{
 		if (strlen(UserMainWinColor)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
-	
+
 	if (strcmp("dwcolor",name)==0)
 	{
 		if (strlen(UserDrawWinColor)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
-	
+
 	if (strcmp("forecolor",name)==0)
 	{
 		if (strlen(UserWhite)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
-	
+
 	if (strcmp("backcolor",name)==0)
 	{
 		if (strlen(UserBlack)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
-	
+
 	if (strcmp("backimage",name)==0)
 	{
 		if (strlen(UserBGBitmap)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
-	
+
 	if (strcmp("smallfont",name)==0)
 	{
 		if (strlen(small_font_name)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
-	
+
 	if (strcmp("bigfont",name)==0)
 	{
 		if (strlen(big_font_name)!=0)
 		{
-		 	continue;
+			continue;
 		}
 	}
 	*/
 	set_option(name,value,0,mask);
-      }
-    }
+	  }
+	}
   }
- 
+
   for(i=0;i<Nopts;i++)
   {
-    free(interopt[i]);
-  }  
-  Nopts = 0;  
+	free(interopt[i]);
+  }
+  Nopts = 0;
 }
 
 void set_internopts_xpprc_and_comline()
@@ -968,67 +967,67 @@ void set_internopts_xpprc_and_comline()
  /*Check for QUIET and LOGFILE options first...*/
   char intrnoptcpy[255]; /*Must use copy to avoid side effects of strtok used in get_first below*/
   for(i=0;i<Nopts;i++){
-    strcpy(intrnoptcpy,interopt[i]);
-    ptr=intrnoptcpy;
-    junk=get_first(ptr," ,");  
-    if (junk == NULL)
-    {
-    	/*No more tokens.  Should this throw an error?*/
-    }	
-    while((mystring=get_next(" ,\n\r"))!=NULL)
-    {
-      split_apart(mystring,name,value);
-      strupr(name); 
-      
-      if (strlen(name)==5)
-      {
-      	      strupr(name);
-	      if(strcmp(name,"QUIET")==0)
-	      {
+	strcpy(intrnoptcpy,interopt[i]);
+	ptr=intrnoptcpy;
+	junk=get_first(ptr," ,");
+	if (junk == NULL)
+	{
+		/*No more tokens.  Should this throw an error?*/
+	}
+	while((mystring=get_next(" ,\n\r"))!=NULL)
+	{
+	  split_apart(mystring,name,value);
+	  strupr(name);
+
+	  if (strlen(name)==5)
+	  {
+			  strupr(name);
+		  if(strcmp(name,"QUIET")==0)
+		  {
 		set_option(name,value,0,NULL);
-	      }
-      }
-      else if (strlen(name)==7)
-      {	
-	      strupr(name);
-	      
-	      if(strcmp(name,"LOGFILE")==0)
-	      {
-	      	      set_option(name,value,0,NULL);
-	      }
-    }
+		  }
+	  }
+	  else if (strlen(name)==7)
+	  {
+		  strupr(name);
+
+		  if(strcmp(name,"LOGFILE")==0)
+		  {
+				  set_option(name,value,0,NULL);
+		  }
+	}
   }
   }
-  
+
   /*We make a BOOLEAN MASK using the current OptionsSet*/
   /*This allows options to be overwritten multiple times within .xpprc
   but prevents overwriting across comline, .xpprc etc.
-  */ 
+  */
   OptionsSet *tempNAS = (OptionsSet*)malloc(sizeof(OptionsSet));
   *tempNAS = notAlreadySet;
-  
+
   for(i=0;i<Nopts;i++){
-    ptr=interopt[i];
-    junk=get_first(ptr," ,");
-    while((mystring=get_next(" ,\n\r"))!=NULL)
-    {
-      split_apart(mystring,name,value);
-      if(strlen(name)>0&&strlen(value)>0)
-      {
-        set_option(name,value,0,tempNAS);
-      }	
-    }
+	ptr=interopt[i];
+	junk=get_first(ptr," ,");
+	while((mystring=get_next(" ,\n\r"))!=NULL)
+	{
+	  split_apart(mystring,name,value);
+	  if(strlen(name)>0&&strlen(value)>0)
+	  {
+		set_option(name,value,0,tempNAS);
+	  }
+	}
   }
   free(tempNAS);
-   
+
   /*
   We leave a fresh start for options specified in the ODE file.
   */
   for(i=0;i<Nopts;i++)
   {
-  	free(interopt[i]);
-  } 
-  
+	free(interopt[i]);
+  }
+
   Nopts=0;
 }
 
@@ -1052,7 +1051,7 @@ char *bob,*name,*value;
   name[k]='\0';
   for(i=k+1;i<l;i++)value[i-k-1]=bob[i];
   value[l-k-1]='\0';
-    }
+	}
 
 }
 
@@ -1067,41 +1066,41 @@ void check_for_xpprc()
   sprintf(rc,"%s/.xpprc",getenv("HOME"));
   fp=fopen(rc,"r");
   if(fp==NULL){
-    /*   plintf("Didnt find rc \n"); */
-    return;
+	/*   plintf("Didnt find rc \n"); */
+	return;
   }
   while(!feof(fp)){
-    bob[0]='\0';
-    fgets(bob,255,fp);
-    if(bob[0]=='@'){
-      stor_internopts(bob);
+	bob[0]='\0';
+	fgets(bob,255,fp);
+	if(bob[0]=='@'){
+	  stor_internopts(bob);
 
-    }
+	}
   }
   fclose(fp);
 }
 
 
 void stor_internopts(s1)
-     char *s1;
+	 char *s1;
 {
   int n=strlen(s1);
   if(Nopts>MAXOPT){
    plintf("WARNING -- to many options set %s ignored\n",s1);
-    return;
+	return;
   }
   interopt[Nopts]=(char *)malloc(n+1);
   sprintf(interopt[Nopts],"%s",s1);
   Nopts++;
 
 }
-  
+
 
 
 void set_option(s1,s2,force,mask)
-     char *s1,*s2;
-     int force;
-     OptionsSet *mask;
+	 char *s1,*s2;
+	 int force;
+	 OptionsSet *mask;
 {
   int i,j,f;
  char xx[4],yy[4],zz[4];
@@ -1112,783 +1111,783 @@ void set_option(s1,s2,force,mask)
  if(msc("QUIET",s1)){
    if(!(msc(s2,"0")||msc(s2,"1")))
    {
-   	plintf("QUIET option must be 0 or 1.\n");
+	plintf("QUIET option must be 0 or 1.\n");
 	exit(-1);
    }
    if (OVERRIDE_QUIET==0)/*Will be 1 if -quiet was specified on the command line.*/
    {
-   	XPPVERBOSE=(atoi(s2)==0);
+	XPPVERBOSE=(atoi(s2)==0);
    }
    return;
  }
  if(msc("LOGFILE",s1)){
    if (OVERRIDE_LOGFILE==0) /*Will be 1 if -logfile was specified on the command line.*/
    {
-      if (logfile != NULL)       
-      { 		         
-     	  fclose(logfile);       
-      } 		         
-      logfile=fopen(s2,"w");     
+	  if (logfile != NULL)
+	  {
+		  fclose(logfile);
+	  }
+	  logfile=fopen(s2,"w");
    }
    return;
  }
  if(msc("BELL",s1)){
    if(!(msc(s2,"0")||msc(s2,"1")))
    {
-   	plintf("BELL option must be 0 or 1.\n");
+	plintf("BELL option must be 0 or 1.\n");
 	exit(-1);
    }
    tfBell=atoi(s2);
    return;
  }
  if(msc("BUT",s1)){
-    add_user_button(s2);
-    return;
+	add_user_button(s2);
+	return;
   }
  if((msc("BIGFONT",s1))||(msc("BIG",s1))){
-    if ((notAlreadySet.BIG_FONT_NAME||force) || ((mask!=NULL)&&(mask->BIG_FONT_NAME==1)))
-    {
-    	strcpy(big_font_name,s2);
+	if ((notAlreadySet.BIG_FONT_NAME||force) || ((mask!=NULL)&&(mask->BIG_FONT_NAME==1)))
+	{
+		strcpy(big_font_name,s2);
 	notAlreadySet.BIG_FONT_NAME=0;
-    }
-    return;
+	}
+	return;
   }
   if((msc("SMALLFONT",s1))||(msc("SMALL",s1))){;
-    if ((notAlreadySet.SMALL_FONT_NAME||force) || ((mask!=NULL)&&(mask->SMALL_FONT_NAME==1)))
-    {
-    	strcpy(small_font_name,s2);
+	if ((notAlreadySet.SMALL_FONT_NAME||force) || ((mask!=NULL)&&(mask->SMALL_FONT_NAME==1)))
+	{
+		strcpy(small_font_name,s2);
 	notAlreadySet.SMALL_FONT_NAME=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("FORECOLOR",s1)){
-    if ((notAlreadySet.UserBlack||force) || ((mask!=NULL)&&(mask->UserBlack==1)))
-    {
-    	sprintf(UserBlack,"#%s",s2);
+	if ((notAlreadySet.UserBlack||force) || ((mask!=NULL)&&(mask->UserBlack==1)))
+	{
+		sprintf(UserBlack,"#%s",s2);
 	notAlreadySet.UserBlack=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("BACKCOLOR",s1)){
-    if ((notAlreadySet.UserWhite||force) || ((mask!=NULL)&&(mask->UserWhite==1)))
-    {
-    	sprintf(UserWhite,"#%s",s2);
+	if ((notAlreadySet.UserWhite||force) || ((mask!=NULL)&&(mask->UserWhite==1)))
+	{
+		sprintf(UserWhite,"#%s",s2);
 	notAlreadySet.UserWhite=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("MWCOLOR",s1)){
-    if ((notAlreadySet.UserMainWinColor||force) || ((mask!=NULL)&&(mask->UserMainWinColor==1)))
-    {
-      /* printf("Setting MWCOLOR=%s\n",s2); */
-        sprintf(UserMainWinColor,"#%s",s2);
+	if ((notAlreadySet.UserMainWinColor||force) || ((mask!=NULL)&&(mask->UserMainWinColor==1)))
+	{
+	  /* printf("Setting MWCOLOR=%s\n",s2); */
+		sprintf(UserMainWinColor,"#%s",s2);
 	notAlreadySet.UserMainWinColor=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("DWCOLOR",s1)){
-    if ((notAlreadySet.UserDrawWinColor||force) || ((mask!=NULL)&&(mask->UserDrawWinColor==1)))
-    {
-    	sprintf(UserDrawWinColor,"#%s",s2);
+	if ((notAlreadySet.UserDrawWinColor||force) || ((mask!=NULL)&&(mask->UserDrawWinColor==1)))
+	{
+		sprintf(UserDrawWinColor,"#%s",s2);
 	notAlreadySet.UserDrawWinColor=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("GRADS",s1)){
-    if ((notAlreadySet.UserGradients||force) || ((mask!=NULL)&&(mask->UserGradients==1)))
-    {
-	    if(!(msc(s2,"0")||msc(s2,"1")))
-	    {
-   		 plintf("GRADS option must be 0 or 1.\n");
+	if ((notAlreadySet.UserGradients||force) || ((mask!=NULL)&&(mask->UserGradients==1)))
+	{
+		if(!(msc(s2,"0")||msc(s2,"1")))
+		{
+		 plintf("GRADS option must be 0 or 1.\n");
 		 exit(-1);
-	    }
-	    UserGradients=atoi(s2);
-	    notAlreadySet.UserGradients=0;
-    }
-    return;
+		}
+		UserGradients=atoi(s2);
+		notAlreadySet.UserGradients=0;
+	}
+	return;
   }
 
 
 
   if(msc("PLOTFMT",s1)){
-    if ((notAlreadySet.PLOTFORMAT||force) || ((mask!=NULL)&&(mask->PLOTFORMAT==1)))
-    {
-    	strcpy(PlotFormat,s2);
+	if ((notAlreadySet.PLOTFORMAT||force) || ((mask!=NULL)&&(mask->PLOTFORMAT==1)))
+	{
+		strcpy(PlotFormat,s2);
 	notAlreadySet.PLOTFORMAT=0;
-    }
-    return;
+	}
+	return;
   }
 
-  
+
 
   if(msc("BACKIMAGE",s1)){
-    if ((notAlreadySet.UserBGBitmap||force) || ((mask!=NULL)&&(mask->UserBGBitmap==1)))
-    {
-    	strcpy(UserBGBitmap,s2);
+	if ((notAlreadySet.UserBGBitmap||force) || ((mask!=NULL)&&(mask->UserBGBitmap==1)))
+	{
+		strcpy(UserBGBitmap,s2);
 	notAlreadySet.UserBGBitmap=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("WIDTH",s1)){
-    if ((notAlreadySet.UserMinWidth||force)|| ((mask!=NULL)&&(mask->UserMinWidth==1)))
-    {
-       UserMinWidth=atoi(s2);
-       notAlreadySet.UserMinWidth=0;
-    }
-    return;
+	if ((notAlreadySet.UserMinWidth||force)|| ((mask!=NULL)&&(mask->UserMinWidth==1)))
+	{
+	   UserMinWidth=atoi(s2);
+	   notAlreadySet.UserMinWidth=0;
+	}
+	return;
   }
   if(msc("HEIGHT",s1)){
-    if ((notAlreadySet.UserMinHeight||force) || ((mask!=NULL)&&(mask->UserMinHeight==1)))
-    {
-         UserMinHeight=atoi(s2);
+	if ((notAlreadySet.UserMinHeight||force) || ((mask!=NULL)&&(mask->UserMinHeight==1)))
+	{
+		 UserMinHeight=atoi(s2);
 	 notAlreadySet.UserMinHeight=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("YNC",s1)){
-    if ((notAlreadySet.YNullColor||force) || ((mask!=NULL)&&(mask->YNullColor==1)))
-    {
+	if ((notAlreadySet.YNullColor||force) || ((mask!=NULL)&&(mask->YNullColor==1)))
+	{
 	  i=atoi(s2);
 	  if(i>-1&&i<11)
 	  {
 	   YNullColor=i;
 	  }
 	   notAlreadySet.YNullColor=0;
-    }
+	}
   return;
   }
 if(msc("XNC",s1)){
-    if ((notAlreadySet.XNullColor||force) || ((mask!=NULL)&&(mask->XNullColor==1)))
-    {
-	    i=atoi(s2);
+	if ((notAlreadySet.XNullColor||force) || ((mask!=NULL)&&(mask->XNullColor==1)))
+	{
+		i=atoi(s2);
 	  if(i>-1&&i<11)
 	  {
-	   XNullColor=i; 
+	   XNullColor=i;
 	   notAlreadySet.XNullColor=0;
 	  }
-	  
-    }
+
+	}
   return;
   }
 
 if(msc("SMC",s1)){
 
-    if ((notAlreadySet.StableManifoldColor||force) || ((mask!=NULL)&&(mask->StableManifoldColor==1)))
-    {
-  
+	if ((notAlreadySet.StableManifoldColor||force) || ((mask!=NULL)&&(mask->StableManifoldColor==1)))
+	{
+
 	  i=atoi(s2);
 	  if(i>-1&&i<11)
 	  {
 	   StableManifoldColor=i;
 	   notAlreadySet.StableManifoldColor=0;
 	  }
-    }
+	}
   return;
   }
 if(msc("UMC",s1)){
-    if ((notAlreadySet.UnstableManifoldColor||force) || ((mask!=NULL)&&(mask->UnstableManifoldColor==1)))
-    {
-	    i=atoi(s2);
-	    if(i>-1&&i<11)
-	    {
-	     UnstableManifoldColor=i;
-	     notAlreadySet.UnstableManifoldColor=0;
-	    }
-    }
+	if ((notAlreadySet.UnstableManifoldColor||force) || ((mask!=NULL)&&(mask->UnstableManifoldColor==1)))
+	{
+		i=atoi(s2);
+		if(i>-1&&i<11)
+		{
+		 UnstableManifoldColor=i;
+		 notAlreadySet.UnstableManifoldColor=0;
+		}
+	}
    return;
   }
 
   if(msc("LT",s1)){
-     if ((notAlreadySet.START_LINE_TYPE||force) || ((mask!=NULL)&&(mask->START_LINE_TYPE==1)))
-     {
-     	
-	    i=atoi(s2);
-	    if(i<2&&i>-6)
-	    {  
-	      START_LINE_TYPE=i; 
-	      reset_all_line_type();
-	      notAlreadySet.START_LINE_TYPE=0;
-	      }
-     }
-     return;
+	 if ((notAlreadySet.START_LINE_TYPE||force) || ((mask!=NULL)&&(mask->START_LINE_TYPE==1)))
+	 {
+
+		i=atoi(s2);
+		if(i<2&&i>-6)
+		{
+		  START_LINE_TYPE=i;
+		  reset_all_line_type();
+		  notAlreadySet.START_LINE_TYPE=0;
+		  }
+	 }
+	 return;
   }
-  if(msc("SEED",s1)){ 
-     if ((notAlreadySet.RandSeed||force) || ((mask!=NULL)&&(mask->RandSeed==1)))
-     {
-	    i=atoi(s2);
-	    if(i>=0){
-	      RandSeed=i;
-	      nsrand48(RandSeed);  
-	      notAlreadySet.RandSeed=0;
-	    }
-     }
-    return;
+  if(msc("SEED",s1)){
+	 if ((notAlreadySet.RandSeed||force) || ((mask!=NULL)&&(mask->RandSeed==1)))
+	 {
+		i=atoi(s2);
+		if(i>=0){
+		  RandSeed=i;
+		  nsrand48(RandSeed);
+		  notAlreadySet.RandSeed=0;
+		}
+	 }
+	return;
   }
  if(msc("BACK",s1)){
    if ((notAlreadySet.PaperWhite||force) || ((mask!=NULL)&&(mask->PaperWhite==1)))
    {
 	   if(s2[0]=='w'||s2[0]=='W')
 	   {
-	   	PaperWhite=1;
+		PaperWhite=1;
 	   }
-	   else 
-	   {  
-	   	PaperWhite=0;
+	   else
+	   {
+		PaperWhite=0;
 	   }
 	   notAlreadySet.PaperWhite=0;
    }
-    return;
+	return;
   }
  if(msc("COLORMAP",s1)){
-     if ((notAlreadySet.COLORMAP||force) || ((mask!=NULL)&&(mask->COLORMAP==1)))
-     {
-   		i=atoi(s2);
-   		if(i<7)custom_color=i;
+	 if ((notAlreadySet.COLORMAP||force) || ((mask!=NULL)&&(mask->COLORMAP==1)))
+	 {
+		i=atoi(s2);
+		if(i<7)custom_color=i;
 		notAlreadySet.COLORMAP=0;
 
-     }
+	 }
    return;
  }
    if(msc("NPLOT",s1)){
-     if ((notAlreadySet.NPLOT||force) || ((mask!=NULL)&&(mask->NPLOT==1)))
-     {
-    	NPltV=atoi(s2);
+	 if ((notAlreadySet.NPLOT||force) || ((mask!=NULL)&&(mask->NPLOT==1)))
+	 {
+		NPltV=atoi(s2);
 	notAlreadySet.NPLOT=0;
-     }
-    return;
+	 }
+	return;
   }
 
    if(msc("DLL_LIB",s1)){
-      if ((notAlreadySet.DLL_LIB||force) || ((mask!=NULL)&&(mask->DLL_LIB==1)))
-     {
-     sprintf(dll_lib,"%s",s2);
-     dll_flag+=1;
-     notAlreadySet.DLL_LIB=0;
-     }
-     return;
+	  if ((notAlreadySet.DLL_LIB||force) || ((mask!=NULL)&&(mask->DLL_LIB==1)))
+	 {
+	 sprintf(dll_lib,"%s",s2);
+	 dll_flag+=1;
+	 notAlreadySet.DLL_LIB=0;
+	 }
+	 return;
    }
    if(msc("DLL_FUN",s1)){
-     if ((notAlreadySet.DLL_FUN||force) || ((mask!=NULL)&&(mask->DLL_FUN==1)))
-     {
-     	sprintf(dll_fun,"%s",s2);
-     	dll_flag+=2;
-     	notAlreadySet.DLL_FUN=0;
-     }
-     return;
+	 if ((notAlreadySet.DLL_FUN||force) || ((mask!=NULL)&&(mask->DLL_FUN==1)))
+	 {
+		sprintf(dll_fun,"%s",s2);
+		dll_flag+=2;
+		notAlreadySet.DLL_FUN=0;
+	 }
+	 return;
    }
    /* can now initialize several plots */
    if(msc("SIMPLOT",s1)){
-     SimulPlotFlag=1;
-     return;
+	 SimulPlotFlag=1;
+	 return;
    }
    if(msc("MULTIWIN",s1)){
-     MultiWin=1;
-     return;
+	 MultiWin=1;
+	 return;
    }
  for(j=2;j<=8;j++){
-      sprintf(xx,"XP%d",j);
-      sprintf(yy,"YP%d",j);
-      sprintf(zz,"ZP%d",j);
-      sprintf(xxh,"XHI%d",j);    
-      sprintf(xxl,"XLO%d",j);    
-      sprintf(yyh,"YHI%d",j);    
-      sprintf(yyl,"YLO%d",j);    
-    if(msc(xx,s1)){
-    find_variable(s2,&i);
-    if(i>-1)IX_PLT[j]=i;
-    return;
+	  sprintf(xx,"XP%d",j);
+	  sprintf(yy,"YP%d",j);
+	  sprintf(zz,"ZP%d",j);
+	  sprintf(xxh,"XHI%d",j);
+	  sprintf(xxl,"XLO%d",j);
+	  sprintf(yyh,"YHI%d",j);
+	  sprintf(yyl,"YLO%d",j);
+	if(msc(xx,s1)){
+	find_variable(s2,&i);
+	if(i>-1)IX_PLT[j]=i;
+	return;
   }
    if(msc(yy,s1)){
-     find_variable(s2,&i);
-    if(i>-1)IY_PLT[j]=i;
-    return;
+	 find_variable(s2,&i);
+	if(i>-1)IY_PLT[j]=i;
+	return;
   }
    if(msc(zz,s1)){
-     find_variable(s2,&i);
-    if(i>-1)IZ_PLT[j]=i;
-    return;
+	 find_variable(s2,&i);
+	if(i>-1)IZ_PLT[j]=i;
+	return;
   }
    if(msc(xxh,s1)){
-     X_HI[j]=atof(s2);
-     return;
+	 X_HI[j]=atof(s2);
+	 return;
    }
    if(msc(xxl,s1)){
-     X_LO[j]=atof(s2);
-     return;
+	 X_LO[j]=atof(s2);
+	 return;
    }
 if(msc(yyh,s1)){
-     Y_HI[j]=atof(s2);
-     return;
+	 Y_HI[j]=atof(s2);
+	 return;
    }
 if(msc(yyl,s1)){
-     Y_LO[j]=atof(s2);
-     return;
+	 Y_LO[j]=atof(s2);
+	 return;
    }
  }
    if(msc("XP",s1)){
-     if ((notAlreadySet.XP||force) || ((mask!=NULL)&&(mask->XP==1)))
-     {
-    	find_variable(s2,&i);
-    	if(i>-1)IXPLT=i;
+	 if ((notAlreadySet.XP||force) || ((mask!=NULL)&&(mask->XP==1)))
+	 {
+		find_variable(s2,&i);
+		if(i>-1)IXPLT=i;
 	notAlreadySet.XP=0;
 	notAlreadySet.IXPLT=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("YP",s1)){
-     if ((notAlreadySet.YP||force) || ((mask!=NULL)&&(mask->YP==1)))
-     {
-     	find_variable(s2,&i);
-    	if(i>-1)IYPLT=i;
+	 if ((notAlreadySet.YP||force) || ((mask!=NULL)&&(mask->YP==1)))
+	 {
+		find_variable(s2,&i);
+		if(i>-1)IYPLT=i;
 	notAlreadySet.YP=0;
 	notAlreadySet.IYPLT=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("ZP",s1)){
-     if ((notAlreadySet.ZP||force) || ((mask!=NULL)&&(mask->ZP==1)))
-     {
-     	find_variable(s2,&i);
-    	if(i>-1)IZPLT=i;
+	 if ((notAlreadySet.ZP||force) || ((mask!=NULL)&&(mask->ZP==1)))
+	 {
+		find_variable(s2,&i);
+		if(i>-1)IZPLT=i;
 
-     	notAlreadySet.ZP=0;
+		notAlreadySet.ZP=0;
 	notAlreadySet.IZPLT=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("AXES",s1)){
-     if ((notAlreadySet.AXES||force) || ((mask!=NULL)&&(mask->AXES==1)))
-     {
+	 if ((notAlreadySet.AXES||force) || ((mask!=NULL)&&(mask->AXES==1)))
+	 {
 	 if(s2[0]=='3')
 	 {
 	   AXES=5;
 	 }
-	 else 
+	 else
 	 {
 	   AXES=0;
-	 } 
-        
+	 }
+
 	 notAlreadySet.AXES=0;
-     }
-    return;
+	 }
+	return;
   }
 
    if(msc("NJMP",s1)){
-     if ((notAlreadySet.NOUT||force) || ((mask!=NULL)&&(mask->NOUT==1)))
-     {
-    	NJMP=atoi(s2);
-        notAlreadySet.NOUT=0;
-     }
-    return;
+	 if ((notAlreadySet.NOUT||force) || ((mask!=NULL)&&(mask->NOUT==1)))
+	 {
+		NJMP=atoi(s2);
+		notAlreadySet.NOUT=0;
+	 }
+	return;
   }
   if(msc("NOUT",s1)){
-     if ((notAlreadySet.NOUT||force) || ((mask!=NULL)&&(mask->NOUT==1)))
-     {
-      NJMP=atoi(s2);
-      notAlreadySet.NOUT=0;
-     }
-    return;
+	 if ((notAlreadySet.NOUT||force) || ((mask!=NULL)&&(mask->NOUT==1)))
+	 {
+	  NJMP=atoi(s2);
+	  notAlreadySet.NOUT=0;
+	 }
+	return;
   }
    if(msc("NMESH",s1)){
-     if ((notAlreadySet.NMESH||force) || ((mask!=NULL)&&(mask->NMESH==1)))
-     {
-    	NMESH=atoi(s2);
+	 if ((notAlreadySet.NMESH||force) || ((mask!=NULL)&&(mask->NMESH==1)))
+	 {
+		NMESH=atoi(s2);
 	notAlreadySet.NMESH=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("METH",s1)){
-     if ((notAlreadySet.METHOD||force) || ((mask!=NULL)&&(mask->METHOD==1)))
-     {
-    for(i=0;i<15;i++)
-      if(s2[0]==mkey[i]||s2[0]==Mkey[i])
+	 if ((notAlreadySet.METHOD||force) || ((mask!=NULL)&&(mask->METHOD==1)))
+	 {
+	for(i=0;i<15;i++)
+	  if(s2[0]==mkey[i]||s2[0]==Mkey[i])
 	METHOD=i;
-      
-       notAlreadySet.METHOD=0;
-     }
-    return;
+
+	   notAlreadySet.METHOD=0;
+	 }
+	return;
   }
    if(msc("VMAXPTS",s1)){
-     if ((notAlreadySet.VMAXPTS||force) || ((mask!=NULL)&&(mask->VMAXPTS==1)))
-     {
-     	MaxPoints=atoi(s2);
+	 if ((notAlreadySet.VMAXPTS||force) || ((mask!=NULL)&&(mask->VMAXPTS==1)))
+	 {
+		MaxPoints=atoi(s2);
 	notAlreadySet.VMAXPTS=0;
-     
-     }
-     return;
+
+	 }
+	 return;
    }
-   if(msc("MAXSTOR",s1)){ 
-     if ((notAlreadySet.MAXSTOR||force) || ((mask!=NULL)&&(mask->MAXSTOR==1)))
-     {
-    	MAXSTOR=atoi(s2);
-        notAlreadySet.MAXSTOR=0;
-     } 
-    return;
+   if(msc("MAXSTOR",s1)){
+	 if ((notAlreadySet.MAXSTOR||force) || ((mask!=NULL)&&(mask->MAXSTOR==1)))
+	 {
+		MAXSTOR=atoi(s2);
+		notAlreadySet.MAXSTOR=0;
+	 }
+	return;
   }
    if(msc("TOR_PER",s1)){
-     if ((notAlreadySet.TOR_PER||force) || ((mask!=NULL)&&(mask->TOR_PER==1)))
-     {
-     	TOR_PERIOD=atof(s2);
-     	TORUS=1;
+	 if ((notAlreadySet.TOR_PER||force) || ((mask!=NULL)&&(mask->TOR_PER==1)))
+	 {
+		TOR_PERIOD=atof(s2);
+		TORUS=1;
 	notAlreadySet.TOR_PER=0;
-     }
-     return;
+	 }
+	 return;
    }
    if(msc("JAC_EPS",s1)){
-     if ((notAlreadySet.JAC_EPS||force) || ((mask!=NULL)&&(mask->JAC_EPS==1)))
-     {
-     	NEWT_ERR=atof(s2);
-        notAlreadySet.JAC_EPS=0;
-     }
-     return;
+	 if ((notAlreadySet.JAC_EPS||force) || ((mask!=NULL)&&(mask->JAC_EPS==1)))
+	 {
+		NEWT_ERR=atof(s2);
+		notAlreadySet.JAC_EPS=0;
+	 }
+	 return;
    }
    if(msc("NEWT_TOL",s1)){
-     if ((notAlreadySet.NEWT_TOL||force) || ((mask!=NULL)&&(mask->NEWT_TOL==1)))
-     {
-     	EVEC_ERR=atof(s2);
+	 if ((notAlreadySet.NEWT_TOL||force) || ((mask!=NULL)&&(mask->NEWT_TOL==1)))
+	 {
+		EVEC_ERR=atof(s2);
 	notAlreadySet.NEWT_TOL=0;
-     
-     }
-     return;
+
+	 }
+	 return;
    }
    if(msc("NEWT_ITER",s1)){
-     if ((notAlreadySet.NEWT_ITER||force) || ((mask!=NULL)&&(mask->NEWT_ITER==1)))
-     {
-     	EVEC_ITER=atoi(s2);
+	 if ((notAlreadySet.NEWT_ITER||force) || ((mask!=NULL)&&(mask->NEWT_ITER==1)))
+	 {
+		EVEC_ITER=atoi(s2);
 	notAlreadySet.NEWT_ITER=0;
-     }
-     return;
+	 }
+	 return;
    }
   if(msc("FOLD",s1)){
-     if ((notAlreadySet.FOLD||force) || ((mask!=NULL)&&(mask->FOLD==1)))
-     {
-     find_variable(s2,&i);
-     if(i>0){
-       itor[i-1]=1;
-      TORUS=1;
-     }
-     
-     }
-     return;
+	 if ((notAlreadySet.FOLD||force) || ((mask!=NULL)&&(mask->FOLD==1)))
+	 {
+	 find_variable(s2,&i);
+	 if(i>0){
+	   itor[i-1]=1;
+	  TORUS=1;
+	 }
+
+	 }
+	 return;
    }
    if(msc("TOTAL",s1)){
-    if ((notAlreadySet.TEND||force) || ((mask!=NULL)&&(mask->TEND==1)))
-     {
-    	TEND=atof(s2);
+	if ((notAlreadySet.TEND||force) || ((mask!=NULL)&&(mask->TEND==1)))
+	 {
+		TEND=atof(s2);
 	notAlreadySet.TEND=0;
-    }
-    return;
+	}
+	return;
   }
   if(msc("DTMIN",s1)){
-     if ((notAlreadySet.DTMIN||force) || ((mask!=NULL)&&(mask->DTMIN==1)))
-     {
-    	HMIN=atof(s2);
-         notAlreadySet.DTMIN=0;
-     }
-    return;
+	 if ((notAlreadySet.DTMIN||force) || ((mask!=NULL)&&(mask->DTMIN==1)))
+	 {
+		HMIN=atof(s2);
+		 notAlreadySet.DTMIN=0;
+	 }
+	return;
   }
   if(msc("DTMAX",s1)){
-     if ((notAlreadySet.DTMAX||force) || ((mask!=NULL)&&(mask->DTMAX==1)))
-     {
-    	HMAX=atof(s2);
+	 if ((notAlreadySet.DTMAX||force) || ((mask!=NULL)&&(mask->DTMAX==1)))
+	 {
+		HMAX=atof(s2);
 	notAlreadySet.DTMAX=0;
-      }
-    return;
+	  }
+	return;
   }
    if(msc("DT",s1)){
-     if ((notAlreadySet.DT||force) || ((mask!=NULL)&&(mask->DT==1)))
-     {
-    	DELTA_T=atof(s2);
+	 if ((notAlreadySet.DT||force) || ((mask!=NULL)&&(mask->DT==1)))
+	 {
+		DELTA_T=atof(s2);
 	notAlreadySet.DT=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("T0",s1)){
-     if ((notAlreadySet.T0||force) || ((mask!=NULL)&&(mask->T0==1)))
-     { 
-    	T0=atof(s2);
-        notAlreadySet.T0=0;
-     }
-    return;
+	 if ((notAlreadySet.T0||force) || ((mask!=NULL)&&(mask->T0==1)))
+	 {
+		T0=atof(s2);
+		notAlreadySet.T0=0;
+	 }
+	return;
   }
    if(msc("TRANS",s1)){
-     if ((notAlreadySet.TRANS||force) || ((mask!=NULL)&&(mask->TRANS==1)))
-     {
-     	TRANS=atof(s2);
-        notAlreadySet.TRANS=0;
-     }
-    return;
+	 if ((notAlreadySet.TRANS||force) || ((mask!=NULL)&&(mask->TRANS==1)))
+	 {
+		TRANS=atof(s2);
+		notAlreadySet.TRANS=0;
+	 }
+	return;
   }
    if(msc("BOUND",s1)){
-     if ((notAlreadySet.BOUND||force) || ((mask!=NULL)&&(mask->BOUND==1)))
-     {
-       BOUND=atof(s2);
-       notAlreadySet.BOUND=0;
-     }
-    return;
+	 if ((notAlreadySet.BOUND||force) || ((mask!=NULL)&&(mask->BOUND==1)))
+	 {
+	   BOUND=atof(s2);
+	   notAlreadySet.BOUND=0;
+	 }
+	return;
   }
    if(msc("ATOL",s1)){
-     if ((notAlreadySet.ATOLER||force) || ((mask!=NULL)&&(mask->ATOLER==1)))
-     {
-     	ATOLER=atof(s2);
-        notAlreadySet.ATOLER=0;
-     }
-     return;
+	 if ((notAlreadySet.ATOLER||force) || ((mask!=NULL)&&(mask->ATOLER==1)))
+	 {
+		ATOLER=atof(s2);
+		notAlreadySet.ATOLER=0;
+	 }
+	 return;
    }
    if(msc("TOL",s1)){
-     if ((notAlreadySet.TOLER||force) || ((mask!=NULL)&&(mask->TOLER==1)))
-     {
+	 if ((notAlreadySet.TOLER||force) || ((mask!=NULL)&&(mask->TOLER==1)))
+	 {
 	TOLER=atof(s2);
 	notAlreadySet.TOLER=0;
-     }
-    return;
+	 }
+	return;
   }
-    
+
    if(msc("DELAY",s1)){
-     if ((notAlreadySet.DELAY||force) || ((mask!=NULL)&&(mask->DELAY==1)))
-     {
-    	DELAY=atof(s2);
+	 if ((notAlreadySet.DELAY||force) || ((mask!=NULL)&&(mask->DELAY==1)))
+	 {
+		DELAY=atof(s2);
 	notAlreadySet.DELAY=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("BANDUP",s1)){
-     if ((notAlreadySet.BANDUP||force) || ((mask!=NULL)&&(mask->BANDUP==1)))
-     {
-     	cv_bandflag=1;
-     	cv_bandupper=atoi(s2);
-     	notAlreadySet.BANDUP=0;
-     }
-     return;
+	 if ((notAlreadySet.BANDUP||force) || ((mask!=NULL)&&(mask->BANDUP==1)))
+	 {
+		cv_bandflag=1;
+		cv_bandupper=atoi(s2);
+		notAlreadySet.BANDUP=0;
+	 }
+	 return;
    }
   if(msc("BANDLO",s1)){
-     if ((notAlreadySet.BANDLO||force) || ((mask!=NULL)&&(mask->BANDLO==1)))
-     {
-     	cv_bandflag=1;
-     	cv_bandlower=atoi(s2);
-     	notAlreadySet.BANDLO=0;
-     }
-     return;
+	 if ((notAlreadySet.BANDLO||force) || ((mask!=NULL)&&(mask->BANDLO==1)))
+	 {
+		cv_bandflag=1;
+		cv_bandlower=atoi(s2);
+		notAlreadySet.BANDLO=0;
+	 }
+	 return;
    }
-  
+
   if(msc("PHI",s1)){
-     if ((notAlreadySet.PHI||force) || ((mask!=NULL)&&(mask->PHI==1)))
-     {
-    	PHI0=atof(s2);
+	 if ((notAlreadySet.PHI||force) || ((mask!=NULL)&&(mask->PHI==1)))
+	 {
+		PHI0=atof(s2);
 	notAlreadySet.PHI=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("THETA",s1)){
-     if ((notAlreadySet.THETA||force) || ((mask!=NULL)&&(mask->THETA==1)))
-     {
-    	THETA0=atof(s2);
+	 if ((notAlreadySet.THETA||force) || ((mask!=NULL)&&(mask->THETA==1)))
+	 {
+		THETA0=atof(s2);
 	notAlreadySet.THETA=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("XLO",s1)){
-     if ((notAlreadySet.XLO||force) || ((mask!=NULL)&&(mask->XLO==1)))
-     {
-    	MY_XLO=atof(s2);
+	 if ((notAlreadySet.XLO||force) || ((mask!=NULL)&&(mask->XLO==1)))
+	 {
+		MY_XLO=atof(s2);
 	notAlreadySet.XLO=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("YLO",s1)){
-    if ((notAlreadySet.YLO||force) || ((mask!=NULL)&&(mask->YLO==1)))
-    {
-    	MY_YLO=atof(s2);
+	if ((notAlreadySet.YLO||force) || ((mask!=NULL)&&(mask->YLO==1)))
+	{
+		MY_YLO=atof(s2);
 	notAlreadySet.YLO=0;
-    }
-    return;
+	}
+	return;
   }
-  
+
    if(msc("XHI",s1)){
-    if ((notAlreadySet.XHI||force) || ((mask!=NULL)&&(mask->XHI==1)))
-    {
-    	MY_XHI=atof(s2);
-        notAlreadySet.XHI=0;
-    }
-    return;
+	if ((notAlreadySet.XHI||force) || ((mask!=NULL)&&(mask->XHI==1)))
+	{
+		MY_XHI=atof(s2);
+		notAlreadySet.XHI=0;
+	}
+	return;
   }
    if(msc("YHI",s1)){
-     if ((notAlreadySet.YHI||force) || ((mask!=NULL)&&(mask->YHI==1)))
-     {
-    	MY_YHI=atof(s2);
-        notAlreadySet.YHI=0;
-     }
-    return;
+	 if ((notAlreadySet.YHI||force) || ((mask!=NULL)&&(mask->YHI==1)))
+	 {
+		MY_YHI=atof(s2);
+		notAlreadySet.YHI=0;
+	 }
+	return;
   }
    if(msc("XMAX",s1)){
-     if ((notAlreadySet.XMAX||force) || ((mask!=NULL)&&(mask->XMAX==1)))
-     {
-    	x_3d[1]=atof(s2);
+	 if ((notAlreadySet.XMAX||force) || ((mask!=NULL)&&(mask->XMAX==1)))
+	 {
+		x_3d[1]=atof(s2);
 	notAlreadySet.XMAX=0;
-     
-     }
-    return;
+
+	 }
+	return;
   }
    if(msc("YMAX",s1)){
-     if ((notAlreadySet.YMAX||force) || ((mask!=NULL)&&(mask->YMAX==1)))
-     {
-        y_3d[1]=atof(s2);
+	 if ((notAlreadySet.YMAX||force) || ((mask!=NULL)&&(mask->YMAX==1)))
+	 {
+		y_3d[1]=atof(s2);
 	notAlreadySet.YMAX=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("ZMAX",s1)){
-     if ((notAlreadySet.ZMAX||force) || ((mask!=NULL)&&(mask->ZMAX==1)))
-     {
-        z_3d[1]=atof(s2);
+	 if ((notAlreadySet.ZMAX||force) || ((mask!=NULL)&&(mask->ZMAX==1)))
+	 {
+		z_3d[1]=atof(s2);
 	notAlreadySet.ZMAX=0;
-     }
-    return;
+	 }
+	return;
   }
    if(msc("XMIN",s1)){
-     /*  printf("Trying to set XMIN %d =%s\n",notAlreadySet.XMIN,s2); */
-     if ((notAlreadySet.XMIN||force) || ((mask!=NULL)&&(mask->XMIN==1)))
-     {
-        x_3d[0]=atof(s2);
-	notAlreadySet.XMIN=0; 
+	 /*  printf("Trying to set XMIN %d =%s\n",notAlreadySet.XMIN,s2); */
+	 if ((notAlreadySet.XMIN||force) || ((mask!=NULL)&&(mask->XMIN==1)))
+	 {
+		x_3d[0]=atof(s2);
+	notAlreadySet.XMIN=0;
 	if ((notAlreadySet.XLO||force) || ((mask!=NULL)&&(mask->XLO==1)))
 	{
-    	   MY_XLO=atof(s2);
+		   MY_XLO=atof(s2);
 	   notAlreadySet.XLO=0;
 	}
-     }
-    return;
+	 }
+	return;
   }
    if(msc("YMIN",s1)){
-     if ((notAlreadySet.YMIN||force) || ((mask!=NULL)&&(mask->YMIN==1)))
-     {
-    	y_3d[0]=atof(s2);
+	 if ((notAlreadySet.YMIN||force) || ((mask!=NULL)&&(mask->YMIN==1)))
+	 {
+		y_3d[0]=atof(s2);
 	notAlreadySet.YMIN=0;
 	if ((notAlreadySet.YLO||force) || ((mask!=NULL)&&(mask->YLO==1)))
 	{
-    	   MY_YLO=atof(s2);
+		   MY_YLO=atof(s2);
 	   notAlreadySet.YLO=0;
 	}
-     }
-    return;
+	 }
+	return;
   }
  if(msc("ZMIN",s1)){
-     if ((notAlreadySet.ZMIN||force) || ((mask!=NULL)&&(mask->ZMIN==1)))
-     {
-    	z_3d[0]=atof(s2);
+	 if ((notAlreadySet.ZMIN||force) || ((mask!=NULL)&&(mask->ZMIN==1)))
+	 {
+		z_3d[0]=atof(s2);
 	notAlreadySet.ZMIN=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("POIMAP",s1)){
-     if ((notAlreadySet.POIMAP||force) || ((mask!=NULL)&&(mask->POIMAP==1)))
-     {
-   	if(s2[0]=='m'||s2[0]=='M')POIMAP=2;
-   	if(s2[0]=='s'||s2[0]=='S')POIMAP=1;
-   	if(s2[0]=='p'||s2[0]=='P')POIMAP=3;
-   	notAlreadySet.POIMAP=0;
+	 if ((notAlreadySet.POIMAP||force) || ((mask!=NULL)&&(mask->POIMAP==1)))
+	 {
+	if(s2[0]=='m'||s2[0]=='M')POIMAP=2;
+	if(s2[0]=='s'||s2[0]=='S')POIMAP=1;
+	if(s2[0]=='p'||s2[0]=='P')POIMAP=3;
+	notAlreadySet.POIMAP=0;
    }
    return;
  }
 
  if(msc("POIVAR",s1)){
-     if ((notAlreadySet.POIVAR||force) || ((mask!=NULL)&&(mask->POIVAR==1)))
-     {
-    	find_variable(s2,&i);
-    	if(i>-1)POIVAR=i;
-	
+	 if ((notAlreadySet.POIVAR||force) || ((mask!=NULL)&&(mask->POIVAR==1)))
+	 {
+		find_variable(s2,&i);
+		if(i>-1)POIVAR=i;
+
 	notAlreadySet.POIVAR=0;
-     
-     }
-    return;
+
+	 }
+	return;
   }
  if(msc("OUTPUT",s1)){
-     if ((notAlreadySet.OUTPUT||force) || ((mask!=NULL)&&(mask->OUTPUT==1)))
-     {
-   	strcpy(batchout,s2);
+	 if ((notAlreadySet.OUTPUT||force) || ((mask!=NULL)&&(mask->OUTPUT==1)))
+	 {
+	strcpy(batchout,s2);
 	notAlreadySet.OUTPUT=0;
-     }
+	 }
    return;
  }
-  
+
  if(msc("POISGN",s1)){
-     if ((notAlreadySet.POISGN||force) || ((mask!=NULL)&&(mask->POISGN==1)))
-     {
-   	POISGN=atoi(s2);
+	 if ((notAlreadySet.POISGN||force) || ((mask!=NULL)&&(mask->POISGN==1)))
+	 {
+	POISGN=atoi(s2);
 	notAlreadySet.POISGN=0;
-     }
+	 }
    return;
  }
- 
+
  if(msc("POISTOP",s1)){
-     if ((notAlreadySet.POISTOP||force) || ((mask!=NULL)&&(mask->POISTOP==1)))
-     {
-   	SOS=atoi(s2);
+	 if ((notAlreadySet.POISTOP||force) || ((mask!=NULL)&&(mask->POISTOP==1)))
+	 {
+	SOS=atoi(s2);
 	notAlreadySet.POISTOP=0;
-     }
+	 }
    return;
  }
  if(msc("STOCH",s1)){
-     if ((notAlreadySet.STOCH||force)|| ((mask!=NULL)&&(mask->STOCH==1)))
-     {
-   	STOCH_FLAG=atoi(s2);
+	 if ((notAlreadySet.STOCH||force)|| ((mask!=NULL)&&(mask->STOCH==1)))
+	 {
+	STOCH_FLAG=atoi(s2);
 	notAlreadySet.STOCH=0;
-     }
+	 }
    return;
  }
  if(msc("POIPLN",s1)){
-     if ((notAlreadySet.POIPLN||force)|| ((mask!=NULL)&&(mask->POIPLN==1)))
-     {
-   	POIPLN=atof(s2);
+	 if ((notAlreadySet.POIPLN||force)|| ((mask!=NULL)&&(mask->POIPLN==1)))
+	 {
+	POIPLN=atof(s2);
 	notAlreadySet.POIPLN=0;
-     }
+	 }
    return;
  }
-  
- 
+
+
 
  if(msc("RANGEOVER",s1)){
-     if ((notAlreadySet.RANGEOVER||force)|| ((mask!=NULL)&&(mask->RANGEOVER==1)))
-     {
-    	strcpy(range.item,s2);
+	 if ((notAlreadySet.RANGEOVER||force)|| ((mask!=NULL)&&(mask->RANGEOVER==1)))
+	 {
+		strcpy(range.item,s2);
 	notAlreadySet.RANGEOVER=0;
-     }
+	 }
 
-    return;
+	return;
   }
  if(msc("RANGESTEP",s1)){
-     if ((notAlreadySet.RANGESTEP||force)|| ((mask!=NULL)&&(mask->RANGESTEP==1)))
-     {
-        
-   	range.steps=atoi(s2);
+	 if ((notAlreadySet.RANGESTEP||force)|| ((mask!=NULL)&&(mask->RANGESTEP==1)))
+	 {
+
+	range.steps=atoi(s2);
 	notAlreadySet.RANGESTEP=0;
-     }
+	 }
    return;
  }
-  
+
  if(msc("RANGELOW",s1)){
-     if ((notAlreadySet.RANGELOW||force)|| ((mask!=NULL)&&(mask->RANGELOW==1)))
-     {
-   	range.plow=atof(s2);
-   	notAlreadySet.RANGELOW=0;
-     }
+	 if ((notAlreadySet.RANGELOW||force)|| ((mask!=NULL)&&(mask->RANGELOW==1)))
+	 {
+	range.plow=atof(s2);
+	notAlreadySet.RANGELOW=0;
+	 }
 
    return;
  }
 
  if(msc("RANGEHIGH",s1)){
-     if ((notAlreadySet.RANGEHIGH||force)|| ((mask!=NULL)&&(mask->RANGEHIGH==1)))
-     {
-   	range.phigh=atof(s2);
+	 if ((notAlreadySet.RANGEHIGH||force)|| ((mask!=NULL)&&(mask->RANGEHIGH==1)))
+	 {
+	range.phigh=atof(s2);
 	notAlreadySet.RANGEHIGH=0;
-     }
+	 }
    return;
  }
- 
+
  if(msc("RANGERESET",s1)){
-     if ((notAlreadySet.RANGERESET||force)|| ((mask!=NULL)&&(mask->RANGERESET==1)))
-     {
+	 if ((notAlreadySet.RANGERESET||force)|| ((mask!=NULL)&&(mask->RANGERESET==1)))
+	 {
 	 if(s2[0]=='y'||s2[0]=='Y')
 	 {
 	  range.reset=1;
@@ -1896,51 +1895,51 @@ if(msc(yyl,s1)){
 	 else
 	 {
 	  range.reset=0;
-	 } 
+	 }
 	  notAlreadySet.RANGERESET=0;
-     }
-  	return;
+	 }
+	return;
    }
 
  if(msc("RANGEOLDIC",s1)){
-     if ((notAlreadySet.RANGEOLDIC||force)|| ((mask!=NULL)&&(mask->RANGEOLDIC==1)))
-     {
-  	if(s2[0]=='y'||s2[0]=='Y')
+	 if ((notAlreadySet.RANGEOLDIC||force)|| ((mask!=NULL)&&(mask->RANGEOLDIC==1)))
+	 {
+	if(s2[0]=='y'||s2[0]=='Y')
 	{
-   		range.oldic=1;
-   	}
-	else
-	{ 
-   		range.oldic=0;
+		range.oldic=1;
 	}
-	
-   	notAlreadySet.RANGEOLDIC=0;
-     }
-      return;
+	else
+	{
+		range.oldic=0;
+	}
+
+	notAlreadySet.RANGEOLDIC=0;
+	 }
+	  return;
  }
- 
-   
+
+
  if(msc("RANGE",s1)){
-     if ((notAlreadySet.RANGE||force)|| ((mask!=NULL)&&(mask->RANGE==1)))
-     {
-   	batch_range=atoi(s2);
+	 if ((notAlreadySet.RANGE||force)|| ((mask!=NULL)&&(mask->RANGE==1)))
+	 {
+	batch_range=atoi(s2);
 	notAlreadySet.RANGE=0;
-     }
+	 }
    return;
  }
- 
+
  if(msc("NTST",s1)){
-     if ((notAlreadySet.NTST||force)|| ((mask!=NULL)&&(mask->NTST==1)))
-     {
-   	auto_ntst=atoi(s2);
+	 if ((notAlreadySet.NTST||force)|| ((mask!=NULL)&&(mask->NTST==1)))
+	 {
+	auto_ntst=atoi(s2);
 	notAlreadySet.NTST=0;
-     }
+	 }
    return;
  }
 if(msc("NMAX",s1)){
    if ((notAlreadySet.NMAX||force)|| ((mask!=NULL)&&(mask->NMAX==1)))
    {
-   	auto_nmx=atoi(s2);
+	auto_nmx=atoi(s2);
 	notAlreadySet.NMAX=0;
    }
    return;
@@ -1948,7 +1947,7 @@ if(msc("NMAX",s1)){
 if(msc("NPR",s1)){
    if ((notAlreadySet.NPR||force)|| ((mask!=NULL)&&(mask->NPR==1)))
    {
-   	auto_npr=atoi(s2);
+	auto_npr=atoi(s2);
 	notAlreadySet.NPR=0;
    }
    return;
@@ -1956,8 +1955,8 @@ if(msc("NPR",s1)){
  if(msc("NCOL",s1)){
    if ((notAlreadySet.NCOL||force)|| ((mask!=NULL)&&(mask->NCOL==1)))
    {
-   	auto_ncol=atoi(s2);
-   	notAlreadySet.NCOL=0;
+	auto_ncol=atoi(s2);
+	notAlreadySet.NCOL=0;
    }
    return;
  }
@@ -1966,7 +1965,7 @@ if(msc("NPR",s1)){
 if(msc("DSMIN",s1)){
    if ((notAlreadySet.DSMIN||force)|| ((mask!=NULL)&&(mask->DSMIN==1)))
    {
-   	auto_dsmin=atof(s2);
+	auto_dsmin=atof(s2);
 	notAlreadySet.DSMIN=0;
    }
    return;
@@ -1974,446 +1973,446 @@ if(msc("DSMIN",s1)){
 if(msc("DSMAX",s1)){
    if ((notAlreadySet.DSMAX||force)|| ((mask!=NULL)&&(mask->DSMAX==1)))
    {
-   	auto_dsmax=atof(s2);
-   	notAlreadySet.DSMAX=0;
+	auto_dsmax=atof(s2);
+	notAlreadySet.DSMAX=0;
    }
    return;
  }
 if(msc("DS",s1)){
-    if ((notAlreadySet.DS||force)|| ((mask!=NULL)&&(mask->DS==1)))
-    {
-   	auto_ds=atof(s2);
+	if ((notAlreadySet.DS||force)|| ((mask!=NULL)&&(mask->DS==1)))
+	{
+	auto_ds=atof(s2);
 	notAlreadySet.DS=0;
-    }
- 
+	}
+
    return;
  }
 if(msc("PARMIN",s1)){
    if ((notAlreadySet.XMAX||force)|| ((mask!=NULL)&&(mask->XMAX==1)))
    {
-   	auto_rl0=atof(s2);
+	auto_rl0=atof(s2);
 	notAlreadySet.XMAX=0;
    }
    return;
  }
 if(msc("PARMAX",s1)){
-    if ((notAlreadySet.PARMAX||force)|| ((mask!=NULL)&&(mask->PARMAX==1)))
-    {
-   	auto_rl1=atof(s2);
+	if ((notAlreadySet.PARMAX||force)|| ((mask!=NULL)&&(mask->PARMAX==1)))
+	{
+	auto_rl1=atof(s2);
 	notAlreadySet.PARMAX=0;
-    }
+	}
    return;
  }
 if(msc("NORMMIN",s1)){
-     if ((notAlreadySet.NORMMIN||force)|| ((mask!=NULL)&&(mask->NORMMIN==1)))
-     {
-   	auto_a0=atof(s2);
+	 if ((notAlreadySet.NORMMIN||force)|| ((mask!=NULL)&&(mask->NORMMIN==1)))
+	 {
+	auto_a0=atof(s2);
 	notAlreadySet.NORMMIN=0;
-     }
+	 }
    return;
  }
 if(msc("NORMMAX",s1)){
-     if ((notAlreadySet.NORMMAX||force)|| ((mask!=NULL)&&(mask->NORMMAX==1)))
-     {
-   	auto_a1=atof(s2);
-   	notAlreadySet.NORMMAX=0;
-     }
+	 if ((notAlreadySet.NORMMAX||force)|| ((mask!=NULL)&&(mask->NORMMAX==1)))
+	 {
+	auto_a1=atof(s2);
+	notAlreadySet.NORMMAX=0;
+	 }
    return;
  }
  if(msc("EPSL",s1)){
-     if ((notAlreadySet.EPSL||force)|| ((mask!=NULL)&&(mask->EPSL==1)))
-     {
-   	auto_epsl=atof(s2);
+	 if ((notAlreadySet.EPSL||force)|| ((mask!=NULL)&&(mask->EPSL==1)))
+	 {
+	auto_epsl=atof(s2);
 	notAlreadySet.EPSL=0;
-     }
+	 }
    return;
  }
 
 if(msc("EPSU",s1)){
-     if ((notAlreadySet.EPSU||force)|| ((mask!=NULL)&&(mask->EPSU==1)))
-     {
-   	auto_epsu=atof(s2);
+	 if ((notAlreadySet.EPSU||force)|| ((mask!=NULL)&&(mask->EPSU==1)))
+	 {
+	auto_epsu=atof(s2);
 	notAlreadySet.EPSU=0;
-     }
+	 }
    return;
  }
 if(msc("EPSS",s1)){
-     if ((notAlreadySet.EPSS||force)|| ((mask!=NULL)&&(mask->EPSS==1)))
-     {
-   	auto_epss=atof(s2);
+	 if ((notAlreadySet.EPSS||force)|| ((mask!=NULL)&&(mask->EPSS==1)))
+	 {
+	auto_epss=atof(s2);
 	notAlreadySet.EPSS=0;
-     }
+	 }
    return;
  }
  if(msc("RUNNOW",s1)){
-     if ((notAlreadySet.RUNNOW||force)|| ((mask!=NULL)&&(mask->RUNNOW==1)))
-     {
-   	RunImmediately=atoi(s2);
+	 if ((notAlreadySet.RUNNOW||force)|| ((mask!=NULL)&&(mask->RUNNOW==1)))
+	 {
+	RunImmediately=atoi(s2);
 	notAlreadySet.RUNNOW=0;
-     }
+	 }
    return;
  }
 
  if(msc("SEC",s1)){
-     if ((notAlreadySet.SEC||force)|| ((mask!=NULL)&&(mask->SEC==1)))
-     {
-   	SEc=atoi(s2);
+	 if ((notAlreadySet.SEC||force)|| ((mask!=NULL)&&(mask->SEC==1)))
+	 {
+	SEc=atoi(s2);
 	notAlreadySet.SEC=0;
-     }
+	 }
    return;
  }
  if(msc("UEC",s1)){
-     if ((notAlreadySet.UEC||force)|| ((mask!=NULL)&&(mask->UEC==1)))
-     {
-   	UEc=atoi(s2);
+	 if ((notAlreadySet.UEC||force)|| ((mask!=NULL)&&(mask->UEC==1)))
+	 {
+	UEc=atoi(s2);
 	notAlreadySet.UEC=0;
-     }
+	 }
    return;
  }
  if(msc("SPC",s1)){
-     if ((notAlreadySet.SPC||force)|| ((mask!=NULL)&&(mask->SPC==1)))
-     {
-   	SPc=atoi(s2);
+	 if ((notAlreadySet.SPC||force)|| ((mask!=NULL)&&(mask->SPC==1)))
+	 {
+	SPc=atoi(s2);
 	notAlreadySet.SPC=0;
-     }
+	 }
    return;
  }
  if(msc("UPC",s1)){
-     if ((notAlreadySet.UPC||force)|| ((mask!=NULL)&&(mask->UPC==1)))
-     {
-   	UPc=atoi(s2);
+	 if ((notAlreadySet.UPC||force)|| ((mask!=NULL)&&(mask->UPC==1)))
+	 {
+	UPc=atoi(s2);
 	notAlreadySet.UPC=0;
-     }
+	 }
    return;
  }
 
  if(msc("AUTOEVAL",s1)){
-     if ((notAlreadySet.AUTOEVAL||force)|| ((mask!=NULL)&&(mask->AUTOEVAL==1)))
-     {
-   	f=atoi(s2);
-   	set_auto_eval_flags(f);
+	 if ((notAlreadySet.AUTOEVAL||force)|| ((mask!=NULL)&&(mask->AUTOEVAL==1)))
+	 {
+	f=atoi(s2);
+	set_auto_eval_flags(f);
 	notAlreadySet.AUTOEVAL=0;
-    }
+	}
    return;
  }
 if(msc("AUTOXMAX",s1)){
-     if ((notAlreadySet.AUTOXMAX||force)|| ((mask!=NULL)&&(mask->AUTOXMAX==1)))
-     {
- 	auto_xmax=atof(s2);
+	 if ((notAlreadySet.AUTOXMAX||force)|| ((mask!=NULL)&&(mask->AUTOXMAX==1)))
+	 {
+	auto_xmax=atof(s2);
 	notAlreadySet.AUTOXMAX=0;
-     }
+	 }
  return;
 }
 if(msc("AUTOYMAX",s1)){
-     if ((notAlreadySet.AUTOYMAX||force)|| ((mask!=NULL)&&(mask->AUTOYMAX==1)))
-     {
- 		auto_ymax=atof(s2);
+	 if ((notAlreadySet.AUTOYMAX||force)|| ((mask!=NULL)&&(mask->AUTOYMAX==1)))
+	 {
+		auto_ymax=atof(s2);
 		notAlreadySet.AUTOYMAX=0;
-     }
+	 }
  return;
 }
 if(msc("AUTOXMIN",s1)){
-     if ((notAlreadySet.AUTOXMIN||force)|| ((mask!=NULL)&&(mask->AUTOXMIN==1)))
-     {
- 	auto_xmin=atof(s2);
+	 if ((notAlreadySet.AUTOXMIN||force)|| ((mask!=NULL)&&(mask->AUTOXMIN==1)))
+	 {
+	auto_xmin=atof(s2);
 	notAlreadySet.AUTOXMIN=0;
-     }
+	 }
  return;
 }
 if(msc("AUTOYMIN",s1)){
-     if ((notAlreadySet.AUTOYMIN||force)|| ((mask!=NULL)&&(mask->AUTOYMIN==1)))
-     {
- 	auto_ymin=atof(s2);
+	 if ((notAlreadySet.AUTOYMIN||force)|| ((mask!=NULL)&&(mask->AUTOYMIN==1)))
+	 {
+	auto_ymin=atof(s2);
 	notAlreadySet.AUTOYMIN=0;
-     }
+	 }
  return;
 }
 if(msc("AUTOVAR",s1)){
-     if ((notAlreadySet.AUTOVAR||force)|| ((mask!=NULL)&&(mask->AUTOVAR==1)))
-     {
-     	find_variable(s2,&i);
-    	if(i>0)auto_var=i-1;
+	 if ((notAlreadySet.AUTOVAR||force)|| ((mask!=NULL)&&(mask->AUTOVAR==1)))
+	 {
+		find_variable(s2,&i);
+		if(i>0)auto_var=i-1;
 	notAlreadySet.AUTOVAR=0;
-    }
-    return;
+	}
+	return;
   }
 
 /* postscript options */
 
  if(msc("PS_FONT",s1)){
-     if ((notAlreadySet.PS_FONT||force)|| ((mask!=NULL)&&(mask->PS_FONT==1)))
-     {
-   	strcpy(PS_FONT,s2);
+	 if ((notAlreadySet.PS_FONT||force)|| ((mask!=NULL)&&(mask->PS_FONT==1)))
+	 {
+	strcpy(PS_FONT,s2);
 	notAlreadySet.PS_FONT=0;
-     }
+	 }
    return;
  }
 
 if(msc("PS_LW",s1)){
    if ((notAlreadySet.PS_LW||force)|| ((mask!=NULL)&&(mask->PS_LW==1)))
    {
-  	PS_LW=atof(s2);
+	PS_LW=atof(s2);
 	notAlreadySet.PS_LW=0;
    }
    return;
  }
 
 if(msc("PS_FSIZE",s1)){
-     if ((notAlreadySet.PS_FSIZE||force)|| ((mask!=NULL)&&(mask->PS_FSIZE==1)))
-     {
-  	PS_FONTSIZE=atoi(s2);
+	 if ((notAlreadySet.PS_FSIZE||force)|| ((mask!=NULL)&&(mask->PS_FSIZE==1)))
+	 {
+	PS_FONTSIZE=atoi(s2);
 	notAlreadySet.PS_FSIZE=0;
-     }
+	 }
    return;
  }
 
 if(msc("PS_COLOR",s1)){
-     if ((notAlreadySet.PS_COLOR||force)|| ((mask!=NULL)&&(mask->PS_COLOR==1)))
-     {
-  	PSColorFlag=atoi(s2);
-  	PS_Color=PSColorFlag;
+	 if ((notAlreadySet.PS_COLOR||force)|| ((mask!=NULL)&&(mask->PS_COLOR==1)))
+	 {
+	PSColorFlag=atoi(s2);
+	PS_Color=PSColorFlag;
 	notAlreadySet.PS_COLOR=0;
-     }
+	 }
    return;
  }
 if(msc("TUTORIAL",s1)){
    if(!(msc(s2,"0")||msc(s2,"1")))
    {
-   	plintf("TUTORIAL option must be 0 or 1.\n");
+	plintf("TUTORIAL option must be 0 or 1.\n");
 	exit(-1);
    }
    if ((notAlreadySet.TUTORIAL||force) || ((mask!=NULL)&&(mask->TUTORIAL==1)))
    {
-   	DoTutorial=atoi(s2);
+	DoTutorial=atoi(s2);
 	notAlreadySet.TUTORIAL=0;
    }
    return;
  }
  if(msc("S1",s1)){
-     if ((notAlreadySet.SLIDER1||force) || ((mask!=NULL)&&(mask->SLIDER1==1)))
-     {
+	 if ((notAlreadySet.SLIDER1||force) || ((mask!=NULL)&&(mask->SLIDER1==1)))
+	 {
 	strncpy(SLIDER1VAR,s2,20);
 	SLIDER1VAR[19]= '\0';
 	notAlreadySet.SLIDER1=0;
-     }
-    return;
+	 }
+	return;
   }
 
 if(msc("S2",s1)){
-     if ((notAlreadySet.SLIDER2||force) || ((mask!=NULL)&&(mask->SLIDER2==1)))
-     {
-    	strncpy(SLIDER2VAR,s2,20);
+	 if ((notAlreadySet.SLIDER2||force) || ((mask!=NULL)&&(mask->SLIDER2==1)))
+	 {
+		strncpy(SLIDER2VAR,s2,20);
 	SLIDER2VAR[19]= '\0';
 	notAlreadySet.SLIDER2=0;
-     }
-    return;
+	 }
+	return;
    }
  if(msc("S3",s1)){
-     if ((notAlreadySet.SLIDER3||force) || ((mask!=NULL)&&(mask->SLIDER3==1)))
-     {	
-     	strncpy(SLIDER3VAR,s2,20);
+	 if ((notAlreadySet.SLIDER3||force) || ((mask!=NULL)&&(mask->SLIDER3==1)))
+	 {
+		strncpy(SLIDER3VAR,s2,20);
 	SLIDER3VAR[19]= '\0';
 	notAlreadySet.SLIDER3=0;
-     }
-    return;
+	 }
+	return;
   }
   if(msc("SLO1",s1)){
-     if ((notAlreadySet.SLIDER1LO||force) || ((mask!=NULL)&&(mask->SLIDER1LO==1)))
-     {
-    	SLIDER1LO=atof(s2);
+	 if ((notAlreadySet.SLIDER1LO||force) || ((mask!=NULL)&&(mask->SLIDER1LO==1)))
+	 {
+		SLIDER1LO=atof(s2);
 	notAlreadySet.SLIDER1LO=0;
-     }
-    return;
+	 }
+	return;
   }
 
 if(msc("SLO2",s1)){
-     if ((notAlreadySet.SLIDER2LO||force) || ((mask!=NULL)&&(mask->SLIDER2LO==1)))
-     {
-    	SLIDER2LO=atof(s2);
+	 if ((notAlreadySet.SLIDER2LO||force) || ((mask!=NULL)&&(mask->SLIDER2LO==1)))
+	 {
+		SLIDER2LO=atof(s2);
 	notAlreadySet.SLIDER2LO=0;
-     }
-    return;
+	 }
+	return;
    }
  if(msc("SLO3",s1)){
-     if ((notAlreadySet.SLIDER3LO||force) || ((mask!=NULL)&&(mask->SLIDER3LO==1)))
-     {
-    	SLIDER3LO=atof(s2);
+	 if ((notAlreadySet.SLIDER3LO||force) || ((mask!=NULL)&&(mask->SLIDER3LO==1)))
+	 {
+		SLIDER3LO=atof(s2);
 	notAlreadySet.SLIDER3LO=0;
-     }
-    return;
+	 }
+	return;
   }
  if(msc("SHI1",s1)){
-     if ((notAlreadySet.SLIDER1HI||force) || ((mask!=NULL)&&(mask->SLIDER1HI==1)))
-     {
-    	SLIDER1HI=atof(s2);
+	 if ((notAlreadySet.SLIDER1HI||force) || ((mask!=NULL)&&(mask->SLIDER1HI==1)))
+	 {
+		SLIDER1HI=atof(s2);
 	notAlreadySet.SLIDER1HI=0;
-     }
-    return;
+	 }
+	return;
   }
  if(msc("SHI2",s1)){
-     if ((notAlreadySet.SLIDER2HI||force) || ((mask!=NULL)&&(mask->SLIDER2HI==1)))
-     {
-    	SLIDER2HI=atof(s2);
+	 if ((notAlreadySet.SLIDER2HI||force) || ((mask!=NULL)&&(mask->SLIDER2HI==1)))
+	 {
+		SLIDER2HI=atof(s2);
 	notAlreadySet.SLIDER2HI=0;
-     }
-    return;
+	 }
+	return;
    }
  if(msc("SHI3",s1)){
-     if ((notAlreadySet.SLIDER3HI||force) || ((mask!=NULL)&&(mask->SLIDER3HI==1)))
-     {
-    	SLIDER3HI=atof(s2);
+	 if ((notAlreadySet.SLIDER3HI||force) || ((mask!=NULL)&&(mask->SLIDER3HI==1)))
+	 {
+		SLIDER3HI=atof(s2);
 	notAlreadySet.SLIDER3HI=0;
-     }
-    return;
+	 }
+	return;
  }
 
  /* postprocessing options
-    This is rally only relevant for batch jobs as it 
-    writes files then
+	This is rally only relevant for batch jobs as it
+	writes files then
  */
 
  if(msc("POSTPROCESS",s1)){
-     if ((notAlreadySet.POSTPROCESS||force) || ((mask!=NULL)&&(mask->POSTPROCESS==1)))
-     {
-    	post_process=atoi(s2);
+	 if ((notAlreadySet.POSTPROCESS||force) || ((mask!=NULL)&&(mask->POSTPROCESS==1)))
+	 {
+		post_process=atoi(s2);
 	notAlreadySet.POSTPROCESS=0;
-     }
-    return;
+	 }
+	return;
    }
-   
+
  if(msc("HISTLO",s1)){
-     if ((notAlreadySet.HISTLO||force) || ((mask!=NULL)&&(mask->HISTLO==1)))
-     {
-    	hist_inf.xlo=atof(s2);
+	 if ((notAlreadySet.HISTLO||force) || ((mask!=NULL)&&(mask->HISTLO==1)))
+	 {
+		hist_inf.xlo=atof(s2);
 	notAlreadySet.HISTLO=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("HISTHI",s1)){
-     if ((notAlreadySet.HISTHI||force) || ((mask!=NULL)&&(mask->HISTHI==1)))
-     {
-    	hist_inf.xhi=atof(s2);
+	 if ((notAlreadySet.HISTHI||force) || ((mask!=NULL)&&(mask->HISTHI==1)))
+	 {
+		hist_inf.xhi=atof(s2);
 	notAlreadySet.HISTHI=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("HISTBINS",s1)){
-     if ((notAlreadySet.HISTBINS||force) || ((mask!=NULL)&&(mask->HISTBINS==1)))
-     {
-    	hist_inf.nbins=atoi(s2);
+	 if ((notAlreadySet.HISTBINS||force) || ((mask!=NULL)&&(mask->HISTBINS==1)))
+	 {
+		hist_inf.nbins=atoi(s2);
 	notAlreadySet.HISTBINS=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("HISTCOL",s1)){
-     if ((notAlreadySet.HISTCOL||force) || ((mask!=NULL)&&(mask->HISTCOL==1)))
-     {
-       find_variable(s2,&i);
-       if(i>(-1)) hist_inf.col=i;
+	 if ((notAlreadySet.HISTCOL||force) || ((mask!=NULL)&&(mask->HISTCOL==1)))
+	 {
+	   find_variable(s2,&i);
+	   if(i>(-1)) hist_inf.col=i;
 	notAlreadySet.HISTCOL=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("SPECCOL",s1)){
-     if ((notAlreadySet.SPECCOL||force) || ((mask!=NULL)&&(mask->SPECCOL==1)))
-     {
-       find_variable(s2,&i);
-       if(i>(-1)) spec_col=i;
+	 if ((notAlreadySet.SPECCOL||force) || ((mask!=NULL)&&(mask->SPECCOL==1)))
+	 {
+	   find_variable(s2,&i);
+	   if(i>(-1)) spec_col=i;
 	notAlreadySet.SPECCOL=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("SPECCOL2",s1)){
-     if ((notAlreadySet.SPECCOL2||force) || ((mask!=NULL)&&(mask->SPECCOL2==1)))
-     {
-       find_variable(s2,&i);
-       if(i>(-1)) spec_col2=i;
+	 if ((notAlreadySet.SPECCOL2||force) || ((mask!=NULL)&&(mask->SPECCOL2==1)))
+	 {
+	   find_variable(s2,&i);
+	   if(i>(-1)) spec_col2=i;
 	notAlreadySet.SPECCOL2=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("SPECWIDTH",s1)){
-     if ((notAlreadySet.SPECWIDTH||force) || ((mask!=NULL)&&(mask->SPECWIDTH==1)))
-     {
-       spec_wid=atoi(s2);
+	 if ((notAlreadySet.SPECWIDTH||force) || ((mask!=NULL)&&(mask->SPECWIDTH==1)))
+	 {
+	   spec_wid=atoi(s2);
 	notAlreadySet.SPECWIDTH=0;
-     }
-    return;
+	 }
+	return;
   }
 
  if(msc("SPECWIN",s1)){
-     if ((notAlreadySet.SPECWIN||force) || ((mask!=NULL)&&(mask->SPECWIN==1)))
-     {
-       spec_win=atoi(s2);
+	 if ((notAlreadySet.SPECWIN||force) || ((mask!=NULL)&&(mask->SPECWIN==1)))
+	 {
+	   spec_win=atoi(s2);
 	notAlreadySet.SPECWIN=0;
-     }
-    return;
+	 }
+	return;
   }
 
 
   if(msc("DFGRID",s1)){
-     if ((notAlreadySet.DFGRID||force)|| ((mask!=NULL)&&(mask->DFGRID==1)))
-     { 
-     	DF_GRID=atoi(s2);
+	 if ((notAlreadySet.DFGRID||force)|| ((mask!=NULL)&&(mask->DFGRID==1)))
+	 {
+		DF_GRID=atoi(s2);
 	notAlreadySet.DFGRID=0;
-     }
+	 }
    return;
  }
-  if(msc("DFDRAW",s1)){ 
-     if ((notAlreadySet.DFBATCH||force)|| ((mask!=NULL)&&(mask->DFBATCH==1)))
-     { 
-     	DFBatch=atoi(s2);
+  if(msc("DFDRAW",s1)){
+	 if ((notAlreadySet.DFBATCH||force)|| ((mask!=NULL)&&(mask->DFBATCH==1)))
+	 {
+		DFBatch=atoi(s2);
 	notAlreadySet.DFBATCH=0;
-     }
+	 }
    return;
  }
    if(msc("NCDRAW",s1)){
-     if ((notAlreadySet.NCBATCH||force)|| ((mask!=NULL)&&(mask->NCBATCH==1)))
-     { 
-     	NCBatch=atoi(s2);
+	 if ((notAlreadySet.NCBATCH||force)|| ((mask!=NULL)&&(mask->NCBATCH==1)))
+	 {
+		NCBatch=atoi(s2);
 	notAlreadySet.NCBATCH=0;
-     }
+	 }
    return;
    }
 
    /* colorize customizing !! */
    if(msc("COLORVIA",s1))
-     {
-       if ((notAlreadySet.COLORVIA||force)|| ((mask!=NULL)&&(mask->COLORVIA==1)))
-       strcpy(ColorVia,s2);
-       	notAlreadySet.COLORVIA=0;
-       return;
-     }
+	 {
+	   if ((notAlreadySet.COLORVIA||force)|| ((mask!=NULL)&&(mask->COLORVIA==1)))
+	   strcpy(ColorVia,s2);
+		notAlreadySet.COLORVIA=0;
+	   return;
+	 }
    if(msc("COLORIZE",s1))
-     {
-          if ((notAlreadySet.COLORIZE||force)|| ((mask!=NULL)&&(mask->COLORIZE==1)))
-       ColorizeFlag=atoi(s2);
-          	notAlreadySet.COLORIZE=0;
-          return;
-     }
+	 {
+		  if ((notAlreadySet.COLORIZE||force)|| ((mask!=NULL)&&(mask->COLORIZE==1)))
+	   ColorizeFlag=atoi(s2);
+			notAlreadySet.COLORIZE=0;
+		  return;
+	 }
    if(msc("COLORLO",s1))
-     {
-              if ((notAlreadySet.COLORLO||force)|| ((mask!=NULL)&&(mask->COLORLO==1)))
-       ColorViaLo=atof(s2);
-	             	notAlreadySet.COLORLO=0;
-          return;
-     }
+	 {
+			  if ((notAlreadySet.COLORLO||force)|| ((mask!=NULL)&&(mask->COLORLO==1)))
+	   ColorViaLo=atof(s2);
+					notAlreadySet.COLORLO=0;
+		  return;
+	 }
    if(msc("COLORHI",s1))
-     {
-              if ((notAlreadySet.COLORHI||force)|| ((mask!=NULL)&&(mask->COLORHI==1)))
-       ColorViaHi=atof(s2);
-              	notAlreadySet.COLORHI=0;
-       return;
-     }
+	 {
+			  if ((notAlreadySet.COLORHI||force)|| ((mask!=NULL)&&(mask->COLORHI==1)))
+	   ColorViaHi=atof(s2);
+				notAlreadySet.COLORHI=0;
+	   return;
+	 }
 
-plintf("!! Option %s not recognized\n",s1); 
-  
+plintf("!! Option %s not recognized\n",s1);
+
 }
 
 
