@@ -1,17 +1,3 @@
-#include "tabular.h"
-
-#include "browse.h"
-#include "ggets.h"
-#include "init_conds.h"
-#include "many_pops.h"
-#include "simplenet.h"
-
-#include "parserslow.h"
-
-#include <stdlib.h>
-#include <string.h>
-
-
 /*********************************************************
 	 This is code for read-in tables in XPP
 	 This should probably be accessible from within the program
@@ -66,22 +52,28 @@
 
 to be added later
 **************************************************************/
+#include "tabular.h"
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "browse.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "init_conds.h"
+#include "many_pops.h"
+#include "parserslow.h"
+#include "simplenet.h"
+#include "storage.h"
 
 TABULAR my_table[MAX_TAB];
+
 
 double atof();
 double get_ivar();
 double evaluate();
-extern char cur_dir[];
-extern int NTable;
-
-extern int NCON,NSYM,NCON_START,NSYM_START;
-
-extern int MAXSTOR;
-extern float **storage;
 void set_auto_eval_flags(int f)
 {
  int i;
