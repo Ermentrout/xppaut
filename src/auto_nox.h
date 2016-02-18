@@ -72,6 +72,10 @@ typedef struct {
 }  AUTOAX;
 
 /* --- Data --- */
+extern char fort3[200];
+extern char fort7[200];
+extern char fort8[200];
+extern char fort9[200];
 extern int AutoPar[8];
 extern int Auto_index_to_array[8];
 extern int AutoTwoParam;
