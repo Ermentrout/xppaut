@@ -15,6 +15,7 @@
 #include "ggets.h"
 #include "init_conds.h"
 #include "load_eqn.h"
+#include "main.h"
 #include "many_pops.h"
 #include "mykeydef.h"
 #include "newhome.h"
@@ -39,7 +40,7 @@
 #define SIMPMASK (ButtonPressMask |\
 		  KeyPressMask	  |\
 		  ExposureMask    |\
-                  StructureNotifyMask)
+				  StructureNotifyMask)
 
 /* --- Types --- */
 struct {
@@ -54,7 +55,7 @@ struct {
 struct{
   Window base,up,down,list,main,close;
   int istart,nlines,flag;
-  
+
 } eq_list;
 
 /* --- Functions --- */
@@ -69,17 +70,17 @@ Window w;
  if(w==eq_list.down)xds("Down");
   if(w==eq_list.close)xds("Close");
  if(w==eq_list.list){
- 
+
    for(i=eq_list.istart;i<eq_list.istart+eq_list.nlines;i++){
-     if(i>=NEQ)break;
-     if(i<NODE &&METHOD>0)strcpy(fstr,"d%s/dT=%s");
-     if(i<NODE &&METHOD==0)strcpy(fstr,"%s(n+1)=%s");
-     if(i<NODE &&EqType[i]==1)strcpy(fstr,"%s(t)=%s");
-     if(i>=NODE)strcpy(fstr,"%s=%s");
-     sprintf(bob,fstr,uvar_names[i],ode_names[i]);
-    
-     bob[299]=0;
-     XDrawString(display,w,small_gc,0,CURY_OFFs+(i-eq_list.istart)*(DCURYs+2),
+	 if(i>=NEQ)break;
+	 if(i<NODE &&METHOD>0)strcpy(fstr,"d%s/dT=%s");
+	 if(i<NODE &&METHOD==0)strcpy(fstr,"%s(n+1)=%s");
+	 if(i<NODE &&EqType[i]==1)strcpy(fstr,"%s(t)=%s");
+	 if(i>=NODE)strcpy(fstr,"%s=%s");
+	 sprintf(bob,fstr,uvar_names[i],ode_names[i]);
+
+	 bob[299]=0;
+	 XDrawString(display,w,small_gc,0,CURY_OFFs+(i-eq_list.istart)*(DCURYs+2),
 		 bob,strlen(bob));
    }
  }
@@ -87,7 +88,7 @@ Window w;
 
 void create_eq_list()
 {
- 
+
  int width,height,hlist,hmain;
  Window base;
  static char *wname[]={"Equations"};
@@ -99,7 +100,7 @@ void create_eq_list()
    return;
  }
 
-  eq_list.flag=0; /*  this is to tell that no eq_box is here  */ 
+  eq_list.flag=0; /*  this is to tell that no eq_box is here  */
 
 
   hmain=3*DCURYs;
@@ -108,11 +109,11 @@ void create_eq_list()
   if(height>300)height=300;
   eq_list.istart=0;
   eq_list.nlines=(height-hmain)/(DCURYs+2);
- 
+
   width=300;
   base=make_plain_window(RootWindow(display,screen),0,0,width,height,4);
   eq_list.base=base;
-  
+
   XStringListToTextProperty(wname,1,&winname);
    XStringListToTextProperty(iname,1,&iconame);
 
@@ -123,12 +124,12 @@ void create_eq_list()
  size_hints.height=height;
  size_hints.min_width=width;
  size_hints.min_height=height;
- 
+
  XClassHint class_hints;
  class_hints.res_name="";
  class_hints.res_class="";
- 
- 
+
+
   XSetWMProperties(display,base,&winname,&iconame,NULL,0,&size_hints,NULL,&class_hints);
  make_icon((char*)eqns_bits,eqns_width,eqns_height,base);
  eq_list.main=make_plain_window(base,0,0,width,hmain,1);
@@ -159,9 +160,9 @@ void eq_list_keypress(ev,used)
  {
   *used=1;
    ks=(char)get_key_press(&ev);
- 
 
- 
+
+
    if(ks==UP){eq_list_up(); return;}
 
   if(ks==DOWN){eq_list_down(); return;}
@@ -172,11 +173,11 @@ void eq_list_keypress(ev,used)
 void enter_eq_stuff(Window w, int b)
 {
   if(eq_list.flag==1){
-    if(w==eq_list.close||w==eq_list.up||w==eq_list.down)
-      XSetWindowBorderWidth(display,w,b);
+	if(w==eq_list.close||w==eq_list.up||w==eq_list.down)
+	  XSetWindowBorderWidth(display,w,b);
   }
   if(eq_box.flag==1&&(w==eq_box.close||w==eq_box.import))
-    XSetWindowBorderWidth(display,w,b);
+	XSetWindowBorderWidth(display,w,b);
 }
 
 void eq_list_button(XEvent ev)
@@ -196,7 +197,7 @@ void eq_list_button(XEvent ev)
  }
 }
 
-  
+
 void eq_list_up(){
  if(eq_list.istart>0){
    eq_list.istart--;
@@ -208,7 +209,7 @@ void eq_list_up(){
 void eq_list_down(){
  if(eq_list.istart<(NEQ-1)){
    eq_list.istart++;
-    XClearWindow(display,eq_list.list);
+	XClearWindow(display,eq_list.list);
    draw_eq_list(eq_list.list);
  }
 
@@ -218,21 +219,21 @@ void eq_box_import()
 {
   int n=eq_box.n,i;
   for(i=0;i<n;i++)
-    last_ic[i]=eq_box.y[i];
+	last_ic[i]=eq_box.y[i];
 
 
   if(n<20){
-    if(sparity==0){
-      for(i=0;i<n;i++)
+	if(sparity==0){
+	  for(i=0;i<n;i++)
 	homo_l[i]=eq_box.y[i];
-      printf("Saved to left equilibrium\n");
-    }
-    if(sparity==1){
-      for(i=0;i<n;i++)
+	  printf("Saved to left equilibrium\n");
+	}
+	if(sparity==1){
+	  for(i=0;i<n;i++)
 	homo_r[i]=eq_box.y[i];
-      printf("Saved to right equilibrium\n");
-    }
-    sparity=1-sparity;
+	  printf("Saved to right equilibrium\n");
+	}
+	sparity=1-sparity;
   }
    redraw_ics();
 }
@@ -249,7 +250,7 @@ unsigned int *wid,*hgt;
 
 void resize_eq_list(win)
 Window win;
-{ 
+{
 
   int nlines;
   unsigned int w,h;
@@ -261,7 +262,7 @@ Window win;
   get_new_size(win,&w,&h);
   nlines=(h-CURY_OFFs-2*DCURYs)/(DCURYs+2);
   eq_list.nlines=nlines;
-  XResizeWindow(display,eq_list.base,w,h);  
+  XResizeWindow(display,eq_list.base,w,h);
  XResizeWindow(display,eq_list.list,w,h-2*DCURYs);
  XResizeWindow(display,eq_list.main,w,2*DCURYs);
 }
@@ -274,10 +275,10 @@ void eq_box_button(Window w)
   if(eq_box.flag==0)return;
   if(w==eq_box.import){eq_box_import(); return;}
   if(eq_box.close==w){
-    eq_box.flag=0;
-    waitasec(ClickTime);
-    XDestroySubwindows(display,eq_box.base);
-    XDestroyWindow(display,eq_box.base);
+	eq_box.flag=0;
+	waitasec(ClickTime);
+	XDestroySubwindows(display,eq_box.base);
+	XDestroyWindow(display,eq_box.base);
  }
 }
 
@@ -294,7 +295,7 @@ double *y,*ev;
   XSizeHints size_hints;
 /*    Do this every time   */
  redraw_ics();
- for(i=0;i<n;i++) 
+ for(i=0;i<n;i++)
  eq_box.y[i]=y[i];
  eq_box.n=n;
  eq_box.info[0]=cp;
@@ -349,8 +350,8 @@ else {   /*   Already it has been created so we are updating it */
  XClearWindow(display,eq_box.rest);
   draw_eq_box(eq_box.rest);
 }
- 
-    
+
+
 }
 
 void  draw_eq_box(w)
@@ -366,7 +367,7 @@ void  draw_eq_box(w)
    xds("Import");
  if(w==eq_box.top){
    XDrawString(display,eq_box.top,gc,5,CURY_OFF,eq_box.type,
-	       strlen(eq_box.type));
+		   strlen(eq_box.type));
   return;
  }
  if(w==eq_box.stab){
@@ -376,39 +377,39 @@ void  draw_eq_box(w)
  XDrawString(display,eq_box.stab,small_gc,2+9*DCURXs,2*DCURY+6,temp,strlen(temp));
  sprintf(temp,"im = %d",eq_box.info[2]);
  XDrawString(display,eq_box.stab,small_gc,2+18*DCURXs,2*DCURY+6,
-	     temp,strlen(temp));
+		 temp,strlen(temp));
  sprintf(temp,"r+ = %d",eq_box.info[3]);
  XDrawString(display,eq_box.stab,small_gc,2,2*DCURY+2*DCURYs+6,temp,strlen(temp));
  sprintf(temp,"r- = %d",eq_box.info[4]);
  XDrawString(display,eq_box.stab,small_gc,2+9*DCURXs,2*DCURY+2*DCURYs+6,
-	     temp,strlen(temp));
+		 temp,strlen(temp));
  return;
 }
  if(w==eq_box.rest){
   if(n>=20)nrow=20;
   else nrow=n;
- 
+
    ncol=1+n/3;
- 
+
    for(j=0;j<ncol;j++){
-     for(i=0;i<nrow;i++){
-       in=j*20+i;
-       if(in>=n)continue;
-       sprintf(temp,"%s=%.5g",uvar_names[in],eq_box.y[in]);
-       XDrawString(display,eq_box.rest,small_gc,j*28*DCURXs+8,i*(DCURYs+3)+13,
+	 for(i=0;i<nrow;i++){
+	   in=j*20+i;
+	   if(in>=n)continue;
+	   sprintf(temp,"%s=%.5g",uvar_names[in],eq_box.y[in]);
+	   XDrawString(display,eq_box.rest,small_gc,j*28*DCURXs+8,i*(DCURYs+3)+13,
 		   temp,strlen(temp));
-     
-     }
+
+	 }
    }
   return;
 }
 }
-       
 
- 
-   
 
-			 
+
+
+
+
 
 
 

@@ -1,12 +1,34 @@
 #include "pop_list.h"
 
-#include "form_ode.h"
-#include "many_pops.h"
-#include "ggets.h"
-#include "menudrive.h"
-#include "bitmap/info.bitmap"
-#include "bitmap/alert.bitmap"
+#include <stdlib.h>
+#include <string.h>
+#include <X11/cursorfont.h>
+#include <X11/Xutil.h>
+
 #include "browse.h"
+#include "form_ode.h"
+#include "ggets.h"
+#include "graf_par.h"
+#include "main.h"
+#include "many_pops.h"
+#include "markov.h"
+#include "menudrive.h"
+#include "bitmap/alert.bitmap"
+#include "bitmap/info.bitmap"
+
+#define EV_MASK	   (ButtonPressMask 	|\
+					KeyPressMask		|\
+					ExposureMask		|\
+					StructureNotifyMask)
+
+#define BUT_MASK   (ButtonPressMask 	|\
+					KeyPressMask		|\
+					ExposureMask		|\
+					StructureNotifyMask	|\
+					EnterWindowMask		|\
+					LeaveWindowMask)
+
+SCRBOX_LIST scrbox_list[10];
 
 void set_window_title(Window win,char *string)
 {

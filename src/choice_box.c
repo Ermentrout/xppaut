@@ -11,6 +11,7 @@
 
 #include "browse.h"
 #include "ggets.h"
+#include "main.h"
 #include "pop_list.h"
 #include "struct.h"
 
@@ -42,17 +43,17 @@ CHOICE_BOX p;
  int n=p.n;
  XSetFillStyle(display,gc,FillSolid);
   XSetForeground(display,gc,MyForeColor);
- 
+
   if(w==p.ok)XDrawString(display,w,gc,0,CURY_OFF,"Ok",2);
   if(w==p.cancel)
 	XDrawString(display,w,gc,0,CURY_OFF,"Cancel",6);
    for(i=0;i<n;i++)
-  {  
-    if(w!=p.cw[i])continue;
-    XDrawString(display,w,gc,0,CURY_OFF,p.name[i],strlen(p.name[i]));
-    if(p.flag[i]==1)set_fore();
-    else set_back();
-    XDrawString(display,w,gc,(p.mc+1)*DCURX,CURY_OFF,"X",1);
+  {
+	if(w!=p.cw[i])continue;
+	XDrawString(display,w,gc,0,CURY_OFF,p.name[i],strlen(p.name[i]));
+	if(p.flag[i]==1)set_fore();
+	else set_back();
+	XDrawString(display,w,gc,(p.mc+1)*DCURX,CURY_OFF,"X",1);
   }
   set_fore();
 }
@@ -61,8 +62,8 @@ void do_checks(p)
 CHOICE_BOX p;
 {
  int i;
- 
- 
+
+
  for(i=0;i<p.n;i++)
  {
   if(p.flag[i]==1)set_fore();
@@ -80,7 +81,7 @@ char **names,*wname;
 }
 
 
- 
+
 
 int do_choice_box(root,wname,n,mcc,names,check,type)
 Window root;
@@ -95,7 +96,7 @@ char **names,*wname;
    int oldcheck[MAXENTRY];
    int xpos,ypos,status;
    int xstart,ystart;
-     XTextProperty winname;
+	 XTextProperty winname;
    XSizeHints size_hints;
    Window base;
    maxchar=mcc;
@@ -114,15 +115,15 @@ char **names,*wname;
  size_hints.max_width=width;
  size_hints.max_height=height;
  XSetWMProperties(display,base,&winname,NULL,NULL,0,&size_hints,NULL,NULL);
- 
+
  ystart=DCURY;
    xstart=DCURX;
 
 p.name=names;
 p.flag=check;
 for(i=0;i<n;i++){
-    oldcheck[i]=check[i];
-    xpos=xstart;
+	oldcheck[i]=check[i];
+	xpos=xstart;
   ypos=ystart+i*(DCURY+10);
    p.cw[i]=make_window(base,xpos,ypos,(mcc+3)*DCURX,DCURY,1);
   }
@@ -132,7 +133,7 @@ for(i=0;i<n;i++){
   p.ok=make_window(base,xpos,ypos,2*DCURX,DCURY,2);
   p.cancel=make_window(base,xpos+4*DCURX,ypos,6*DCURX,DCURY,2);
   p.base=base;
-  
+
   p.n=n;
   p.type=type;
   p.mc=mcc;
@@ -148,24 +149,24 @@ for(i=0;i<n;i++){
  }
 
 
- 
+
 int choice_box_event_loop(p)
  CHOICE_BOX p;
- 
+
  {
  int i,j,nn=p.n;
   int status=-1;
- 
+
  XEvent ev;
 
  XNextEvent(display,&ev);
- 
- 
+
+
   switch(ev.type){
 	case ConfigureNotify:
 	case Expose:
 	case MapNotify:
- 	display_choice(ev.xany.window,p);
+	display_choice(ev.xany.window,p);
 	break;
 	case ButtonPress:
 		if(ev.xbutton.window==p.ok)
@@ -179,29 +180,29 @@ int choice_box_event_loop(p)
 		status=FORGET_ALL;
 		}
 		for(i=0;i<nn;i++)
- 		{
+		{
 			if(ev.xbutton.window==p.cw[i]){
-                         if(p.type==RADIO){
+						 if(p.type==RADIO){
 				for(j=0;j<nn;j++)p.flag[j]=0;
 				p.flag[i]=1;
-                                do_checks(p);
+								do_checks(p);
 			  }
 			if(p.type==CHOICE){
-			     p.flag[i]=1-p.flag[i];
-			     do_checks(p);
-			     }
-                         }
-			 
-			
-			
+				 p.flag[i]=1-p.flag[i];
+				 do_checks(p);
+				 }
+						 }
+
+
+
 		}
-			
+
 		break;
 	case KeyPress:
-             		break;
-         }
- 
-         return(status);
+					break;
+		 }
+
+		 return(status);
  }
 
 

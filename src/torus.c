@@ -8,7 +8,9 @@
 #include <X11/Xutil.h>
 
 #include "browse.h"
+#include "form_ode.h"
 #include "ggets.h"
+#include "main.h"
 #include "many_pops.h"
 #include "pop_list.h"
 

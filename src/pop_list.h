@@ -1,124 +1,16 @@
-#ifndef _pop_list_h
-#define _pop_list_h
+#ifndef XPPAUT_POP_LIST_H
+#define XPPAUT_POP_LIST_H
 
-
-
-#include "phsplan.h"
-#include <stdlib.h>
-#include <string.h>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/cursorfont.h>
-#include <stdio.h>
-#include "xpplim.h"
-#include "math.h"
 
-
-
+/* --- Macros --- */
 #define MAX_N_SBOX 22
 #define MAX_LEN_SBOX 25
-
-
 #define FORGET_ALL 0
 #define DONE_ALL 2
 #define FORGET_THIS 3
 #define DONE_THIS 1
 
-
-
-
-
-#define EV_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask)
-
-#define BUT_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		EnterWindowMask		|\
-		LeaveWindowMask)
-
-
-
-
-
-
-
-extern Display *display;
-extern int DisplayWidth,DisplayHeight;
-extern int screen;
-extern Atom deleteWindowAtom;
-extern Window main_win,info_pop,draw_win;
-extern int DCURY,DCURX,CURY_OFF,DCURXs,DCURYs,CURY_OFFs,xor_flag;
-extern GC gc,small_gc;
-extern unsigned int MyBackColor,MyForeColor;
-
-extern int TipsFlag;
-char *get_next(),*get_first();
-extern char UserBlack[8];
-extern char UserWhite[8];
-extern int UserGradients;
-
-
-Window make_window();
-Window make_plain_window();
-
-/*  This is a string box widget which handles a list of
-	editable strings
- */
-
-typedef struct {
-		Window base,ok,cancel;
-		Window win[MAX_N_SBOX];
-		char name[MAX_N_SBOX][MAX_LEN_SBOX],
-			 value[MAX_N_SBOX][MAX_LEN_SBOX];
-		int n,hot;
-				int hgt,wid;
-				int hh[MAX_N_SBOX];
-		} STRING_BOX;
-
-
-typedef struct {
-			   char **list;
-			   int n;
-}  SCRBOX_LIST;
-
-extern int NUPAR,NEQ,NODE,NMarkov;
-extern  char *color_names[];
-SCRBOX_LIST scrbox_list[10];
-
-
-/*  This is a new improved pop_up widget */
-typedef struct {
-		Window base,tit;
-		Window *w;
-		char *title;
-		char **entries;
-				char **hints;
-		int n,max;
-		char *key;
-		int hot;
-		} POP_UP;
-
-
-typedef struct {
-			   Window base,slide,close,text;
-			   int i0;
-			   int exist,len,nlines;
-			   char **list;
-			   } TEXTWIN;
-
-typedef struct {
-			  Window base,slide;
-			  Window *w;
-			  int nw,nent,i0;
-			  int len,exist;
-			  char **list;
-			  } SCROLLBOX;
-
-TEXTWIN mytext;
 #define SB_PLOTTABLE 0
 #define SB_VARIABLE 1
 #define SB_PARAMETER 2
@@ -127,10 +19,53 @@ TEXTWIN mytext;
 #define SB_MARKER 5
 #define SB_METHOD 6
 
+/* --- Types --- */
+/*  This is a string box widget which handles a list of
+	editable strings
+ */
+typedef struct {
+		Window base,ok,cancel;
+		Window win[MAX_N_SBOX];
+		char name[MAX_N_SBOX][MAX_LEN_SBOX],
+			 value[MAX_N_SBOX][MAX_LEN_SBOX];
+		int n,hot;
+		int hgt,wid;
+		int hh[MAX_N_SBOX];
+} STRING_BOX;
 
+typedef struct {
+		char **list;
+		int n;
+}  SCRBOX_LIST;
 
+/*  This is a new improved pop_up widget */
+typedef struct {
+		Window base,tit;
+		Window *w;
+		char *title;
+		char **entries;
+		char **hints;
+		int n,max;
+		char *key;
+		int hot;
+} POP_UP;
 
+typedef struct {
+		Window base,slide,close,text;
+		int i0;
+		int exist,len,nlines;
+		char **list;
+} TEXTWIN;
 
+typedef struct {
+		Window base,slide;
+		Window *w;
+		int nw,nent,i0;
+		int len,exist;
+		char **list;
+} SCROLLBOX;
+
+/* --- Functions --- */
 void set_window_title(Window win, char *string);
 void make_scrbox_lists(void);
 int get_x_coord_win(Window win);
@@ -166,4 +101,4 @@ void draw_pop_up(POP_UP p, Window w);
 Window make_unmapped_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
 Window make_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
 
-#endif
+#endif /* XPPAUT_POP_LIST_H */

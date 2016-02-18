@@ -14,6 +14,7 @@
 #include "ggets.h"
 #include "init_conds.h"
 #include "load_eqn.h"
+#include "main.h"
 #include "parserslow.h"
 #include "pop_list.h"
 #include "xpplim.h"
