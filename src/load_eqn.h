@@ -255,6 +255,7 @@ extern int NJMP;
 extern int PAR_FOL;
 extern int PAUSER;
 extern int PLOT_3D;
+extern int POIEXT;
 extern int POIMAP;
 extern int POISGN;
 extern int POIVAR;

@@ -56,7 +56,6 @@
 #include "numerics.h"
 #include "odesol2.h"
 #include "parserslow.h"
-#include "phsplan.h"
 #include "pop_list.h"
 #include "pp_shoot.h"
 #include "stiff.h"

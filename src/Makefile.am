@@ -81,7 +81,6 @@ noinst_HEADERS = \
 	numerics.h \
 	odesol2.h \
 	parserslow.h \
-	phsplan.h \
 	pop_list.h \
 	pp_shoot.h \
 	read_dir.h \

@@ -1,7 +1,7 @@
-#ifndef _do_fit_h_
-#define _do_fit_h_
+#ifndef XPPAUT_DO_FIT_H
+#define XPPAUT_DO_FIT_H
 
-
+/* --- Types --- */
 typedef struct {
   char file[25];
   char varlist[25],collist[25];
@@ -11,7 +11,7 @@ typedef struct {
   double tol,eps;
 } FITINFO;
 
-
+/* --- Functions --- */
 void init_fit_info(void);
 void get_fit_info(double *y, double *a, double *t0, int *flag, double eps, double *yfit, double **yderv, int npts, int npars, int nvars, int *ivar, int *ipar);
 void printem(double **yderv, double *yfit, double *t0, int npars, int nvars, int npts);
@@ -26,5 +26,5 @@ void parse_collist(char *collist, int *icols, int *n);
 void parse_varlist(char *varlist, int *ivars, int *n);
 void parse_parlist(char *parlist, int *ipars, int *n);
 
-#endif
+#endif /* XPPAUT_DO_FIT_H */
 

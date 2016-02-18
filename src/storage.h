@@ -2,8 +2,10 @@
 #define XPPAUT_STORAGE_H
 
 /* --- Data --- */
-extern int MAXSTOR;
 extern double *WORK;
+
+extern int IWORK[10000];
+extern int MAXSTOR;
 
 /* --- Functions --- */
 void init_alloc_info(void);
