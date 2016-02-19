@@ -1,6 +1,23 @@
 #ifndef XPPAUT_EXTRA_H
 #define XPPAUT_EXTRA_H
 
+/* --- Types --- */
+typedef struct {
+  char libname[1024];
+  char libfile[256];
+  char fun[256];
+  int loaded;
+} DLFUN;
+
+typedef struct
+{
+  char *lin,*lout;
+  int *in,*intype;
+  int *out,*outtype;
+  int nin,nout;
+  double *vin,*vout;
+} IN_OUT;
+
 /* --- Data --- */
 extern int dll_flag;
 extern char dll_fun[256];
