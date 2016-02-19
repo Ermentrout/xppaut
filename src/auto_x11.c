@@ -42,11 +42,15 @@
 
 #define MAX_AUT_PER 10
 
+#define MYMASK (ButtonPressMask		| \
+				KeyPressMask		| \
+				ExposureMask		| \
+				StructureNotifyMask	| \
+				LeaveWindowMask		| \
+				EnterWindowMask		| \
+				ButtonMotionMask)
 
 
-#define MYMASK  (ButtonPressMask|KeyPressMask|ExposureMask|StructureNotifyMask	|LeaveWindowMask|EnterWindowMask| ButtonMotionMask)
-
-#define SIMPMASK (ButtonPressMask | KeyPressMask|ExposureMask    |StructureNotifyMask)
 
 
 int AutoRedrawFlag=1;

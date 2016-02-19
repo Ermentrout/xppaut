@@ -36,11 +36,6 @@
 					LeaveWindowMask		|\
 					EnterWindowMask)
 
-#define SIMPMASK   (ButtonPressMask |\
-					KeyPressMask	  |\
-					ExposureMask    |\
-					StructureNotifyMask)
-
 EQ_BOX eq_box;
 EQ_LIST eq_list;
 
