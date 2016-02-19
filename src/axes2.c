@@ -20,16 +20,6 @@
 #include "xpplim.h"
 
 /* --- Macros --- */
-#define NOAXES 0
-#define CROSS 1
-#define TAXIS 3
-#define ELAXIS 2
-#define BOX 4
-#define CROSS3D 5
-#define T3D 7
-#define EL3D 6
-#define CUBE 8
-
 #define SIGNIF (0.01)		/* less than one hundredth of a tic mark */
 #define CheckZero(x,tic) (fabs(x) < ((tic) * SIGNIF) ? 0.0 : (x))
 
