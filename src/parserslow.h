@@ -1,10 +1,11 @@
 #ifndef XPPAUT_PARSERSLOW_H
 #define XPPAUT_PARSERSLOW_H
 
-#include "volterra.h"
 #include "xpplim.h"
 
 /* --- Macros --- */
+#define KN_OLD 1
+#define KN 0
 #define MAXARG 20
 #define MXLEN 10
 #define VECTYPE 13  /* for vectorized stuff */
@@ -13,6 +14,12 @@
 #define GETVAR(i) (i)<NVAR ? variables[(i)]:0.0
 
 /* --- Types --- */
+typedef struct {
+  double k_n1,k_n,sum,betnn,mu,*al,*cnv;
+  int *formula,flag,*kerform;
+  char name[20],*expr,*kerexpr;
+} KERNEL;
+
 typedef struct {
 	char name[MXLEN+1];
 	int len;

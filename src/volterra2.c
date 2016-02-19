@@ -24,7 +24,6 @@
 #include "load_eqn.h"
 #include "markov.h"
 #include "parserslow.h"
-#include "volterra.h"
 #include "xpplim.h"
 
 /* --- Macros --- */
