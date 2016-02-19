@@ -40,9 +40,6 @@ double get_ivar();
 
 MARKOV markov[MAXMARK];
 
-
-extern float **storage;
-
 int storind;
 float *my_mean[MAXODE],*my_variance[MAXODE];
 int stoch_len;
@@ -51,9 +48,6 @@ int STOCH_FLAG,STOCH_HERE,N_TRIALS;
 int Wiener[MAXPAR];
 int NWiener;
 double normal();
-extern double constants[];
-
-
 
 void add_wiener(index)
 	 int index;
