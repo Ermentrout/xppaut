@@ -132,15 +132,6 @@ void strlwr(char *s)
 
 /* --- Types --- */
 /***************  stuff for grabber  *******************/
-typedef struct {
-  double x0,y0;
-  double x,y;
-  double ox,oy;
-  double t1,t2,tstart;
-  double vx,vy;
-  double vax,vay;
-} ANI_MOTION_INFO;
-
 ANI_MOTION_INFO ami;
 
 ANI_GRAB ani_grab[MAX_ANI_GRAB];
@@ -166,51 +157,8 @@ int ani_speed_inc=2;
 double ani_xlo=0,ani_xhi=1,ani_ylo=0,ani_yhi=1;
 double ani_lastx,ani_lasty;
 Pixmap ani_pixmap;
-
-/*
-typedef struct {
-  int flag;
- int skip;
-  char root[100];
- char filter[256];
- int aviflag,filflag;
-} MPEG_SAVE;
-
 MPEG_SAVE mpeg;
-
-typedef struct {
-  int n;
-  int *x,*y,*col;
-  int i;
-} Comet;
-
-typedef struct {
-  Comet c;
-  int type, flag;
-  int *col,*x1,*y1,*x2,*y2,*who;
-  double zcol,zx1,zy1,zx2,zy2,zrad,zval;
-  int zthick,tfont,tsize,tcolor;
-} ANI_COM;
-*/
-
-MPEG_SAVE mpeg;
-
-
 ANI_COM my_ani[MAX_ANI_LINES];
-
-
-typedef struct {
-Window base, wfile,wgo,wpause,wreset,wfast,wslow,wmpeg;
-  Window wfly,kill,slider;
-Window wup,wdn,wskip;
-  Window view,wgrab;
-int hgt,wid,iexist,ok;
-int pos,inc;
-  int slipos,sliwid;
-char file[XPP_MAX_NAME];
-/*char file[256];*/
-} VCR;
-
 VCR vcr;
 
 

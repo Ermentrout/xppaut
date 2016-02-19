@@ -8,44 +8,71 @@
 #define MAX_GEVENTS 20  /* maximum variables you can change per grabbable */
 #define MAX_ANI_GRAB 50   /* max grabbable objects  */
 
+#ifndef XPP_MAX_NAME
+#define XPP_MAX_NAME 300
+#if (XPP_MAX_NAME > FILENAME_MAX)
+	#define XPP_MAX_NAME FILENAME_MAX
+#endif
+#endif
+
 /* --- Types --- */
+typedef struct {
+	int n;
+	int *x,*y,*col;
+	int i;
+} Comet;
+
 typedef struct {  /* tasks have the form {name1=formula1;name2=formula2;...} */
-  double vrhs[MAX_GEVENTS];
-  char lhsname[MAX_GEVENTS][11];
-  int lhsivar[MAX_GEVENTS];
-  int *comrhs[MAX_GEVENTS];
-  int runnow;
-  int n; /* number of tasks <= MAX_GEVENTS */
+	double vrhs[MAX_GEVENTS];
+	char lhsname[MAX_GEVENTS][11];
+	int lhsivar[MAX_GEVENTS];
+	int *comrhs[MAX_GEVENTS];
+	int runnow;
+	int n; /* number of tasks <= MAX_GEVENTS */
 }GRAB_TASK;
 
 typedef struct {
-  int ok;
-  double zx,zy,tol;
-  int *x,*y;
-  GRAB_TASK start,end;
-} ANI_GRAB;
+  double x0,y0;
+  double x,y;
+  double ox,oy;
+  double t1,t2,tstart;
+  double vx,vy;
+  double vax,vay;
+} ANI_MOTION_INFO;
 
 typedef struct {
-  int flag;
- int skip;
-  char root[100];
- char filter[256];
- int aviflag,filflag;
+	int flag;
+	int skip;
+	char root[100];
+	char filter[256];
+	int aviflag,filflag;
 } MPEG_SAVE;
 
 typedef struct {
-  int n;
-  int *x,*y,*col;
-  int i;
-} Comet;
+	Window base, wfile,wgo,wpause,wreset,wfast,wslow,wmpeg;
+	Window wfly,kill,slider;
+	Window wup,wdn,wskip;
+	Window view,wgrab;
+	int hgt,wid,iexist,ok;
+	int pos,inc;
+	int slipos,sliwid;
+	char file[XPP_MAX_NAME];
+} VCR;
 
 typedef struct {
-  Comet c;
-  int type, flag;
-  int *col,*x1,*y1,*x2,*y2,*who;
-  double zcol,zx1,zy1,zx2,zy2,zrad,zval;
-  int zthick,tfont,tsize,tcolor;
+	Comet c;
+	int type, flag;
+	int *col,*x1,*y1,*x2,*y2,*who;
+	double zcol,zx1,zy1,zx2,zy2,zrad,zval;
+	int zthick,tfont,tsize,tcolor;
 } ANI_COM;
+
+typedef struct {
+	int ok;
+	double zx,zy,tol;
+	int *x,*y;
+	GRAB_TASK start,end;
+} ANI_GRAB;
 
 /* --- Data --- */
 extern int animation_on_the_fly;
