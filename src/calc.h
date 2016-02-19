@@ -1,9 +1,16 @@
-#ifndef _calc_h_
-#define _calc_h_
+#ifndef XPPAUT_CALC_H
+#define XPPAUT_CALC_H
 
 #include <X11/Xlib.h>
 
+/* --- Types --- */
+typedef struct {
+  Window base,quit,answer;
+  double last_val;
+  int use;
+} MY_CALC;
 
+/* --- Functions --- */
 void draw_calc(Window w);
 void make_calc(double z);
 void quit_calc(void);
@@ -13,5 +20,4 @@ int do_calc(char *temp, double *z);
 int has_eq(char *z, char *w, int *where);
 double calculate(char *expr, int *ok);
 
-
-#endif
+#endif /* XPPAUT_CALC_H */
