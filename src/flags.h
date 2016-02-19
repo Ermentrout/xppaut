@@ -1,6 +1,26 @@
 #ifndef XPPAUT_FLAGS_H
 #define XPPAUT_FLAGS_H
 
+/* --- Macros --- */
+#define MAX_EVENTS 20 /*  this is the maximum number of events per flag */
+
+/* --- Types --- */
+typedef struct {
+  double f0,f1;
+  double tstar;
+  int lhs[MAX_EVENTS];
+  double vrhs[MAX_EVENTS];
+  char lhsname[MAX_EVENTS][11];
+  char *rhs[MAX_EVENTS];
+  int *comrhs[MAX_EVENTS];
+  char *cond;
+  int *comcond;
+  int sign,nevents;
+  int hit,type[MAX_EVENTS];
+  int anypars;
+  int nointerp;
+} FLAG;
+
 /* --- Data --- */
 extern int NFlags;
 extern double STOL;
