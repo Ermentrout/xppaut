@@ -2,6 +2,21 @@
 #define XPPAUT_EIG_LIST_H
 
 #include <X11/Xlib.h>
+#include "xpplim.h"
+
+/* --- Types --- */
+typedef struct {
+  Window base,stab,rest,top,close,import;
+  double y[MAXODE],ev[MAXODE+MAXODE];
+  int n,flag;
+  int info[5];
+  char type[15];
+} EQ_BOX;
+
+typedef struct{
+  Window base,up,down,list,main,close;
+  int istart,nlines,flag;
+} EQ_LIST;
 
 /* --- Functions --- */
 void draw_eq_list(Window w);
