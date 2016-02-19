@@ -230,15 +230,6 @@ char *get_next(/* char *src */);
 
 */
 
-
-#define MYMASK  (ButtonPressMask 	|\
-				ButtonReleaseMask |\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		LeaveWindowMask		|\
-		EnterWindowMask)
-
 void new_vcr()
 {
   int tt,i;

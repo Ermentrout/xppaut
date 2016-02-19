@@ -33,14 +33,6 @@
 #define xds(a) {XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
 				return;}
 
-#define MYMASK  (ButtonPressMask 	|\
-				ButtonReleaseMask |\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		LeaveWindowMask		|\
-		EnterWindowMask)
-
 TXTVIEW txtview;
 /*
   [Up]   [Down]  [PgUp]  [PgDn] [Kill]
