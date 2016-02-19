@@ -26,11 +26,6 @@ int ks_ncycle=1;
 int ks_speed=50;
 int mov_ind;
 
-typedef struct {
-	unsigned int h,w;
-	Pixmap xi;
-} MOVIE;
-
 MOVIE movie[MAXFILM];
 
 void do_movie_com(int c)
