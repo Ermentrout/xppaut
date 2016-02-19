@@ -70,7 +70,6 @@
 #define ENDINDX 69
 
 #define MAXEXPLEN 1024
-#define MXLEN 10
 #define THOUS 10000
 #define DOUB_EPS 2.23E-15
 #define POP stack[--stack_pointer]
@@ -86,15 +85,6 @@ double lgamma();
 
 
 double zippy;
-
-/* --- Types --- */
-typedef struct {
-	char name[MXLEN+1];
-	int len;
-	int com;
-	int arg;
-	int pri;
-} SYMBOL;
 
 int nsrand48(int seed);
 

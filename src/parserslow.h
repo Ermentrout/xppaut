@@ -6,6 +6,7 @@
 
 /* --- Macros --- */
 #define MAXARG 20
+#define MXLEN 10
 #define FUN1TYPE 9
 #define FUN2TYPE 1
 #define VARTYPE 3  /* standard variable */
@@ -22,6 +23,14 @@
 #define MAXTYPE 20000000  /* this is the maximum number of named stuff */
 
 /* --- Types --- */
+typedef struct {
+	char name[MXLEN+1];
+	int len;
+	int com;
+	int arg;
+	int pri;
+} SYMBOL;
+
 typedef struct {
   int narg;
   char args[MAXARG][11];
