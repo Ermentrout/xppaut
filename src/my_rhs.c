@@ -8,7 +8,6 @@
 #include "main.h"
 #include "markov.h"
 #include "parserslow.h"
-#include "shoot.h"
 #include "xpplim.h"
 
 double evaluate(/* int *ar */);

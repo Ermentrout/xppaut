@@ -27,7 +27,6 @@
 #include "newpars.h"
 #include "parserslow.h"
 #include "read_dir.h"
-#include "shoot.h"
 #include "simplenet.h"
 #include "strutil.h"
 #include "xpplim.h"

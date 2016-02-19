@@ -82,7 +82,6 @@ noinst_HEADERS = \
 	read_dir.h \
 	rubber.h \
 	scrngif.h \
-	shoot.h \
 	simplenet.h \
 	stiff.h \
 	storage.h \

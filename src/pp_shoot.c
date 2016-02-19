@@ -22,7 +22,6 @@
 #include "my_rhs.h"
 #include "parserslow.h"
 #include "pop_list.h"
-#include "shoot.h"
 #include "xpplim.h"
 
 /* --- Macros --- */

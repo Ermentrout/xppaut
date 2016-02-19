@@ -26,7 +26,6 @@
 #include "menus.h"
 #include "parserslow.h"
 #include "pop_list.h"
-#include "shoot.h"
 #include "struct.h"
 #include "xpplim.h"
 

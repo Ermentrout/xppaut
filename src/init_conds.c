@@ -43,7 +43,6 @@
 #include "parserslow.h"
 #include "pop_list.h"
 #include "read_dir.h"
-#include "shoot.h"
 #include "tabular.h"
 #include "volterra2.h"
 #include "xpplim.h"

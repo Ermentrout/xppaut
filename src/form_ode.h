@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include "newpars.h"
-#include "shoot.h"
 #include "strutil.h"
 #include "xpplim.h"
 
@@ -18,6 +17,13 @@ typedef struct {
   char *text,*action;
   int aflag;
 } ACTION;
+
+typedef struct {
+  int *com;
+  char *string;
+  char *name;
+  int side;
+} BC_STRUCT;
 
 typedef struct {
 	char *name,*value;
