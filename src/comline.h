@@ -10,6 +10,11 @@ typedef struct {
   struct SET_NAME * next;
 } SET_NAME;
 
+typedef struct {
+  char name[10];
+  int len;
+} VOCAB;
+
 /* --- Data --- */
 extern char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
 
