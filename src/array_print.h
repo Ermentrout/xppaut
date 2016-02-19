@@ -1,8 +1,16 @@
-#ifndef _array_print_h_
-#define _array_print_h_
+#ifndef XPPAUT_ARRAY_PRINT_H
+#define XPPAUT_ARRAY_PRINT_H
 
+/* --- Types --- */
+typedef struct {
+  float xmin,xmax,ymin,ymax;
+  float xscale,yscale,xoff,yoff;
+  float tx,ty,angle,slant;  /* text attributes   */
+  float linecol,letx,lety;
+  int linewid;
+  } DEVSCALE;
 
-/* array_print.c */
+/* --- Functions --- */
 int array_print(char *filename, char *xtitle, char *ytitle, char *bottom, int nacross, int ndown, int col0, int row0, int nskip, int ncskip, int maxrow, int maxcol, float **data, double zmin, double zmax, double tlo, double thi, int type);
 void ps_replot(float **z, int col0, int row0, int nskip, int ncskip, int maxrow, int maxcol, int nacross, int ndown, double zmin, double zmax, int type);
 void ps_begin(double xlo, double ylo, double xhi, double yhi, double sx, double sy);
@@ -20,5 +28,4 @@ void ps_bar(double x, double y, double wid, double len, double fill, int flag);
 void ps_rgb_bar(double x, double y, double wid, double len, double fill, int flag, int rgb);
 void ps_hsb_bar(double x, double y, double wid, double len, double fill, int flag);
 
-
-#endif
+#endif /* XPPAUT_ARRAY_PRINT_H */
