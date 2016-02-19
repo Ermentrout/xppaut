@@ -61,8 +61,6 @@ noinst_HEADERS = \
 	kinescope.h \
 	load_eqn.h \
 	lunch-new.h \
-	macdirent.h \
-	macsysdirent.h \
 	main.h \
 	many_pops.h \
 	markov.h \
