@@ -3,8 +3,17 @@
 
 #include <stdio.h>
 
+/* --- Types ---*/
+typedef struct {
+  int here,col0,ncol,colskip;
+  int row0,nrow,rowskip;
+  float **data;
+  char firstcol[11];
+} MY_TRANS;
+
 /* --- Data --- */
 extern int AdjRange;
+extern int FOUR_HERE;
 extern int silent;
 
 /* --- Functions --- */

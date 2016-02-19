@@ -38,18 +38,12 @@ double evaluate();
 double ndrand48();
 
 int (*rhs)();
-extern int FOUR_HERE;
 int adj_len;
 float **my_adj;
 float **my_h;
 float *my_liap[2];
 
-struct {
-  int here,col0,ncol,colskip;
-  int row0,nrow,rowskip;
-  float **data;
-  char firstcol[11];
-} my_trans;
+MY_TRANS my_trans;
 
 int TRANPOSE_HERE=0;
 int LIAP_FLAG=0;
