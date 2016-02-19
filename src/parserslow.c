@@ -8,7 +8,6 @@
 
 #include "comline.h"
 #include "delay_handle.h"
-#include "getvar.h"
 #include "ggets.h"
 #include "strutil.h"
 #include "tabular.h"

@@ -7,7 +7,6 @@
 
 #include "form_ode.h"
 #include "gear.h"
-#include "getvar.h"
 #include "ggets.h"
 #include "integrate.h"
 #include "load_eqn.h"

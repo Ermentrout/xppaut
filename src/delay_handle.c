@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "form_ode.h"
-#include "getvar.h"
 #include "ggets.h"
 #include "integrate.h"
 #include "load_eqn.h"
@@ -27,30 +26,30 @@ double delay_list[MAXDELAY];
 
 double evaluate();
 
-double delay_stab_eval(delay,var)  
-/* this returns appropriate values for delay jacobian */ 
-     double delay;
-     int var;
+double delay_stab_eval(delay,var)
+/* this returns appropriate values for delay jacobian */
+	 double delay;
+	 int var;
 {
   int i;
 
   if(del_stab_flag==0) /* search for all delays  */
-    {
-      for(i=0;i<NDelay;i++){
+	{
+	  for(i=0;i<NDelay;i++){
 	if(delay==delay_list[i])
 	  return(GETVAR(var));
-      }
-      delay_list[NDelay]=delay;
-      NDelay++;
-      return(GETVAR(var));
-    }
+	  }
+	  delay_list[NDelay]=delay;
+	  NDelay++;
+	  return(GETVAR(var));
+	}
  /*  now we must determine the value to return  */
- /*  del_stab_flag =-1 */    
-     for(i=0;i<NDelay;i++){
-       if(delay==delay_list[i])
+ /*  del_stab_flag =-1 */
+	 for(i=0;i<NDelay;i++){
+	   if(delay==delay_list[i])
 	if(i==WhichDelay)
 	  return variable_shift[1][var-1];
-     }
+	 }
    return variable_shift[0][var-1];
 }
 
@@ -61,7 +60,7 @@ double big;
 {
  int n,i;
 
- 
+
  n=(int)(big/fabs(DELTA_T))+1;
 
  MaxDelay=n;
@@ -122,33 +121,33 @@ double tau;
  }
 
 void polint(xa,ya,n,x,y,dy)
-     double *ya,*xa,*y,*dy,x;
-     int n;
+	 double *ya,*xa,*y,*dy,x;
+	 int n;
 {
   int i,m,ns=1;
   double den,dif,dift,h0,hp,w;
   double c[10],d[10];
   dif=fabs(x-xa[0]);
   for(i=1;i<=n;i++){
-    if( (dift=fabs(x-xa[i-1]))<dif){
-      ns=i;
-      dif=dift;
-    }
-    c[i-1]=ya[i-1];
-    d[i-1]=ya[i-1];
+	if( (dift=fabs(x-xa[i-1]))<dif){
+	  ns=i;
+	  dif=dift;
+	}
+	c[i-1]=ya[i-1];
+	d[i-1]=ya[i-1];
   }
   *y=ya[(ns--) -1];
   for(m=1;m<n;m++){
-    for(i=1;i<=n-m;i++){
-      h0=xa[i-1]-x;
-      hp=xa[i+m-1]-x;
-      w=c[i]-d[i-1];
-      if((den=h0-hp)==0.0)return ;
-      den=w/den;
-      d[i-1]=hp*den;
-      c[i-1]=h0*den;
-    }
-    *y += (*dy=(2*ns < (n-m) ? c[ns]:d[ns-- -1]));
+	for(i=1;i<=n-m;i++){
+	  h0=xa[i-1]-x;
+	  hp=xa[i+m-1]-x;
+	  w=c[i]-d[i-1];
+	  if((den=h0-hp)==0.0)return ;
+	  den=w/den;
+	  d[i-1]=hp*den;
+	  c[i-1]=h0*den;
+	}
+	*y += (*dy=(2*ns < (n-m) ? c[ns]:d[ns-- -1]));
   }
 }
 
@@ -171,7 +170,7 @@ double tau;
 			 err_msg("Delay negative or too large");
 			stop_integration();
 			return(0.0);
-  			}
+			}
  if(tau==0.0) /* check fro zero delay and ignore the rest */
    return DelayWork[in+nodes*(LatestDelay%MaxDelay)];
   xa[1]=n1*dd;
@@ -193,7 +192,7 @@ double tau;
    ya[0]=DelayWork[in+(nodes )*i0];
   ya[3]=DelayWork[in+(nodes )*i3];
   polint(xa,ya,4,tau,&y,&dy);
-  
+
   return(y);
  }
 
@@ -204,7 +203,7 @@ double big;
  double t=T0,old_t,y[MAXODE];
  int i,nt,j;
  int len;
- 
+
  int *del_form[MAXODE];
  nt=(int)(big/fabs(DELTA_T));
  NCON=NCON_START;
@@ -214,14 +213,14 @@ double big;
 	if(del_form[i]==NULL){
 		err_msg("Failed to allocate delay formula ...");
 		for(j=0;j<i;j++)free(del_form[j]);
-                NCON=NCON_START;
+				NCON=NCON_START;
 		NSYM=NSYM_START;
 		return(0);
 		}
 
 	 if(add_expr(delay_string[i],del_form[i],&len)){
 		err_msg("Illegal delay expression");
-                for(j=0;j<=i;j++)free(del_form[j]);
+				for(j=0;j<=i;j++)free(del_form[j]);
 		 NCON=NCON_START;
 		NSYM=NSYM_START;
 		return(0);
@@ -230,7 +229,7 @@ double big;
   LatestDelay=1;
 
   get_val("t",&old_t);
- 
+
   for(i=nt;i>=0;i--){
 	t=T0-fabs(DELTA_T)*i;
 	set_val("t",t);
@@ -244,19 +243,19 @@ double big;
   set_val("t",old_t);
    return(1);
  }
-		
-	 
-	
-        
- 
- 
-  
 
- 
- 
- 
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 

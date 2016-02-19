@@ -7,7 +7,6 @@
 #include <strings.h>
 
 #include "form_ode.h"
-#include "getvar.h"
 #include "odesol2.h"
 #include "parserslow.h"
 #include "pop_list.h"

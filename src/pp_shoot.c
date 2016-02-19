@@ -10,7 +10,6 @@
 #include "browse.h"
 #include "delay_handle.h"
 #include "gear.h"
-#include "getvar.h"
 #include "ggets.h"
 #include "graf_par.h"
 #include "init_conds.h"

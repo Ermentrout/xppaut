@@ -5,7 +5,6 @@
 #include "dae_fun.h"
 #include "extra.h"
 #include "form_ode.h"
-#include "getvar.h"
 #include "main.h"
 #include "markov.h"
 #include "parserslow.h"

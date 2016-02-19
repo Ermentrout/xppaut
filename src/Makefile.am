@@ -49,7 +49,6 @@ noinst_HEADERS = \
 	flags.h \
 	form_ode.h \
 	gear.h \
-	getvar.h \
 	ggets.h \
 	graf_par.h \
 	graphics.h \

@@ -7,20 +7,10 @@
 /* --- Macros --- */
 #define MAXARG 20
 #define MXLEN 10
-#define FUN1TYPE 9
-#define FUN2TYPE 1
-#define VARTYPE 3  /* standard variable */
-#define CONTYPE 2  /* standard parameter */
-#define UFUNTYPE   24
-#define SVARTYPE 4  /* shifted variable */
-#define SCONTYPE 32  /* shifted constant  */
-#define NETTYPE 6
-#define TABTYPE 7
-#define USTACKTYPE 8
-#define KERTYPE 10
 #define VECTYPE 13  /* for vectorized stuff */
-#define EVECTYPE 14 /* treat vector like a function */
-#define MAXTYPE 20000000  /* this is the maximum number of named stuff */
+
+#define SETVAR(i,x) if((i)<NVAR)variables[(i)]=(x);
+#define GETVAR(i) (i)<NVAR ? variables[(i)]:0.0
 
 /* --- Types --- */
 typedef struct {
