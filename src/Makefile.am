@@ -71,7 +71,6 @@ noinst_HEADERS = \
 	menus.h \
 	myfonts.h \
 	mykeydef.h \
-	my_pars.h \
 	my_ps.h \
 	my_rhs.h \
 	my_svg.h \

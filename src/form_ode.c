@@ -24,7 +24,6 @@
 #include "load_eqn.h"
 #include "main.h"
 #include "markov.h"
-#include "my_pars.h"
 #include "newpars.h"
 #include "parserslow.h"
 #include "read_dir.h"
