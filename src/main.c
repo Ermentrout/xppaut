@@ -77,7 +77,6 @@
 #define FIX_MAX_SIZE 1
 #define lowbit(x) ((x) & (~(x) + 1))
 #define TOPBUTTONCOLOR 27
-#define BITMAPDEPTH 1
 #define TOO_SMALL 0
 #define BIG_ENOUGH 1
 #define cstringmaj MYSTR1
