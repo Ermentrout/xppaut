@@ -32,7 +32,6 @@
 
 /* --- Macros --- */
 #define MAX_LEN_SBOX 25
-#define DING ping
 #define MAX_NULL 10000
 
 int OutPutNC=0;
