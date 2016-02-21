@@ -32,7 +32,6 @@
 /* --- Macros --- */
 #define READEM 1
 #define VOLTERRA 6
-#define MAXUFUN 50
 #define PARAMBOX 1
 
 int set_type=0;

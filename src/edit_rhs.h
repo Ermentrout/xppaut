@@ -1,10 +1,9 @@
 #ifndef XPPAUT_EDIT_RHS_H
 #define XPPAUT_EDIT_RHS_H
 
-
+#include <stdio.h>
 #include <X11/Xlib.h>
 #include "xpplim.h"
-#include <stdio.h>
 
 /* --- Macros --- */
 #define NEQMAXFOREDIT 20
@@ -12,7 +11,6 @@
 #define MAX_N_EBOX MAXODE
 #define MAX_LEN_EBOX 86
 #define RESET_ALL 4
-#define MAXUFUN 50
 
 /*  This is a edit box widget which handles a list of
 	editable strings

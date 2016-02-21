@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include "form_ode.h"
 
-
-
 void file_inf(void);
 void ps_write_pars(FILE *fp);
 void do_info(FILE *fp);
