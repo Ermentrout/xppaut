@@ -1,6 +1,11 @@
 #ifndef XPPAUT_ARRAY_PRINT_H
 #define XPPAUT_ARRAY_PRINT_H
 
+/* --- Macros --- */
+#define GREYSCALE -1
+#define REDBLUE  0
+#define ROYGBIV  1
+
 /* --- Types --- */
 typedef struct {
   float xmin,xmax,ymin,ymax;

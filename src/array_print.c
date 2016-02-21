@@ -1,16 +1,10 @@
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
 #include "array_print.h"
 
-
-#define GREYSCALE -1
-#define REDBLUE  0
-#define ROYGBIV  1
-#define PERIODIC 2
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 FILE *my_plot_file;
-
 DEVSCALE ps_scale;
 
 int array_print(filename,xtitle,ytitle,bottom,nacross,ndown,col0,row0,nskip,
@@ -303,21 +297,29 @@ int flag,rgb;
 	}
 	if(fill<0.0)
 		fill=0.0;
+
 	if(fill>1.0)
 		fill=1.0;
+
 	switch(rgb)	{
-	case 0:
+    case REDBLUE:
 		fill=1.-fill;
 		b=(float)sqrt((double)(1.0-fill*fill));
 		r=(float)sqrt((double)(fill*(2.0-fill)));
 		break;
-	case 1:
-		if(fill>.4999)r=0.0;
-		else r=(float)sqrt((float)(1.-4*fill*fill));
+    case ROYGBIV:
+        if(fill>.4999)
+            r=0.0;
+        else
+            r=(float)sqrt((float)(1.-4*fill*fill));
+
 		g=(float)2*sqrt((double)fill*(1.-fill));
 
-		if(fill<.5001)b=0.0;
-		else b=(float)sqrt((float)(4*(fill-.5)*(1.5-fill)));
+        if(fill<.5001)
+            b=0.0;
+        else
+            b=(float)sqrt((float)(4*(fill-.5)*(1.5-fill)));
+
 		break;
 	}
 	fprintf(my_plot_file,"%f %f %f RGB\n",r,g,b);
