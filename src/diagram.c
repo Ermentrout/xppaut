@@ -563,7 +563,7 @@ double *xlo,*xhi,*ylo,*yhi;
         if(y2<*ylo)
             *ylo=y2;
         if(y1>*yhi)
-            yhi=y1;
+            *yhi=y1;
         d=d->next;
         if(d==NULL)
             break;

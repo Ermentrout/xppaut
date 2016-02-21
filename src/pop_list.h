@@ -6,10 +6,12 @@
 /* --- Macros --- */
 #define MAX_N_SBOX 22
 #define MAX_LEN_SBOX 25
+
+#define ALL_DONE 2
 #define FORGET_ALL 0
+#define DONE_THIS 1
 #define DONE_ALL 2
 #define FORGET_THIS 3
-#define DONE_THIS 1
 
 #define SB_PLOTTABLE 0
 #define SB_VARIABLE 1
@@ -18,6 +20,18 @@
 #define SB_COLOR 4
 #define SB_MARKER 5
 #define SB_METHOD 6
+
+#define EV_MASK    (ButtonPressMask 	|\
+                    KeyPressMask		|\
+                    ExposureMask		|\
+                    StructureNotifyMask)
+
+#define BUT_MASK   (ButtonPressMask 	|\
+                    KeyPressMask		|\
+                    ExposureMask		|\
+                    StructureNotifyMask	|\
+                    EnterWindowMask		|\
+                    LeaveWindowMask)
 
 /* --- Types --- */
 /*  This is a string box widget which handles a list of

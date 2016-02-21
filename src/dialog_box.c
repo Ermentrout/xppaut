@@ -14,25 +14,8 @@
 #include "ggets.h"
 #include "main.h"
 #include "many_pops.h"
+#include "pop_list.h"
 #include "struct.h"
-
-/* --- Macros --- */
-#define ALL_DONE 2
-#define DONE_WITH_THIS 1
-#define FORGET_ALL   0
-#define FORGET_THIS 3
-
-#define EV_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask)
-
-#define BUT_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		EnterWindowMask		|\
-		LeaveWindowMask)
 
 double atof();
 Window make_window();
@@ -102,7 +85,7 @@ int max;
  XDestroySubwindows(display,d.base);
  XDestroyWindow(display,d.base);
  XFlush(display);
- if(status==ALL_DONE||status==DONE_WITH_THIS)
+ if(status==ALL_DONE||status==DONE_THIS)
  strcpy(value,d.input_s);
  return(status);
 }
@@ -157,7 +140,7 @@ DIALOG *d;
 			ch=get_key_press(&ev);
 			edit_window(d->input,pos,d->input_s,col,&done,ch);
 			if(done==-1)status=FORGET_ALL;
-			if(done==1||done==2)status=DONE_WITH_THIS;
+            if(done==1||done==2)status=DONE_THIS;
 
 					break;
 		 }

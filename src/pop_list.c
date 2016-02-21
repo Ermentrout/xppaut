@@ -13,20 +13,10 @@
 #include "many_pops.h"
 #include "markov.h"
 #include "menudrive.h"
+
 #include "bitmap/alert.bitmap"
 #include "bitmap/info.bitmap"
 
-#define EV_MASK	   (ButtonPressMask 	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask)
-
-#define BUT_MASK   (ButtonPressMask 	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask	|\
-					EnterWindowMask		|\
-					LeaveWindowMask)
 
 SCRBOX_LIST scrbox_list[10];
 

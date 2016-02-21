@@ -16,19 +16,6 @@
 
 #include "bitmap/info.bitmap"
 
-/* --- Macros --- */
-#define EV_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask)
-
-#define BUT_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		EnterWindowMask		|\
-		LeaveWindowMask)
-
 Torbox torbox;
 
 void do_torus_com(int c)

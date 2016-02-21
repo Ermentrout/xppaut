@@ -15,10 +15,6 @@
 #include "pop_list.h"
 #include "struct.h"
 
-/* --- Macros --- */
-#define ALL_DONE 2
-#define FORGET_ALL 0
-
 /* --- Functions --- */
 void destroy_choice(p)
 CHOICE_BOX p;

@@ -11,10 +11,6 @@
 #define MAXARG 20
 #define MAX_N_EBOX MAXODE
 #define MAX_LEN_EBOX 86
-#define FORGET_ALL 0
-#define DONE_ALL 2
-#define FORGET_THIS 3
-#define DONE_THIS 1
 #define RESET_ALL 4
 #define MAXUFUN 50
 

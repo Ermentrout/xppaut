@@ -29,18 +29,6 @@
 #include "struct.h"
 #include "xpplim.h"
 
-#define EV_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask)
-
-#define BUT_MASK (ButtonPressMask 	|\
-		KeyPressMask		|\
-		ExposureMask		|\
-		StructureNotifyMask	|\
-		EnterWindowMask		|\
-		LeaveWindowMask)
-
 char *get_next(),*get_first();
 
 Window make_window();
