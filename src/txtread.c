@@ -29,10 +29,6 @@
 
 #include "bitmap/txtview.bitmap"
 
-/* --- Macros --- */
-#define xds(a) {XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
-				return;}
-
 TXTVIEW txtview;
 /*
   [Up]   [Down]  [PgUp]  [PgDn] [Kill]

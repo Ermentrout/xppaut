@@ -5,7 +5,22 @@
 #include <X11/Xlib.h>
 
 /* --- Macros --- */
+#define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
+                 return;}
+
 #define BMAXCOL 20
+
+#define MYMASK	   (ButtonPressMask 	|\
+                    KeyPressMask		|\
+                    ExposureMask		|\
+                    StructureNotifyMask	|\
+                    LeaveWindowMask		|\
+                    EnterWindowMask)
+
+#define SIMPMASK   (ButtonPressMask		|\
+                    KeyPressMask		|\
+                    ExposureMask		|\
+                    StructureNotifyMask)
 
 /* --- Types --- */
 typedef struct {

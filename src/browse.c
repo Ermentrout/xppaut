@@ -40,29 +40,6 @@
 
 #include "bitmap/browse.bitmap"
 
-/* --- Macros --- */
-#define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
-				 return;}
-
-
-#define BMAXCOL 20
-
-#define MYMASK	   (ButtonPressMask 	|\
-					ButtonReleaseMask	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask	|\
-					LeaveWindowMask		|\
-					EnterWindowMask)
-
-#define SIMPMASK   (ButtonPressMask		|\
-					ButtonReleaseMask	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask)
-
-
-
 BROWSER my_browser;
 
 double evaluate();

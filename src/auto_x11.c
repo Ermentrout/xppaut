@@ -8,6 +8,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "browse.h"
 #include "diagram.h"
 #include "init_conds.h"
 #include "form_ode.h"
@@ -30,17 +31,7 @@
 #define STD_WID 460	  /* golden mean  */
 #define STD_HGT 284
 
-#define xds(a) { XDrawString(display,w,gc,5,CURY_OFFb,a,strlen(a));return;}
-
 #define SBW XSetWindowBorderWidth(display,w,1)
-
-#define MYMASK (ButtonPressMask		| \
-				KeyPressMask		| \
-				ExposureMask		| \
-				StructureNotifyMask	| \
-				LeaveWindowMask		| \
-				EnterWindowMask		| \
-				ButtonMotionMask)
 
 int AutoRedrawFlag=1;
 

@@ -73,7 +73,6 @@
 #define MAX_LEN_SBOX 25
 #define PARAM 1
 #define IC 2
-#define BMAXCOL 20
 #define NAR_IC 50
 #define VOLTERRA 6
 #define BACKEUL 7

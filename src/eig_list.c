@@ -25,17 +25,6 @@
 #include "bitmap/eqns.bitmap"
 #include "bitmap/equilib.bitmap"
 
-/* --- Macros --- */
-#define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
-	return;}
-
-#define MYMASK	   (ButtonPressMask 	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask	|\
-					LeaveWindowMask		|\
-					EnterWindowMask)
-
 EQ_BOX eq_box;
 EQ_LIST eq_list;
 
