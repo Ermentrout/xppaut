@@ -206,7 +206,7 @@ void data_del_col(b)  /*  this only works with storage  */
   return;
   strcpy(var,"");
   status=get_dialog("Delete","Name",var,"Ok","Cancel",20);
-   if(status!=0)
+   if(status!=FORGET_ALL)
 	del_stor_col(var,b);
 }
 
@@ -222,9 +222,9 @@ BROWSER *b;
   strcpy(var,"");
   strcpy(form,"");
   status=get_dialog("Add Column","Name",var,"Ok","Cancel",20);
-  if(status!=0){
+  if(status!=FORGET_ALL){
 	status=get_dialog("Add Column","Formula:",form,"Add it","Cancel",80);
-	 if(status!=0)
+	 if(status!=FORGET_ALL)
 	  add_stor_col(var,form,b);
   }
 }
@@ -1223,9 +1223,9 @@ BROWSER *b;
 strcpy(var,uvar_names[0]);
 strcpy(form,uvar_names[0]);
 status=get_dialog("Replace","Variable:",var,"Ok","Cancel",20);
-if(status!=0){
+if(status!=FORGET_ALL){
  status=get_dialog("Replace","Formula:",form,"Replace","Cancel",80);
- if(status!=0)replace_column(var,form,b->data,b->maxrow);
+ if(status!=FORGET_ALL)replace_column(var,form,b->data,b->maxrow);
  draw_data(*b);
 }
 

@@ -521,7 +521,7 @@ void ani_create_mpeg()
   sprintf(values[1],"%s",mpeg.root);
    sprintf(values[2],"%d",mpeg.aviflag);
   status=do_string_box(3,3,1,"Frame saving",n,values,28);
-  if(status!=0){
+  if(status!=FORGET_ALL){
 	mpeg.flag=atoi(values[0]);
 	if(mpeg.flag>0)mpeg.flag=1;
 	mpeg.aviflag=atoi(values[2]);
@@ -666,7 +666,7 @@ void ani_newskip()
   XGetInputFocus(display,&w,&rev);
   sprintf(bob,"%d",vcr.inc);
   status=get_dialog("Frame skip","Increment:",bob,"Ok","Cancel",20);
-  if(status!=0){
+  if(status!=FORGET_ALL){
 	vcr.inc=atoi(bob);
 	if(vcr.inc<=0)vcr.inc=1;
   }
