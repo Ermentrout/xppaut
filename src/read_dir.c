@@ -47,7 +47,7 @@ and save the file.
 #include "ggets.h"
 #include "load_eqn.h"
 
-char cur_dir[MAXPATHLEN];
+char cur_dir[XPP_MAX_NAME];
 
 FILEINFO my_ff;
  /*
@@ -284,7 +284,7 @@ int IsDirectory(root, path)
 	char	   *root;
 	char	   *path;
 {
-	char	    fullpath[MAXPATHLEN];
+	char	    fullpath[XPP_MAX_NAME];
 	struct stat	    statbuf;
 
 	if (path == NULL)

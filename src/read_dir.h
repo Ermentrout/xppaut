@@ -3,12 +3,6 @@
 
 #include "load_eqn.h"
 
-/* --- Macros --- */
-/* Let's try to be consistent with file name buffer sizes and any strings that
- * may hold a path name (e.g. dialog message etc.)
- */
-#define MAXPATHLEN XPP_MAX_NAME
-
 /* --- Types --- */
 typedef struct {
   char **dirnames,**filenames;
@@ -16,7 +10,7 @@ typedef struct {
 } FILEINFO;
 
 /* --- Data --- */
-extern char cur_dir[MAXPATHLEN];
+extern char cur_dir[XPP_MAX_NAME];
 extern FILEINFO my_ff;
 
 /* --- Functions --- */

@@ -137,10 +137,8 @@ including derived parameters but XPP takes care of this so start at 0
 #define EVEN 0
 #define ZERO 1
 #define PERIODIC 2
-#define IC 2
 /* simple network stuff */
 
-#define MAXVEC 100
 #define CONVE 0
 #define CONV0 1
 #define CONVP 2
