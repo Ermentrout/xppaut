@@ -619,7 +619,7 @@ int rk_interp(double **jac, int k1, int k2, double *y, double *work,
 }
 
 
-int step_eul(double ** jac, int k, inr k2, double *yold, double *work, int node, dobule dt) {
+int step_eul(double ** jac, int k, int k2, double *yold, double *work, int node, double dt) {
 
 	int j,i,n2=node*node,info;
 	int ipvt[MAXODE];
