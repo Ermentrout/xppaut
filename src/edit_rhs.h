@@ -7,7 +7,6 @@
 
 /* --- Macros --- */
 #define NEQMAXFOREDIT 20
-#define MAXARG 20
 #define MAX_N_EBOX MAXODE
 #define MAX_LEN_EBOX 86
 #define RESET_ALL 4

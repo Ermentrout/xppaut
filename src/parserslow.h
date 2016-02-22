@@ -1,12 +1,12 @@
 #ifndef XPPAUT_PARSERSLOW_H
 #define XPPAUT_PARSERSLOW_H
 
+#include "newpars.h"
 #include "xpplim.h"
 
 /* --- Macros --- */
 #define KN_OLD 1
 #define KN 0
-#define MAXARG 20
 #define MXLEN 10
 #define VECTYPE 13  /* for vectorized stuff */
 

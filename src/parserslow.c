@@ -38,7 +38,6 @@
 
 #define ENDEXP 999
 #define ENDFUN 998
-#define STARTDELAY 980
 #define DELSYM  42
 #define ENDDELAY 996
 #define MYIF  995
@@ -49,7 +48,6 @@
 #define SHIFTSYM 64
 #define ISHIFTSYM 67
 #define ENDSHIFT 988
-#define SUMINDEX 989
 #define LASTTOK MAX_SYMBS-2
 #define NUMSYM 987
 #define NUMTOK 59
@@ -58,25 +56,16 @@
 #define ENDDELSHFT 986
 #define DELSHFTSYM 65
 #define ENDISHIFT 985
-#define SETSYM  92
 #define ENDSET 981
 #define INDX 68
-#define INDXVAR 984
 #define STDSYM 95
 
 #define INDXCOM 922
-#define STARTINDX 70
-#define ENDINDX 69
 
-#define MAXEXPLEN 1024
 #define THOUS 10000
 #define DOUB_EPS 2.23E-15
 #define POP stack[--stack_pointer]
 #define PUSH(a) zippy=(a); stack[stack_pointer++]=zippy;
-
-#define DFNORMAL 1
-#define DFFP 2
-#define DFSTAB 3
 
 #ifdef NOLGAMMA
 double lgamma();
