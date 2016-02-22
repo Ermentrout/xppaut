@@ -40,6 +40,7 @@
 #include "pop_list.h"
 #include "pp_shoot.h"
 #include "read_dir.h"
+#include "rubber.h"
 #include "xAuto.h"
 
 #define MAXLINELENGTH 100000

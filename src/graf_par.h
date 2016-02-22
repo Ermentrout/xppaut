@@ -5,9 +5,6 @@
 #include <X11/Xlib.h>
 
 /* --- Macros --- */
-#define RUBBOX 0
-#define RUBLINE 1
-
 #define SCRNFMT 0
 #define PSFMT 1
 #define SVGFMT 2
