@@ -324,9 +324,15 @@ void put_text_x11(x,y,str)
 {
   int sw=strlen(str)*DCURXs;
   switch(TextJustify){
-  case 0: sw=0; break;
-  case 1: sw=-sw/2; break;
-  case 2: sw=-sw; break;
+  case TJ_LEFT:
+		  sw=0;
+		  break;
+  case TJ_CENTER:
+		  sw=-sw/2;
+		  break;
+  case TJ_RIGHT:
+		  sw=-sw;
+		  break;
   }
   XSetForeground(display,small_gc,GrFore);
   XDrawString(display,draw_win,small_gc,x+sw,y+DCURYs/3,str,strlen(str));

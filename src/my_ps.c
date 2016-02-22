@@ -21,10 +21,6 @@
 
 #define PS_SC (10)				/* scale is 1pt = 10 units */
 #define PS_VCHAR (PS_FONTSIZE*PS_SC)
-
-#define LEFT 0
-#define RIGHT 2
-#define CENTER 1
 #define POINT_TYPES 8
 
 int LastPtLine;
@@ -473,29 +469,32 @@ void ps_text(x,y,str)
 int x,y;
 char *str;
 {
- char ch;
-  fprintf(psfile, "0 0 0 setrgbcolor \n");
-  fprintf(psfile,"/%s findfont %d ",PS_FONT,PS_FONTSIZE*PS_SC);
- fprintf(psfile,"scalefont setfont\n");
- fprintf(psfile,"%d %d moveto\n",x,y);
- if (TextAngle != 0)
-   fprintf(psfile,"currentpoint gsave translate %d rotate 0 0 moveto\n"
-	   ,TextAngle*90);
- putc('(',psfile);
- ch = *str++;
- while(ch!='\0') {
-   if ( (ch=='(') || (ch==')') || (ch=='\\') )
-	 putc('\\',psfile);
-   putc(ch,psfile);
-   ch = *str++;
- }
- switch(TextJustify) {
- case LEFT : fprintf(psfile,") Lshow\n");
-   break;
- case CENTER : fprintf(psfile,") Cshow\n");
-   break;
- case RIGHT : fprintf(psfile,") Rshow\n");
-   break;
+	char ch;
+	fprintf(psfile, "0 0 0 setrgbcolor \n");
+	fprintf(psfile,"/%s findfont %d ",PS_FONT,PS_FONTSIZE*PS_SC);
+	fprintf(psfile,"scalefont setfont\n");
+	fprintf(psfile,"%d %d moveto\n",x,y);
+	if (TextAngle != 0)
+	fprintf(psfile,"currentpoint gsave translate %d rotate 0 0 moveto\n"
+			,TextAngle*90);
+	putc('(',psfile);
+	ch = *str++;
+	while(ch!='\0') {
+		if ( (ch=='(') || (ch==')') || (ch=='\\') )
+			putc('\\',psfile);
+		putc(ch,psfile);
+		ch = *str++;
+	}
+	switch(TextJustify) {
+		case TJ_LEFT:
+			fprintf(psfile,") Lshow\n");
+			break;
+		case TJ_CENTER:
+			fprintf(psfile,") Cshow\n");
+			break;
+		case TJ_RIGHT:
+			fprintf(psfile,") Rshow\n");
+			break;
  }
  if (TextAngle != 0)
    fprintf(psfile,"grestore\n");

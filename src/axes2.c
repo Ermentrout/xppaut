@@ -228,13 +228,13 @@ void Frame_3d()
   if(MyGraph->xorgflag)line_3d(x4,y0,z0,x5,y0,z0);
 
   dt=.06;
-  TextJustify=2;
+  TextJustify=TJ_RIGHT;
   sprintf(bob,"%g",xmin);
   text3d(x1,-1-2.*dt,-1.0,bob);
   sprintf(bob,"%g",xmax);
   text3d(x2,-1-2.*dt,-1.0,bob);
   text3d(0.0,-1-dt,-1.0,MyGraph->xlabel);
-  TextJustify=0;
+  TextJustify=TJ_LEFT;
   sprintf(bob,"%g",ymin);
   /*sprintf(bob,"%g",ymin,bob);
   */
@@ -244,13 +244,13 @@ void Frame_3d()
   */
   text3d(1+dt,y2,-1.0,bob);
   text3d(1+dt,0.0,-1.0,MyGraph->ylabel);
-  TextJustify=2;
+  TextJustify=TJ_RIGHT;
   sprintf(bob,"%g",zmin);
   text3d(-1.-dt,-1-dt,z1,bob);
   sprintf(bob,"%g",zmax);
   text3d(-1.-dt,-1-dt,z2,bob);
   text3d(-1.-dt,-1.-dt,0.0,MyGraph->zlabel);
-  TextJustify=0;
+  TextJustify=TJ_LEFT;
 
   DOING_AXES=0;
 }
@@ -293,7 +293,7 @@ void Box_axis(x_min,x_max,y_min,y_max,sx,sy,flag)
   line(xleft,ytop,xleft,ybot);
   draw_ytics(sy,ytic*floor(y_min/ytic),ytic,ytic*ceil(y_max/ytic));
   draw_xtics(sx,xtic*floor(x_min/xtic),xtic,xtic*ceil(x_max/xtic));
-  TextJustify=0;
+  TextJustify=TJ_LEFT;
   set_linestyle(0);
 
   DOING_AXES=0;
@@ -310,7 +310,7 @@ void draw_ytics(s1,start, incr, end)
   x_min=XMin;
   char bob[100];
   int xt,yt,s=1;
-  TextJustify=2; /* Right justification  */
+  TextJustify=TJ_RIGHT; /* Right justification  */
   for(ticvalue=start;ticvalue<=end;ticvalue+=incr){
 	place=CheckZero(ticvalue,incr);
 	if(ticvalue<y_min||ticvalue>y_max)continue;
@@ -356,7 +356,7 @@ void draw_xtics(s2,start, incr, end)
   int xt,yt;
   int s=1;
   if(DTop<DBottom)s=-1;
-  TextJustify=1; /* Center justification  */
+  TextJustify=TJ_CENTER; /* Center justification  */
   for(ticvalue=start;ticvalue<=end;ticvalue+=incr){
 	place=CheckZero(ticvalue,incr);
 	if(ticvalue<x_min||ticvalue>x_max)continue;
