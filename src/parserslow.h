@@ -7,6 +7,10 @@
 /* --- Macros --- */
 #define KN_OLD 1
 #define KN 0
+
+/* KERNEL.flag values */
+#define CONV 2
+
 #define MXLEN 10
 #define VECTYPE 13  /* for vectorized stuff */
 

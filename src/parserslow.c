@@ -51,7 +51,6 @@
 #define LASTTOK MAX_SYMBS-2
 #define NUMSYM 987
 #define NUMTOK 59
-#define CONV 2
 #define FIRST_ARG 73
 #define ENDDELSHFT 986
 #define DELSHFTSYM 65

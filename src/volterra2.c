@@ -29,7 +29,6 @@
 /* --- Macros --- */
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
-#define CONV 2
 
 int CurrentPoint;
 int KnFlag;

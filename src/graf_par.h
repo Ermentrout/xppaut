@@ -9,6 +9,12 @@
 #define PSFMT 1
 #define SVGFMT 2
 
+/* type values */
+#define CSEQ 1
+#define CUEQ 2
+#define SPER 3
+#define UPER 4
+
 #define REAL_SMALL 1.e-6
 #define MAXBIFCRV 100
 #define lmax(a,b) ((a>b) ? a : b)
