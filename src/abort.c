@@ -9,7 +9,7 @@
 #include "ggets.h"
 #include "main.h"
 #include "many_pops.h"
-
+#include "mykeydef.h"
 
 int get_command_width()
 {
@@ -41,7 +41,8 @@ int my_abort()
 	XEvent event;
 	while(XPending(display)>0){
 		XNextEvent(display,&event);
-		if(check_ani_pause(event)==27)return(27);
+		if(check_ani_pause(event)==ESC)
+			return(ESC);
 		switch(event.type){
 		case Expose: do_expose(event);
 			break;
