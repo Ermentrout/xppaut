@@ -57,9 +57,6 @@
 #include "xpplim.h"
 #include "bitmap/array.bitmap"
 
-/* --- Macros --- */
-#define FIRSTCOLOR 30
-
 /* --- Functions --- */
 double atof();
 int aplot_range;

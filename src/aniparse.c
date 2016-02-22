@@ -110,11 +110,11 @@ void strupr(char *s)
 {
   int i=0;
   while(s[i])
-    {
-      if(islower(s[i]))
-        s[i]-=32;
-      i++;
-    }
+	{
+	  if(islower(s[i]))
+		s[i]-=32;
+	  i++;
+	}
 }
 #endif
 #ifndef strlwr
@@ -122,11 +122,11 @@ void strlwr(char *s)
 {
   int i=0;
   while(s[i])
-    {
-      if(isupper(s[i]))
-        s[i]+=32;
-      i++;
-    }
+	{
+	  if(isupper(s[i]))
+		s[i]+=32;
+	  i++;
+	}
 }
 #endif
 
@@ -142,7 +142,6 @@ int who_was_grabbed;
 double get_ivar(int);
 /************************8  end grabber **********************/
 
-#define FIRSTCOLOR 30
 int on_the_fly_speed=10;
 int animation_on_the_fly=0;
 double evaluate();

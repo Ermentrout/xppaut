@@ -3,6 +3,9 @@
 
 #include <X11/Xlib.h>
 
+/* --- Macros --- */
+#define FIRSTCOLOR 30
+
 /* --- Data --- */
 extern int COLOR;
 extern int color_total;

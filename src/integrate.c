@@ -68,7 +68,6 @@
 /* --- Macros --- */
 #define MSWTCH(u,v) memcpy((void *)(u),(void *)(v),xpv.node*sizeof(double))
 #define ESCAPE 27
-#define FIRSTCOLOR 30
 #define NAR_IC 50
 
 int MakePlotFlag=0;
