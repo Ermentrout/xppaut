@@ -21,13 +21,6 @@
 #include "xpplim.h"
 #include "bitmap/auto.bitmap"
 
-#define RIGHT 6
-#define LEFT 2
-#define ESC 27
-#define TAB 10
-#define FINE 13
-
-
 #define STD_WID 460	  /* golden mean  */
 #define STD_HGT 284
 
