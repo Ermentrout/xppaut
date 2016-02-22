@@ -14,15 +14,14 @@
 
 /* --- Macros --- */
 #define Z(a,b) z[(a)+n*(b)]
-#define DING ping()
 
 /* --- Functions --- */
 void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
-     double *x,eps,err,big;
-     int *ierr,n,maxit;
-     float *stabinfo;
+	 double *x,eps,err,big;
+	 int *ierr,n,maxit;
+	 float *stabinfo;
 {
-      double rr[2];
+	  double rr[2];
 
  double colnorm=0,colmax,colsum;
  double *work,old_x[MAXODE],sign;
@@ -39,11 +38,11 @@ void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
  rooter(x,err,eps,big,work,ierr,maxit,n);
  if(*ierr!=0)
    {
-     del_stab_flag=1;
-     free(work);
-     err_msg("Could not converge to root");
-     for(i=0;i<n;i++)x[i]=old_x[i];
-     return;
+	 del_stab_flag=1;
+	 free(work);
+	 err_msg("Could not converge to root");
+	 for(i=0;i<n;i++)x[i]=old_x[i];
+	 return;
    }
  /* OKAY -- we have the root */
  NDelay=0;
@@ -53,50 +52,50 @@ void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
    variable_shift[1][i]=x[i];
  }
  free(work);
- /*  plintf(" Found %d delays \n",NDelay); */ 
+ /*  plintf(" Found %d delays \n",NDelay); */
  coef=(double *)malloc(n*n*(NDelay+1)*sizeof(double));
- 
+
  /* now we must compute a bunch of jacobians  */
  /* first the normal one   */
  del_stab_flag=-1;
  WhichDelay=-1;
  colmax=0.0;
- 
+
  for(i=0;i<n;i++)
    {
-     colsum=0.0;
-     for(j=0;j<n;j++)xp[j]=x[j];
-     dx=eps*amax(eps,fabs(x[i]));
-     xp[i]=xp[i]+dx;
-     rhs(0.0,xp,yp,n);
-     for(j=0;j<n;j++){
-       coef[j*n+i]=(yp[j]-y[j])/dx;
-       colsum+=fabs(coef[j*n+i]);
-       /*      plintf("a(0,%d,%d)=%g \n",i,j,coef[j*n+i]); */   
-     }
-     if(colsum>colmax)colmax=colsum;
+	 colsum=0.0;
+	 for(j=0;j<n;j++)xp[j]=x[j];
+	 dx=eps*amax(eps,fabs(x[i]));
+	 xp[i]=xp[i]+dx;
+	 rhs(0.0,xp,yp,n);
+	 for(j=0;j<n;j++){
+	   coef[j*n+i]=(yp[j]-y[j])/dx;
+	   colsum+=fabs(coef[j*n+i]);
+	   /*      plintf("a(0,%d,%d)=%g \n",i,j,coef[j*n+i]); */
+	 }
+	 if(colsum>colmax)colmax=colsum;
    }
  colnorm=colmax;
  for(j=0;j<n;j++)xp[j]=x[j];
  /* now the jacobians for the delays */
  for(k=0;k<NDelay;k++){
-   /* plintf(" found delay=%g \n",delay_list[k]); */   
+   /* plintf(" found delay=%g \n",delay_list[k]); */
    WhichDelay=k;
    colmax=0.0;
    for(i=0;i<n;i++){
-     colsum=0.0;
-     for(j=0;j<n;j++)
-       variable_shift[1][j]=variable_shift[0][j];
-     dx=eps*amax(eps,fabs(x[i]));
-     variable_shift[1][i]=x[i]+dx;
-     rhs(0.0,x,yp,n);
-     variable_shift[1][i]=x[i];
-     for(j=0;j<n;j++){
-       coef[j*n+i+n*n*(k+1)]=(yp[j]-y[j])/dx;
-       colsum+=fabs(coef[j*n+i+n*n*(k+1)]);
-       /* plintf("a(%d,%d,%d)=%g \n",k+1,i,j,coef[j*n+i+n*n*(k+1)]); */  
-     }
-     if(colsum>colmax)colmax=colsum;
+	 colsum=0.0;
+	 for(j=0;j<n;j++)
+	   variable_shift[1][j]=variable_shift[0][j];
+	 dx=eps*amax(eps,fabs(x[i]));
+	 variable_shift[1][i]=x[i]+dx;
+	 rhs(0.0,x,yp,n);
+	 variable_shift[1][i]=x[i];
+	 for(j=0;j<n;j++){
+	   coef[j*n+i+n*n*(k+1)]=(yp[j]-y[j])/dx;
+	   colsum+=fabs(coef[j*n+i+n*n*(k+1)]);
+	   /* plintf("a(%d,%d,%d)=%g \n",k+1,i,j,coef[j*n+i+n*n*(k+1)]); */
+	 }
+	 if(colsum>colmax)colmax=colsum;
    }
    colnorm+=colmax;
  }
@@ -109,7 +108,7 @@ void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
    ev[0]=rr[0];
    ev[1]=rr[1];
  }
- free(coef);  
+ free(coef);
  *stabinfo=(float)fabs(sign);
  /* if(*stabinfo>0) */
  i=(int)sign;
@@ -128,7 +127,7 @@ if(i==0&&okroot==1&&AlphaMax>0)
 
 
 COMPLEX csum(z,w)
-     COMPLEX z,w;
+	 COMPLEX z,w;
 {
   COMPLEX sum;
   sum.r=z.r+w.r;
@@ -137,7 +136,7 @@ COMPLEX csum(z,w)
 }
 
 COMPLEX cdif(z,w)
-     COMPLEX z,w;
+	 COMPLEX z,w;
 {
    COMPLEX sum;
   sum.r=z.r-w.r;
@@ -146,7 +145,7 @@ COMPLEX cdif(z,w)
  }
 
 COMPLEX cmlt(z,w)
-     COMPLEX z,w;
+	 COMPLEX z,w;
 {
    COMPLEX sum;
   sum.r=z.r*w.r-z.i*w.i;
@@ -155,7 +154,7 @@ COMPLEX cmlt(z,w)
 }
 
 COMPLEX cdivv(z,w)
-     COMPLEX z,w;
+	 COMPLEX z,w;
 {
   COMPLEX sum;
   double amp=w.r*w.r+w.i*w.i;
@@ -165,7 +164,7 @@ COMPLEX cdivv(z,w)
 }
 
 COMPLEX cexp2(z)
-     COMPLEX z;
+	 COMPLEX z;
 {
   COMPLEX sum;
   double ex=exp(z.r);
@@ -175,20 +174,20 @@ COMPLEX cexp2(z)
 }
 
 void switch_rows(z,i1,i2,n)
-     COMPLEX *z;
-     int i1,i2,n;
+	 COMPLEX *z;
+	 int i1,i2,n;
 {
   COMPLEX zt;
   int j;
   for(j=0;j<n;j++){
-    zt=Z(i1,j);
-    Z(i1,j)=Z(i2,j);
-    Z(i2,j)=zt;
+	zt=Z(i1,j);
+	Z(i1,j)=Z(i2,j);
+	Z(i2,j)=zt;
   }
 }
 
 COMPLEX rtoc(x,y)
-     double x,y;
+	 double x,y;
 {
   COMPLEX sum;
   sum.i=y;
@@ -197,122 +196,122 @@ COMPLEX rtoc(x,y)
 }
 
 void cprintn(z)
-     COMPLEX z;
+	 COMPLEX z;
 {
   plintf(" %g + i %g \n",z.r,z.i);
 }
 
 void cprint(z)
-     COMPLEX z;
+	 COMPLEX z;
 {
 printf("(%g,%g) ",z.r,z.i);
 }
 
 void cprintarr(z,n,m)
-     COMPLEX *z;
-     int n,m;
+	 COMPLEX *z;
+	 int n,m;
 {
   int i,j;
   for(i=0;i<m;i++){
-    for(j=0;j<n;j++)
-      cprint(z[i+m*j]);
-    plintf("\n");
+	for(j=0;j<n;j++)
+	  cprint(z[i+m*j]);
+	plintf("\n");
   }
 }
 
 double c_abs(z)
-     COMPLEX z;
+	 COMPLEX z;
 {
  return(sqrt(z.i*z.i+z.r*z.r));
 }
 
 COMPLEX cdeterm(z,n)
-     COMPLEX *z;
-     int n;
+	 COMPLEX *z;
+	 int n;
 {
   int i,j,imax=0,k;
   double q,qmax;
   COMPLEX sign=rtoc(1.0,0.0),mult,sum,zd;
   for(j=0;j<n;j++){
-    qmax=0.0;
-    for(i=j;i<n;i++){
-      q=c_abs(Z(i,j));
-      if(q>qmax){
+	qmax=0.0;
+	for(i=j;i<n;i++){
+	  q=c_abs(Z(i,j));
+	  if(q>qmax){
 	qmax=q;
 	imax=i;
-      }
-    }
-    if(qmax==0.0)return(rtoc(0.0,0.0));
-    switch_rows(z,imax,j,n);
-    if(imax>j)sign=cmlt(rtoc(-1.0,0.0),sign);
-    zd=Z(j,j);
-    for(i=j+1;i<n;i++){
-      mult=cdivv(Z(i,j),zd);
-      for(k=j+1;k<n;k++){
+	  }
+	}
+	if(qmax==0.0)return(rtoc(0.0,0.0));
+	switch_rows(z,imax,j,n);
+	if(imax>j)sign=cmlt(rtoc(-1.0,0.0),sign);
+	zd=Z(j,j);
+	for(i=j+1;i<n;i++){
+	  mult=cdivv(Z(i,j),zd);
+	  for(k=j+1;k<n;k++){
 	Z(i,k)=cdif(Z(i,k),cmlt(mult,Z(j,k)));
-      }
-    }
+	  }
+	}
   }
   sum=sign;
   for(j=0;j<n;j++)
-    sum=cmlt(sum,Z(j,j));
+	sum=cmlt(sum,Z(j,j));
   return sum;
 }
 COMPLEX cxdeterm(z,n)
-     COMPLEX *z;
-     int n;
+	 COMPLEX *z;
+	 int n;
 {
   int i,j,k;
   COMPLEX ajj,sum,mult;
   for(j=0;j<n;j++){
-    ajj=Z(j,j);
-    for(i=j+1;i<n;i++){
-      mult=cdivv(Z(i,j),ajj);
-      for(k=j+1;k<n;k++){
-        Z(i,k)=cdif(Z(i,k),cmlt(mult,Z(j,k)));
-      }
-    }
+	ajj=Z(j,j);
+	for(i=j+1;i<n;i++){
+	  mult=cdivv(Z(i,j),ajj);
+	  for(k=j+1;k<n;k++){
+		Z(i,k)=cdif(Z(i,k),cmlt(mult,Z(j,k)));
+	  }
+	}
   }
  /* now it should be diagonalized */
   sum=rtoc(1.0,0.0);
   for(j=0;j<n;j++){
-    sum=cmlt(sum,Z(j,j));
+	sum=cmlt(sum,Z(j,j));
   }
   return sum;
 }
-	 
+
 void make_z(z,delay,n,m,coef,lambda)
-     COMPLEX lambda;
-     COMPLEX *z;
-     double *coef,*delay;
-     int n,m;
+	 COMPLEX lambda;
+	 COMPLEX *z;
+	 double *coef,*delay;
+	 int n,m;
 {
   int i,j,k,km;
   COMPLEX temp,eld;
-  
+
  for(j=0;j<n;j++)
-    for(i=0;i<n;i++){
-      if(i==j)temp=lambda;
-      else temp=rtoc(0.0,0.0);
-      /* cprintn(temp); */
-      z[i+j*n]=cdif(temp,rtoc(coef[i+j*n],0.0)); /* initialize the array */
-    }
+	for(i=0;i<n;i++){
+	  if(i==j)temp=lambda;
+	  else temp=rtoc(0.0,0.0);
+	  /* cprintn(temp); */
+	  z[i+j*n]=cdif(temp,rtoc(coef[i+j*n],0.0)); /* initialize the array */
+	}
   for(k=0;k<m;k++){
-    km=(k+1)*n*n;
-    temp=rtoc(-delay[k],0.0); /* convert delay to complex number */
-    eld=cexp2(cmlt(temp,lambda)); /* compute exp(-lambda*tau) */
-    /* cprintn(eld); */
-    for(j=0;j<n;j++)
-      for(i=0;i<n;i++)
+	km=(k+1)*n*n;
+	temp=rtoc(-delay[k],0.0); /* convert delay to complex number */
+	eld=cexp2(cmlt(temp,lambda)); /* compute exp(-lambda*tau) */
+	/* cprintn(eld); */
+	for(j=0;j<n;j++)
+	  for(i=0;i<n;i++)
 	z[i+j*n]=cdif(z[i+j*n],cmlt(eld,rtoc(coef[km+i+n*j],0.0)));
   }
 }
 
 int find_positive_root(coef,delay,n,m,rad,err,eps,big,maxit,rr)
-     double *coef,*delay,*rr;
-     int n,m,maxit;
-     double rad;
-     double eps,err,big;
+	 double *coef,*delay,*rr;
+	 int n,m,maxit;
+	 double rad;
+	 double eps,err,big;
 {
   COMPLEX lambda,lambdap;
   COMPLEX det,*z,detp;
@@ -320,160 +319,160 @@ int find_positive_root(coef,delay,n,m,rad,err,eps,big,maxit,rr)
   double xl,yl,r,xlp,ylp;
 
   int k;
-  
-    lambda.r=AlphaMax;
-    lambda.i=OmegaMax;
- 
-   z=(COMPLEX *)malloc(sizeof(COMPLEX)*n*n); 
- 
+
+	lambda.r=AlphaMax;
+	lambda.i=OmegaMax;
+
+   z=(COMPLEX *)malloc(sizeof(COMPLEX)*n*n);
+
   /* now Newtons Method for maxit times */
   for(k=0;k<maxit;k++){
-      
-    make_z(z,delay,n,m,coef,lambda);
-    det=cdeterm(z,n);
 
-    r=c_abs(det);
-    if(r<err){ /* within the tolerance */
-      process_root(lambda.r,lambda.i);
-      AlphaMax=lambda.r;
-      OmegaMax=lambda.i;
-      return 1;
-    }
-    xl=lambda.r;
-    yl=lambda.i;
-   
-    /* compute the Jacobian */
-    if(fabs(xl)>eps)
-      r=eps*fabs(xl);
-    else
-      r=eps*eps;
-    xlp=xl+r;
-    lambdap=rtoc(xlp,yl);
-    make_z(z,delay,n,m,coef,lambdap);
-    detp=cdeterm(z,n);
+	make_z(z,delay,n,m,coef,lambda);
+	det=cdeterm(z,n);
+
+	r=c_abs(det);
+	if(r<err){ /* within the tolerance */
+	  process_root(lambda.r,lambda.i);
+	  AlphaMax=lambda.r;
+	  OmegaMax=lambda.i;
+	  return 1;
+	}
+	xl=lambda.r;
+	yl=lambda.i;
+
+	/* compute the Jacobian */
+	if(fabs(xl)>eps)
+	  r=eps*fabs(xl);
+	else
+	  r=eps*eps;
+	xlp=xl+r;
+	lambdap=rtoc(xlp,yl);
+	make_z(z,delay,n,m,coef,lambdap);
+	detp=cdeterm(z,n);
    jac[0]=(detp.r-det.r)/r;
    jac[2]=(detp.i-det.i)/r;
-    if(fabs(yl)>eps)
-      r=eps*fabs(yl);
-    else
-      r=eps*eps;
-    ylp=yl+r;
-    lambdap=rtoc(xl,ylp);
-    make_z(z,delay,n,m,coef,lambdap);
-    detp=cdeterm(z,n);
-    jac[1]=(detp.r-det.r)/r;
-    jac[3]=(detp.i-det.i)/r;
-    r=jac[0]*jac[3]-jac[1]*jac[2];
-    if(r==0){
-      plintf(" singular jacobian \n");
-      return -1;
-    }
+	if(fabs(yl)>eps)
+	  r=eps*fabs(yl);
+	else
+	  r=eps*eps;
+	ylp=yl+r;
+	lambdap=rtoc(xl,ylp);
+	make_z(z,delay,n,m,coef,lambdap);
+	detp=cdeterm(z,n);
+	jac[1]=(detp.r-det.r)/r;
+	jac[3]=(detp.i-det.i)/r;
+	r=jac[0]*jac[3]-jac[1]*jac[2];
+	if(r==0){
+	  plintf(" singular jacobian \n");
+	  return -1;
+	}
    xlp=(jac[3]*det.r-jac[1]*det.i)/r;
    ylp=(-jac[2]*det.r+jac[0]*det.i)/r;
-    xl=xl-xlp;
-    yl=yl-ylp;
-    r=fabs(xlp)+fabs(ylp);
-    lambda.r=xl;
-    lambda.i=yl;
-    if(r<err)
-    { /* within the tolerance */
-      process_root(lambda.r,lambda.i);
-      AlphaMax=lambda.r;
-      OmegaMax=lambda.i;
-      rr[0]=AlphaMax;
-      rr[1]=OmegaMax;
-      return 1;
-    }
-    if(r>big){
-      plintf("Failed to converge \n");
-      return -1;
-    }
+	xl=xl-xlp;
+	yl=yl-ylp;
+	r=fabs(xlp)+fabs(ylp);
+	lambda.r=xl;
+	lambda.i=yl;
+	if(r<err)
+	{ /* within the tolerance */
+	  process_root(lambda.r,lambda.i);
+	  AlphaMax=lambda.r;
+	  OmegaMax=lambda.i;
+	  rr[0]=AlphaMax;
+	  rr[1]=OmegaMax;
+	  return 1;
+	}
+	if(r>big){
+	  plintf("Failed to converge \n");
+	  return -1;
+	}
   }
-      
+
   plintf("Max iterates exceeded \n");
   return -1;
 }
 void process_root(real,im)
-     double real,im;
+	 double real,im;
 {
-  plintf("Root: %g + I %g \n",real,im); 
+  plintf("Root: %g + I %g \n",real,im);
 }
-double get_arg(delay,coef,m,n,lambda)  
-     COMPLEX lambda;
-     double *coef;
-     double *delay;
-     int m,n;
+double get_arg(delay,coef,m,n,lambda)
+	 COMPLEX lambda;
+	 double *coef;
+	 double *delay;
+	 int m,n;
 {
   int i,j,k,km;
   COMPLEX *z;
   COMPLEX temp,eld;
   double arg;
   if(m==0)return(0);  /* no delays so don't use this! */
-  z=(COMPLEX *)malloc(sizeof(COMPLEX)*n*n); 
+  z=(COMPLEX *)malloc(sizeof(COMPLEX)*n*n);
   for(j=0;j<n;j++)
-    for(i=0;i<n;i++){
-      if(i==j)temp=lambda;
-      else temp=rtoc(0.0,0.0);
-      /* cprintn(temp); */
-      z[i+j*n]=cdif(temp,rtoc(coef[i+j*n],0.0)); /* initialize the array */
-    }
+	for(i=0;i<n;i++){
+	  if(i==j)temp=lambda;
+	  else temp=rtoc(0.0,0.0);
+	  /* cprintn(temp); */
+	  z[i+j*n]=cdif(temp,rtoc(coef[i+j*n],0.0)); /* initialize the array */
+	}
   for(k=0;k<m;k++){
-    km=(k+1)*n*n;
-    temp=rtoc(-delay[k],0.0); /* convert delay to complex number */
-    eld=cexp2(cmlt(temp,lambda)); /* compute exp(-lambda*tau) */
-    /* cprintn(eld); */
-    for(j=0;j<n;j++)
-      for(i=0;i<n;i++)
+	km=(k+1)*n*n;
+	temp=rtoc(-delay[k],0.0); /* convert delay to complex number */
+	eld=cexp2(cmlt(temp,lambda)); /* compute exp(-lambda*tau) */
+	/* cprintn(eld); */
+	for(j=0;j<n;j++)
+	  for(i=0;i<n;i++)
 	z[i+j*n]=cdif(z[i+j*n],cmlt(eld,rtoc(coef[km+i+n*j],0.0)));
   }
   /*  the array is done  */
- /* cprintarr(z,n,n); */ 
+ /* cprintarr(z,n,n); */
   temp=cdeterm(z,n);
-  /* cprint(lambda); 
-  cprint(temp); 
+  /* cprint(lambda);
+  cprint(temp);
   plintf(" \n"); */
-   free(z); 
+   free(z);
   arg=atan2(temp.i,temp.r);
-  /*   plintf("%g %g %g \n",lambda.r,lambda.i,arg); */ 
+  /*   plintf("%g %g %g \n",lambda.r,lambda.i,arg); */
   return(arg);
-}   
+}
 
 int test_sign(old,new)
-     double old,new;
+	 double old,new;
 {
   if(old>0.0&&new<0.0){
-    if(old>2.9&&new<-2.9)return 1;
-    return(0); /* doesnt pass threshold */
+	if(old>2.9&&new<-2.9)return 1;
+	return(0); /* doesnt pass threshold */
   }
   if(old<0.0&&new>0.0){
-    if(old<-2.9&&new>2.9)return -1;
-    return 0;
+	if(old<-2.9&&new>2.9)return -1;
+	return 0;
   }
   return 0;
 }
 
 /* code for establishing delay stability
    sign=plot_args(coef,delay,n,m,npts,amax,wmax)
-    coef is a real array of length  (m+1)*n^2
-    each n^2 block is the jacobian with respect to the mth delay
-    m total delays
-    n is size of system
-    npts is number of pts on each part of contour
-    contour is
-      i wmax -----<---------    amax+i wmax
-       |                            |
-       V                            ^
-       |                            |
-     -i wmax ----->-----------  amax-i wmax
-  
-     sign is the number of roots in the contour using the argument
-     principle
-*/  
+	coef is a real array of length  (m+1)*n^2
+	each n^2 block is the jacobian with respect to the mth delay
+	m total delays
+	n is size of system
+	npts is number of pts on each part of contour
+	contour is
+	  i wmax -----<---------    amax+i wmax
+	   |                            |
+	   V                            ^
+	   |                            |
+	 -i wmax ----->-----------  amax-i wmax
+
+	 sign is the number of roots in the contour using the argument
+	 principle
+*/
 
 int plot_args(coef,delay,n,m,npts,almax,wmax)
-     double *coef;
-     int n,m,npts;
-     double almax,wmax,*delay;
+	 double *coef;
+	 int n,m,npts;
+	 double almax,wmax,*delay;
 {
   int i;
   int sign=0;
@@ -484,54 +483,54 @@ int plot_args(coef,delay,n,m,npts,almax,wmax)
   ds=2*wmax/npts;
    x=0.0;
   for(i=0;i<npts;i++){
-    y=wmax-i*ds;
-    lambda=rtoc(x,y);
-    arg=get_arg(delay,coef,m,n,lambda);
+	y=wmax-i*ds;
+	lambda=rtoc(x,y);
+	arg=get_arg(delay,coef,m,n,lambda);
    /* plintf(" %d %g \n",i,arg); */
-    sign=sign+test_sign(oldarg,arg);
-    oldarg=arg;
- 
+	sign=sign+test_sign(oldarg,arg);
+	oldarg=arg;
+
   }
  /* lower contour   */
   y=-wmax;
   ds=almax/npts;
   for(i=0;i<npts;i++){
-    x=i*ds;
-    lambda=rtoc(x,y);
-    arg=get_arg(delay,coef,m,n,lambda);
+	x=i*ds;
+	lambda=rtoc(x,y);
+	arg=get_arg(delay,coef,m,n,lambda);
 /*        plintf(" %d %g \n",i+npts,arg); */
-       sign=sign+test_sign(oldarg,arg);
-    oldarg=arg;
- 
+	   sign=sign+test_sign(oldarg,arg);
+	oldarg=arg;
+
   }
 /* right contour */
  x=almax;
  ds=2*wmax/npts;
   for(i=0;i<npts;i++){
-    y=-wmax+i*ds;
-    lambda=rtoc(x,y);
-    arg=get_arg(delay,coef,m,n,lambda);
+	y=-wmax+i*ds;
+	lambda=rtoc(x,y);
+	arg=get_arg(delay,coef,m,n,lambda);
 /*     plintf(" %d %g \n",i+2*npts,arg); */
-      sign=sign+test_sign(oldarg,arg);
-    oldarg=arg;
- 
+	  sign=sign+test_sign(oldarg,arg);
+	oldarg=arg;
+
   }
- 
+
 /* top contour */
   y=wmax;
   ds=almax/npts;
   for(i=0;i<npts;i++){
-    x=almax-i*ds;
-    lambda=rtoc(x,y);
-    arg=get_arg(delay,coef,m,n,lambda);
+	x=almax-i*ds;
+	lambda=rtoc(x,y);
+	arg=get_arg(delay,coef,m,n,lambda);
 /*         plintf(" %d %g \n",i+3*npts,arg); */
-    sign=sign+test_sign(oldarg,arg);
-    oldarg=arg;
-  
+	sign=sign+test_sign(oldarg,arg);
+	oldarg=arg;
+
   }
   return sign;
 }
- 
+
 
 
 
