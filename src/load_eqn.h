@@ -244,7 +244,6 @@ extern int IX_PLT[10];
 extern int IY_PLT[10];
 extern int IZ_PLT[10];
 extern int MaxEulIter;
-extern int METHOD;
 extern int MultiWin;
 extern int NEQ;
 extern int NC_ITER;

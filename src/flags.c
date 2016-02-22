@@ -7,6 +7,7 @@
 #include <strings.h>
 
 #include "form_ode.h"
+#include "newpars.h"
 #include "odesol2.h"
 #include "parserslow.h"
 #include "pop_list.h"
@@ -74,8 +75,6 @@ type =2 output
 type =3 halt
 */
 
-#define IC 2
-#define PARAM 1
 /* #define Set_ivar(a,b) variables[(a)]=(b) */
 FLAG flag[MAXFLAG];
 int NFlags=0;
@@ -180,7 +179,7 @@ int compile_flags()
 		for(i=0;i<flag[j].nevents;i++){
 			index=find_user_name(IC,flag[j].lhsname[i]);
 			if(index<0){
-				index=find_user_name(PARAM,flag[j].lhsname[i]);
+				index=find_user_name(FUNCTION,flag[j].lhsname[i]);
 				if(index<0){
 					if(strcasecmp(flag[j].lhsname[i],"out_put")==0)
 					{

@@ -20,12 +20,13 @@
 #include "main.h"
 #include "markov.h"
 #include "my_rhs.h"
+#include "newpars.h"
+#include "numerics.h"
 #include "parserslow.h"
 #include "pop_list.h"
 #include "xpplim.h"
 
 /* --- Macros --- */
-#define MAX_LEN_SBOX 25
 #define ESCAPE 27
 
 #define NOCHANGE 2
@@ -36,8 +37,6 @@
 #define BADINT -4
 #define ABORT -5
 #define ABORT_ALL -6
-#define PARAM 1
-#define IC 2
 
 SHOOT_RANGE shoot_range;
 
@@ -234,7 +233,7 @@ double *sect;
 
 	status=do_string_box(4,4,1,"Periodic BCs",n,values,45);
 	if(status!=0){
-		i=find_user_name(PARAM,values[0]);
+		i=find_user_name(FUNCTION,values[0]);
 		if(i>-1)
 			*ipar=i;
 		else {
@@ -376,7 +375,7 @@ int set_up_sh_range()
 	status=do_string_box(7,7,1,"Range Shoot",n,values,45);
 	if(status!=0){
 		strcpy(shoot_range.item,values[0]);
-		i=find_user_name(PARAM,shoot_range.item);
+		i=find_user_name(FUNCTION,shoot_range.item);
 		if(i<0){
 			err_msg("No such parameter");
 			return(0);

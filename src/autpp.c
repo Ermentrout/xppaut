@@ -6,6 +6,7 @@
 #include "derived.h"
 #include "load_eqn.h"
 #include "main.h"
+#include "numerics.h"
 #include "parserslow.h"
 #include "pp_shoot.h"
 #include "xAuto.h"

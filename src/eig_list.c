@@ -14,11 +14,11 @@
 #include "form_ode.h"
 #include "ggets.h"
 #include "init_conds.h"
-#include "load_eqn.h"
 #include "main.h"
 #include "many_pops.h"
 #include "mykeydef.h"
 #include "newhome.h"
+#include "numerics.h"
 #include "parserslow.h"
 #include "pop_list.h"
 

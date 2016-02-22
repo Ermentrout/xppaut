@@ -34,19 +34,6 @@
 #include "struct.h"
 #include "volterra2.h"
 
-/* --- Macros --- */
-#define MAX_LEN_SBOX 25
-#define VOLTERRA 6
-#define BACKEUL 7
-#define RKQS 8
-#define STIFF 9
-#define CVODE 10
-#define GEAR 5
-#define DP5 11
-#define DP83 12
-#define RB23 13
-#define SYMPLECT 14
-
 double atof();
 
 /*   This is numerics.c
@@ -56,6 +43,8 @@ double atof();
 */
 
 POINCARE_MAP my_pmap;
+
+int METHOD;
 
 int (*solver)();
 float *fft_data,*hist_data,color_scale,min_scale;

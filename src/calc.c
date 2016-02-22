@@ -15,13 +15,10 @@
 #include "init_conds.h"
 #include "load_eqn.h"
 #include "main.h"
+#include "newpars.h"
 #include "parserslow.h"
 #include "pop_list.h"
 #include "xpplim.h"
-
-/* --- Macros --- */
-#define PARAM 1
-#define IC 2
 
 double calculate(/* char * */);
 double evaluate();
@@ -154,7 +151,7 @@ double *z;
 
 		if(ok==0)
 			return(-1);
-		i=find_user_name(PARAM,val);
+		i=find_user_name(FUNCTION,val);
 		if(i>-1){
 			set_val(val,newz); /* a parameter set to value  */
 			*z=newz;

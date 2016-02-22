@@ -7,9 +7,8 @@
 #include "flags.h"
 #include "form_ode.h"
 #include "load_eqn.h"
-
-/* --- Macros --- */
-#define DING ping()
+#include "markov.h"
+#include "numerics.h"
 
 int UnstableManifoldColor=5;
 int StableManifoldColor=8;
@@ -143,7 +142,7 @@ int maxit, n,*ierr;
   for(i=0;i<n;i++)x[i]=old_x[i];
   return;
  }
- DING;
+ ping();
  /* for(i=0;i<n;i++)xl[i]=(float)x[i]; */
 
  for(i=0;i<n*n;i++){

@@ -1,7 +1,7 @@
 #ifndef XPPAUT_XPPLIM_H
 #define XPPAUT_XPPLIM_H
 
-/* --- Macros --- */Z
+/* --- Macros --- */
 #define MAXODE 5000
 #define MAXODE1 4999
 #define MAXDELAY 50

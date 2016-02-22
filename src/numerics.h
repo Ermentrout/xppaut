@@ -1,6 +1,20 @@
 #ifndef XPPAUT_NUMERICS_H
 #define XPPAUT_NUMERICS_H
 
+/* --- Macros --- */
+#define MAX_LEN_SBOX 25
+
+#define VOLTERRA 6
+#define BACKEUL 7
+#define RKQS 8
+#define STIFF 9
+#define CVODE 10
+#define GEAR 5
+#define DP5 11
+#define DP83 12
+#define RB23 13
+#define SYMPLECT 14
+
 /* --- Types --- */
 typedef struct {
   double tmod;
@@ -13,6 +27,7 @@ typedef struct {
 extern int cv_bandflag;
 extern int cv_bandlower;
 extern int cv_bandupper;
+extern int METHOD;
 
 /* --- Functions --- */
 void chk_delay(void);

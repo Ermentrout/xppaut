@@ -8,19 +8,12 @@
 #include "delay_handle.h"
 #include "form_ode.h"
 #include "load_eqn.h"
+#include "do_fit.h"
+#include "numerics.h"
 #include "parserslow.h"
 #include "storage.h"
 
 /*  this is also X free ! */
-
-#define GEAR 5
-#define RKQS 8
-#define STIFF 9
-#define CVODE 10
-#define DP5 11
-#define DP83 12
-#define RB23 13
-#define MAX_LEN_SBOX 25
 #define MAX(a,b) ((a)>(b)?(a):(b))
 
 double atof();

@@ -24,6 +24,7 @@
 #include "many_pops.h"
 #include "markov.h"
 #include "menus.h"
+#include "numerics.h"
 #include "parserslow.h"
 #include "pop_list.h"
 #include "struct.h"

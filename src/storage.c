@@ -6,17 +6,9 @@
 #include "form_ode.h"
 #include "ggets.h"
 #include "integrate.h"
-#include "load_eqn.h"
 #include "markov.h"
+#include "numerics.h"
 #include "xpplim.h"
-
-/* --- Macros --- */
-#define BACKEUL 7
-#define VOLTERRA 6
-#define STIFF 9
-#define GEAR 5
-#define RB23 13
-#define SYMPLECT 14
 
 /* --- Data --- */
 float **storage;

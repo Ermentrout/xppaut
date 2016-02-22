@@ -53,6 +53,7 @@
 #include "my_ps.h"
 #include "my_rhs.h"
 #include "my_svg.h"
+#include "newpars.h"
 #include "numerics.h"
 #include "odesol2.h"
 #include "parserslow.h"
@@ -70,19 +71,7 @@
 #define READEM 1
 #define ESCAPE 27
 #define FIRSTCOLOR 30
-#define MAX_LEN_SBOX 25
-#define PARAM 1
-#define IC 2
 #define NAR_IC 50
-#define VOLTERRA 6
-#define BACKEUL 7
-#define RKQS 8
-#define STIFF 9
-#define GEAR 5
-#define CVODE 10
-#define DP5 11
-#define DP83 12
-#define RB23 13
 
 int MakePlotFlag=0;
 int ar_ic_defined=0;
@@ -225,7 +214,7 @@ sprintf(values[7],"%s",yn[eq_range.mc]);
  status=do_string_box(8,8,1,"Range Equilibria",n,values,45);
  if(status!=0){
    strcpy(eq_range.item,values[0]);
-   i=find_user_name(PARAM,eq_range.item);
+   i=find_user_name(FUNCTION,eq_range.item);
    if(i<0){
 		err_msg("No such parameter");
 	   return(0);
@@ -276,9 +265,9 @@ int range_item()
 {
  int i;
  char bob[256];
- i=find_user_name(PARAM,range.item);
+ i=find_user_name(FUNCTION,range.item);
  if(i>-1){
-   range.type=PARAM;
+   range.type=FUNCTION;
    range.index=i;
  }
  else {
@@ -298,9 +287,9 @@ int range_item2()
 {
  int i;
  char bob[256];
- i=find_user_name(PARAM,range.item2);
+ i=find_user_name(FUNCTION,range.item2);
  if(i>-1){
-   range.type2=PARAM;
+   range.type2=FUNCTION;
    range.index2=i;
  }
  else {
@@ -707,7 +696,7 @@ int flag; /* 0 for 1-param 1 for 2 parameter 2 for Auto range */
  PAUSER=0;
 nit2=0;
 if(range.rtype==2)nit2=range.steps2;
-if(range.type==PARAM)get_val(range.item,&temp);
+if(range.type==FUNCTION)get_val(range.item,&temp);
  alloc_liap(nit); /* make space */
  if(range.rtype>0){
  itype2=range.type2;
@@ -716,7 +705,7 @@ if(range.type==PARAM)get_val(range.item,&temp);
  phigh2=range.phigh2;
   if(range.rtype==2)dpar2=(phigh2-plow2)/(double)nit2;
   else dpar2=(phigh2-plow2)/(double)nit;
-  if(range.type2==PARAM)get_val(range.item2,&temp2);
+  if(range.type2==FUNCTION)get_val(range.item2,&temp2);
 
  }
 
@@ -839,9 +828,9 @@ if(fabs(MyTime)>=TRANS&&STORFLAG==1&&POIMAP==0)
  }
  if(oldic==1)get_ic(1,x);
  else get_ic(0,x);
- if(range.type==PARAM)set_val(range.item,temp);
+ if(range.type==FUNCTION)set_val(range.item,temp);
  if(range.rtype>0)
-   if(range.type2==PARAM)set_val(range.item2,temp2);
+   if(range.type2==FUNCTION)set_val(range.item2,temp2);
  evaluate_derived();
 MyGraph->color[0]=color;
  INFLAG=1;

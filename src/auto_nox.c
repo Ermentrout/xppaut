@@ -35,6 +35,7 @@
 #include "menus.h"
 #include "my_ps.h"
 #include "my_rhs.h"
+#include "numerics.h"
 #include "parserslow.h"
 #include "pop_list.h"
 #include "pp_shoot.h"
@@ -70,7 +71,6 @@ int TypeOfCalc=0;
 #define DI1 11
 #define HO2 12
 
-#define MAX_LEN_SBOX 25
 #define HI_P 0  /* uhi vs par */
 #define NR_P 1  /* norm vs par */
 #define HL_P 2  /* Hi and Lo vs par  periodic only */
