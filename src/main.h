@@ -4,8 +4,13 @@
 #include <X11/Xlib.h>
 #include "load_eqn.h"
 
+/* --- Macros --- */
+/* FixWindowSize(flag) values */
+#define FIX_MAX_SIZE 1
+#define FIX_MIN_SIZE 2
+#define FIX_SIZE 3
+
 /* --- Data --- */
-extern int allwinvis;
 extern char anifile[XPP_MAX_NAME];
 extern char batchout[256];
 extern char big_font_name[100];
@@ -31,6 +36,7 @@ extern double SLIDER3HI;
 extern float xppvermaj;
 extern float xppvermin;
 
+extern int allwinvis;
 extern int batch_range;
 extern int CURY_OFF;
 extern int CURY_OFFb;

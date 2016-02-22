@@ -72,9 +72,6 @@
 #include "bitmap/pp.bitmap"
 
 /* --- Macros --- */
-#define FIX_SIZE 3
-#define FIX_MIN_SIZE 2
-#define FIX_MAX_SIZE 1
 #define lowbit(x) ((x) & (~(x) + 1))
 #define TOPBUTTONCOLOR 27
 #define TOO_SMALL 0

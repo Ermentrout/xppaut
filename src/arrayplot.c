@@ -59,7 +59,6 @@
 
 /* --- Macros --- */
 #define FIRSTCOLOR 30
-#define FIX_MIN_SIZE 2
 
 /* --- Functions --- */
 double atof();
