@@ -125,23 +125,31 @@ char *s;
 void bad_shoot(iret)
 int iret;
 {
-switch(iret){
-	case NOCHANGE:
-		err_msg("No change from last point. Saving anyway");
-		break;
-	case NUMICS:
-		err_msg("Number BCS not equal number ICs");
-		break;
-	case BADINT:
-		err_msg("Unable to complete integration");
-		break;
-	case TOOMANY:
-		err_msg("Maximum iterates exceeded");
-		break;
-	case BADJAC:
-		err_msg("Bad Jacobian -- uninvertable");
-		break;
-}
+	switch(iret){
+		case NOCHANGE:
+			err_msg("No change from last point. Saving anyway");
+			break;
+		case GOODSHOT:
+			break;
+		case NUMICS:
+			err_msg("Number BCS not equal number ICs");
+			break;
+		case TOOMANY:
+			err_msg("Maximum iterates exceeded");
+			break;
+		case BADJAC:
+			err_msg("Bad Jacobian -- uninvertable");
+			break;
+		case BADINT:
+			err_msg("Unable to complete integration");
+			break;
+		case ABORT:
+			err_msg("ABORT integration");
+			break;
+		case ABORT_ALL:
+			err_msg("ABORT all");
+			break;
+	}
 }
 
 void do_sh_range(ystart,yend)
