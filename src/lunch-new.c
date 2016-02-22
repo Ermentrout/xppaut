@@ -30,8 +30,6 @@
 #include "xpplim.h"
 
 /* --- Macros --- */
-#define READEM 1
-#define VOLTERRA 6
 #define PARAMBOX 1
 
 int set_type=0;

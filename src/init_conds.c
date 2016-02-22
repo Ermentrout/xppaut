@@ -62,20 +62,16 @@
 #define HOTWILD 2
 #define HOTFILE 1
 
-#define READEM 1
-#define WRITEM 0
-#define MAX_LEN_SBOX 25
-
 #define PARAMBOX 1
 #define ICBOX 2
 #define DELAYBOX 3
 #define BCBOX 4
 #define BOXEVENT   (ButtonPressMask 	|\
-                    KeyPressMask		|\
-                    ExposureMask		|\
-                    StructureNotifyMask	|\
-                    LeaveWindowMask		|\
-                    EnterWindowMask)
+					KeyPressMask		|\
+					ExposureMask		|\
+					StructureNotifyMask	|\
+					LeaveWindowMask		|\
+					EnterWindowMask)
 
 #define EDIT_WAIT 0
 #define EDIT_NEXT 1

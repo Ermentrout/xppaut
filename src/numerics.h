@@ -2,8 +2,6 @@
 #define XPPAUT_NUMERICS_H
 
 /* --- Macros --- */
-#define MAX_LEN_SBOX 25
-
 #define VOLTERRA 6
 #define BACKEUL 7
 #define RKQS 8

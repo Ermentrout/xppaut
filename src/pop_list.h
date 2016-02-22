@@ -2,10 +2,10 @@
 #define XPPAUT_POP_LIST_H
 
 #include <X11/Xlib.h>
+#include "xpplim.h"
 
 /* --- Macros --- */
 #define MAX_N_SBOX 22
-#define MAX_LEN_SBOX 25
 
 #define ALL_DONE 2
 #define FORGET_ALL 0
@@ -22,16 +22,16 @@
 #define SB_METHOD 6
 
 #define EV_MASK    (ButtonPressMask 	|\
-                    KeyPressMask		|\
-                    ExposureMask		|\
-                    StructureNotifyMask)
+					KeyPressMask		|\
+					ExposureMask		|\
+					StructureNotifyMask)
 
 #define BUT_MASK   (ButtonPressMask 	|\
-                    KeyPressMask		|\
-                    ExposureMask		|\
-                    StructureNotifyMask	|\
-                    EnterWindowMask		|\
-                    LeaveWindowMask)
+					KeyPressMask		|\
+					ExposureMask		|\
+					StructureNotifyMask	|\
+					EnterWindowMask		|\
+					LeaveWindowMask)
 
 /* --- Types --- */
 /*  This is a string box widget which handles a list of

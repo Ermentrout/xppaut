@@ -31,7 +31,6 @@
 #include "xpplim.h"
 
 /* --- Macros --- */
-#define MAX_LEN_SBOX 25
 #define MAX_NULL 10000
 
 int OutPutNC=0;

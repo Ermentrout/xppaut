@@ -43,7 +43,6 @@
 #define IC 2
 #define DFNORMAL 1
 #define MAXOPT 1000
-#define READEM 1
 
 void nsrand48(int seed);
 

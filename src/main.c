@@ -1248,7 +1248,7 @@ void commander(ch)
 			break;
 		case 'w': flash(1);
 			/* write set */
-			   do_lunch(0);
+			   do_lunch(WRITEM);
 			flash(1);
 			break;
 		case 's': flash(2);
@@ -1271,7 +1271,7 @@ void commander(ch)
 			break;
 		case 'r': flash(5);
 			/* read set */
-				do_lunch(1);
+				do_lunch(READEM);
 			flash(5);
 			break;
 		case 'e': flash(6);

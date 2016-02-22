@@ -17,5 +17,6 @@
 #define MAXVEC 100
 #define MAX_ANI_LINES 2000
 #define MAX_INTERN_SET 500
+#define MAX_LEN_SBOX 25
 
 #endif /* XPPAUT_XPPLIM_H */

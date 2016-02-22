@@ -13,7 +13,6 @@
 #define SVGFMT 2
 
 #define REAL_SMALL 1.e-6
-#define MAX_LEN_SBOX 25
 #define MAXBIFCRV 100
 #define lmax(a,b) ((a>b) ? a : b)
 

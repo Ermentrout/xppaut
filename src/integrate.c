@@ -53,7 +53,6 @@
 #include "my_ps.h"
 #include "my_rhs.h"
 #include "my_svg.h"
-#include "newpars.h"
 #include "numerics.h"
 #include "odesol2.h"
 #include "parserslow.h"
@@ -68,7 +67,6 @@
 
 /* --- Macros --- */
 #define MSWTCH(u,v) memcpy((void *)(u),(void *)(v),xpv.node*sizeof(double))
-#define READEM 1
 #define ESCAPE 27
 #define FIRSTCOLOR 30
 #define NAR_IC 50

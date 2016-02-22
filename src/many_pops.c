@@ -40,7 +40,6 @@
 #include "bitmap/graph.bitmap"
 
 /* --- Macros --- */
-#define MAX_LEN_SBOX 25
 #define MAXLAB 50
 #define MAXGROB 400
 #define POINTER 0

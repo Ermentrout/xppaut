@@ -436,7 +436,7 @@ void do_file_com(int com)
 	make_txtview();
 	break;
   case M_FW:
-	do_lunch(0);
+	do_lunch(WRITEM);
 	break;
   case M_FS:
 	file_inf();
@@ -450,7 +450,7 @@ void do_file_com(int com)
 	q_calc();
 	break;
   case M_FR:
-	do_lunch(1);
+	do_lunch(READEM);
 	break;
   case M_FB:
 	tfBell=1-tfBell;

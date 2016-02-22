@@ -475,7 +475,7 @@ int if_needed_load_par()
 	return 1;
   }
   plintf("Loading external parameter file: %s\n",parfilename);
-  io_parameter_file(parfilename,1);
+  io_parameter_file(parfilename, READEM);
   return 1;
 }
 
@@ -488,7 +488,7 @@ int if_needed_load_ic()
 	return 1;
   }
   plintf("Loading external initial condition file: %s\n",icfilename);
-  io_ic_file(icfilename,1);
+  io_ic_file(icfilename, READEM);
   return(1);
 }
 

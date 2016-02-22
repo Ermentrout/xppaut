@@ -29,10 +29,6 @@
 #include "storage.h"
 #include "xpplim.h"
 
-
-#define MAX_LEN_SBOX 25
-#define READEM 1
-
 /* --- Functions --- */
 double evaluate();
 double ndrand48();
