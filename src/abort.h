@@ -1,11 +1,9 @@
-#ifndef _abort_h_
-#define _abort_h_
+#ifndef XPPAUT_ABORT_H
+#define XPPAUT_ABORT_H
 
-
-/* abort.c */
+/* --- Functions --- */
 int get_command_width(void);
 void plot_command(int nit, int icount, int cwidth);
 int my_abort(void);
 
-
-#endif
+#endif /* XPPAUT_ABORT_H */
