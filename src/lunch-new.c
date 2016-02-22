@@ -29,9 +29,6 @@
 #include "volterra2.h"
 #include "xpplim.h"
 
-/* --- Macros --- */
-#define PARAMBOX 1
-
 int set_type=0;
 
 /* --- Functions --- */

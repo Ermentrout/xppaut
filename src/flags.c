@@ -7,6 +7,7 @@
 #include <strings.h>
 
 #include "form_ode.h"
+#include "init_conds.h"
 #include "newpars.h"
 #include "odesol2.h"
 #include "parserslow.h"
@@ -177,9 +178,9 @@ int compile_flags()
 		for(k=0;k<=nc;k++)
 			flag[j].comcond[k]=command[k];
 		for(i=0;i<flag[j].nevents;i++){
-			index=find_user_name(IC,flag[j].lhsname[i]);
+			index=find_user_name(ICBOX,flag[j].lhsname[i]);
 			if(index<0){
-				index=find_user_name(FUNCTION,flag[j].lhsname[i]);
+				index=find_user_name(PARAMBOX,flag[j].lhsname[i]);
 				if(index<0){
 					if(strcasecmp(flag[j].lhsname[i],"out_put")==0)
 					{

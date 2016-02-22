@@ -43,7 +43,6 @@
 #include "xAuto.h"
 
 #define MAXLINELENGTH 100000
-#define PARAM_BOX 1
 
 #define ESC 27
 
@@ -597,7 +596,7 @@ int auto_name_to_index(s)
   int i,in;
   find_variable(s,&in);
   if(in==0)return(10);
-  in=find_user_name(PARAM_BOX,s);
+  in=find_user_name(PARAMBOX,s);
   for(i=0;i<NAutoPar;i++)
 	if(AutoPar[i]==in)return(i);
   return(-1);
@@ -674,7 +673,7 @@ void auto_params()
   if(status!=0){
 	for(i=0;i<8;i++){
 	  if(i<NAutoPar){
-	in=find_user_name(PARAM_BOX,values[i]);
+	in=find_user_name(PARAMBOX,values[i]);
 	if(in>=0){
 	  AutoPar[i]=in;
 	  in=get_param_index(values[i]);
@@ -832,7 +831,7 @@ void auto_plot_par()
 	if(i>0)
 	  Auto.var=i-1;
 	/*  Now check the parameters  */
-	i1=find_user_name(PARAM_BOX,values[1]);
+	i1=find_user_name(PARAMBOX,values[1]);
 	if(i1>=0){
 	  for(i=0;i<NAutoPar;i++){
 	if(i1==AutoPar[i]){
@@ -841,7 +840,7 @@ void auto_plot_par()
 	}
 	  }
 	}
-	 i1=find_user_name(PARAM_BOX,values[2]);
+	 i1=find_user_name(PARAMBOX,values[2]);
 	if(i1>=0){
 	  for(i=0;i<NAutoPar;i++){
 	if(i1==AutoPar[i]){

@@ -6,6 +6,11 @@
 
 /* --- Macros --- */
 #define FILESELNWIN 10
+/* type values */
+#define PARAMBOX 1
+#define ICBOX 2
+#define DELAYBOX 3
+#define BCBOX 4
 
 /* --- Types --- */
 typedef struct {

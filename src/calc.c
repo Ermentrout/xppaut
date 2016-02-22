@@ -151,14 +151,14 @@ double *z;
 
 		if(ok==0)
 			return(-1);
-		i=find_user_name(FUNCTION,val);
+		i=find_user_name(PARAMBOX,val);
 		if(i>-1){
 			set_val(val,newz); /* a parameter set to value  */
 			*z=newz;
 			redraw_params();
 		}
 		else {
-			i=find_user_name(IC,val);
+			i=find_user_name(ICBOX,val);
 			if(i<0){
 				err_msg("No such name!");
 				return(-1);

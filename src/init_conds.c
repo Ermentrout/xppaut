@@ -62,10 +62,6 @@
 #define HOTWILD 2
 #define HOTFILE 1
 
-#define PARAMBOX 1
-#define ICBOX 2
-#define DELAYBOX 3
-#define BCBOX 4
 #define BOXEVENT   (ButtonPressMask 	|\
 					KeyPressMask		|\
 					ExposureMask		|\
