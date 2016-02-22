@@ -20,6 +20,7 @@
 #include "main.h"
 #include "markov.h"
 #include "my_rhs.h"
+#include "mykeydef.h"
 #include "newpars.h"
 #include "numerics.h"
 #include "parserslow.h"
@@ -27,8 +28,6 @@
 #include "xpplim.h"
 
 /* --- Macros --- */
-#define ESCAPE 27
-
 #define NOCHANGE 2
 #define GOODSHOT 1
 #define NUMICS -1
@@ -438,7 +437,7 @@ int *iret,maxit,n,ishow,iper,ipar,ivar;
 	while(1){
 		esc=my_abort();
 
-		if(esc==ESCAPE) {
+		if(esc==ESC) {
 			*iret=ABORT;
 			break;
 		}

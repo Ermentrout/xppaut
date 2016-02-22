@@ -50,6 +50,7 @@
 #include "many_pops.h"
 #include "markov.h"
 #include "menudrive.h"
+#include "mykeydef.h"
 #include "my_ps.h"
 #include "my_rhs.h"
 #include "my_svg.h"
@@ -67,7 +68,6 @@
 
 /* --- Macros --- */
 #define MSWTCH(u,v) memcpy((void *)(u),(void *)(v),xpv.node*sizeof(double))
-#define ESCAPE 27
 #define NAR_IC 50
 
 int MakePlotFlag=0;
@@ -2083,7 +2083,7 @@ if(Xup) cwidth=get_command_width();
 
 		   {
 
-			 if(esc==ESCAPE) break;
+			 if(esc==ESC) break;
 		 if(esc=='/'){rval=1;ENDSING=1;break;}
 
 		   }

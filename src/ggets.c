@@ -17,7 +17,6 @@
 #include "newhome.h"
 #include "pop_list.h"
 
-#define ESCAPE 27
 char *info_message;
 double atof();
 int MSStyle=0;
@@ -336,7 +335,7 @@ int get_mouse_xy(x,y,w)
 		 break;
    case KeyPress:
 	 ch=get_key_press(&ev);
-	 if(ch==ESCAPE) return 0;
+	 if(ch==ESC) return 0;
 	 if(ch==FINE)return -2;
 	 if(ch==TAB)return -3;
 	 break;
