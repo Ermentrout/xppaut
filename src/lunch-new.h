@@ -27,4 +27,4 @@ void io_double(double *z, FILE *fp, int f, char *ss);
 void io_float(float *z, FILE *fp, int f, char *ss);
 void io_string(char *s, int len, FILE *fp, int f);
 
-#endif /+ XPPAUT_LUNCH_NEW_H */
+#endif /* XPPAUT_LUNCH_NEW_H */
