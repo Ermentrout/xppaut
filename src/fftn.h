@@ -90,23 +90,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-   extern void fft_free (void);
+extern void fft_free (void);
 
-   /* double precision routine */
-   extern int fftn (int /* ndim */,
-		    const int /* dims */[],
-		    double /* Re */[],
-		    double /* Im */[],
-		    int /* isign */,
-		    double /* scaling */);
+/* double precision routine */
+extern int fftn (int /* ndim */,
+				 const int /* dims */[],
+				 double /* Re */[],
+				 double /* Im */[],
+				 int /* isign */,
+				 double /* scaling */);
 
-   /* float precision routine */
-   extern int fftnf (int /* ndim */,
-		     const int /* dims */[],
-		     float /* Re */[],
-		     float /* Im */[],
-		     int /* isign */,
-		     double /* scaling */);
+/* float precision routine */
+extern int fftnf (int /* ndim */,
+				  const int /* dims */[],
+				  float /* Re */[],
+				  float /* Im */[],
+				  int /* isign */,
+				  double /* scaling */);
 
 #ifdef __cplusplus
 }
