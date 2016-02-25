@@ -5,8 +5,8 @@
 
 /* --- Types --- */
 typedef struct  {
-  Window canvas, axes,numerics,grab,next,run,clear,redraw,base,per;
-  Window info,param,file,abort,stab,hint,kill;
+    Window canvas, axes,numerics,grab,next,run,clear,redraw,base,per;
+    Window info,param,file,abort,stab,hint,kill;
 } AUTOWIN;
 
 /* --- Data --- */
@@ -49,11 +49,11 @@ void auto_button(XEvent ev);
 void auto_kill(void);
 void auto_keypress(XEvent ev, int *used);
 int query_special(char* title,char *nsymb);
-void clear_msg();
+void clear_msg(void);
 void find_point(int ibr,int pt);
 void auto_get_info( int *n, char *pname);
 void auto_set_mark(int i);
-void do_auto_range();
-void RedrawMark();
+void do_auto_range(void);
+void RedrawMark(void);
 
 #endif /* XPPAUT_AUTO_X11_H */
