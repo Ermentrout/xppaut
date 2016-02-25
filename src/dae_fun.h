@@ -3,21 +3,21 @@
 
 /* --- Types --- */
 typedef struct {
-  double *work;
-  int *iwork;
-  int status;
+    double *work;
+    int *iwork;
+    int status;
 } DAEWORK;
 
 typedef struct {
-  char name[12],*rhs;
-  int *form;
-  int index;
-  double value,last;
+    char name[12],*rhs;
+    int *form;
+    int index;
+    double value,last;
 } SOLV_VAR;
 
 typedef struct {
-  char *rhs;
-  int *form;
+    char *rhs;
+    int *form;
 } DAE_EQN;
 
 /* --- Functions --- */
