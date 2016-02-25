@@ -14,15 +14,15 @@
 
 /* --- Types --- */
 typedef struct {
-  char *text,*action;
-  int aflag;
+	char *text,*action;
+	int aflag;
 } ACTION;
 
 typedef struct {
-  int *com;
-  char *string;
-  char *name;
-  int side;
+	int *com;
+	char *string;
+	char *name;
+	int side;
 } BC_STRUCT;
 
 typedef struct {
@@ -104,11 +104,11 @@ int find_char(char *s1, char *s2, int i0, int *i1);
 int next_nonspace(char *s1, int i0, int *i1);
 void remove_blanks(char *s1);
 void read_a_line(FILE *fp, char *s);
-int search_array(char *old, char *new, int *i1, int *i2, int *flag);
+int search_array(char *old, char *new_char, int *i1, int *i2, int *flag);
 int check_if_ic(char *big);
 int not_ker(char *s, int i);
 int is_comment(char *s);
-void subsk(char *big, char *new, int k, int flag);
+void subsk(char *big, char *new_char, int k, int flag);
 void keep_orig_comments(void);
 void default_comments(void);
 void free_comments(void);
