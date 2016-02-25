@@ -51,11 +51,11 @@ xend     Final x value (xend-x may be positive or negative).
 
 itoler   Switch for atoler and rtoler :
 	   itoler=0 : both atoler and rtoler are scalars, the code keeps
-		      roughly the local error of y[i] below
-		      rtoler*abs(y[i])+atoler.
+			  roughly the local error of y[i] below
+			  rtoler*abs(y[i])+atoler.
 	   itoler=1 : both rtoler and atoler are vectors, the code keeps
-		      the local error of y[i] below
-		      rtoler[i]*abs(y[i])+atoler[i].
+			  the local error of y[i] below
+			  rtoler[i]*abs(y[i])+atoler[i].
 
 solout   A pointer to the output function called during integration.
 	 If iout >= 1, it is called after every successful step. If iout = 0,
@@ -80,7 +80,7 @@ iout     Switch for calling solout :
 	   iout=0 : no call,
 	   iout=1 : solout only used for output,
 	   iout=2 : dense output is performed in solout (in this case nrdens
-		    must be greater than 0).
+			must be greater than 0).
 
 fileout  A pointer to the stream used for messages, if you do not want any
 	 message, just pass NULL.
@@ -223,11 +223,11 @@ xend     Final x value (xend-x may be positive or negative).
 
 itoler   Switch for atoler and rtoler :
 	   itoler=0 : both atoler and rtoler are scalars, the code keeps
-		      roughly the local error of y[i] below
-		      rtoler*abs(y[i])+atoler.
+			  roughly the local error of y[i] below
+			  rtoler*abs(y[i])+atoler.
 	   itoler=1 : both rtoler and atoler are vectors, the code keeps
-		      the local error of y[i] below
-		      rtoler[i]*abs(y[i])+atoler[i].
+			  the local error of y[i] below
+			  rtoler[i]*abs(y[i])+atoler[i].
 
 solout   A pointer to the output function called during integration.
 	 If iout >= 1, it is called after every successful step. If iout = 0,
@@ -252,7 +252,7 @@ iout     Switch for calling solout :
 	   iout=0 : no call,
 	   iout=1 : solout only used for output,
 	   iout=2 : dense output is performed in solout (in this case nrdens
-		    must be greater than 0).
+			must be greater than 0).
 
 fileout  A pointer to the stream used for messages, if you do not want any
 	 message, just pass NULL.
@@ -344,8 +344,6 @@ nfcnRead    Number of function calls.
 
 */
 
-
-#include "my_rhs.h"
 #include <stdio.h>
 #include <limits.h>
 
