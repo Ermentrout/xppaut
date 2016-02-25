@@ -31,6 +31,10 @@
 #include "strutil.h"
 #include "xpplim.h"
 
+
+#define cstringmaj MYSTR1
+#define cstringmin MYSTR2
+
 /* --- Functions --- */
 int IN_INCLUDED_FILE=0;
 char uvar_names[MAXODE][12];
@@ -63,9 +67,6 @@ int NODE,NUPAR,NLINES;
 int PrimeStart;
 int NCON_START,NSYM_START;
 int BVP_NL,BVP_NR,BVP_N;
-
-#define cstringmaj MYSTR1
-#define cstringmin MYSTR2
 
 int ConvertStyle=0;
 FILE *convertf;

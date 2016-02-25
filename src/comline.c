@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "adj2.h"
+#include "form_ode.h"
 #include "ggets.h"
 #include "integrate.h"
 #include "load_eqn.h"

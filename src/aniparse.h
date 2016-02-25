@@ -3,17 +3,11 @@
 
 #include <stdio.h>
 #include <X11/Xlib.h>
+#include "xpplim.h"
 
 /* --- Macros --- */
 #define MAX_GEVENTS 20  /* maximum variables you can change per grabbable */
 #define MAX_ANI_GRAB 50   /* max grabbable objects  */
-
-#ifndef XPP_MAX_NAME
-#define XPP_MAX_NAME 300
-#if (XPP_MAX_NAME > FILENAME_MAX)
-	#define XPP_MAX_NAME FILENAME_MAX
-#endif
-#endif
 
 /* --- Types --- */
 typedef struct {

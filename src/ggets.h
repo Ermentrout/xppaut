@@ -4,7 +4,6 @@
 #include <X11/Xlib.h>
 
 /* --- Macros --- */
-#define MaxIncludeFiles 10
 #define ClickTime 200
 
 /* --- Data --- */

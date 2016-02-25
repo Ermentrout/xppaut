@@ -1,18 +1,17 @@
 #ifndef XPPAUT_COMLINE_H
 #define XPPAUT_COMLINE_H
 
-#include "ggets.h"
-#include "load_eqn.h"
+#include "xpplim.h"
 
 /* --- Types --- */
 typedef struct {
-  char *name;
-  struct SET_NAME * next;
+	char *name;
+	struct SET_NAME * next;
 } SET_NAME;
 
 typedef struct {
-  char name[10];
-  int len;
+	char name[10];
+	int len;
 } VOCAB;
 
 /* --- Data --- */
