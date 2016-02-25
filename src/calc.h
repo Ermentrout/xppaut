@@ -5,9 +5,9 @@
 
 /* --- Types --- */
 typedef struct {
-  Window base,quit,answer;
-  double last_val;
-  int use;
+    Window base,quit,answer;
+    double last_val;
+    int use;
 } MY_CALC;
 
 /* --- Functions --- */
