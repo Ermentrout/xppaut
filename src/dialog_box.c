@@ -23,10 +23,7 @@ Window make_window();
 static int dialog_event_loop(DIALOG *d, int max, int *pos, int *col);
 static void display_dialog(Window w, DIALOG d, int pos, int col);
 
-int get_dialog(wname,name,value,ok,cancel,max)
-char *wname,*name,*value,*ok,*cancel;
-int max;
-{
+int get_dialog(char *wname, char *name, char *value, char *ok, char *cancel, int max) {
 	int lm=strlen(name)*DCURX;
 	int lv=max*DCURX;
 	int pos,colm;
@@ -86,17 +83,13 @@ int max;
 	XDestroySubwindows(display,d.base);
 	XDestroyWindow(display,d.base);
 	XFlush(display);
-	if(status==ALL_DONE||status==DONE_THIS)
+	if(status==ALL_DONE || status==DONE_THIS)
 		strcpy(value,d.input_s);
 
 	return(status);
 }
 
-static int dialog_event_loop(d,max,pos,col)
-DIALOG *d;
-int max;
-int *pos,*col;
-{
+static int dialog_event_loop(DIALOG *d, int max, int *pos, int *col) {
 	int status=-1;
 	int done=0;
 	int ch;
@@ -104,66 +97,61 @@ int *pos,*col;
 
 	XNextEvent(display,&ev);
 
-	switch(ev.type){
-		case ConfigureNotify:
-		case Expose:
-		case MapNotify:
-			do_expose(ev);
-			display_dialog(ev.xany.window,*d,*pos,*col);
-			break;
-		case ButtonPress:
-			if(ev.xbutton.window==d->ok)
-			{
-
-				status=ALL_DONE;
-			}
-			if(ev.xbutton.window==d->cancel)
-			{
-				status=FORGET_ALL;
-			}
-			if(ev.xbutton.window==d->input)
-				XSetInputFocus(display,d->input,RevertToParent,CurrentTime);
-			break;
-
-		case EnterNotify:
-			if(ev.xcrossing.window==d->ok||
-					ev.xcrossing.window==d->cancel	)
-				XSetWindowBorderWidth(display,
-									  ev.xcrossing.window,2);
-			break;
-		case LeaveNotify:
-			if(ev.xcrossing.window==d->ok||
-					ev.xcrossing.window==d->cancel	)
-				XSetWindowBorderWidth(display,
-									  ev.xcrossing.window,1);
-			break;
-
-		case KeyPress:
-			ch=get_key_press(&ev);
-			edit_window(d->input,pos,d->input_s,col,&done,ch);
-			if(done==-1)status=FORGET_ALL;
-			if(done==1||done==2)status=DONE_THIS;
-
-			break;
+	switch(ev.type) {
+	case ConfigureNotify:
+	case Expose:
+	case MapNotify:
+		do_expose(ev);
+		display_dialog(ev.xany.window,*d,*pos,*col);
+		break;
+	case ButtonPress:
+		if(ev.xbutton.window==d->ok) {
+			status=ALL_DONE;
+		}
+		if(ev.xbutton.window==d->cancel) {
+			status=FORGET_ALL;
+		}
+		if(ev.xbutton.window==d->input) {
+			XSetInputFocus(display,d->input,RevertToParent,CurrentTime);
+		}
+		break;
+	case EnterNotify:
+		if(ev.xcrossing.window==d->ok ||
+		   ev.xcrossing.window==d->cancel) {
+			XSetWindowBorderWidth(display, ev.xcrossing.window,2);
+		}
+		break;
+	case LeaveNotify:
+		if(ev.xcrossing.window==d->ok ||
+		   ev.xcrossing.window==d->cancel) {
+			XSetWindowBorderWidth(display, ev.xcrossing.window,1);
+		}
+		break;
+	case KeyPress:
+		ch=get_key_press(&ev);
+		edit_window(d->input,pos,d->input_s,col,&done,ch);
+		if(done==-1) {
+			status=FORGET_ALL;
+		}
+		if(done==1 || done==2) {
+			status=DONE_THIS;
+		}
+		break;
 	}
 	return(status);
 }
 
-static void display_dialog(w,d,pos,col)
-Window w;
-DIALOG d;
-int pos,col;
-{
-	if(w==d.ok)
-	XDrawString(display,w,gc,0,CURY_OFF+1,d.ok_s,strlen(d.ok_s));
-
-	if(w==d.cancel)
-	XDrawString(display,w,gc,0,CURY_OFF+1,d.cancel_s,strlen(d.cancel_s));
-
-	if(w==d.mes)
-	XDrawString(display,w,gc,0,CURY_OFF+1,d.mes_s,strlen(d.mes_s));
-
-	if(w==d.input){
+static void display_dialog(Window w, DIALOG d, int pos, int col) {
+	if(w==d.ok) {
+		XDrawString(display,w,gc,0,CURY_OFF+1,d.ok_s,strlen(d.ok_s));
+	}
+	if(w==d.cancel) {
+		XDrawString(display,w,gc,0,CURY_OFF+1,d.cancel_s,strlen(d.cancel_s));
+	}
+	if(w==d.mes) {
+		XDrawString(display,w,gc,0,CURY_OFF+1,d.mes_s,strlen(d.mes_s));
+	}
+	if(w==d.input) {
 		XDrawString(display,w,gc,0,CURY_OFF,d.input_s,strlen(d.input_s));
 		put_cursor_at(w,col,0);
 		/* showchar('_',DCURX*strlen(d.input_s),0,d.input); */
