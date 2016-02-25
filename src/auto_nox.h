@@ -55,17 +55,6 @@ typedef struct {
 } GRABPT;
 
 
-typedef struct diagram {
-  int package;
-  int ibr,ntot,itp,lab,calc;
-  double norm,*uhi,*ulo,*u0,*ubar,*evr,*evi;
-  double par[20],per,torper;
-  int index,nfpar;
-  int icp1,icp2,icp3,icp4,icp5,flag2;
-  struct diagram *prev;
-  struct diagram *next;
-} DIAGRAM;
-
 typedef struct {
   int plot,var,icp1,icp2,icp3,icp4,icp5;
   double xmin,ymin,xmax,ymax;
@@ -159,7 +148,6 @@ void add_point(double *par, double per, double *uhigh, double *ulow, double *uba
 void get_bif_sym(char *at, int itp);
 void info_header(int flag2, int icp1, int icp2);
 void new_info(int ibr, int pt, char *ty, int lab, double *par, double norm, double u0, double per, int flag2, int icp1, int icp2);
-void traverse_out(DIAGRAM *d, int *ix, int *iy, int dodraw);
 void do_auto_win(void);
 void load_last_plot(int flag);
 void keep_last_plot(int flag);

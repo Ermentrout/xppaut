@@ -2,7 +2,18 @@
 #define XPPAUT_DIAGRAM_H
 
 #include <stdio.h>
-#include "auto_nox.h"
+
+/* --- Types --- */
+typedef struct diagram {
+	int package;
+	int ibr,ntot,itp,lab,calc;
+	double norm,*uhi,*ulo,*u0,*ubar,*evr,*evi;
+	double par[20],per,torper;
+	int index,nfpar;
+	int icp1,icp2,icp3,icp4,icp5,flag2;
+	struct diagram *prev;
+	struct diagram *next;
+} DIAGRAM;
 
 /* --- Data --- */
 extern DIAGRAM *bifd;

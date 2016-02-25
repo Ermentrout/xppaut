@@ -8,6 +8,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "auto_nox.h"
 #include "browse.h"
 #include "diagram.h"
 #include "init_conds.h"
@@ -18,6 +19,7 @@
 #include "mykeydef.h"
 #include "parserslow.h"
 #include "pop_list.h"
+#include "xAuto.h"
 #include "xpplim.h"
 #include "bitmap/auto.bitmap"
 
@@ -230,6 +232,48 @@ void find_point(int ibr, int pt)
 	   }
 	   d=dnew;
 	 }
+}
+
+
+static void traverse_out(DIAGRAM *d, int *ix, int *iy, int dodraw) {
+	double norm,per,*par,par1,par2=0,*evr,*evi;
+	int pt,itp,ibr,lab,icp1,icp2,flag2;
+	double x,y1,y2;
+	char symb[3];
+	if (d==NULL) {
+		return;
+	}
+	norm=d->norm;
+	par=d->par;
+
+	per=d->per;
+	lab=d->lab;
+	itp=d->itp;
+	ibr=d->ibr;
+	icp1=d->icp1;
+	icp2=d->icp2;
+	flag2=d->flag2;
+	pt=d->ntot;
+
+	evr=d->evr;
+	evi=d->evi;
+
+	get_bif_sym(symb,itp);
+	par1=par[icp1];
+	if(icp2<NAutoPar) {
+		par2=par[icp2];
+	}
+	auto_xy_plot(&x,&y1,&y2,par1,par2,per,d->uhi,d->ulo,d->ubar,norm);
+
+	*ix=IXVal(x);
+	*iy=IYVal(y1);
+	if (dodraw==1) {
+		XORCross(*ix,*iy);
+		plot_stab(evr,evi,NODE);
+		new_info(ibr,pt,symb,lab,par,norm,d->u0[Auto.var],per,flag2,icp1,icp2);
+	}
+	if(lab>0  &&  load_all_labeled_orbits>0)
+		load_auto_orbitx(ibr,1,lab,per);
 }
 
 
