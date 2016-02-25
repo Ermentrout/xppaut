@@ -1,5 +1,5 @@
-#ifndef _menudrive_h_
-#define _menudrive_h_
+#ifndef XPPAUT_MENUDRIVE_H
+#define XPPAUT_MENUDRIVE_H
 
 #include <X11/Xlib.h>
 
@@ -270,14 +270,6 @@ void x_vs_t(void);
 void redraw_them_all(void);
 void get_3d_par(void);
 void edit_xpprc();
-void do_tutorial();
+void do_tutorial(void);
 
-
-
-#endif
-
-
-
-
-
-
+#endif /* XPPAUT_MENUDRIVE_H */
