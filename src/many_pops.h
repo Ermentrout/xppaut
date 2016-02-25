@@ -6,20 +6,20 @@
 
 /* --- Types --- */
 typedef struct {
-  float xs,ys,xe,ye;
-  double size;
-  short use;
-  Window w;
-  int type, color;
+	float xs,ys,xe,ye;
+	double size;
+	short use;
+	Window w;
+	int type, color;
 } GROB;
 
 typedef struct {
-  int type,color;
-  int number,start,skip;
-  double size;
+	int type,color;
+	int number,start,skip;
+	double size;
 } MARKINFO;
 
- /* --- Data --- */
+/* --- Data --- */
 extern int ActiveWinList[MAXPOP];
 extern int current_pop;
 extern int num_pops;
