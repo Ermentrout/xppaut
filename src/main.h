@@ -12,18 +12,18 @@
 
 /* --- Data --- */
 extern char anifile[XPP_MAX_NAME];
-extern char batchout[256];
-extern char big_font_name[100];
-extern char PlotFormat[100];
+extern char batchout[XPP_MAX_NAME];
+extern char big_font_name[MAXVEC];
+extern char PlotFormat[MAXVEC];
 extern char SLIDER1VAR[20];
 extern char SLIDER2VAR[20];
 extern char SLIDER3VAR[20];
-extern char small_font_name[100];
+extern char small_font_name[MAXVEC];
 extern char UserBGBitmap[XPP_MAX_NAME];
 extern char UserBlack[8];
 extern char UserDrawWinColor[8];
 extern char UserMainWinColor[8];
-extern char UserOUTFILE[256];
+extern char UserOUTFILE[XPP_MAX_NAME];
 extern char UserWhite[8];
 
 extern double SLIDER1LO;
