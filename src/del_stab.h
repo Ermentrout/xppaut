@@ -1,11 +1,12 @@
-#ifndef _del_stab_h_
-#define _del_stab_h_
+#ifndef XPPAUT_DEL_STAB_H
+#define XPPAUT_DEL_STAB_H
 
+/* --- Types --- */
 typedef struct{
-  double r,i;
-}COMPLEX;
+	double r,i;
+} COMPLEX;
 
-/* del_stab.c */
+/* --- Functions --- */
 void do_delay_sing(double *x, double eps, double err, double big, int maxit, int n, int *ierr, float *stabinfo);
 COMPLEX csum(COMPLEX z, COMPLEX w);
 COMPLEX cdif(COMPLEX z, COMPLEX w);
@@ -24,8 +25,7 @@ void make_z(COMPLEX *z, double *delay, int n, int m, double *coef, COMPLEX lambd
 int find_positive_root(double *coef, double *delay, int n, int m, double rad, double err, double eps, double big, int maxit, double *rr);
 void process_root(double real, double im);
 double get_arg(double *delay, double *coef, int m, int n, COMPLEX lambda);
-int test_sign(double old, double new);
+int test_sign(double old, double new_double);
 int plot_args(double *coef, double *delay, int n, int m, int npts, double almax, double wmax);
 
-
-#endif
+#endif /* XPPAUT_DEL_STAB_H */
