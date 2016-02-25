@@ -4,9 +4,9 @@
 
 /* --- Types --- */
 typedef struct {
-  int index,*form;
-  char *rhs;
-  double value;
+	int index,*form;
+	char *rhs;
+	double value;
 } DERIVED;
 
 /* --- Functions --- */

@@ -20,56 +20,54 @@ int nderived=0;
 double evaluate();
 
 /* clean up derived stuff */
-void free_derived()
-{
+void free_derived(void) {
 	int i;
-	for(i=0;i<nderived;i++){
+	for(i=0;i<nderived;i++) {
 		free(derived[i].form);
 		free(derived[i].rhs);
 	}
 	nderived=0;
 }
 
-/* This compiles all of the formulae
-It is called only once during the session
-*/
-int compile_derived()
-{
+
+/* This compiles all of the formulae. t is called only once during the session
+ */
+int compile_derived(void) {
 	int i,k;
 	int f[256],n;
-	for(i=0;i<nderived;i++){
-		if(add_expr(derived[i].rhs,f,&n)==1){
+	for(i=0;i<nderived;i++) {
+		if(add_expr(derived[i].rhs,f,&n)==1) {
 			plintf(" Bad right-hand side for derived parameters \n");
 			return(1);
 		}
 		derived[i].form=(int *)malloc(sizeof(int)*(n+2));
-		for(k=0;k<n;k++)
+		for(k=0;k<n;k++) {
 			derived[i].form[k]=f[k];
+		}
 	}
 	evaluate_derived();
 	return 0;
 }
 
-/* This evaluates all derived quantities in order of definition
-called before any integration or numerical computation
-and after changing parameters and constants
-*/
-void evaluate_derived()
-{
+
+/* This evaluates all derived quantities in order of definition called before
+ * any integration or numerical computation and after changing parameters
+ * and constants
+ */
+void evaluate_derived(void) {
 	int i;
-	for(i=0;i<nderived;i++){
+	for(i=0;i<nderived;i++) {
 		derived[i].value=evaluate(derived[i].form);
 		constants[derived[i].index]=derived[i].value;
 	}
 }
 
+
 /* this adds a derived quantity  */
-int add_derived(name,rhs)
-char *name,*rhs;
-{
+int add_derived(char *name, char *rhs) {
 	int n=strlen(rhs)+2;
 	int i0;
-	if(nderived>=MAXDERIVED){
+	if(nderived>=MAXDERIVED) {
 		plintf(" Too many derived constants! \n");
 		return(1);
 	}
@@ -84,9 +82,3 @@ char *name,*rhs;
 	nderived++;
 	return(add_con(name,0.0));
 }
-
-
-
-
-
-
