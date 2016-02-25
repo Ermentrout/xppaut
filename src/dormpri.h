@@ -352,77 +352,70 @@ typedef void (*SolTrait)(long nr, double xold, double x, double* y, unsigned n, 
 
 
 extern int dop853
- (unsigned n,      /* dimension of the system <= UINT_MAX-1*/
-  FcnEqDiff fcn,   /* function computing the value of f(x,y) */
-  double x,        /* initial x-value */
-  double* y,       /* initial values for y */
-  double xend,     /* final x-value (xend-x may be positive or negative) */
-  double* rtoler,  /* relative error tolerance */
-  double* atoler,  /* absolute error tolerance */
-  int itoler,      /* switch for rtoler and atoler */
-  SolTrait solout, /* function providing the numerical solution during integration */
-  int iout,        /* switch for calling solout */
-  FILE* fileout,   /* messages stream */
-  double uround,   /* rounding unit */
-  double safe,     /* safety factor */
-  double fac1,     /* parameters for step size selection */
-  double fac2,
-  double beta,     /* for stabilized step size control */
-  double hmax,     /* maximal step size */
-  double h,        /* initial step size */
-  long nmax,       /* maximal number of allowed steps */
-  int meth,        /* switch for the choice of the coefficients */
-  long nstiff,     /* test for stiffness */
-  unsigned nrdens, /* number of components for which dense outpout is required */
-  unsigned* icont, /* indexes of components for which dense output is required, >= nrdens */
-  unsigned licont,  /* declared length of icon */
-  double *work
+(unsigned n,      /* dimension of the system <= UINT_MAX-1*/
+ FcnEqDiff fcn,   /* function computing the value of f(x,y) */
+ double x,        /* initial x-value */
+ double* y,       /* initial values for y */
+ double xend,     /* final x-value (xend-x may be positive or negative) */
+ double* rtoler,  /* relative error tolerance */
+ double* atoler,  /* absolute error tolerance */
+ int itoler,      /* switch for rtoler and atoler */
+ SolTrait solout, /* function providing the numerical solution during integration */
+ int iout,        /* switch for calling solout */
+ FILE* fileout,   /* messages stream */
+ double uround,   /* rounding unit */
+ double safe,     /* safety factor */
+ double fac1,     /* parameters for step size selection */
+ double fac2,
+ double beta,     /* for stabilized step size control */
+ double hmax,     /* maximal step size */
+ double h,        /* initial step size */
+ long nmax,       /* maximal number of allowed steps */
+ int meth,        /* switch for the choice of the coefficients */
+ long nstiff,     /* test for stiffness */
+ unsigned nrdens, /* number of components for which dense outpout is required */
+ unsigned* icont, /* indexes of components for which dense output is required, >= nrdens */
+ unsigned licont,  /* declared length of icon */
+ double *work
  );
 
 extern double contd8
- (unsigned ii,     /* index of desired component */
-  double x         /* approximation at x */
+(unsigned ii,     /* index of desired component */
+ double x         /* approximation at x */
  );
 
-
-
-
 extern int dopri5
- (unsigned n,      /* dimension of the system <= UINT_MAX-1*/
-  FcnEqDiff fcn,   /* function computing the value of f(x,y) */
-  double x,        /* initial x-value */
-  double* y,       /* initial values for y */
-  double xend,     /* final x-value (xend-x may be positive or negative) */
-  double* rtoler,  /* relative error tolerance */
-  double* atoler,  /* absolute error tolerance */
-  int itoler,      /* switch for rtoler and atoler */
-  SolTrait solout, /* function providing the numerical solution during integration */
-  int iout,        /* switch for calling solout */
-  FILE* fileout,   /* messages stream */
-  double uround,   /* rounding unit */
-  double safe,     /* safety factor */
-  double fac1,     /* parameters for step size selection */
-  double fac2,
-  double beta,     /* for stabilized step size control */
-  double hmax,     /* maximal step size */
-  double h,        /* initial step size */
-  long nmax,       /* maximal number of allowed steps */
-  int meth,        /* switch for the choice of the coefficients */
-  long nstiff,     /* test for stiffness */
-  unsigned nrdens, /* number of components for which dense outpout is required */
-  unsigned* icont, /* indexes of components for which dense output is required, >= nrdens */
-  unsigned licont , /* declared length of icon */
-  double *work
+(unsigned n,      /* dimension of the system <= UINT_MAX-1*/
+ FcnEqDiff fcn,   /* function computing the value of f(x,y) */
+ double x,        /* initial x-value */
+ double* y,       /* initial values for y */
+ double xend,     /* final x-value (xend-x may be positive or negative) */
+ double* rtoler,  /* relative error tolerance */
+ double* atoler,  /* absolute error tolerance */
+ int itoler,      /* switch for rtoler and atoler */
+ SolTrait solout, /* function providing the numerical solution during integration */
+ int iout,        /* switch for calling solout */
+ FILE* fileout,   /* messages stream */
+ double uround,   /* rounding unit */
+ double safe,     /* safety factor */
+ double fac1,     /* parameters for step size selection */
+ double fac2,
+ double beta,     /* for stabilized step size control */
+ double hmax,     /* maximal step size */
+ double h,        /* initial step size */
+ long nmax,       /* maximal number of allowed steps */
+ int meth,        /* switch for the choice of the coefficients */
+ long nstiff,     /* test for stiffness */
+ unsigned nrdens, /* number of components for which dense outpout is required */
+ unsigned* icont, /* indexes of components for which dense output is required, >= nrdens */
+ unsigned licont , /* declared length of icon */
+ double *work
  );
 
 extern double contd5
- (unsigned ii,     /* index of desired component */
-  double x         /* approximation at x */
+(unsigned ii,     /* index of desired component */
+ double x         /* approximation at x */
  );
-
-
-
-
 
 void dprhs(unsigned n, double t, double *y, double *f);
 void dp_err(int k);
@@ -439,27 +432,9 @@ double contd8(unsigned ii, double x);
 int dopri5(unsigned n, FcnEqDiff fcn, double x, double *y, double xend, double *rtoler, double *atoler, int itoler, SolTrait solout, int iout, FILE *fileout, double uround, double safe, double fac1, double fac2, double beta, double hmax, double h, long nmax, int meth, long nstiff, unsigned nrdens, unsigned *icont, unsigned licont, double *work);
 double contd5(unsigned ii, double x);
 
-
-
-
 extern long nfcnRead (void);   /* encapsulation of statistical data */
 extern long nstepRead (void);
 extern long naccptRead (void);
 extern long nrejctRead (void);
 extern double hRead (void);
 extern double xRead (void);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
