@@ -14,30 +14,30 @@
 
 /* --- Types --- */
 typedef struct {
- int n,n0,here;
- Window base,cancel,ok,up,dn,pgup,pgdn,file,wild,w[FILESELNWIN],dir,home,start;
- Window fw,ww;
- char wildtxt[256],filetxt[256];
- int nwin,minwid,minhgt;
- int off,pos,hot;
- char title[256];
+	int n,n0,here;
+	Window base,cancel,ok,up,dn,pgup,pgdn,file,wild,w[FILESELNWIN],dir,home,start;
+	Window fw,ww;
+	char wildtxt[256],filetxt[256];
+	int nwin,minwid,minhgt;
+	int off,pos,hot;
+	char title[256];
 } FILESEL;
 
 typedef struct {
- int pos,n,n0,npos;
- int ihot,twid;
- int max;
- char **v;
- Window side,up,down,text;
+	int pos,n,n0,npos;
+	int ihot,twid;
+	int max;
+	char **v;
+	Window side,up,down,text;
 } SCROLL_LIST;
 
 typedef struct {
-  int use,pos,l;
-  char parname[20];
-  double lo,hi,val;
-  int hgt;
-  int type,index;
-  Window left,right,top,main,slide,go;
+	int use,pos,l;
+	char parname[20];
+	double lo,hi,val;
+	int hgt;
+	int type,index;
+	Window left,right,top,main,slide,go;
 } PAR_SLIDER;
 
 typedef struct {
@@ -52,20 +52,20 @@ typedef struct {
 } BoxListold;
 
 typedef struct {
-		int use,type,xuse;
-		int n,n0;
-		int nwin,minwid,minhgt;
-		Window up,dn;
-		Window pgup,pgdn;
-		Window base;
-		Window cancel,ok,def,go,close;
-		Window xvt,pp,arr;
-		Window *w;
-		Window *we;
-		Window *ck;
-		char **value,*iname,*wname;
-		int *isck;
-		int mc,*off,*pos;
+	int use,type,xuse;
+	int n,n0;
+	int nwin,minwid,minhgt;
+	Window up,dn;
+	Window pgup,pgdn;
+	Window base;
+	Window cancel,ok,def,go,close;
+	Window xvt,pp,arr;
+	Window *w;
+	Window *we;
+	Window *ck;
+	char **value,*iname,*wname;
+	int *isck;
+	int mc,*off,*pos;
 } BoxList;
 
 /* --- Data --- */
