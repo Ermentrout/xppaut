@@ -7,13 +7,13 @@
 
 /* --- Types --- */
 typedef struct {
-  int  **command;
-  char **trans;
-  double *fixed;
-  int nstates;
-  double *states;
-  int type;   /* 0 is default and state dependent.  1 is fixed for all time  */
-  char name[12];
+	int  **command;
+	char **trans;
+	double *fixed;
+	int nstates;
+	double *states;
+	int type;   /* 0 is default and state dependent.  1 is fixed for all time  */
+	char name[12];
 } MARKOV;
 
 /* --- Data --- */

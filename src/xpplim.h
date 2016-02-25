@@ -21,9 +21,8 @@
 #define MAX_INTERN_SET 500
 #define MAX_LEN_SBOX 25
 #define MaxIncludeFiles 10
+#define MAX_STRING_LENGTH 256
 
-
-/* --- Macros --- */
 /*
 The acutual max filename length is determined by the
 FILENAME_MAX (see <stdio.h>), and usually 4096 -- but
@@ -33,7 +32,6 @@ restricitive for lengths of filenames. You could also
 set this define in the Makefile or at compile time to
 override the below definition.
 */
-
 #if FILENAME_MAX < 300
 # define XPP_MAX_NAME 300
 #else
