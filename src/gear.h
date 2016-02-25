@@ -35,7 +35,7 @@ double sgnum(double x, double y);
 double Max(double x, double y);
 double Min(double x, double y);
 void sgefa(double *a, int lda, int n, int *ipvt, int *info);
-void  sgesl(double *a, int lda, int n, int *ipvt, double *b, int job);
+void sgesl(double *a, int lda, int n, int *ipvt, double *b, int job);
 void saxpy(int n, double sa, double *sx, int incx, double *sy, int incy);
 int isamax(int n, double *sx, int incx);
 double sdot(int n, double *sx, int incx, double *sy, int incy);
