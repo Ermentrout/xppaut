@@ -13,24 +13,28 @@
 #include "struct.h"
 
 /* --- Functions --- */
-void display_choice(w,p)
-Window w;
-CHOICE_BOX p;
-{
+void display_choice(Window w, CHOICE_BOX p) {
 	int i;
 	int n=p.n;
 	XSetFillStyle(display,gc,FillSolid);
 	XSetForeground(display,gc,MyForeColor);
 
-	if(w==p.ok)XDrawString(display,w,gc,0,CURY_OFF,"Ok",2);
-	if(w==p.cancel)
-	XDrawString(display,w,gc,0,CURY_OFF,"Cancel",6);
-	for(i=0;i<n;i++)
-	{
-		if(w!=p.cw[i])continue;
+	if(w==p.ok) {
+		XDrawString(display,w,gc,0,CURY_OFF,"Ok",2);
+	}
+	if(w==p.cancel) {
+		XDrawString(display,w,gc,0,CURY_OFF,"Cancel",6);
+	}
+	for(i=0;i<n;i++) {
+		if(w!=p.cw[i]) {
+			continue;
+		}
 		XDrawString(display,w,gc,0,CURY_OFF,p.name[i],strlen(p.name[i]));
-		if(p.flag[i]==1)set_fore();
-		else set_back();
+		if(p.flag[i]==1) {
+			set_fore();
+		} else {
+			set_back();
+		}
 		XDrawString(display,w,gc,(p.mc+1)*DCURX,CURY_OFF,"X",1);
 	}
 	set_fore();
