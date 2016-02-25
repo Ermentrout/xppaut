@@ -21,17 +21,17 @@
 
 /* --- Types --- */
 typedef struct {
-  char angle[20];
-  char yes[3];
-  double start;
-  double incr;
-  int nclip;
+	char angle[20];
+	char yes[3];
+	double start;
+	double incr;
+	int nclip;
 } MOV3D;
 
 typedef struct {
-  float *x[MAXBIFCRV],*y[MAXBIFCRV];
-  int color[MAXBIFCRV],npts[MAXBIFCRV],nbifcrv;
-  Window w;
+	float *x[MAXBIFCRV],*y[MAXBIFCRV];
+	int color[MAXBIFCRV],npts[MAXBIFCRV],nbifcrv;
+	Window w;
 } BD;
 
 /* --- Data --- */
@@ -49,7 +49,6 @@ void axes_opts(void);
 void get_3d_view(int ind);
 void check_val(double *x1, double *x2, double *xb, double *xd);
 void get_max(int index, double *vmin, double *vmax);
-void pretty(double *x1, double *x2);
 void corner_cube(double *xlo, double *xhi, double *ylo, double *yhi);
 void fit_window(void);
 void check_windows(void);
