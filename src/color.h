@@ -25,4 +25,5 @@ void get_ps_color(int i, float *r, float *g, float *b);
 void get_svg_color(int i,int *r,int *g,int *b);
 void MakeColormap(void);
 int ColorMap(int i);
+
 #endif /* XPPAUT_COLOR_H */
