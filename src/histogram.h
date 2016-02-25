@@ -6,10 +6,10 @@
 
 /* --- Types --- */
 typedef struct {
-  int nbins,nbins2,type,col,col2,fftc;
-  double xlo,xhi;
-  double ylo,yhi;
-  char cond[80];
+	int nbins,nbins2,type,col,col2,fftc;
+	double xlo,xhi;
+	double ylo,yhi;
+	char cond[80];
 } HIST_INFO;
 
 /* --- Data --- */
