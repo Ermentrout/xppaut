@@ -39,12 +39,15 @@ DLFUN dlf;
 
 #include <dlfcn.h>
 
+#define MAXW 50
+
+int dll_loaded=0;
+
 void *dlhandle;
 double (*fun)();
-int dll_loaded=0;
-void auto_load_dll()
-{
-	if(dll_flag==3){
+
+void auto_load_dll(void) {
+	if(dll_flag==3) {
 		get_directory(cur_dir);
 		plintf("DLL lib %s/%s with function %s \n",cur_dir,dll_lib,dll_fun);
 		sprintf(dlf.libfile,"%s",dll_lib);
@@ -54,38 +57,40 @@ void auto_load_dll()
 	}
 }
 
-void load_new_dll()
-{
+
+void load_new_dll(void) {
 	int status;
-	if(dlf.loaded!=0&&dlhandle!=NULL)
+	if(dlf.loaded!=0 && dlhandle!=NULL) {
 		dlclose(dlhandle);
+	}
 	status=file_selector("Library:",dlf.libfile,"*.so");
-	if(status==0)return;
+	if(status==0) {
+		return;
+	}
 	sprintf(dlf.libname,"%s/%s",cur_dir,dlf.libfile);
 	new_string("Function name:",dlf.fun);
 	dlf.loaded=0;
 }
 
-#define MAXW 50
 
 void get_import_values(int n, double *ydot, char *soname, char *sofun,
 					   int ivar, double *wgt[MAXW],
-					   double *var, double *con)
-{
+					   double *var, double *con) {
 	int i;
 	char sofullname[256];
 	char *error;
-	if(dll_loaded==1){
+	if(dll_loaded==1) {
 		fun(n,ivar,con,var,wgt,ydot);
 		return;
 	}
-	if(dll_loaded==-1)
+	if(dll_loaded==-1) {
 		return;
+	}
 	printf("soname = %s  sofun = %s \n",soname,sofun);
 	get_directory(cur_dir);
 	sprintf(sofullname,"%s/%s",cur_dir,soname);
 	dlhandle=dlopen (sofullname, RTLD_LAZY);
-	if(!dlhandle){
+	if(!dlhandle) {
 		plintf(" Cant find the library %s\n",soname);
 		dll_loaded=-1;
 		return;
@@ -93,22 +98,23 @@ void get_import_values(int n, double *ydot, char *soname, char *sofun,
 	dlerror();
 	*(void **) (&fun)=dlsym(dlhandle,sofun);
 	error=dlerror();
-	if(error!= NULL){
+	if(error!= NULL) {
 		plintf("Problem with function.. %s\n",sofun);
 		dlf.loaded=-1;
 		return;
 	}
 	dll_loaded=1;
 	fun(n,ivar,con,var,wgt,ydot);
-
 }
-int my_fun(double *in, double *out, int nin,int nout,double *v,double *c)
-{
+
+int my_fun(double *in, double *out, int nin,int nout,double *v,double *c) {
 	char *error;
-	if(dlf.loaded==-1)return(0);
-	if(dlf.loaded==0){
+	if(dlf.loaded==-1) {
+		return 0;
+	}
+	if(dlf.loaded==0) {
 		dlhandle=dlopen (dlf.libname, RTLD_LAZY);
-		if(!dlhandle){
+		if(!dlhandle) {
 			plintf(" Cant find the library \n");
 			dlf.loaded=-1;
 			return 0;
@@ -126,7 +132,7 @@ int my_fun(double *in, double *out, int nin,int nout,double *v,double *c)
 	 for detailed explanation...*/
 		*(void **) (&fun)=dlsym(dlhandle,dlf.fun);
 		error=dlerror();
-		if(error!= NULL){
+		if(error!= NULL) {
 			plintf("Problem with function..\n");
 			dlf.loaded=-1;
 			return 0;
@@ -163,28 +169,30 @@ void auto_load_dll()
 }
 #endif
 
-void do_in_out()
-{
+void do_in_out(void) {
 	int i;
-	if(in_out.nin==0||in_out.nout==0)return;
-	for(i=0;i<in_out.nin;i++){
-		if(in_out.intype[i]==PAR)
+	if(in_out.nin==0 || in_out.nout==0) {
+		return;
+	}
+	for(i=0;i<in_out.nin;i++) {
+		if(in_out.intype[i]==PAR) {
 			in_out.vin[i]=constants[in_out.in[i]];
-		else
+		} else {
 			in_out.vin[i]=variables[in_out.in[i]];
+		}
 	}
 	my_fun(in_out.vin,in_out.vout,in_out.nin,in_out.nout,variables,constants);
-	for(i=0;i<in_out.nout;i++){
-		if(in_out.outtype[i]==PAR)
+	for(i=0;i<in_out.nout;i++) {
+		if(in_out.outtype[i]==PAR) {
 			constants[in_out.out[i]]=in_out.vout[i];
-		else
+		} else {
 			variables[in_out.out[i]]=in_out.vout[i];
-
+		}
 	}
 }
 
-void add_export_list(char *in,char *out)
-{
+
+void add_export_list(char *in,char *out) {
 	int l1=strlen(in);
 	int l2=strlen(out);
 	int i;
@@ -203,46 +211,52 @@ void add_export_list(char *in,char *out)
 	in_out.vout=(double *)malloc((i+1)*sizeof(double));
 	in_out.nout=i;
 	/* plintf(" in %d out %d \n",in_out.nin,in_out.nout); */
-
 }
 
-void check_inout()
-{
+
+void check_inout(void) {
 	int i;
-	for(i=0;i<in_out.nin;i++)
+	for(i=0;i<in_out.nin;i++) {
 		plintf(" type=%d index=%d \n",in_out.intype[i],in_out.in[i]);
-	for(i=0;i<in_out.nout;i++)
+	}
+	for(i=0;i<in_out.nout;i++) {
 		plintf(" type=%d index=%d \n",in_out.outtype[i],in_out.out[i]);
+	}
 }
-int get_export_count(char *s)
-{
+
+
+int get_export_count(char *s) {
 	int i=0;
 	int j;
 	int l=strlen(s);
-	for(j=0;j<l;j++)
-		if(s[j]==',')i++;
+	for(j=0;j<l;j++) {
+		if(s[j]==',') {
+			i++;
+		}
+	}
 	i++;
 	return(i);
 }
 
-void do_export_list()
-{
-	if(in_out.nin==0||in_out.nout==0)return;
+
+void do_export_list(void) {
+	if(in_out.nin==0 || in_out.nout==0) {
+		return;
+	}
 	parse_inout(in_out.lin,0);
 	parse_inout(in_out.lout,1);
 	/* check_inout(); */
 }
 
-void parse_inout(char *l,int flag)
-{
+
+void parse_inout(char *l,int flag) {
 	int i=0,j=0;
 	int k=0,index;
-	char new[20],c;
+	char new_char[20],c;
 	int done=1;
-	while(done)
-	{
+	while(done)	{
 		c=l[i];
-		switch(c){
+		switch(c) {
 		case '{':
 			i++;
 			break;
@@ -252,39 +266,30 @@ void parse_inout(char *l,int flag)
 		case ',':
 		case '}':
 			i++;
-			new[j]=0;
-			index=get_param_index(new);
-			if(index<0) /* not a parameter */
-			{
-				index=get_var_index(new);
-				if(index<0)
-				{
-					printf("Cant export %s - non existent!\n",new);
+			new_char[j]=0;
+			index=get_param_index(new_char);
+			/* not a parameter */
+			if(index<0) {
+				index=get_var_index(new_char);
+				if(index<0)	{
+					printf("Cant export %s - non existent!\n",new_char);
 					exit(0);
-				}
-				else /* it is a variable */
-				{
-					if(flag==0){
+				} else {/* it is a variable */
+					if(flag==0) {
 						in_out.in[k]=index;
 						in_out.intype[k]=VAR;
-					}
-					else {
+					} else {
 						in_out.out[k]=index;
 						in_out.outtype[k]=VAR;
 					}
 					/*  plintf(" variable %s =%d k=%d \n",new,index,k); */
 					k++;
 				}
-			} /* it is a parameter */
-			else
-			{
-				if(flag==0)
-				{
+			} else { /* it is a parameter */
+				if(flag==0)	{
 					in_out.in[k]=index;
 					in_out.intype[k]=PAR;
-				}
-				else
-				{
+				} else {
 					in_out.out[k]=index;
 					in_out.outtype[k]=PAR;
 				}
@@ -292,25 +297,19 @@ void parse_inout(char *l,int flag)
 				k++;
 
 			}
-			if(c=='}')
+			if(c=='}') {
 				done=0;
+			}
 			j=0;
 			break;
 
 		default:
-			new[j]=c;
+			new_char[j]=c;
 			j++;
 			i++;
 		}
-		if(i>strlen(l))
+		if(i>strlen(l)) {
 			done=0;
+		}
 	}
 }
-
-
-
-
-
-
-
-

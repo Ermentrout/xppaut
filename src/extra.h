@@ -3,19 +3,19 @@
 
 /* --- Types --- */
 typedef struct {
-  char libname[1024];
-  char libfile[256];
-  char fun[256];
-  int loaded;
+	char libname[1024];
+	char libfile[256];
+	char fun[256];
+	int loaded;
 } DLFUN;
 
 typedef struct
 {
-  char *lin,*lout;
-  int *in,*intype;
-  int *out,*outtype;
-  int nin,nout;
-  double *vin,*vout;
+	char *lin,*lout;
+	int *in,*intype;
+	int *out,*outtype;
+	int nin,nout;
+	double *vin,*vout;
 } IN_OUT;
 
 /* --- Data --- */
