@@ -8,22 +8,22 @@
 
 void strupr(char *s)
 {
-  int i=0;
-  while(s[i])
+    int i=0;
+    while(s[i])
     {
-      if(islower(s[i]))
-        s[i]-=32;
-      i++;
+        if(islower(s[i]))
+            s[i]-=32;
+        i++;
     }
 }
 
 void strlwr(char *s)
 {
-  int i=0;
-  while(s[i])
+    int i=0;
+    while(s[i])
     {
-      if(isupper(s[i]))
-        s[i]+=32;
-      i++;
+        if(isupper(s[i]))
+            s[i]+=32;
+        i++;
     }
 }
