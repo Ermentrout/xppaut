@@ -25,14 +25,10 @@ int DOING_SVG_COLOR=0;
 int DO_MARKER=0;
 
 /* --- Functions --- */
-int svg_init(char *filename, int color)
-{
+int svg_init(char *filename, int color) {
 	FILE *fp;
-
 	init_svg();
-	char css[256];
-
-
+	char css[MAX_STRING_LENGTH];
 	LastPSX=-10000;
 	LastPSY=-10000;
 
@@ -68,8 +64,6 @@ int svg_init(char *filename, int color)
 	fprintf(svgfile,"      <style type=\"text/css\">\n");
 	fprintf(svgfile,"           <![CDATA[\n");
 	fprintf(svgfile,"      \n");
-
-
 
 	fprintf(svgfile,"                 circle.xpppointP {\n");
 	fprintf(svgfile,"                    stroke-width: 1.0;\n");
@@ -230,78 +224,64 @@ int svg_init(char *filename, int color)
 
 	sprintf(css,"%s/xppaut-stylesheet.css",getenv("HOME"));
 	fp=fopen(css,"r");
-	if(fp!=NULL)
-	{
+	if(fp!=NULL) {
 		plintf("Styling svg image according to %s\n",css);
-		char bob[256];
-		while(!feof(fp))
-		{
+		char bob[MAX_STRING_LENGTH];
+		while(!feof(fp)) {
 			bob[0]='\0';
 			fgets(bob,255,fp);
 			fprintf(svgfile,"%s",bob);
-
 		}
-
 		fclose(fp);
 	}
-
-
 	fprintf(svgfile,"           ]]>\n");
 	fprintf(svgfile,"      </style>\n\n");
-
 	return(1);
 }
 
 
-void svg_write(str)
-char *str;
-{
+void svg_write(char *str) {
 	fprintf(svgfile,"%s\n",str);
 }
 
-void svg_stroke(void)
-{
 
+void svg_stroke(void) {
 }
 
-void svg_do_color(int color)
-{
-	int r,g,b;
 
-	if(PltFmtFlag==SCRNFMT)
+void svg_do_color(int color) {
+	int r,g,b;
+	if(PltFmtFlag==SCRNFMT	||
+	   PltFmtFlag==PSFMT	||
+	   PSColorFlag==0) {
 		return;
-	if(PltFmtFlag==PSFMT)
-		return;
-	if(PSColorFlag==0)
-		return;
+	}
 	get_svg_color(color,&r,&g,&b);
 	cur_RGB[0]=r;cur_RGB[1]=g;cur_RGB[2]=b;
-
 	DOING_SVG_COLOR=1;
 }
 
-void svg_setcolor(int color)
-{
 
+void svg_setcolor(int color) {
 }
 
-void svg_end(void)
-{
- svg_write("</svg>");
- fclose(svgfile);
- PltFmtFlag=SCRNFMT;
- DOING_SVG_COLOR=0;
- if(Xup)
-	 init_x11();
+
+void svg_end(void) {
+	svg_write("</svg>");
+	fclose(svgfile);
+	PltFmtFlag=SCRNFMT;
+	DOING_SVG_COLOR=0;
+	if(Xup) {
+		init_x11();
+	}
 }
 
-void svg_bead(int x, int y)
-{
+
+void svg_bead(int x, int y) {
 	DO_MARKER=1;
 }
 
-void svg_frect(int x, int y, int w, int h)
-{
+void svg_frect(int x, int y, int w, int h) {
 	double gray = 0;
 	if (DOING_SVG_COLOR) {
 		fprintf(svgfile,"      <rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"stroke:rgb(%d,%d,%d);fill:rgb(%d,%d,%d);\"/>",x,y,w,h,cur_RGB[0],cur_RGB[1],cur_RGB[2],cur_RGB[0],cur_RGB[1],cur_RGB[2]);
@@ -311,15 +291,13 @@ void svg_frect(int x, int y, int w, int h)
 	}
 }
 
-void svg_last_pt_off(void)
-{
-  LastPtLine=0;
+
+void svg_last_pt_off(void) {
+	LastPtLine=0;
 }
 
 
-
-void svg_line(int xp1, int yp1, int xp2, int yp2)
-{
+void svg_line(int xp1, int yp1, int xp2, int yp2){
 	if (DOING_SVG_COLOR) {
 		if (DOING_AXES)	{
 			if (DOING_BOX_AXES)	{
@@ -363,38 +341,24 @@ void svg_line(int xp1, int yp1, int xp2, int yp2)
 			}
 		}
 	}
-
 	LastPSX=xp2;
 	LastPSY=yp2;
-
 	DOING_SVG_COLOR=0;
 	DO_MARKER=0;
 }
 
 
-void chk_svg_lines(void)
-{
-  /*PSLines++;
-  if(PSLines>=MAXPSLINE){
-	fprintf(psfile,"currentpoint stroke moveto\n");
-	PSLines=0;
-  } */
+void chk_svg_lines(void) {
 }
 
-void svg_linetype(int linetype)
-{
+
+void svg_linetype(int linetype) {
 	char *line = "ba0123456789c";
-
 	SVGLINETYPE=line[(linetype%11)+2];
-
 	PSLines=0;
-	   /* LastPSX=-100000000;
-		LastPSY=-100000000;
-	*/
 }
 
-void svg_point(int x, int y)
-{
+void svg_point(int x, int y) {
 	char svgcol[8];
 	char svgfill[8];
 
@@ -405,12 +369,12 @@ void svg_point(int x, int y)
 	char *point="PDABCTSKF";
 	number %= POINT_TYPES;
 
-	if(number < -1)
+	if(number < -1) {
 		number = -1;
-
-	if(PointRadius>0)
+	}
+	if(PointRadius>0) {
 		number=7;
-
+	}
 	if (number==7)  {
 		sprintf(svgcol,"00FF00");sprintf(svgfill,"#00FF00");
 	} else if (number==6)  {
@@ -418,41 +382,30 @@ void svg_point(int x, int y)
 	} else {
 		sprintf(svgcol,"000000");sprintf(svgfill,"#000000");
 	}
-
 	if (DOING_SVG_COLOR)  {
 		fprintf(svgfile,"      <use xlink:href = \"#xpppoint%c\" x=\"%d\" y=\"%d\" style=\"stroke:rgb(%d,%d,%d); fill:rgb(%d,%d,%d)\"/>\n",point[number+1],x,y,cur_RGB[0],cur_RGB[1],cur_RGB[2],cur_RGB[0],cur_RGB[1],cur_RGB[2]);
 	} else  {
 		fprintf(svgfile,"      <use xlink:href = \"#xpppoint%c\" x=\"%d\" y=\"%d\" style=\"stroke:#%s; fill:%s\"/>\n",point[number+1],x,y,svgcol,svgfill);
 	}
-
 	PSLines=0;
 	LastPtLine=0;
 	DOING_SVG_COLOR=0;
 }
 
 
-void svg_fnt(int cf, int scale)
-{
-
+void svg_fnt(int cf, int scale) {
 }
 
-void svg_show(char *str, int type)
-{
-
+void svg_show(char *str, int type) {
 }
 
-void svg_abs(int x, int y)
-{
-
+void svg_abs(int x, int y) {
 }
 
-void svg_rel(int x, int y)
-{
-
+void svg_rel(int x, int y) {
 }
 
-void special_put_text_svg(int x, int y, char *str, int size)
-{
+void special_put_text_svg(int x, int y, char *str, int size) {
 	char anchor[7];
 
 	switch(TextJustify) {
@@ -469,21 +422,16 @@ void special_put_text_svg(int x, int y, char *str, int size)
 		sprintf(anchor,"start");
 		break;
 	}
-
 	fprintf(svgfile,"\n      <text class=\"xpptext%d\" text-anchor=\"%s\" x=\"%d\"  y=\"%d\"\n",size,anchor,x,y);
-
 	fprintf(svgfile,"      >%s</text>\n",str);
 }
 
-void fancy_svg_text(int x, int y, char *str, int size, int font)
-{
 
+void fancy_svg_text(int x, int y, char *str, int size, int font) {
 }
 
-void svg_text(int x, int y, char *str)
-{
+void svg_text(int x, int y, char *str) {
 	char anchor[7];
-
 	switch(TextJustify) {
 	case TJ_LEFT:
 		sprintf(anchor,"start");
@@ -498,12 +446,10 @@ void svg_text(int x, int y, char *str)
 		sprintf(anchor,"start");
 		break;
 	}
-
 	if (DOING_AXES)	{
 		fprintf(svgfile,"\n      <text class=\"xppaxestext\" text-anchor=\"%s\" x=\"%d\"  y=\"%d\"\n",anchor,x,y);
 	} else {
 		fprintf(svgfile,"\n      <text class=\"xpptext\" text-anchor=\"%s\" x=\"%d\"  y=\"%d\"\n",anchor,x,y);
 	}
-
 	fprintf(svgfile,"      >%s</text>\n",str);
 }
