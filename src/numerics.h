@@ -15,10 +15,10 @@
 
 /* --- Types --- */
 typedef struct {
-  double tmod;
-  int maxvar,sos,type,sign;
-  char section[256];
-  int formula[256];
+	double tmod;
+	int maxvar,sos,type,sign;
+	char section[256];
+	int formula[256];
 } POINCARE_MAP;
 
 /* --- Data --- */
