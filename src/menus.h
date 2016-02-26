@@ -13,14 +13,14 @@
 
 /* --- Types --- */
 typedef struct {
-  Window base;
-  Window title;
-  Window w[25];
-  char key[25];
-  char **names;
-  char **hints;
-  int n;
-  int visible;
+	Window base;
+	Window title;
+	Window w[25];
+	char key[25];
+	char **names;
+	char **hints;
+	int n;
+	int visible;
 } MENUDEF;
 
 /* --- Data --- */
