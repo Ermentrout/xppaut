@@ -26,12 +26,12 @@ typedef struct {  /* tasks have the form {name1=formula1;name2=formula2;...} */
 }GRAB_TASK;
 
 typedef struct {
-  double x0,y0;
-  double x,y;
-  double ox,oy;
-  double t1,t2,tstart;
-  double vx,vy;
-  double vax,vay;
+	double x0,y0;
+	double x,y;
+	double ox,oy;
+	double t1,t2,tstart;
+	double vx,vy;
+	double vax,vay;
 } ANI_MOTION_INFO;
 
 typedef struct {
