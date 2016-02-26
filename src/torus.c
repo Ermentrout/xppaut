@@ -18,18 +18,19 @@
 
 Torbox torbox;
 
-void do_torus_com(int c)
-{
+void do_torus_com(int c) {
  int i;
  TORUS=0;
- if(c==0||c==2){
+ if(c==0||c==2) {
    new_float("Period :",&TOR_PERIOD);
-   if(TOR_PERIOD<=0.0){
+   if(TOR_PERIOD<=0.0) {
 	 err_msg("Choose positive period");
 	 return;
    }
-   if(c==0){
-	 for(i=0;i<MAXODE;i++)itor[i]=1;
+   if(c==0) {
+     for(i=0;i<MAXODE;i++) {
+         itor[i]=1;
+     }
 	 TORUS=1;
 	 return;
    }
@@ -37,14 +38,14 @@ void do_torus_com(int c)
    choose_torus();
    return;
  }
- for(i=0;i<MAXODE;i++)itor[i]=0;
+ for(i=0;i<MAXODE;i++) {
+     itor[i]=0;
+ }
  TORUS=0;
 }
 
 
-
-
-void draw_tor_var(i)
+void draw_tor_var(int i)
 int i;
 {
  char strng[15];
@@ -61,16 +62,16 @@ Window win;
  int i;
 
 
- if(win==torbox.cancel){
+ if(win==torbox.cancel) {
    XDrawString(display,win,small_gc,5,CURY_OFFs,"Cancel",6);
    return;
  }
- if(win==torbox.done){
+ if(win==torbox.done) {
    XDrawString(display,win,small_gc,5,CURY_OFFs,"Done",4);
    return;
  }
 
-for(i=0;i<NEQ;i++){
+for(i=0;i<NEQ;i++) {
   if(win==torbox.w[i])
   draw_tor_var(i);
 }
@@ -130,7 +131,7 @@ XStringListToTextProperty(&title,1,&winname);
  make_icon((char*)info_bits,info_width,info_height,base);
 
  XSetWMProperties(display,base,&winname,NULL,NULL,0,&size_hints,NULL,&class_hints);
- for(i=0;i<NEQ;i++){
+ for(i=0;i<NEQ;i++) {
    i1=i/nv;
    j1=i%nv;
    xpos=xstart+18*DCURXs*i1;
@@ -157,10 +158,10 @@ void do_torus_events()
  int i;
  int oldit[MAXODE];
  for(i=0;i<NEQ;i++)oldit[i]=itor[i];
- while(!done){
+ while(!done) {
 
   XNextEvent(display,&ev);
- switch(ev.type){
+ switch(ev.type) {
 
 	case Expose:
 
@@ -169,11 +170,11 @@ void do_torus_events()
 		break;
 
 	case ButtonPress:
-		if(ev.xbutton.window==torbox.done){status=1;done=1;break;}
-		if(ev.xbutton.window==torbox.cancel){status=-1;done=1;break;}
+        if(ev.xbutton.window==torbox.done) {status=1;done=1;break;}
+        if(ev.xbutton.window==torbox.cancel) {status=-1;done=1;break;}
 			for(i=0;i<NEQ;i++)
 		{
-			if(ev.xbutton.window==torbox.w[i]){
+            if(ev.xbutton.window==torbox.w[i]) {
 				itor[i]=1-itor[i];
 			draw_tor_var(i);
 			break;
@@ -195,7 +196,7 @@ void do_torus_events()
 		  }
 }
 
- if(status==-1){
+ if(status==-1) {
    for(i=0;i<NEQ;i++)itor[i]=oldit[i];
    TORUS=0;
  }
