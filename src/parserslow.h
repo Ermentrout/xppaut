@@ -19,9 +19,9 @@
 
 /* --- Types --- */
 typedef struct {
-  double k_n1,k_n,sum,betnn,mu,*al,*cnv;
-  int *formula,flag,*kerform;
-  char name[20],*expr,*kerexpr;
+	double k_n1,k_n,sum,betnn,mu,*al,*cnv;
+	int *formula,flag,*kerform;
+	char name[20],*expr,*kerexpr;
 } KERNEL;
 
 typedef struct {
@@ -33,8 +33,8 @@ typedef struct {
 } SYMBOL;
 
 typedef struct {
-  int narg;
-  char args[MAXARG][11];
+	int narg;
+	char args[MAXARG][11];
 } UFUN_ARG;
 
 /* --- Data --- */
