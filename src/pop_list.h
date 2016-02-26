@@ -22,61 +22,61 @@
 #define SB_METHOD 6
 
 #define EV_MASK    (ButtonPressMask 	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask)
+	KeyPressMask		|\
+	ExposureMask		|\
+	StructureNotifyMask)
 
 #define BUT_MASK   (ButtonPressMask 	|\
-					KeyPressMask		|\
-					ExposureMask		|\
-					StructureNotifyMask	|\
-					EnterWindowMask		|\
-					LeaveWindowMask)
+	KeyPressMask		|\
+	ExposureMask		|\
+	StructureNotifyMask	|\
+	EnterWindowMask		|\
+	LeaveWindowMask)
 
 /* --- Types --- */
 /*  This is a string box widget which handles a list of
 	editable strings
  */
 typedef struct {
-		Window base,ok,cancel;
-		Window win[MAX_N_SBOX];
-		char name[MAX_N_SBOX][MAX_LEN_SBOX],
-			 value[MAX_N_SBOX][MAX_LEN_SBOX];
-		int n,hot;
-		int hgt,wid;
-		int hh[MAX_N_SBOX];
+	Window base,ok,cancel;
+	Window win[MAX_N_SBOX];
+	char name[MAX_N_SBOX][MAX_LEN_SBOX],
+	value[MAX_N_SBOX][MAX_LEN_SBOX];
+	int n,hot;
+	int hgt,wid;
+	int hh[MAX_N_SBOX];
 } STRING_BOX;
 
 typedef struct {
-		char **list;
-		int n;
+	char **list;
+	int n;
 }  SCRBOX_LIST;
 
 /*  This is a new improved pop_up widget */
 typedef struct {
-		Window base,tit;
-		Window *w;
-		char *title;
-		char **entries;
-		char **hints;
-		int n,max;
-		char *key;
-		int hot;
+	Window base,tit;
+	Window *w;
+	char *title;
+	char **entries;
+	char **hints;
+	int n,max;
+	char *key;
+	int hot;
 } POP_UP;
 
 typedef struct {
-		Window base,slide,close,text;
-		int i0;
-		int exist,len,nlines;
-		char **list;
+	Window base,slide,close,text;
+	int i0;
+	int exist,len,nlines;
+	char **list;
 } TEXTWIN;
 
 typedef struct {
-		Window base,slide;
-		Window *w;
-		int nw,nent,i0;
-		int len,exist;
-		char **list;
+	Window base,slide;
+	Window *w;
+	int nw,nent,i0;
+	int len,exist;
+	char **list;
 } SCROLLBOX;
 
 /* --- Functions --- */
@@ -100,8 +100,10 @@ void set_sbox_item(STRING_BOX *sb, int item);
 int s_box_event_loop(STRING_BOX *sb, int *pos, int *col, SCROLLBOX *scrb);
 void make_sbox_windows(STRING_BOX *sb, int row, int col, char *title, int maxchar);
 Window make_fancy_window(Window root, int x, int y, int width, int height, int bw, int fc, int bc);
+Window make_unmapped_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
 Window make_unmapped_window(Window root, int x, int y, int width, int height, int bw);
 Window make_plain_unmapped_window(Window root, int x, int y, int width, int height, int bw);
+Window make_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
 Window make_window(Window root, int x, int y, int width, int height, int bw);
 Window make_plain_window(Window root, int x, int y, int width, int height, int bw);
 void expose_resp_box(char *button, char *message, Window wb, Window wm, Window w);
@@ -112,7 +114,5 @@ int two_choice(char *choice1, char *choice2, char *string, char *key, int x, int
 int yes_no_box(void);
 int pop_up_list(Window *root, char *title, char **list, char *key, int n, int max, int def, int x, int y, char **hints, Window hwin, char *httxt);
 void draw_pop_up(POP_UP p, Window w);
-Window make_unmapped_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
-Window make_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
 
 #endif /* XPPAUT_POP_LIST_H */
