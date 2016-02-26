@@ -1,22 +1,22 @@
-#ifndef _scrngif_h_
-#define _scrngif_h_
+#ifndef XPPAUT_SCRNGIF_H
+#define XPPAUT_SCRNGIF_H
 
 #include <stdio.h>
 #include <X11/Xlib.h>
 
- typedef struct GifTree {
-   char typ;             /* terminating, lookup, or search */
-   int code;             /* the code to be output */
-   unsigned char ix;     /* the color map index */
-   struct GifTree **node, *nxt, *alt;
- } GifTree;
- 
- 
+/* --- Types --- */
+typedef struct GifTree {
+    char typ;             /* terminating, lookup, or search */
+    int code;             /* the code to be output */
+    unsigned char ix;     /* the color map index */
+    struct GifTree **node, *nxt, *alt;
+} GifTree;
+
 typedef struct {
-  unsigned char r,g,b;
+    unsigned char r,g,b;
 } GIFCOL;
 
-
+/* --- Functions --- */
 void set_global_map(int flag);
 int ppmtopix(unsigned char r, unsigned char g, unsigned char b, int *n);
 void end_ani_gif(FILE *fp);
@@ -35,4 +35,4 @@ int GifEncode(FILE *fout, unsigned char *pixels, int depth, int siz);
 void ClearTree(int cc, GifTree *root);
 unsigned char *AddCodeToBuffer(int code, short n, unsigned char *buf);
 
-#endif
+#endif /* XPPAUT_SCRNGIF_H */
