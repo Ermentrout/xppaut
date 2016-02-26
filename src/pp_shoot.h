@@ -5,12 +5,12 @@
 
 /* --- Types --- */
 typedef struct {
-  char item[30];
-  int steps,side,cycle,movie;
-  double plow,phigh;
+    char item[30];
+    int steps,side,cycle,movie;
+    double plow,phigh;
 } SHOOT_RANGE;
 
-
+/* --- Functions -- */
 void do_bc(double *y__0, double t0, double *y__1, double t1, double *f, int n);
 void compile_bvp(void);
 void reset_bvp(void);
