@@ -5,10 +5,10 @@
 
 /* --- Types ---*/
 typedef struct {
-  int here,col0,ncol,colskip;
-  int row0,nrow,rowskip;
-  float **data;
-  char firstcol[11];
+    int here,col0,ncol,colskip;
+    int row0,nrow,rowskip;
+    float **data;
+    char firstcol[11];
 } MY_TRANS;
 
 /* --- Data --- */
