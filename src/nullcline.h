@@ -5,14 +5,14 @@
 
 /* --- Types --- */
 typedef struct {
-		float x,y,z;
-		} Pt;
+	float x,y,z;
+} Pt;
 
 typedef struct nclines {
-				float *xn,*yn;
-				int nmx,nmy;
-				int n_ix,n_iy;
-				struct nclines *n,*p;
+	float *xn,*yn;
+	int nmx,nmy;
+	int n_ix,n_iy;
+	struct nclines *n,*p;
 }  NCLINES;
 
 /* --- Data --- */
