@@ -3,7 +3,6 @@
 
 /* --- Data --- */
 extern double *WORK;
-
 extern int IWORK[10000];
 extern int MAXSTOR;
 
