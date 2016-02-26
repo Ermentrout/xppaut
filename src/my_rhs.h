@@ -1,8 +1,7 @@
-#ifndef _my_rhs_h_
-#define _my_rhs_h_
+#ifndef XPPAUT_MY_RHS_H
+#define XPPAUT_MY_RHS_H
 
-
-/* my_rhs.c */
+/* --- Functions --- */
 int MAIN__(void);
 int main(int argc, char **argv);
 void extra(double *y__y, double t, int nod, int neq);
@@ -13,5 +12,4 @@ void fix_only(void);
 void rhs_only(double *y, double *ydot);
 void vec_rhs(double t, double *y, double *ydot, int neq);
 
-
-#endif
+#endif /* XPPAUT_MY_RHS_H */
