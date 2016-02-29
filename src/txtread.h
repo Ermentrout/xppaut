@@ -5,9 +5,9 @@
 
 /* --- Types ---*/
 typedef struct {
-    Window up,down,pgup,pgdn,kill,home,end,base,text,src,action;
-    int here,first,hgt,wid,nlines,which;
-    int dh,dw;
+	Window up,down,pgup,pgdn,kill,home,end,base,text,src,action;
+	int here,first,hgt,wid,nlines,which;
+	int dh,dw;
 } TXTVIEW;
 
 void txt_view_events(XEvent ev);

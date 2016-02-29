@@ -87,4 +87,5 @@ void set_ivar(int i, double value);
 double get_ivar(int i);
 int do_num(char *source, char *num, double *value, int *ind);
 void convert(char *source, char *dest);
+
 #endif /* XPPAUT_PARSERSLOW_H */

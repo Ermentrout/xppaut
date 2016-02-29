@@ -5,8 +5,8 @@
 
 /* --- Types --- */
 typedef struct  {
-    Window canvas, axes,numerics,grab,next,run,clear,redraw,base,per;
-    Window info,param,file,abort,stab,hint,kill;
+	Window canvas, axes,numerics,grab,next,run,clear,redraw,base,per;
+	Window info,param,file,abort,stab,hint,kill;
 } AUTOWIN;
 
 /* --- Data --- */

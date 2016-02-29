@@ -5,8 +5,8 @@
 
 /* --- Types --- */
 typedef struct {
-    char **dirnames,**filenames;
-    int nfiles,ndirs;
+	char **dirnames,**filenames;
+	int nfiles,ndirs;
 } FILEINFO;
 
 /* --- Data --- */

@@ -10,4 +10,3 @@ int rkqs(double *y, double *dydx, int n, double *x, double htry, double eps, dou
 void rkck(double *y, double *dydx, int n, double x, double h, double *yout, double *yerr, double *work);
 
 #endif /* XPPAUT_STIFF_H */
-

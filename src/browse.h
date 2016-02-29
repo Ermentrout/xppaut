@@ -6,38 +6,38 @@
 
 /* --- Macros --- */
 #define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
-    return;}
+	return;}
 
 #define BMAXCOL 20
 
 #define MYMASK	   (ButtonPressMask 	|\
-    KeyPressMask		|\
-    ExposureMask		|\
-    StructureNotifyMask	|\
-    LeaveWindowMask		|\
-    EnterWindowMask)
+	KeyPressMask		|\
+	ExposureMask		|\
+	StructureNotifyMask	|\
+	LeaveWindowMask		|\
+	EnterWindowMask)
 
 #define SIMPMASK   (ButtonPressMask		|\
-    KeyPressMask		|\
-    ExposureMask		|\
-    StructureNotifyMask)
+	KeyPressMask		|\
+	ExposureMask		|\
+	StructureNotifyMask)
 
 /* --- Types --- */
 typedef struct {
-    Window base,upper;
-    Window find,up,down,pgup,pgdn,home,end,left,right;
-    Window first,last,restore,write,get,close;
-    Window load,repl,unrepl,table,addcol,delcol;
-    Window main;
-    Window label[BMAXCOL];
-    Window time;
-    Window hint;
-    char hinttxt[256];
-    int dataflag,xflag;
-    int col0,row0,ncol,nrow;
-    int maxrow,maxcol;
-    float **data;
-    int istart,iend;
+	Window base,upper;
+	Window find,up,down,pgup,pgdn,home,end,left,right;
+	Window first,last,restore,write,get,close;
+	Window load,repl,unrepl,table,addcol,delcol;
+	Window main;
+	Window label[BMAXCOL];
+	Window time;
+	Window hint;
+	char hinttxt[256];
+	int dataflag,xflag;
+	int col0,row0,ncol,nrow;
+	int maxrow,maxcol;
+	float **data;
+	int istart,iend;
 } BROWSER;
 
 /* --- Data --- */

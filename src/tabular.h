@@ -16,11 +16,11 @@
  * (xyvals=0 is faster lookup )
  */
 typedef struct {
-    double xlo,xhi,dx;
-    double *y,*x;
-    int n,flag,interp,autoeval;
-    int xyvals;
-    char filename[128],name[12];
+	double xlo,xhi,dx;
+	double *y,*x;
+	int n,flag,interp,autoeval;
+	int xyvals;
+	char filename[128],name[12];
 } TABULAR;
 
 /* --- Data --- */
@@ -43,4 +43,3 @@ int load_table(char *filename, int index);
 int get_lookup_len(int i);
 
 #endif /* XPPAUT_TABULAR_H */
-

@@ -5,8 +5,8 @@
 
 /* --- Types --- */
 typedef struct {
-    unsigned int h,w;
-    Pixmap xi;
+	unsigned int h,w;
+	Pixmap xi;
 } MOVIE;
 
 /* --- Functions --- */
@@ -22,5 +22,3 @@ void auto_play(void);
 void too_small(void);
 
 #endif /* XPPAUT_KINESCOPE_H */
-
-

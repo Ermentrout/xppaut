@@ -7,8 +7,8 @@
 
 /* --- Types --- */
 typedef struct {
-    Window base,done,cancel;
-    Window w[MAXODE];
+	Window base,done,cancel;
+	Window w[MAXODE];
 } Torbox;
 
 void do_torus_com(int c);

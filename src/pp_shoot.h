@@ -5,9 +5,9 @@
 
 /* --- Types --- */
 typedef struct {
-    char item[30];
-    int steps,side,cycle,movie;
-    double plow,phigh;
+	char item[30];
+	int steps,side,cycle,movie;
+	double plow,phigh;
 } SHOOT_RANGE;
 
 /* --- Functions -- */

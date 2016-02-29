@@ -2947,7 +2947,7 @@ L480:
 		a22r = a22 - e * b22;
 		a22i = ei * b22;
 		if (fabs(a11r) + fabs(a11i) + fabs(a12r) + fabs(a12i) < fabs(a21) + fabs(
-					a22r) + fabs(a22i)) {
+				a22r) + fabs(a22i)) {
 			goto L482;
 		}
 		a1 = a12r;
@@ -6413,8 +6413,8 @@ L80:
 		goto L90;
 	}
 	if ((d__1 = a[nl + (nl - 1) * a_dim1], fabs(d__1)) * (fabs(q) + fabs(r__)) <=
-			*eps * fabs(p) * ((d__2 = a[nl - 1 + (nl - 1) * a_dim1], fabs(d__2)
-							   ) + fabs(z__) + (d__3 = a[nl + 1 + (nl + 1) * a_dim1], fabs(d__3))))
+		*eps * fabs(p) * ((d__2 = a[nl - 1 + (nl - 1) * a_dim1], fabs(d__2)
+						   ) + fabs(z__) + (d__3 = a[nl + 1 + (nl + 1) * a_dim1], fabs(d__3))))
 	{
 		goto L90;
 	}
@@ -6462,12 +6462,12 @@ L110:
 
 	if (*imfd == 1) {
 		if (a[mu - 1 + (mu - 1) * a_dim1] + a[mu + mu * a_dim1] >= a[mu + 1 +
-				(mu + 1) * a_dim1] + a[mu + 2 + (mu + 2) * a_dim1]) {
+			(mu + 1) * a_dim1] + a[mu + 2 + (mu + 2) * a_dim1]) {
 			goto L230;
 		}
 	} else {
 		if (a[mu - 1 + (mu - 1) * a_dim1] + a[mu + mu * a_dim1] <= a[mu + 1 +
-				(mu + 1) * a_dim1] + a[mu + 2 + (mu + 2) * a_dim1]) {
+			(mu + 1) * a_dim1] + a[mu + 2 + (mu + 2) * a_dim1]) {
 			goto L230;
 		}
 	}
@@ -6492,12 +6492,12 @@ L130:
 
 	if (*imfd == 1) {
 		if (a[mu - 1 + (mu - 1) * a_dim1] + a[mu + mu * a_dim1] >= a[mu + 1 +
-				(mu + 1) * a_dim1] * 2.) {
+			(mu + 1) * a_dim1] * 2.) {
 			goto L230;
 		}
 	} else {
 		if (a[mu - 1 + (mu - 1) * a_dim1] + a[mu + mu * a_dim1] <= a[mu + 1 +
-				(mu + 1) * a_dim1] * 2.) {
+			(mu + 1) * a_dim1] * 2.) {
 			goto L230;
 		}
 	}
@@ -6543,12 +6543,12 @@ L180:
 
 	if (*imfd == 1) {
 		if (a[mu + mu * a_dim1] * 2. >= a[mu + 1 + (mu + 1) * a_dim1] + a[mu
-				+ 2 + (mu + 2) * a_dim1]) {
+			+ 2 + (mu + 2) * a_dim1]) {
 			goto L220;
 		}
 	} else {
 		if (a[mu + mu * a_dim1] * 2. <= a[mu + 1 + (mu + 1) * a_dim1] + a[mu
-				+ 2 + (mu + 2) * a_dim1]) {
+			+ 2 + (mu + 2) * a_dim1]) {
 			goto L220;
 		}
 	}

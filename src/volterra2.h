@@ -19,4 +19,3 @@ int volterra(double *y, double *t, double dt, int nt, int neq, int *istart, doub
 int volt_step(double *y, double t, double dt, int neq, double *yg, double *yp, double *yp2, double *ytemp, double *errvec, double *jac);
 
 #endif /* XPPAUT_VOLTERRA2_H */
-

@@ -10,54 +10,54 @@
 
 /* --- Types --- */
 typedef struct {
-  int irot;
-  int nrot[1000];
-  double torper;
+	int irot;
+	int nrot[1000];
+	double torper;
 } ROTCHK;
 
 typedef struct  {
-  int exist;
-  int ntst,nmx,npr;
-  double ds,dsmax,dsmin,rl0,rl1,a0,a1;
-  double xmin,xmax,ymin,ymax;
-  double lastx,lasty;
-  int wid,hgt,x0,y0,st_wid;
-  int nfpar,nbc;
-  int ips,irs,ilp,isp,isw,itp;
-  int plot,var;
-  int icp1,icp2,icp3,icp4,icp5;
-  int nper;
-  char hinttxt[256];
-  double period[MAX_AUT_PER];
-  int uzrpar[MAX_AUT_PER];
-  double epsl,epsu,epss;
-  int ncol;
+	int exist;
+	int ntst,nmx,npr;
+	double ds,dsmax,dsmin,rl0,rl1,a0,a1;
+	double xmin,xmax,ymin,ymax;
+	double lastx,lasty;
+	int wid,hgt,x0,y0,st_wid;
+	int nfpar,nbc;
+	int ips,irs,ilp,isp,isw,itp;
+	int plot,var;
+	int icp1,icp2,icp3,icp4,icp5;
+	int nper;
+	char hinttxt[256];
+	double period[MAX_AUT_PER];
+	int uzrpar[MAX_AUT_PER];
+	double epsl,epsu,epss;
+	int ncol;
 } BIFUR;
 
 typedef struct {
-  int iad;
-  int mxbf;
-  int iid;
-  int itmx;
-  int itnw;
-  int nwtn;
-  int iads;
+	int iad;
+	int mxbf;
+	int iid;
+	int itmx;
+	int itnw;
+	int nwtn;
+	int iads;
 
 } ADVAUTO;
 
 typedef struct {
-  int package;
-  int ibr,ntot,itp,lab;
-  double norm,uhi[NAUTO],ulo[NAUTO],u0[NAUTO],ubar[NAUTO];
-  double par[20],per,torper;
-  int index,nfpar,icp1,icp2,icp3,icp4,icp5;
-  int flag;
+	int package;
+	int ibr,ntot,itp,lab;
+	double norm,uhi[NAUTO],ulo[NAUTO],u0[NAUTO],ubar[NAUTO];
+	double par[20],per,torper;
+	int index,nfpar,icp1,icp2,icp3,icp4,icp5;
+	int flag;
 } GRABPT;
 
 
 typedef struct {
-  int plot,var,icp1,icp2,icp3,icp4,icp5;
-  double xmin,ymin,xmax,ymax;
+	int plot,var,icp1,icp2,icp3,icp4,icp5;
+	double xmin,ymin,xmax,ymax;
 } AUTOAX;
 
 /* --- Data --- */

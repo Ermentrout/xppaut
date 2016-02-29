@@ -15,7 +15,6 @@ void getjactrans(double *x,double *y,double *yp,double *xp, double eps, double *
 XAUTO xAuto;
 
 /*    Hooks to xpp RHS     */
-
 int func(integer ndim, double *u, integer *icp, double *par, integer ijac,
 		 double *f, double *dfdu, double *dfdp) {
 	int i,j;
@@ -77,6 +76,7 @@ int stpnt(integer ndim, doublereal t, doublereal *u, doublereal *par) {
 	return 0;
 } /* stpnt_ */
 
+
 /* Subroutine */
 int bcnd(integer ndim, double *par, integer *icp, integer nbc, double *u0, double *u1,
 		 integer ijac, double *fb, double *dbc) {
@@ -89,6 +89,7 @@ int bcnd(integer ndim, double *par, integer *icp, integer nbc, double *u0, doubl
 	do_bc(u0,0.0,u1,1.0,fb,nbc);
 	return 0;
 } /* bcnd_ */
+
 
 /* Subroutine */
 int icnd(integer *ndim, double *par, integer *icp, integer *nint,
@@ -103,6 +104,7 @@ int icnd(integer *ndim, double *par, integer *icp, integer *nint,
    */
 	return 0;
 } /* icnd_ */
+
 
 /* Subroutine */
 int fopt(integer *ndim, double *u, integer *icp, double *par,

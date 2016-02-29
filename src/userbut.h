@@ -5,9 +5,9 @@
 
 /* --- Types --- */
 typedef struct {
-    Window w;
-    char bname[10];
-    int com;
+	Window w;
+	char bname[10];
+	int com;
 } USERBUT;
 
 /* --- Functions --- */
