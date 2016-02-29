@@ -8,12 +8,12 @@
 
 /* --- Types --- */
 typedef struct {
-  float xmin,xmax,ymin,ymax;
-  float xscale,yscale,xoff,yoff;
-  float tx,ty,angle,slant;  /* text attributes   */
-  float linecol,letx,lety;
-  int linewid;
-  } DEVSCALE;
+	float xmin,xmax,ymin,ymax;
+	float xscale,yscale,xoff,yoff;
+	float tx,ty,angle,slant;  /* text attributes   */
+	float linecol,letx,lety;
+	int linewid;
+} DEVSCALE;
 
 /* --- Functions --- */
 int array_print(char *filename, char *xtitle, char *ytitle, char *bottom, int nacross, int ndown, int col0, int row0, int nskip, int ncskip, int maxrow, int maxcol, float **data, double zmin, double zmax, double tlo, double thi, int type);
