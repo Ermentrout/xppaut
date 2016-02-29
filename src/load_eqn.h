@@ -243,6 +243,7 @@ extern int POIVAR;
 extern int RunImmediately;
 extern int SHOOT;
 extern int SOS;
+extern int silent;
 extern int START_LINE_TYPE;
 extern int STORFLAG;
 extern int TIMPLOT;
