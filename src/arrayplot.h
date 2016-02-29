@@ -6,14 +6,14 @@
 
 /* --- Types --- */
 typedef struct {
-  Window base,wclose,wedit,wprint,wstyle,wscale,wmax,wmin,wplot,wredraw,wtime,wgif,wrange,wfit;
-  int index0,indexn,alive,nacross,ndown,plotdef;
-  int height,width,ploth,plotw;
-  int nstart,nskip,ncskip;
-  char name[20];
-  double tstart,tend,zmin,zmax,dt;
-  char xtitle[256],ytitle[256],filename[256],bottom[256];
-  int type;
+	Window base,wclose,wedit,wprint,wstyle,wscale,wmax,wmin,wplot,wredraw,wtime,wgif,wrange,wfit;
+	int index0,indexn,alive,nacross,ndown,plotdef;
+	int height,width,ploth,plotw;
+	int nstart,nskip,ncskip;
+	char name[20];
+	double tstart,tend,zmin,zmax,dt;
+	char xtitle[256],ytitle[256],filename[256],bottom[256];
+	int type;
 } APLOT;
 
 /* --- Data --- */
