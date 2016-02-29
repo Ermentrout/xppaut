@@ -125,7 +125,6 @@ including derived parameters but XPP takes care of this so start at 0
 #include <stdlib.h>
 #include <string.h>
 
-#include "aniparse.h"
 #include "form_ode.h"
 #include "ggets.h"
 #include "markov.h"

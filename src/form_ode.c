@@ -11,7 +11,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "aniparse.h"
 #include "browse.h"
 #include "comline.h"
 #include "dae_fun.h"

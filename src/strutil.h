@@ -2,9 +2,8 @@
 #define XPPAUT_STRUTIL_H
 
 /* --- Functions --- */
-#ifndef HAVE_STRUPR
+void de_space(char *s);
 void strupr(char *s);
 void strlwr(char *s);
-#endif
 
 #endif /* XPPAUT_STRUTIL_H */

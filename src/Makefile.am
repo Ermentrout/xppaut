@@ -302,8 +302,4 @@ auto_sources = \
 	auto_nox.c \
 	auto_x11.c
 
-if HAVE_STRUPR
-	strutil_sources =
-else
-	strutil_sources = strutil.c
-endif
+strutil_sources = strutil.c
