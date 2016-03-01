@@ -8,6 +8,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "color.h"
 #include "form_ode.h"
 #include "ggets.h"
 #include "graf_par.h"
@@ -23,118 +24,66 @@
 #define SIGNIF (0.01)		/* less than one hundredth of a tic mark */
 #define CheckZero(x,tic) (fabs(x) < ((tic) * SIGNIF) ? 0.0 : (x))
 
+/* --- Forward Declarations --- */
+static double dbl_raise(double x, int y);
+static void draw_unit_cube(void);
+static void draw_xtics(char *s2, double start, double incr, double end);
+static void draw_ytics(char *s1, double start, double incr, double end);
+static void find_max_min_tic(double *tmin, double *tmax, double tic);
+static void Frame_3d(void);
+static void get_title_str(char *s1, char *s2, char *s3);
+static double make_tics(double tmin, double tmax);
+static void make_title(char *str);
+static void re_title(void);
+
+/* --- Data --- */
 int DOING_AXES=0;
 int DOING_BOX_AXES=0;
 
 /* --- Functions --- */
-void re_title(void) {
-	char bob[40];
-	make_title(bob);
-	title_text(bob);
-}
+void Box_axis(double x_min, double x_max, double y_min, double y_max,
+			  char *sx, char *sy, int flag) {
+	double ytic,xtic;
+	int xaxis_y,yaxis_x;
+	int ybot=DBottom,ytop=DTop;
+	int xleft=DLeft,xright=DRight;
 
-void get_title_str(char *s1, char *s2, char *s3) {
-	int i;
-	if((i=MyGraph->xv[0])==0) {
-		strcpy(s1,"T");
-	} else {
-		strcpy(s1,uvar_names[i-1]);
-	}
-	if((i=MyGraph->yv[0])==0) {
-		strcpy(s2,"T");
-	} else {
-		strcpy(s2,uvar_names[i-1]);
-	}
-	if((i=MyGraph->zv[0])==0) {
-		strcpy(s3,"T");
-	} else {
-		strcpy(s3,uvar_names[i-1]);
-	}
-}
+	DOING_AXES=1;
 
-void make_title(char *str) {
-	int i;
-	char name1[20];
-	char name2[20];
-	char name3[20];
-	if((i=MyGraph->xv[0])==0) {
-		strcpy(name1,"T");
-	} else {
-		strcpy(name1,uvar_names[i-1]);
-	}
-	if((i=MyGraph->yv[0])==0) {
-		strcpy(name2,"T");
-	} else {
-		strcpy(name2,uvar_names[i-1]);
-	}
-	if((i=MyGraph->zv[0])==0) {
-		strcpy(name3,"T");
-	} else {
-		strcpy(name3,uvar_names[i-1]);
+	if(ybot>ytop) {
+		ytop=ybot;
+		ybot=DTop;
 	}
 
-	if(MyGraph->grtype>=5) {
-		sprintf(str,"%s vs %s vs %s",name3,name2,name1);
-	} else {
-		sprintf(str,"%s vs %s",name2,name1);
+	ytic=make_tics(y_min,y_max);
+	xtic=make_tics(x_min,x_max);
+	scale_to_screen((float)MyGraph->xorg,(float)MyGraph->yorg,&yaxis_x,&xaxis_y);
+	set_linestyle(-1);
+	if(MyGraph->xorgflag && flag) {
+		if(xaxis_y>=ybot && xaxis_y<=ytop) {
+			line(xleft,xaxis_y,xright,xaxis_y);
+		}
 	}
-}
-
-double dbl_raise(double x, int y) {
-	register int i;
-	double val;
-
-	val = 1.0;
-	for (i=0; i < abs(y); i++) {
-		val *= x;
+	if(MyGraph->yorgflag && flag) {
+		if(yaxis_x>=xleft && yaxis_x<=xright) {
+			line(yaxis_x,ybot,yaxis_x,ytop);
+		}
 	}
-	if (y < 0 ) {
-		return (1.0/val);
-	}
-	return(val);
-}
-
-
-double make_tics(double tmin, double tmax) {
-	register double xr,xnorm,tics,tic,l10;
-	xr = fabs(tmin-tmax);
-
-	l10 = log10(xr);
-	xnorm = pow(10.0,l10-(double)((l10 >= 0.0 ) ? (int)l10 : ((int)l10-1)));
-	if (xnorm <= 2) {
-		tics = 0.2;
-	} else if (xnorm <= 5) {
-		tics = 0.5;
-	} else {
-		tics = 1.0;
-	}
-	tic = tics * dbl_raise(10.0,(l10 >= 0.0 ) ? (int)l10 : ((int)l10-1));
-	return(tic);
-}
-
-void find_max_min_tic(double *tmin, double *tmax, double tic) {
-	double t1=*tmin;
-	t1=tic*floor(*tmin/tic);
-	if(t1<*tmin) {
-		t1+=tic;
-	}
-	*tmin=t1;
-	t1=tic*ceil(*tmax/tic);
-	if(t1>*tmax) {
-		t1-=tic;
-	}
-	*tmax=t1;
-}
-
-void redraw_cube_pt(double theta, double phi) {
-	char bob[50];
+	set_linestyle(-2);
+	DOING_BOX_AXES=1;
+	line(xleft,ybot,xright,ybot);
+	line(xright,ybot,xright,ytop);
+	DOING_BOX_AXES=0;
+	line(xright,ytop,xleft,ytop);
+	line(xleft,ytop,xleft,ybot);
+	draw_ytics(sy,ytic*floor(y_min/ytic),ytic,ytic*ceil(y_max/ytic));
+	draw_xtics(sx,xtic*floor(x_min/xtic),xtic,xtic*ceil(x_max/xtic));
+	TextJustify=TJ_LEFT;
 	set_linestyle(0);
-	make_rot(theta,phi);
-	clr_scrn();
 
-	sprintf(bob,"theta=%g phi=%g",theta,phi);
-	canvas_xy(bob);
+	DOING_AXES=0;
 }
+
 
 void do_axes(void) {
 	char s1[20],s2[20],s3[20];
@@ -158,6 +107,7 @@ void do_axes(void) {
 	}
 }
 
+
 void redraw_cube(double theta, double phi) {
 	char bob[50];
 	set_linestyle(0);
@@ -168,7 +118,35 @@ void redraw_cube(double theta, double phi) {
 	canvas_xy(bob);
 }
 
-void draw_unit_cube(void) {
+
+void redraw_cube_pt(double theta, double phi) {
+	char bob[50];
+	set_linestyle(0);
+	make_rot(theta,phi);
+	clr_scrn();
+
+	sprintf(bob,"theta=%g phi=%g",theta,phi);
+	canvas_xy(bob);
+}
+
+
+/* --- Static functions -- */
+static double dbl_raise(double x, int y) {
+	register int i;
+	double val;
+
+	val = 1.0;
+	for (i=0; i < abs(y); i++) {
+		val *= x;
+	}
+	if (y < 0 ) {
+		return (1.0/val);
+	}
+	return(val);
+}
+
+
+static void draw_unit_cube(void) {
 	line3d(-1.,-1.,-1.,1.,-1.,-1.);
 	line3d(1.,-1.,-1.,1.,1.,-1.);
 	line3d(1.,1.,-1.,-1.,1.,-1.);
@@ -183,7 +161,94 @@ void draw_unit_cube(void) {
 	line3d(1.,-1.,1.,1.,-1.,-1.);
 }
 
-void Frame_3d(void) {
+
+static void draw_ytics(char *s1, double start, double incr, double end) {
+	double ticvalue,place;
+	double y_min=YMin,y_max=YMax,
+			x_min=XMin;
+	char bob[100];
+	int xt,yt,s=1;
+	TextJustify=TJ_RIGHT; /* Right justification  */
+	for(ticvalue=start;ticvalue<=end;ticvalue+=incr) {
+		place=CheckZero(ticvalue,incr);
+		if(ticvalue<y_min || ticvalue>y_max) {
+			continue;
+		}
+
+		sprintf(bob,"%g",place);
+		scale_to_screen((float)x_min,(float)place,&xt,&yt);
+		DOING_BOX_AXES=0;
+		line(DLeft,yt,DLeft+HTic,yt);
+		DOING_BOX_AXES=1;
+		line(DRight,yt,DRight-HTic,yt);
+		DOING_BOX_AXES=0;
+		put_text(DLeft-(int)(1.25*HChar),yt,bob);
+	}
+	scale_to_screen((float)x_min,(float)y_max,&xt,&yt);
+	if(DTop<DBottom) {
+		s=-1;
+	}
+
+	if(PltFmtFlag==SVGFMT) {
+		fprintf(svgfile,"\n      <text class=\"xppyaxislabelv\" text-anchor=\"middle\" x=\"%d\"  y=\"%d\"\n",0,0);
+		fprintf(svgfile,"      transform=\"rotate(-90,75,180) translate(75,180)\"\n");
+		fprintf(svgfile,"      >%s</text>\n",s1);
+
+		fprintf(svgfile,"\n      <text class=\"xppyaxislabelh\" text-anchor=\"end\" x=\"%d\"  y=\"%d\"\n",DLeft-HChar,yt+2*s*VChar);
+		fprintf(svgfile,"      >%s</text>\n",s1);
+	} else {
+		put_text(DLeft-HChar,yt+2*s*VChar,s1);
+	}
+}
+
+
+static void draw_xtics(char *s2, double start, double incr, double end) {
+	double ticvalue,place;
+	double y_min=YMin,
+			x_min=XMin,x_max=XMax;
+
+	char bob[100];
+	int xt,yt;
+	int s=1;
+	if(DTop<DBottom) {
+		s=-1;
+	}
+	TextJustify=TJ_CENTER; /* Center justification  */
+	for(ticvalue=start;ticvalue<=end;ticvalue+=incr) {
+		place=CheckZero(ticvalue,incr);
+		if(ticvalue<x_min || ticvalue>x_max) {
+			continue;
+		}
+
+		sprintf(bob,"%g",place);
+		scale_to_screen((float)place,y_min,&xt,&yt);
+		DOING_BOX_AXES=0;
+		line(xt,DBottom,xt,DBottom+s*VTic);
+		DOING_BOX_AXES=1;
+		line(xt,DTop,xt,DTop-s*VTic);
+		DOING_BOX_AXES=0;
+		put_text(xt,yt-(int)(1.25*VChar*s),bob);
+	}
+	put_text((DLeft+DRight)/2,yt-(int)(2.5*VChar*s),s2);
+}
+
+
+static void find_max_min_tic(double *tmin, double *tmax, double tic) {
+	double t1=*tmin;
+	t1=tic*floor(*tmin/tic);
+	if(t1<*tmin) {
+		t1+=tic;
+	}
+	*tmin=t1;
+	t1=tic*ceil(*tmax/tic);
+	if(t1>*tmax) {
+		t1-=tic;
+	}
+	*tmax=t1;
+}
+
+
+static void Frame_3d(void) {
 	double tx,ty,tz;
 	float x1,y1,z1,x2,y2,z2,dt=.03;
 	float x0=MyGraph->xorg,y0=MyGraph->yorg,z0=MyGraph->zorg;
@@ -263,116 +328,76 @@ void Frame_3d(void) {
 	DOING_AXES=0;
 }
 
-void Box_axis(double x_min, double x_max, double y_min, double y_max,
-			  char *sx, char *sy, int flag) {
-	double ytic,xtic;
-	int xaxis_y,yaxis_x;
-	int ybot=DBottom,ytop=DTop;
-	int xleft=DLeft,xright=DRight;
 
-	DOING_AXES=1;
-
-	if(ybot>ytop) {
-		ytop=ybot;
-		ybot=DTop;
-	}
-
-	ytic=make_tics(y_min,y_max);
-	xtic=make_tics(x_min,x_max);
-	scale_to_screen((float)MyGraph->xorg,(float)MyGraph->yorg,&yaxis_x,&xaxis_y);
-	set_linestyle(-1);
-	if(MyGraph->xorgflag && flag) {
-		if(xaxis_y>=ybot && xaxis_y<=ytop) {
-			line(xleft,xaxis_y,xright,xaxis_y);
-		}
-	}
-	if(MyGraph->yorgflag && flag) {
-		if(yaxis_x>=xleft && yaxis_x<=xright) {
-			line(yaxis_x,ybot,yaxis_x,ytop);
-		}
-	}
-	set_linestyle(-2);
-	DOING_BOX_AXES=1;
-	line(xleft,ybot,xright,ybot);
-	line(xright,ybot,xright,ytop);
-	DOING_BOX_AXES=0;
-	line(xright,ytop,xleft,ytop);
-	line(xleft,ytop,xleft,ybot);
-	draw_ytics(sy,ytic*floor(y_min/ytic),ytic,ytic*ceil(y_max/ytic));
-	draw_xtics(sx,xtic*floor(x_min/xtic),xtic,xtic*ceil(x_max/xtic));
-	TextJustify=TJ_LEFT;
-	set_linestyle(0);
-
-	DOING_AXES=0;
-}
-
-
-void draw_ytics(char *s1, double start, double incr, double end) {
-	double ticvalue,place;
-	double y_min=YMin,y_max=YMax,
-			x_min=XMin;
-	char bob[100];
-	int xt,yt,s=1;
-	TextJustify=TJ_RIGHT; /* Right justification  */
-	for(ticvalue=start;ticvalue<=end;ticvalue+=incr) {
-		place=CheckZero(ticvalue,incr);
-		if(ticvalue<y_min || ticvalue>y_max) {
-			continue;
-		}
-
-		sprintf(bob,"%g",place);
-		scale_to_screen((float)x_min,(float)place,&xt,&yt);
-		DOING_BOX_AXES=0;
-		line(DLeft,yt,DLeft+HTic,yt);
-		DOING_BOX_AXES=1;
-		line(DRight,yt,DRight-HTic,yt);
-		DOING_BOX_AXES=0;
-		put_text(DLeft-(int)(1.25*HChar),yt,bob);
-	}
-	scale_to_screen((float)x_min,(float)y_max,&xt,&yt);
-	if(DTop<DBottom) {
-		s=-1;
-	}
-
-	if(PltFmtFlag==SVGFMT) {
-		fprintf(svgfile,"\n      <text class=\"xppyaxislabelv\" text-anchor=\"middle\" x=\"%d\"  y=\"%d\"\n",0,0);
-		fprintf(svgfile,"      transform=\"rotate(-90,75,180) translate(75,180)\"\n");
-		fprintf(svgfile,"      >%s</text>\n",s1);
-
-		fprintf(svgfile,"\n      <text class=\"xppyaxislabelh\" text-anchor=\"end\" x=\"%d\"  y=\"%d\"\n",DLeft-HChar,yt+2*s*VChar);
-		fprintf(svgfile,"      >%s</text>\n",s1);
+static void get_title_str(char *s1, char *s2, char *s3) {
+	int i;
+	if((i=MyGraph->xv[0])==0) {
+		strcpy(s1,"T");
 	} else {
-		put_text(DLeft-HChar,yt+2*s*VChar,s1);
+		strcpy(s1,uvar_names[i-1]);
+	}
+	if((i=MyGraph->yv[0])==0) {
+		strcpy(s2,"T");
+	} else {
+		strcpy(s2,uvar_names[i-1]);
+	}
+	if((i=MyGraph->zv[0])==0) {
+		strcpy(s3,"T");
+	} else {
+		strcpy(s3,uvar_names[i-1]);
 	}
 }
 
 
-void draw_xtics(char *s2, double start, double incr, double end) {
-	double ticvalue,place;
-	double y_min=YMin,
-			x_min=XMin,x_max=XMax;
+static double make_tics(double tmin, double tmax) {
+	register double xr,xnorm,tics,tic,l10;
+	xr = fabs(tmin-tmax);
 
-	char bob[100];
-	int xt,yt;
-	int s=1;
-	if(DTop<DBottom) {
-		s=-1;
+	l10 = log10(xr);
+	xnorm = pow(10.0,l10-(double)((l10 >= 0.0 ) ? (int)l10 : ((int)l10-1)));
+	if (xnorm <= 2) {
+		tics = 0.2;
+	} else if (xnorm <= 5) {
+		tics = 0.5;
+	} else {
+		tics = 1.0;
 	}
-	TextJustify=TJ_CENTER; /* Center justification  */
-	for(ticvalue=start;ticvalue<=end;ticvalue+=incr) {
-		place=CheckZero(ticvalue,incr);
-		if(ticvalue<x_min || ticvalue>x_max) {
-			continue;
-		}
+	tic = tics * dbl_raise(10.0,(l10 >= 0.0 ) ? (int)l10 : ((int)l10-1));
+	return(tic);
+}
 
-		sprintf(bob,"%g",place);
-		scale_to_screen((float)place,y_min,&xt,&yt);
-		DOING_BOX_AXES=0;
-		line(xt,DBottom,xt,DBottom+s*VTic);
-		DOING_BOX_AXES=1;
-		line(xt,DTop,xt,DTop-s*VTic);
-		DOING_BOX_AXES=0;
-		put_text(xt,yt-(int)(1.25*VChar*s),bob);
+
+static void make_title(char *str) {
+	int i;
+	char name1[20];
+	char name2[20];
+	char name3[20];
+	if((i=MyGraph->xv[0])==0) {
+		strcpy(name1,"T");
+	} else {
+		strcpy(name1,uvar_names[i-1]);
 	}
-	put_text((DLeft+DRight)/2,yt-(int)(2.5*VChar*s),s2);
+	if((i=MyGraph->yv[0])==0) {
+		strcpy(name2,"T");
+	} else {
+		strcpy(name2,uvar_names[i-1]);
+	}
+	if((i=MyGraph->zv[0])==0) {
+		strcpy(name3,"T");
+	} else {
+		strcpy(name3,uvar_names[i-1]);
+	}
+
+	if(MyGraph->grtype>=5) {
+		sprintf(str,"%s vs %s vs %s",name3,name2,name1);
+	} else {
+		sprintf(str,"%s vs %s",name2,name1);
+	}
+}
+
+
+static void re_title(void) {
+	char bob[40];
+	make_title(bob);
+	title_text(bob);
 }
