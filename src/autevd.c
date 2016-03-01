@@ -23,16 +23,21 @@
 #define MAXDIMHET 12
 #define MAXDIMHOM 24
 
+
+/* --- Types --- */
+typedef struct {
+	int pt,br;
+	double evr[NAUTO],evi[NAUTO];
+} EIGVAL;
+
+
+/* --- Data --- */
+int DiagFlag=0;
+static EIGVAL my_ev;
 XAUTO xAuto;
 
+
 /* --- Functions --- */
-int DiagFlag=0;
-
-EIGVAL my_ev;
-
-double sign();
-int imin();
-
 void init_auto(int ndim, int nicp,int nbc, int ips, int irs, int ilp,
 			   int ntst, int isp, int isw, int nmx, int npr,
 			   double ds, double dsmin, double dsmax, double rl0, double rl1,
@@ -167,20 +172,4 @@ void addbif(iap_type *iap, rap_type *rap, integer ntots, integer ibrs,
 	add_diagram(ibrs,ntots,iap->itp,lab,iap->nfpr,*a,uhigh,ulow,u0,ubar,
 				par,per,iap->ndim,icp1,icp2,icp3,icp4,AutoTwoParam,my_ev.evr,
 				my_ev.evi);
-}
-
-double etime_(double *z) {
-	return(0.0);
-}
-
-
-int eigrf_(double *a, int *n, int *m, doublecomplex *ecv, double *work, int *ier) {
-	double ev[400];
-	int i;
-	eigen(*n,a,ev,work,ier);
-	for(i=0;i<*n;i++) {
-		(ecv+i)->r=ev[2*i];
-		(ecv+i)->i=ev[2*i+1];
-	}
-	return 0;
 }

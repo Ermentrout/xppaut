@@ -5,12 +5,6 @@
 #include "auto_f2c.h"
 #include "auto_c.h"
 
-/* --- Types --- */
-typedef struct {
-	int pt,br;
-	double evr[NAUTO],evi[NAUTO];
-} EIGVAL;
-
 /* --- Data --- */
 extern int DiagFlag;
 extern integer UzrPar[20];
@@ -20,7 +14,5 @@ void init_auto(int ndim, int nicp,int nbc, int ips, int irs, int ilp, int ntst, 
 void send_mult(int ibr, int ntot, int n, doublecomplex *ev);
 int get_bif_type(int ibr, int ntot, int lab);
 void addbif(iap_type *iap, rap_type *rap, integer ntots, integer ibrs, double *par,integer *icp,int labw, double *a, double *uhigh, double *ulow, double *u0, double *ubar);
-double etime_(double *z);
-int eigrf_(double *a, int *n, int *m, doublecomplex *ecv, double *work, int *ier);
 
 #endif /* XPPAUT_AUTEVD_H */
