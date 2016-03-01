@@ -57,166 +57,55 @@
 #include "xpplim.h"
 #include "bitmap/array.bitmap"
 
-/* --- Functions --- */
-double atof();
-int do_range(double *, int);
 
-char aplot_range_stem[MAX_STRING_LENGTH]="rangearray";
+/* --- Types --- */
+typedef struct {
+	Window base,wclose,wedit,wprint,wstyle,wscale,wmax,wmin,wplot,wredraw,wtime,wgif,wrange,wfit;
+	int index0,indexn,alive,nacross,ndown,plotdef;
+	int height,width,ploth,plotw;
+	int nstart,nskip,ncskip;
+	char name[20];
+	double tstart,tend,zmin,zmax,dt;
+	char xtitle[XPP_MAX_NAME],ytitle[XPP_MAX_NAME],filename[XPP_MAX_NAME],bottom[XPP_MAX_NAME];
+	int type;
+} APLOT;
+
+/* --- Forward Declarations --- */
+static void apbutton(Window w);
+static void create_arrayplot(APLOT *ap, char *wname, char *iname);
+static void destroy_aplot(void);
+static void display_aplot(Window w, APLOT ap);
+static void draw_aplot(APLOT ap);
+static void draw_scale(APLOT ap);
+static int editaplot(APLOT *ap);
+static void get_root(char *s, char *sroot, int *num);
+static void gif_aplot(void);
+static void gif_aplot_all(char *,int);
+static void init_arrayplot(APLOT *ap);
+static void print_aplot(APLOT *ap);
+static void redraw_aplot(APLOT ap);
+static void reset_aplot_axes(APLOT ap);
+static void scale_aplot(APLOT *ap, double *zmax, double *zmin);
+static void set_acolor(int);
+static void tag_aplot(char *);
+static void wborder(Window w, int i, APLOT ap);
+
+/* --- Data --- */
 int aplot_range;
-int aplot_range_count=0;
-int aplot_still=1,aplot_tag=0;
-int first_aplot_press;
-int plot3d_auto_redraw=0;
-
-APLOT aplot;
-FILE *ap_fp;
-GC aplot_gc;
-
-void draw_one_array_plot(char *bob) {
-	char filename[XPP_MAX_NAME];
-
-	redraw_aplot(aplot);
-	if(aplot_tag) {
-		tag_aplot(bob);
-	}
-	XFlush(display);
-	sprintf(filename,"%s.%d.gif",aplot_range_stem,aplot_range_count);
-	gif_aplot_all(filename,aplot_still);
-	aplot_range_count++;
-}
+static int aplot_range_count=0;
+static char aplot_range_stem[XPP_MAX_NAME]="rangearray";
+static int aplot_still=1,aplot_tag=0;
+static int first_aplot_press;
+static int plot3d_auto_redraw=0;
+static APLOT aplot;
+static FILE *ap_fp;
+static GC aplot_gc;
 
 
-void set_up_aplot_range(void) {
-	static char *n[]={"Basename","Still(1/0)","Tag(0/1)"};
-	char values[3][MAX_LEN_SBOX];
-	int status;
-	double *x;
-
-	sprintf(values[0],"%s",aplot_range_stem);
-	sprintf(values[1],"%d",aplot_still);
-	sprintf(values[2],"%d",aplot_tag);
-	status=do_string_box(3,3,1,"Array range saving",n,values,28);
-	if(status!=0) {
-		sprintf(aplot_range_stem,"%s",values[0]);
-		aplot_still=atoi(values[1]);
-		aplot_tag=atoi(values[2]);
-		aplot_range=1;
-		aplot_range_count=0;
-		x=&MyData[0];
-		do_range(x,0);
-	}
-}
-
-
-void fit_aplot(void) {
-	double zmax,zmin;
-
-	scale_aplot(&aplot,&zmax,&zmin);
-	aplot.zmin=zmin;
-	aplot.zmax=zmax;
-	redraw_aplot(aplot);
-}
-
-
-void optimize_aplot(int *plist) {
-	int i0=plist[0]-1;
-	int i1=plist[1]-1;
-	int nr,ns;
-	double zmax,zmin;
-
-	int nrows=my_browser.maxrow;
-	int ncol=i1+1-i0;
-	if(ncol<2 || nrows<2) {
-		return;
-	}
-	make_my_aplot("Array!");
-
-	aplot.index0=i0+1;
-	strcpy(aplot.name,uvar_names[i0]);
-	aplot.nacross=ncol;
-	nr=201;
-	if(nrows<nr) {
-		nr=nrows;
-	}
-	aplot.ndown=nr;
-	ns=nrows/nr;
-	aplot.nskip=ns;
-	aplot.ncskip=1;
-	scale_aplot(&aplot,&zmax,&zmin);
-	aplot.zmin=zmin;
-	aplot.zmax=zmax;
-	aplot.plotdef=1;
-	reset_aplot_axes(aplot);
-	redraw_aplot(aplot);
-}
-
-
-void make_my_aplot(char *name) {
-	if(aplot.alive==1) {
-		return;
-	}
-	create_arrayplot(&aplot,name,name);
-}
-
-
-void scale_aplot(APLOT *ap, double *zmax, double *zmin) {
-	int i,j,ib,jb,row0=ap->nstart,col0=ap->index0;
-	int nrows=my_browser.maxrow;
-	double z;
-
-	ib=col0;
-	jb=row0;
-	*zmax=my_browser.data[ib][jb];
-	*zmin=*zmax;
-	for(i=0;i<ap->nacross/ap->ncskip;i++) {
-		ib=col0+i*ap->ncskip;
-		if(ib<=my_browser.maxcol) {
-			for(j=0;j<ap->ndown;j++) {
-				jb=row0+ap->nskip*j;
-				if(jb<nrows && jb>=0) {
-					z=my_browser.data[ib][jb];
-					if(z<*zmin) {
-						*zmin=z;
-					}
-					if(z>*zmax) {
-						*zmax=z;
-					}
-				}
-			}
-		}
-	}
-	if(*zmin>=*zmax) {
-		*zmax=fabs(*zmin)+1+*zmin;
-	}
-}
-
-
-void init_arrayplot(APLOT *ap) {
-	ap->height=400;
-	ap->width=400;
-	ap->zmin=0.0;
-	ap->zmax=1.0;
-	ap->alive=0;
-	ap->plotdef=0;
-	ap->index0=1;
-	ap->indexn=0;
-	ap->nacross=1;
-	ap->ndown=50;
-	ap->nstart=0;
-	ap->nskip=8;
-	ap->ncskip=1;
-	ap->tstart=0.0;
-	ap->tend=20.0;
-	strcpy(ap->filename,"output.ps");
-	strcpy(ap->xtitle,"index");
-	strcpy(ap->ytitle,"time");
-	strcpy(ap->bottom,"");
-	ap->type=-1;
-}
-
-void expose_aplot(Window w) {
-	if(aplot.alive) {
-		display_aplot(w,aplot);
+/* --- Functions --- */
+void close_aplot_files(void) {
+	if(aplot_still==0) {
+		fclose(ap_fp);
 	}
 }
 
@@ -228,11 +117,6 @@ void do_array_plot_events(XEvent ev) {
 		return;
 	}
 	switch(ev.type) {
-	/* case Expose:
-  case MapNotify:
-	display_aplot(ev.xany.window,aplot);
-	break;
-  */
 	case MotionNotify:
 		if(ev.xany.window==aplot.wplot) {
 			aplot.nstart=aplot.nstart-ev.xmotion.y+first_aplot_press;
@@ -270,18 +154,47 @@ void do_array_plot_events(XEvent ev) {
 }
 
 
-void wborder(Window w, int i, APLOT ap) {
-	if(w==ap.wedit || w==ap.wprint || w==ap.wclose || w==ap.wredraw ||
-	   w==ap.wgif || w==ap.wrange || w==ap.wfit) {
-		XSetWindowBorderWidth(display,w,i);
+void draw_one_array_plot(char *bob) {
+	char filename[XPP_MAX_NAME];
+
+	redraw_aplot(aplot);
+	if(aplot_tag) {
+		tag_aplot(bob);
+	}
+	XFlush(display);
+	sprintf(filename,"%s.%d.gif",aplot_range_stem,aplot_range_count);
+	gif_aplot_all(filename,aplot_still);
+	aplot_range_count++;
+}
+
+
+void dump_aplot(FILE *fp, int f) {
+	char bob[MAX_STRING_LENGTH];
+
+	if(f==READEM) {
+		fgets(bob,255,fp);
+	} else {
+		fprintf(fp,"# Array plot stuff\n");
+		io_string(aplot.name,11,fp,f);
+		io_int(&aplot.nacross ,fp,f,"NCols");
+		io_int(&aplot.nstart ,fp,f,"Row 1");
+		io_int(&aplot.ndown ,fp,f,"NRows");
+		io_int(&aplot.nskip ,fp,f,"RowSkip");
+		io_double(&aplot.zmin,fp,f,"Zmin");
+		io_double(&aplot.zmax,fp,f,"Zmax");
 	}
 }
 
-void destroy_aplot(void) {
-	aplot.alive=0;
-	waitasec(ClickTime);
-	XDestroySubwindows(display,aplot.base);
-	XDestroyWindow(display,aplot.base);
+
+void edit_aplot(void) {
+	editaplot(&aplot);
+}
+
+
+void expose_aplot(Window w) {
+	if(aplot.alive) {
+		display_aplot(w,aplot);
+	}
 }
 
 
@@ -290,7 +203,153 @@ void init_my_aplot(void) {
 }
 
 
-void create_arrayplot(APLOT *ap, char *wname, char *iname) {
+void make_my_aplot(char *name) {
+	if(aplot.alive==1) {
+		return;
+	}
+	create_arrayplot(&aplot,name,name);
+}
+
+
+void optimize_aplot(int *plist) {
+	int i0=plist[0]-1;
+	int i1=plist[1]-1;
+	int nr,ns;
+	double zmax,zmin;
+
+	int nrows=my_browser.maxrow;
+	int ncol=i1+1-i0;
+	if(ncol<2 || nrows<2) {
+		return;
+	}
+	make_my_aplot("Array!");
+
+	aplot.index0=i0+1;
+	strcpy(aplot.name,uvar_names[i0]);
+	aplot.nacross=ncol;
+	nr=201;
+	if(nrows<nr) {
+		nr=nrows;
+	}
+	aplot.ndown=nr;
+	ns=nrows/nr;
+	aplot.nskip=ns;
+	aplot.ncskip=1;
+	scale_aplot(&aplot,&zmax,&zmin);
+	aplot.zmin=zmin;
+	aplot.zmax=zmax;
+	aplot.plotdef=1;
+	reset_aplot_axes(aplot);
+	redraw_aplot(aplot);
+}
+
+
+/* --- Static Functions --- */
+static void set_up_aplot_range(void) {
+	static char *n[]={"Basename","Still(1/0)","Tag(0/1)"};
+	char values[3][MAX_LEN_SBOX];
+	int status;
+	double *x;
+
+	sprintf(values[0],"%s",aplot_range_stem);
+	sprintf(values[1],"%d",aplot_still);
+	sprintf(values[2],"%d",aplot_tag);
+	status=do_string_box(3,3,1,"Array range saving",n,values,28);
+	if(status!=0) {
+		sprintf(aplot_range_stem,"%s",values[0]);
+		aplot_still=atoi(values[1]);
+		aplot_tag=atoi(values[2]);
+		aplot_range=1;
+		aplot_range_count=0;
+		x=&MyData[0];
+		do_range(x,0);
+	}
+}
+
+
+static void fit_aplot(void) {
+	double zmax,zmin;
+
+	scale_aplot(&aplot,&zmax,&zmin);
+	aplot.zmin=zmin;
+	aplot.zmax=zmax;
+	redraw_aplot(aplot);
+}
+
+
+static void scale_aplot(APLOT *ap, double *zmax, double *zmin) {
+	int i,j,ib,jb,row0=ap->nstart,col0=ap->index0;
+	int nrows=my_browser.maxrow;
+	double z;
+
+	ib=col0;
+	jb=row0;
+	*zmax=my_browser.data[ib][jb];
+	*zmin=*zmax;
+	for(i=0;i<ap->nacross/ap->ncskip;i++) {
+		ib=col0+i*ap->ncskip;
+		if(ib<=my_browser.maxcol) {
+			for(j=0;j<ap->ndown;j++) {
+				jb=row0+ap->nskip*j;
+				if(jb<nrows && jb>=0) {
+					z=my_browser.data[ib][jb];
+					if(z<*zmin) {
+						*zmin=z;
+					}
+					if(z>*zmax) {
+						*zmax=z;
+					}
+				}
+			}
+		}
+	}
+	if(*zmin>=*zmax) {
+		*zmax=fabs(*zmin)+1+*zmin;
+	}
+}
+
+
+static void init_arrayplot(APLOT *ap) {
+	ap->height=400;
+	ap->width=400;
+	ap->zmin=0.0;
+	ap->zmax=1.0;
+	ap->alive=0;
+	ap->plotdef=0;
+	ap->index0=1;
+	ap->indexn=0;
+	ap->nacross=1;
+	ap->ndown=50;
+	ap->nstart=0;
+	ap->nskip=8;
+	ap->ncskip=1;
+	ap->tstart=0.0;
+	ap->tend=20.0;
+	strcpy(ap->filename,"output.ps");
+	strcpy(ap->xtitle,"index");
+	strcpy(ap->ytitle,"time");
+	strcpy(ap->bottom,"");
+	ap->type=-1;
+}
+
+
+static void wborder(Window w, int i, APLOT ap) {
+	if(w==ap.wedit || w==ap.wprint || w==ap.wclose || w==ap.wredraw ||
+	   w==ap.wgif || w==ap.wrange || w==ap.wfit) {
+		XSetWindowBorderWidth(display,w,i);
+	}
+}
+
+static void destroy_aplot(void) {
+	aplot.alive=0;
+	waitasec(ClickTime);
+	XDestroySubwindows(display,aplot.base);
+	XDestroyWindow(display,aplot.base);
+}
+
+
+
+static void create_arrayplot(APLOT *ap, char *wname, char *iname) {
 	Window base;
 	int width,height;
 	unsigned int valuemask=0;
@@ -336,7 +395,7 @@ void create_arrayplot(APLOT *ap, char *wname, char *iname) {
 }
 
 
-void print_aplot(APLOT *ap) {
+static void print_aplot(APLOT *ap) {
 	double tlo,thi;
 	int status,errflag;
 	static char *n[]={"Filename","Top label","Side label","Bottom label",
@@ -391,7 +450,7 @@ void print_aplot(APLOT *ap) {
 	}
 }
 
-void apbutton(Window w) {
+static void apbutton(Window w) {
 	if(w==aplot.wedit) {
 		editaplot(&aplot);
 	}
@@ -416,7 +475,7 @@ void apbutton(Window w) {
 }
 
 
-void draw_scale(APLOT ap) {
+static void draw_scale(APLOT ap) {
 	int i,y;
 
 	Window w=ap.wscale;
@@ -428,7 +487,7 @@ void draw_scale(APLOT ap) {
 }
 
 
-void draw_aplot(APLOT ap) {
+static void draw_aplot(APLOT ap) {
 	if(plot3d_auto_redraw!=1) {
 		return;
 	}
@@ -436,12 +495,7 @@ void draw_aplot(APLOT ap) {
 }
 
 
-void edit_aplot(void) {
-	editaplot(&aplot);
-}
-
-
-void get_root(char *s, char *sroot, int *num) {
+static void get_root(char *s, char *sroot, int *num) {
 	int n=strlen(s);
 	int i=n-1,j;
 
@@ -473,7 +527,7 @@ void get_root(char *s, char *sroot, int *num) {
 	}
 }
 
-void reset_aplot_axes(APLOT ap) {
+static void reset_aplot_axes(APLOT ap) {
 	char bob[200];
 	char sroot[100];
 	int num;
@@ -488,24 +542,6 @@ void reset_aplot_axes(APLOT ap) {
 	display_aplot(ap.wmax,ap);
 	display_aplot(ap.wmin,ap);
 	gtitle_text(bob,ap.base);
-}
-
-
-void dump_aplot(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
-
-	if(f==READEM) {
-		fgets(bob,255,fp);
-	} else {
-		fprintf(fp,"# Array plot stuff\n");
-		io_string(aplot.name,11,fp,f);
-		io_int(&aplot.nacross ,fp,f,"NCols");
-		io_int(&aplot.nstart ,fp,f,"Row 1");
-		io_int(&aplot.ndown ,fp,f,"NRows");
-		io_int(&aplot.nskip ,fp,f,"RowSkip");
-		io_double(&aplot.zmin,fp,f,"Zmin");
-		io_double(&aplot.zmax,fp,f,"Zmax");
-	}
 }
 
 
@@ -557,14 +593,7 @@ int editaplot(APLOT *ap) {
 }
 
 
-void close_aplot_files(void) {
-	if(aplot_still==0) {
-		fclose(ap_fp);
-	}
-}
-
-
-void gif_aplot_all(char *filename, int still) {
+static void gif_aplot_all(char *filename, int still) {
 	Pixmap xi;
 	int x,y;
 	unsigned int h,w,bw,d;
@@ -606,7 +635,7 @@ void gif_aplot_all(char *filename, int still) {
 }
 
 
-void gif_aplot(void) {
+static void gif_aplot(void) {
 	char filename[XPP_MAX_NAME];
 	sprintf(filename,"%s.gif",this_file);
 	if(!file_selector("GIF plot",filename,"*.gif")) {
@@ -616,7 +645,7 @@ void gif_aplot(void) {
 }
 
 
-void grab_aplot_screen(APLOT ap) {
+static void grab_aplot_screen(APLOT ap) {
 	Window temp=draw_win;
 	draw_win=ap.wplot;
 	if(film_clip()==0) {
@@ -626,7 +655,7 @@ void grab_aplot_screen(APLOT ap) {
 }
 
 
-void redraw_aplot(APLOT ap) {
+static void redraw_aplot(APLOT ap) {
 	int i,j,w=ap.wplot;
 	double z,dx,dy,x,y,tlo,thi;
 	char bob[100];
@@ -693,13 +722,13 @@ void redraw_aplot(APLOT ap) {
 }
 
 
-void tag_aplot(char *bob) {
+static void tag_aplot(char *bob) {
 	set_color(0);
 	XDrawString(display,aplot.wplot,small_gc,0,CURY_OFFs,bob,strlen(bob));
 }
 
 
-void set_acolor(int col) {
+static void set_acolor(int col) {
 	if(col<0) {
 		XSetForeground(display,aplot_gc,GrBack);
 	} else if(col==0) {
@@ -714,7 +743,7 @@ void set_acolor(int col) {
 }
 
 
-void display_aplot(Window w, APLOT ap) {
+static void display_aplot(Window w, APLOT ap) {
 	char bob[200];
 
 	if(w==ap.wplot) {
