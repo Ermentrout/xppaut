@@ -479,7 +479,7 @@ int set_function_pointers(const iap_type iap,function_list *data) {
 	return 0;
 }
 
-dump_params(iap_type iap, rap_type rap,int *icp, double *thl) {
+void dump_params(iap_type iap, rap_type rap,int *icp, double *thl) {
 	int i;
 	printf("%d %d %d %d  \n", iap.ndim,iap.ips,iap.irs,iap.ilp);
 	printf("%d ",iap.nicp);

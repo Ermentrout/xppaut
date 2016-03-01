@@ -258,9 +258,6 @@ void write_info_out(void) {
 void load_browser_with_branch(int ibr,int pts,int pte) {
 	DIAGRAM *d;
 	int type,i,j,pt;
-	/*int flag=0;
-  */
-	int status;
 	int icp1,icp2;
 	double *par;
 	double par1,par2=0,*u0,per;
