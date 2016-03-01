@@ -17,6 +17,7 @@
 #include "my_rhs.h"
 #include "mykeydef.h"
 #include "parserslow.h"
+#include "storage.h"
 #include "xpplim.h"
 
 /* --- Macros --- */

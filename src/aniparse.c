@@ -45,6 +45,7 @@ want to alter the ordering below
 #include "integrate.h"
 #include "load_eqn.h"
 #include "main.h"
+#include "many_pops.h"
 #include "markov.h"
 #include "menudrive.h"
 #include "mykeydef.h"

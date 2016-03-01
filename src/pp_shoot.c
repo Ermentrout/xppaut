@@ -25,6 +25,7 @@
 #include "numerics.h"
 #include "parserslow.h"
 #include "pop_list.h"
+#include "storage.h"
 #include "xpplim.h"
 
 /* --- Macros --- */

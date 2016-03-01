@@ -41,6 +41,7 @@
 #include "pp_shoot.h"
 #include "read_dir.h"
 #include "rubber.h"
+#include "storage.h"
 #include "xAuto.h"
 
 /* --- Macros --- */

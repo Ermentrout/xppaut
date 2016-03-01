@@ -421,6 +421,8 @@ void do_batch_nclines(void) {
 	}
 
 }
+
+
 void set_colorization_stuff(void) {
 	user_set_color_par(ColorizeFlag,ColorVia,ColorViaLo,ColorViaHi);
 }

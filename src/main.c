@@ -1170,8 +1170,8 @@ XKeyEvent createKeyEvent(Window win,
 		event.type = KeyPress;
 	} else {
 		event.type = KeyRelease;
-		return event;
 	}
+	return event;
 }
 
 Window init_win(unsigned int bw, char *icon_name, char *win_name,

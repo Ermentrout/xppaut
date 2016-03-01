@@ -6,10 +6,13 @@
 #include "autevd.h"
 #include "auto_nox.h"
 #include "browse.h"
+#include "cv2.h"
 #include "form_ode.h"
+#include "init_conds.h"
 #include "load_eqn.h"
 #include "markov.h"
 #include "my_ps.h"
+#include "storage.h"
 
 #define DALLOC(a) (double *)malloc((a)*sizeof(double))
 

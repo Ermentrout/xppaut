@@ -5,6 +5,7 @@
 extern double *WORK;
 extern int IWORK[10000];
 extern int MAXSTOR;
+extern float **storage;
 
 /* --- Functions --- */
 void init_alloc_info(void);
