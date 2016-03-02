@@ -16,19 +16,42 @@
 /* --- Macros --- */
 #define MAXDAE 400
 
-double sdot();
 
-/*    will have more stuff someday */
+/* --- Types --- */
+typedef struct {
+	double *work;
+	int *iwork;
+	int status;
+} DAEWORK;
 
-DAEWORK dae_work;
-SOLV_VAR svar[MAXDAE];
-DAE_EQN aeqn[MAXDAE];
+typedef struct {
+	char name[12],*rhs;
+	int *form;
+	int index;
+	double value,last;
+} SOLV_VAR;
 
-int nsvar=0,naeqn=0;
+typedef struct {
+	char *rhs;
+	int *form;
+} DAE_EQN;
 
-/* this adds an algebraically defined variable  and a formula
-   for the first guess */
 
+/* --- Forward declarations --- */
+static void init_dae_work(void);
+static void get_dae_fun(double *y, double *f);
+static int solve_dae(void);
+
+
+/* --- Data --- */
+static int nsvar=0,naeqn=0;
+
+static DAEWORK dae_work;
+static SOLV_VAR svar[MAXDAE];
+static DAE_EQN aeqn[MAXDAE];
+
+/* --- Functions --- */
+/* this adds an algebraically defined variable and a formula for the first guess */
 int add_svar(char *name, char *rhs) {
 	if(nsvar>=MAXDAE) {
 		plintf(" Too many variables\n");
@@ -44,8 +67,8 @@ int add_svar(char *name, char *rhs) {
 	return 0;
 }
 
-/* adds algebraically define name to name list */
 
+/* adds algebraically define name to name list */
 int add_svar_names(void) {
 	int i;
 	for(i=0;i<nsvar;i++) {
@@ -57,8 +80,8 @@ int add_svar_names(void) {
 	return 0;
 }
 
-/* adds a right-hand side to slove for zero */
 
+/* adds a right-hand side to slove for zero */
 int add_aeqn(char *rhs) {
 	if(naeqn>=MAXDAE) {
 		plintf(" Too many equations\n");
@@ -105,24 +128,14 @@ int compile_svars(void) {
 }
 
 
-void reset_dae(void) {
-	dae_work.status=1;
-}
-
-
-void set_init_guess(void) {
-	int i;
-	double z;
-	dae_work.status=1;
-	if(nsvar==0) {
-		return;
+void do_daes(void) {
+	int ans;
+	ans=solve_dae();
+	dae_work.status=ans;
+	if(ans==1 || ans==2) {
+		return; /* accepts a no change error! */
 	}
-	for(i=0;i<nsvar;i++) {
-		z=evaluate(svar[i].form);
-		SETVAR(svar[i].index,z);
-		svar[i].value=z;
-		svar[i].last=z;
-	}
+	DelayErr=1;
 }
 
 
@@ -146,13 +159,60 @@ void err_dae(void) {
 }
 
 
-void init_dae_work(void) {
+/* interface shit -- different for Win95 */
+void get_new_guesses(void) {
+	int i,n;
+	char name[30];
+	double z;
+	if(nsvar<1) {
+		return;
+	}
+	for(i=0;i<nsvar;i++) {
+		z=svar[i].last;
+		sprintf(name,"Initial %s(%g):",svar[i].name,z);
+		new_string(name,svar[i].rhs);
+		if(add_expr(svar[i].rhs,svar[i].form,&n)) {
+			err_msg("Illegal formula");
+			return;
+		}
+		z=evaluate(svar[i].form);
+		SETVAR(svar[i].index,z);
+		svar[i].value=z;
+		svar[i].last=z;
+	}
+}
+
+
+void reset_dae(void) {
+	dae_work.status=1;
+}
+
+
+void set_init_guess(void) {
+	int i;
+	double z;
+	dae_work.status=1;
+	if(nsvar==0) {
+		return;
+	}
+	for(i=0;i<nsvar;i++) {
+		z=evaluate(svar[i].form);
+		SETVAR(svar[i].index,z);
+		svar[i].value=z;
+		svar[i].last=z;
+	}
+}
+
+
+/* --- Static functions --- */
+static void init_dae_work(void) {
 	dae_work.work=(double *)malloc(sizeof(double)*(nsvar*nsvar+10*nsvar));
 	dae_work.iwork=(int *)malloc(sizeof(int)*nsvar);
 	dae_work.status=1;
 }
 
-void get_dae_fun(double *y, double *f) {
+
+static void get_dae_fun(double *y, double *f) {
 	int i;
 	/* better do this in case fixed variables depend on sol_var */
 	for(i=0;i<nsvar;i++) {
@@ -167,18 +227,8 @@ void get_dae_fun(double *y, double *f) {
 }
 
 
-void do_daes(void) {
-	int ans;
-	ans=solve_dae();
-	dae_work.status=ans;
-	if(ans==1 || ans==2) {
-		return; /* accepts a no change error! */
-	}
-	DelayErr=1;
-}
-
 /* Newton solver for algebraic stuff */
-int solve_dae(void) {
+static int solve_dae(void) {
 	int i,j,n;
 	int info;
 	double err,del,z,yold;
@@ -267,28 +317,5 @@ int solve_dae(void) {
 			}
 			return(-2); /* too many iterates */
 		}
-	}
-}
-
-/* interface shit -- different for Win95 */
-void get_new_guesses(void) {
-	int i,n;
-	char name[30];
-	double z;
-	if(nsvar<1) {
-		return;
-	}
-	for(i=0;i<nsvar;i++) {
-		z=svar[i].last;
-		sprintf(name,"Initial %s(%g):",svar[i].name,z);
-		new_string(name,svar[i].rhs);
-		if(add_expr(svar[i].rhs,svar[i].form,&n)) {
-			err_msg("Illegal formula");
-			return;
-		}
-		z=evaluate(svar[i].form);
-		SETVAR(svar[i].index,z);
-		svar[i].value=z;
-		svar[i].last=z;
 	}
 }
