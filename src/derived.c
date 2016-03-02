@@ -13,25 +13,40 @@
 /* --- Macros --- */
 #define MAXDERIVED 200
 
-DERIVED derived[MAXDERIVED];
-int nderived=0;
+/* --- Types --- */
+typedef struct {
+	int index,*form;
+	char *rhs;
+	double value;
+} DERIVED;
+
+/* --- Data --- */
+static DERIVED derived[MAXDERIVED];
+static int nderived=0;
 
 /* --- Functions --- */
-double evaluate();
-
-/* clean up derived stuff */
-void free_derived(void) {
-	int i;
-	for(i=0;i<nderived;i++) {
-		free(derived[i].form);
-		free(derived[i].rhs);
+/* this adds a derived quantity  */
+int add_derived(char *name, char *rhs) {
+	int n=strlen(rhs)+2;
+	int i0;
+	if(nderived>=MAXDERIVED) {
+		plintf(" Too many derived constants! \n");
+		return(1);
 	}
-	nderived=0;
+	i0=nderived;
+	derived[i0].rhs=(char *)malloc(n);
+	/* save the right hand side */
+	strcpy(derived[i0].rhs,rhs);
+	/* this is the constant to which it addresses */
+	derived[i0].index=NCON;
+	/* add the name to the recognized symbols */
+	plintf(" derived constant[%d] is %s = %s\n",NCON,name,rhs);
+	nderived++;
+	return(add_con(name,0.0));
 }
 
 
-/* This compiles all of the formulae. t is called only once during the session
- */
+/* This compiles all of the formulae. t is called only once during the session */
 int compile_derived(void) {
 	int i,k;
 	int f[256],n;
@@ -60,25 +75,4 @@ void evaluate_derived(void) {
 		derived[i].value=evaluate(derived[i].form);
 		constants[derived[i].index]=derived[i].value;
 	}
-}
-
-
-/* this adds a derived quantity  */
-int add_derived(char *name, char *rhs) {
-	int n=strlen(rhs)+2;
-	int i0;
-	if(nderived>=MAXDERIVED) {
-		plintf(" Too many derived constants! \n");
-		return(1);
-	}
-	i0=nderived;
-	derived[i0].rhs=(char *)malloc(n);
-	/* save the right hand side */
-	strcpy(derived[i0].rhs,rhs);
-	/* this is the constant to which it addresses */
-	derived[i0].index=NCON;
-	/* add the name to the recognized symbols */
-	plintf(" derived constant[%d] is %s = %s\n",NCON,name,rhs);
-	nderived++;
-	return(add_con(name,0.0));
 }
