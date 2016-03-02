@@ -30,7 +30,6 @@ noinst_HEADERS = \
 	axes2.h \
 	browse.h \
 	calc.h \
-	choice_box.h \
 	color.h \
 	comline.h \
 	config.h \
@@ -136,7 +135,6 @@ xppaut_SOURCES = \
 	browse.c \
 	cabs.c \
 	calc.c \
-	choice_box.c \
 	color.c \
 	comline.c \
 	conpar2.c \
@@ -218,7 +216,6 @@ libxpp_a_SOURCES = \
 	browse.c \
 	cabs.c \
 	calc.c \
-	choice_box.c \
 	color.c \
 	comline.c \
 	conpar2.c \
