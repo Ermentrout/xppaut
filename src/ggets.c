@@ -11,19 +11,33 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "axes2.h"
+#include "browse.h"
+#include "calc.h"
+#include "color.h"
+#include "graphics.h"
 #include "load_eqn.h"
 #include "main.h"
+#include "many_pops.h"
+#include "menudrive.h"
 #include "mykeydef.h"
 #include "newhome.h"
 #include "pop_list.h"
 
+/* --- Forward declarations --- */
+static void clr_line_at(Window w, int col0, int pos, int n);
+static void put_string_at(Window w, int col, char *s, int off);
+
+
+/* --- Data --- */
+static int CURS_X,CURS_Y;
+
 char *info_message;
-double atof();
 int MSStyle=0;
-int done=0;
-int CURS_X,CURS_Y;
 int xor_flag;
 
+
+/* --- Functions --- */
 void ping(void) {
 	if(tfBell && !XPPBatch) {
 		/*
@@ -42,6 +56,7 @@ void reset_graphics(void) {
 	hi_lite(draw_win);
 }
 
+
 void blank_screen(Window w) {
 	CURS_X=0;
 	CURS_Y=0;
@@ -53,15 +68,16 @@ void set_fore(void) {
 	XSetForeground(display,gc,MyForeColor);
 }
 
+
 void set_back(void) {
 	XSetForeground(display,gc,MyBackColor);
 }
 
-void showchar(int ch, int col, int row, Window or) {
+void showchar(int ch, int col, int row, Window win) {
 	char bob[2];
 	bob[0]=ch;
 	chk_xor();
-	XDrawString(display,or,gc,col,row+CURY_OFF,bob,1);
+	XDrawString(display,win,gc,col,row+CURY_OFF,bob,1);
 }
 
 void chk_xor(void) {
@@ -73,24 +89,8 @@ void chk_xor(void) {
 }
 
 
-void set_gcurs(int y, int x) {
-	CURS_X=x;
-	CURS_Y=y;
-}
-
-
 void clr_command(void) {
 	blank_screen(command_pop);
-}
-
-
-void draw_info_pop(Window win) {
-	if(win==info_pop) {
-		XClearWindow(display,info_pop);
-		BaseCol();
-		XDrawString(display,info_pop,gc,5,CURY_OFF,info_message,
-					strlen(info_message));
-	}
 }
 
 
@@ -99,13 +99,6 @@ void bottom_msg(int line, char *msg) {
 	BaseCol();
 	strcpy(info_message,msg);
 	XDrawString(display,info_pop,gc,5,CURY_OFF,msg,strlen(msg));
-}
-
-
-void gputs(char *string, Window win) {
-	int xloc=CURS_X*DCURX,yloc=CURS_Y*DCURY;
-	Ftext( xloc, yloc, string,win );
-	CURS_X+=strlen(string);
 }
 
 void err_msg(char *string) {
@@ -144,13 +137,6 @@ int plintf(char *fmt,...)
 int show_position(XEvent ev, int *com) {
 	check_draw_button(ev);
 	return(0);
-}
-
-
-void gpos_prn(char *string, int row, int col) {
-	clr_command();
-	Ftext(0,row*DCURY,string,command_pop);
-	CURS_X=strlen(string);
 }
 
 
@@ -296,22 +282,6 @@ void rectangle(int x, int y, int x2, int y2, Window w) {
 }
 
 
-void setfillstyle(int type, int color) {
-	if(type>-1) {
-		XSetFillStyle(display,gc,FillSolid);
-	}
-	if(color>0) {
-		XSetForeground(display,gc,MyForeColor);
-	} else {
-		XSetForeground(display,gc,MyBackColor);
-	}
-}
-
-void circle(int x, int y, int radius, Window w) {
-	XDrawArc(display,w,gc,x-radius,y-radius,2*radius,2*radius,0,360*64);
-}
-
-
 void xline(int x0, int y0, int x1, int y1, Window w) {
 	XDrawLine(display,w,gc_graph, x0,y0,x1,y1);
 }
@@ -367,10 +337,6 @@ void display_command(char *name, char *value, int pos, int col) {
 	}
 }
 
-void clr_line_at(Window w, int col0, int pos, int n) {
-	XClearArea(display,w,col0+pos*DCURX,0,(n+2)*DCURX,2*DCURY,False);
-}
-
 
 void put_cursor_at(Window w, int col0, int pos) {
 	int x1=col0+pos*DCURX;
@@ -379,12 +345,6 @@ void put_cursor_at(Window w, int col0, int pos) {
 	/* XDrawString(display,w,gc,col0+pos*DCURX-1,DCURY,"^",1);*/
 	XDrawLine(display,w,gc,x1,y1,x1,y2);
 	XDrawLine(display,w,gc,x2,y1,x2,y2);
-}
-
-
-void put_string_at(Window w, int col, char *s, int off) {
-	int l=strlen(s)-off;
-	XDrawString(display,w,gc,col,CURY_OFF,s+off,l);
 }
 
 
@@ -483,22 +443,6 @@ void edit_window(Window w, int *pos, char *value, int *col, int *done, int ch) {
 }
 
 
-void do_backspace(int *pos, char *value, int *col, Window w) {
-	char oldch;
-	*pos=*pos-1;
-	oldch=value[*pos];
-	value[*pos]='\0';
-	if(*col<(SCALEX-DCURX)) {
-		set_back();
-	}
-	showchar('_',*col,0,w);
-	*col=*col-DCURX;
-	showchar(oldch,*col,0,w);
-	set_fore();
-	showchar('_',*col,0,w);
-}
-
-
 void edit_command_string(XEvent ev, char *name, char *value, int *done, int *pos, int *col) {
 	char ch;
 	switch(ev.type) {
@@ -543,4 +487,15 @@ int new_string(char *name, char *value) {
 	}
 	strcpy(value,old_value);
 	return(0);
+}
+
+/* --- Static functions --- */
+static void clr_line_at(Window w, int col0, int pos, int n) {
+	XClearArea(display,w,col0+pos*DCURX,0,(n+2)*DCURX,2*DCURY,False);
+}
+
+
+static void put_string_at(Window w, int col, char *s, int off) {
+	int l=strlen(s)-off;
+	XDrawString(display,w,gc,col,CURY_OFF,s+off,l);
 }

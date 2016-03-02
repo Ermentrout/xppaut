@@ -9,7 +9,7 @@
 #include "eig_list.h"
 #include "gear.h"
 #include "ggets.h"
-
+#include "main.h"
 #include "xpplim.h"
 
 /* --- Macros --- */

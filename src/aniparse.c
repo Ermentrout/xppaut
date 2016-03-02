@@ -99,7 +99,6 @@ want to alter the ordering below
 
 #define TRANSIENT 20
 #define PERMANENT 21
-#define END 50
 #define DIMENSION 22
 #define COMNT 30
 #define SPEED 23

@@ -645,16 +645,6 @@ static void gif_aplot(void) {
 }
 
 
-static void grab_aplot_screen(APLOT ap) {
-	Window temp=draw_win;
-	draw_win=ap.wplot;
-	if(film_clip()==0) {
-		err_msg("Out of film!");
-	}
-	draw_win=temp;
-}
-
-
 static void redraw_aplot(APLOT ap) {
 	int i,j,w=ap.wplot;
 	double z,dx,dy,x,y,tlo,thi;
