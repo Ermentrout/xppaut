@@ -7,8 +7,76 @@
 #include <stdlib.h>
 
 #include "flags.h"
+#include "ggets.h"
+#include "my_rhs.h"
 #include "storage.h"
 
+
+/* --- Types --- */
+typedef void (*FcnEqDiff)(unsigned n, double x, double *y, double *f);
+typedef void (*SolTrait)(long nr, double xold, double x, double* y, unsigned n, int* irtrn);
+
+/* --- Forward declarations --- */
+static int dop853 (
+		unsigned n,      /* dimension of the system <= UINT_MAX-1*/
+ FcnEqDiff fcn,   /* function computing the value of f(x,y) */
+ double x,        /* initial x-value */
+ double* y,       /* initial values for y */
+ double xend,     /* final x-value (xend-x may be positive or negative) */
+ double* rtoler,  /* relative error tolerance */
+ double* atoler,  /* absolute error tolerance */
+ int itoler,      /* switch for rtoler and atoler */
+ SolTrait solout, /* function providing the numerical solution during integration */
+ int iout,        /* switch for calling solout */
+ FILE* fileout,   /* messages stream */
+ double uround,   /* rounding unit */
+ double safe,     /* safety factor */
+ double fac1,     /* parameters for step size selection */
+ double fac2,
+ double beta,     /* for stabilized step size control */
+ double hmax,     /* maximal step size */
+ double h,        /* initial step size */
+ long nmax,       /* maximal number of allowed steps */
+ int meth,        /* switch for the choice of the coefficients */
+ long nstiff,     /* test for stiffness */
+ unsigned nrdens, /* number of components for which dense outpout is required */
+ unsigned* icont, /* indexes of components for which dense output is required, >= nrdens */
+ unsigned licont,  /* declared length of icon */
+ double *work
+ );
+
+static int dopri5 (
+		unsigned n,      /* dimension of the system <= UINT_MAX-1*/
+ FcnEqDiff fcn,   /* function computing the value of f(x,y) */
+ double x,        /* initial x-value */
+ double* y,       /* initial values for y */
+ double xend,     /* final x-value (xend-x may be positive or negative) */
+ double* rtoler,  /* relative error tolerance */
+ double* atoler,  /* absolute error tolerance */
+ int itoler,      /* switch for rtoler and atoler */
+ SolTrait solout, /* function providing the numerical solution during integration */
+ int iout,        /* switch for calling solout */
+ FILE* fileout,   /* messages stream */
+ double uround,   /* rounding unit */
+ double safe,     /* safety factor */
+ double fac1,     /* parameters for step size selection */
+ double fac2,
+ double beta,     /* for stabilized step size control */
+ double hmax,     /* maximal step size */
+ double h,        /* initial step size */
+ long nmax,       /* maximal number of allowed steps */
+ int meth,        /* switch for the choice of the coefficients */
+ long nstiff,     /* test for stiffness */
+ unsigned nrdens, /* number of components for which dense outpout is required */
+ unsigned* icont, /* indexes of components for which dense output is required, >= nrdens */
+ unsigned licont , /* declared length of icon */
+ double *work
+ );
+
+static void dprhs(unsigned n, double t, double *y, double *f);
+
+
+/* --- Data --- */
 static long      nfcn, nstep, naccpt, nrejct;
 static double    hout, xold, xout;
 static unsigned  nrds, *indir;
@@ -16,41 +84,8 @@ static double    *yy1, *k1, *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10,*ysti;
 static double    *rcont1, *rcont2, *rcont3, *rcont4;
 static double    *rcont5, *rcont6, *rcont7, *rcont8;
 
-void dprhs(unsigned n, double t, double *y, double *f) {
-	my_rhs(t,y,f,n);
-}
 
-void dp_err(int k) {
-	ping();
-	switch(k) {
-	case -1:
-		err_msg("Input is not consistent");
-		break;
-	case -2:
-		err_msg("Larger nmax needed");
-		break;
-	case -3:
-		err_msg("Step size too small");
-		break;
-	case -4:
-		err_msg("Problem became stiff");
-		break;
-	}
-}
-
-int dp(int *istart, double *y, double *t, int n, double tout, double *tol,
-	   double *atol, int flag, int *kflag) {
-	int err=0;
-	if(NFlags==0) {
-		return(dormprin(istart,y,t,n,tout,tol,atol,flag,kflag));
-	}
-	err=one_flag_step_dp(istart,y,t,n,tout,tol,atol,flag,kflag);
-	if(err==1) {
-		*kflag=-9;
-	}
-	return 1;
-}
-
+/* --- Functions --- */
 /* this is the basic routine  */
 /* flag=0 for dopri5
  * flag=1 for dopri83
@@ -81,35 +116,42 @@ int dormprin(int *istart, double *y, double *t, int n, double tout,
 }
 
 
-long nfcnRead (void) {
-	return nfcn;
-} /* nfcnRead */
+int dp(int *istart, double *y, double *t, int n, double tout, double *tol,
+	   double *atol, int flag, int *kflag) {
+	int err=0;
+	if(NFlags==0) {
+		return(dormprin(istart,y,t,n,tout,tol,atol,flag,kflag));
+	}
+	err=one_flag_step_dp(istart,y,t,n,tout,tol,atol,flag,kflag);
+	if(err==1) {
+		*kflag=-9;
+	}
+	return 1;
+}
 
 
-long nstepRead (void) {
-	return nstep;
-} /* stepRead */
+void dp_err(int k) {
+	ping();
+	switch(k) {
+	case -1:
+		err_msg("Input is not consistent");
+		break;
+	case -2:
+		err_msg("Larger nmax needed");
+		break;
+	case -3:
+		err_msg("Step size too small");
+		break;
+	case -4:
+		err_msg("Problem became stiff");
+		break;
+	}
+}
 
-
-long naccptRead (void) {
-	return naccpt;
-} /* naccptRead */
-
-
-long nrejctRead (void) {
-	return nrejct;
-} /* nrejct */
-
-
-double hRead (void) {
-	return hout;
-} /* hRead */
-
-
-double xRead (void) {
-	return xout;
-} /* xRead */
-
+/* --- Static functions --- */
+static void dprhs(unsigned n, double t, double *y, double *f) {
+	my_rhs(t,y,f,n);
+}
 
 static double sign (double a, double b) {
 	return (b < 0.0)? -fabs(a) : fabs(a);
@@ -728,7 +770,7 @@ static int dopcor (unsigned n, FcnEqDiff fcn, double x, double* y, double xend,
 } /* dopcor */
 
 /* front-end */
-int dop853(unsigned n, FcnEqDiff fcn, double x, double* y, double xend, double* rtoler,
+static int dop853(unsigned n, FcnEqDiff fcn, double x, double* y, double xend, double* rtoler,
 		   double* atoler, int itoler, SolTrait solout, int iout, FILE* fileout, double uround,
 		   double safe, double fac1, double fac2, double beta, double hmax, double h,
 		   long nmax, int meth, long nstiff, unsigned nrdens, unsigned* icont, unsigned licont,double *work) {
@@ -891,30 +933,6 @@ int dop853(unsigned n, FcnEqDiff fcn, double x, double* y, double xend, double* 
 
 } /* dop853 */
 
-
-
-/* dense output function */
-double contd8 (unsigned ii, double x) {
-	unsigned i;
-	double   s, s1;
-	i = UINT_MAX;
-
-	if(!indir) {
-		i = ii;
-	} else {
-		i = indir[ii];
-	}
-	if(i == UINT_MAX) {
-		plintf ("No dense output available for %uth component", ii);
-		return 0.0;
-	}
-
-	s = (x - xold) / hout;
-	s1 = 1.0 - s;
-
-	return rcont1[i]+s*(rcont2[i]+s1*(rcont3[i]+s*(rcont4[i]+s1*(rcont5[i]+
-																 s*(rcont6[i]+s1*(rcont7[i]+s*rcont8[i]))))));
-} /* contd8 */
 
 /************    dopri5  ***************************/
 static double hinit5 (unsigned n, FcnEqDiff fcn, double x, double* y,
@@ -1263,12 +1281,10 @@ static int dopcor5 (unsigned n, FcnEqDiff fcn, double x, double* y, double xend,
 
 
 /* front-end */
-int dopri5
-(unsigned n, FcnEqDiff fcn, double x, double* y, double xend, double* rtoler,
+static int dopri5 (unsigned n, FcnEqDiff fcn, double x, double* y, double xend, double* rtoler,
  double* atoler, int itoler, SolTrait solout, int iout, FILE* fileout, double uround,
  double safe, double fac1, double fac2, double beta, double hmax, double h,
- long nmax, int meth, long nstiff, unsigned nrdens, unsigned* icont, unsigned licont, double *work)
-{
+ long nmax, int meth, long nstiff, unsigned nrdens, unsigned* icont, unsigned licont, double *work) {
 	int       arret, idid;
 	unsigned  i;
 
@@ -1424,27 +1440,3 @@ int dopri5
 	}
 	return idid;
 } /* dopri5 */
-
-/* dense output function */
-double contd5 (unsigned ii, double x)
-{
-	unsigned i;
-	double   theta, theta1;
-
-	i = UINT_MAX;
-
-	if(!indir) {
-		i = ii;
-	} else {
-		i = indir[ii];
-	}
-	if(i == UINT_MAX) {
-		plintf ("No dense output available for %uth component", ii);
-		return 0.0;
-	}
-
-	theta = (x - xold) / hout;
-	theta1 = 1.0 - theta;
-
-	return rcont1[i] + theta*(rcont2[i] + theta1*(rcont3[i] + theta*(rcont4[i] + theta1*rcont5[i])));
-} /* contd5 */
