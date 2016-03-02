@@ -1223,22 +1223,6 @@ static void find_value(int col, double val, int *row, BROWSER b) {
 }
 
 
-
-static void get_col_list(char *s, int *cl, int *n) {
-	int len,i;
-
-	char sp[256];
-	convert(s,sp);
-	len=strlen(sp);
-	if(len==0) {
-		for(i=0;i<*n;i++) {
-			cl[i]=i;
-		}
-		return;
-	}
-}
-
-
 static void kill_browser(BROWSER *b) {
 	b->xflag=0;
 	waitasec(ClickTime);

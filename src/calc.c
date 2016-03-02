@@ -20,120 +20,26 @@
 #include "pop_list.h"
 #include "xpplim.h"
 
-double calculate(/* char * */);
-double evaluate();
+/* --- Types --- */
+typedef struct {
+	Window base,quit,answer;
+	double last_val;
+	int use;
+} MY_CALC;
 
-MY_CALC my_calc;
+/* --- Forward declarations --- */
+static void draw_calc(Window w);
+static double calculate(char *expr, int *ok);
+static int has_eq(char *z, char *w, int *where);
+static void ini_calc_string(char *name, char *value, int *pos, int *col);
+static void make_calc(double z);
+static void quit_calc(void);
 
-void draw_calc(Window w) {
-	char bob[100];
-	if(w==my_calc.answer) {
-		XClearWindow(display,w);
-		sprintf(bob,"%.16g",my_calc.last_val);
-		XDrawString(display,w,small_gc,0,CURY_OFFs,bob,strlen(bob));
-		return;
-	}
-	if(w==my_calc.quit) {
-		XDrawString(display,w,small_gc,0,CURY_OFFs,"Quit",4);
-		return;
-	}
-}
-
-void make_calc(double z) {
-	int width,height;
-	static char *name[]={"Answer"};
-	Window base;
-	XTextProperty winname;
-	XSizeHints size_hints;
-	my_calc.last_val=z;
-
-	if(my_calc.use==0) {
-		width=20+24*DCURXs;
-		height=4*DCURYs;
-		base=make_plain_window(RootWindow(display,screen),0,0,width,height,4);
-		my_calc.base=base;
-		XStringListToTextProperty(name,1,&winname);
-		size_hints.flags=PPosition|PSize|PMinSize|PMaxSize;
-		size_hints.x=0;
-		size_hints.y=0;
-		size_hints.width=width;
-		size_hints.height=height;
-		size_hints.min_width=width;
-		size_hints.min_height=height;
-		size_hints.max_width=width;
-		size_hints.max_height=height;
-
-		XSetWMProperties(display,base,&winname,&winname,
-						 NULL,0,&size_hints,NULL,NULL);
-		my_calc.answer=make_window(base,10,DCURYs/2,24*DCURXs,DCURYs,0);
-		width=(width-4*DCURXs)/2;
-		my_calc.quit=make_window(base,width,(int)(2.5*DCURYs),4*DCURXs,DCURYs,1);
-		XSelectInput(display,my_calc.quit,MYMASK);
-		my_calc.use=1;
-	}
-	draw_calc(my_calc.answer);
-	XFlush(display);
-}
+/* --- Data --- */
+static MY_CALC my_calc;
 
 
-void quit_calc(void) {
-	my_calc.use=0;
-	XSelectInput(display,my_calc.quit,SIMPMASK);
-	waitasec(ClickTime);
-	XDestroySubwindows(display,my_calc.base);
-	XDestroyWindow(display,my_calc.base);
-	clr_command();
-}
-
-void ini_calc_string(char *name, char *value, int *pos, int *col) {
-	strcpy(value," ");
-	strcpy(name,"Formula:");
-	*pos=strlen(value);
-	*col=(*pos+strlen(name))*DCURX;
-	clr_command();
-	display_command(name,value,2,0);
-}
-
-void q_calc(void) {
-	char value[80],name[10];
-	double z=0.0;
-	XEvent ev;
-	int done=0,pos,col,flag;
-	my_calc.use=0;
-	make_calc(z);
-	ini_calc_string(name,value,&pos,&col);
-	while(1) {
-		XNextEvent(display,&ev);
-		draw_calc(ev.xany.window);
-		if(ev.type==ButtonPress) {
-			if(ev.xbutton.window==my_calc.quit) {
-				break;
-			}
-		}
-		if(ev.type== EnterNotify && ev.xcrossing.window==my_calc.quit) {
-			XSetWindowBorderWidth(display,ev.xcrossing.window,2);
-		}
-
-		if(ev.type==LeaveNotify && ev.xcrossing.window==my_calc.quit) {
-			XSetWindowBorderWidth(display,ev.xcrossing.window,1);
-		}
-		edit_command_string(ev,name,value,&done,&pos,&col);
-		if(done==1) {
-			flag=do_calc(value,&z);
-			if(flag!=-1) {
-				make_calc(z);
-			}
-			ini_calc_string(name,value,&pos,&col);
-			done=0;
-		}
-		if(done==-1) {
-			break;
-		}
-	}
-	quit_calc();
-}
-
-
+/* --- Functions --- */
 int do_calc(char *temp, double *z) {
 	char val[15];
 	int ok;
@@ -178,7 +84,82 @@ int do_calc(char *temp, double *z) {
 }
 
 
-int has_eq(char *z, char *w, int *where) {
+void q_calc(void) {
+	char value[80],name[10];
+	double z=0.0;
+	XEvent ev;
+	int done=0,pos,col,flag;
+	my_calc.use=0;
+	make_calc(z);
+	ini_calc_string(name,value,&pos,&col);
+	while(1) {
+		XNextEvent(display,&ev);
+		draw_calc(ev.xany.window);
+		if(ev.type==ButtonPress) {
+			if(ev.xbutton.window==my_calc.quit) {
+				break;
+			}
+		}
+		if(ev.type== EnterNotify && ev.xcrossing.window==my_calc.quit) {
+			XSetWindowBorderWidth(display,ev.xcrossing.window,2);
+		}
+
+		if(ev.type==LeaveNotify && ev.xcrossing.window==my_calc.quit) {
+			XSetWindowBorderWidth(display,ev.xcrossing.window,1);
+		}
+		edit_command_string(ev,name,value,&done,&pos,&col);
+		if(done==1) {
+			flag=do_calc(value,&z);
+			if(flag!=-1) {
+				make_calc(z);
+			}
+			ini_calc_string(name,value,&pos,&col);
+			done=0;
+		}
+		if(done==-1) {
+			break;
+		}
+	}
+	quit_calc();
+}
+
+
+/* --- Static functions --- */
+static double calculate(char *expr, int *ok) {
+	int com[400],i;
+	double z=0.0;
+	if(add_expr(expr,com,&i)) {
+		err_msg("Illegal formula ..");
+		*ok=0;
+		goto bye;
+	}
+	/* fpr_command(com); */
+	z=evaluate(com);
+	*ok=1;
+bye:
+	/* plintf(" old=%d %d  new = %d %d \n",NCON,NSYM,NCON_START,NSYM_START);  */
+	NCON=NCON_START;
+	NSYM=NSYM_START;
+	return(z);
+}
+
+
+static void draw_calc(Window w) {
+	char bob[100];
+	if(w==my_calc.answer) {
+		XClearWindow(display,w);
+		sprintf(bob,"%.16g",my_calc.last_val);
+		XDrawString(display,w,small_gc,0,CURY_OFFs,bob,strlen(bob));
+		return;
+	}
+	if(w==my_calc.quit) {
+		XDrawString(display,w,small_gc,0,CURY_OFFs,"Quit",4);
+		return;
+	}
+}
+
+
+static int has_eq(char *z, char *w, int *where) {
 	int i;
 	for(i=0;i<strlen(z);i++) {
 		if(z[i]==':') {
@@ -195,20 +176,58 @@ int has_eq(char *z, char *w, int *where) {
 }
 
 
-double calculate(char *expr, int *ok) {
-	int com[400],i;
-	double z=0.0;
-	if(add_expr(expr,com,&i)) {
-		err_msg("Illegal formula ..");
-		*ok=0;
-		goto bye;
+static void ini_calc_string(char *name, char *value, int *pos, int *col) {
+	strcpy(value," ");
+	strcpy(name,"Formula:");
+	*pos=strlen(value);
+	*col=(*pos+strlen(name))*DCURX;
+	clr_command();
+	display_command(name,value,2,0);
+}
+
+
+static void make_calc(double z) {
+	int width,height;
+	static char *name[]={"Answer"};
+	Window base;
+	XTextProperty winname;
+	XSizeHints size_hints;
+	my_calc.last_val=z;
+
+	if(my_calc.use==0) {
+		width=20+24*DCURXs;
+		height=4*DCURYs;
+		base=make_plain_window(RootWindow(display,screen),0,0,width,height,4);
+		my_calc.base=base;
+		XStringListToTextProperty(name,1,&winname);
+		size_hints.flags=PPosition|PSize|PMinSize|PMaxSize;
+		size_hints.x=0;
+		size_hints.y=0;
+		size_hints.width=width;
+		size_hints.height=height;
+		size_hints.min_width=width;
+		size_hints.min_height=height;
+		size_hints.max_width=width;
+		size_hints.max_height=height;
+
+		XSetWMProperties(display,base,&winname,&winname,
+						 NULL,0,&size_hints,NULL,NULL);
+		my_calc.answer=make_window(base,10,DCURYs/2,24*DCURXs,DCURYs,0);
+		width=(width-4*DCURXs)/2;
+		my_calc.quit=make_window(base,width,(int)(2.5*DCURYs),4*DCURXs,DCURYs,1);
+		XSelectInput(display,my_calc.quit,MYMASK);
+		my_calc.use=1;
 	}
-	/* fpr_command(com); */
-	z=evaluate(com);
-	*ok=1;
-bye:
-	/* plintf(" old=%d %d  new = %d %d \n",NCON,NSYM,NCON_START,NSYM_START);  */
-	NCON=NCON_START;
-	NSYM=NSYM_START;
-	return(z);
+	draw_calc(my_calc.answer);
+	XFlush(display);
+}
+
+
+static void quit_calc(void) {
+	my_calc.use=0;
+	XSelectInput(display,my_calc.quit,SIMPMASK);
+	waitasec(ClickTime);
+	XDestroySubwindows(display,my_calc.base);
+	XDestroyWindow(display,my_calc.base);
+	clr_command();
 }
