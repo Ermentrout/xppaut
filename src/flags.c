@@ -1,20 +1,3 @@
-#include "flags.h"
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-
-#include "form_ode.h"
-#include "init_conds.h"
-#include "newpars.h"
-#include "odesol2.h"
-#include "parserslow.h"
-#include "pop_list.h"
-
-#define MY_DBL_EPS 5e-16
-
 /*  this is a new (Summer 1995) addition to XPP that allows one to
 	do things like delta functions and other discontinuous
 	stuff.
@@ -76,14 +59,59 @@ type =2 output
 type =3 halt
 */
 
-/* #define Set_ivar(a,b) variables[(a)]=(b) */
-FLAG flag[MAXFLAG];
+#include "flags.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+
+#include "cv2.h"
+#include "derived.h"
+#include "dormpri.h"
+#include "form_ode.h"
+#include "gear.h"
+#include "ggets.h"
+#include "init_conds.h"
+#include "integrate.h"
+#include "newpars.h"
+#include "odesol2.h"
+#include "parserslow.h"
+#include "pop_list.h"
+#include "stiff.h"
+
+
+/* --- Macros --- */
+#define MY_DBL_EPS 5e-16
+#define MAX_EVENTS 20 /*  this is the maximum number of events per flag */
+
+
+/* --- Types --- */
+typedef struct {
+	double f0,f1;
+	double tstar;
+	int lhs[MAX_EVENTS];
+	double vrhs[MAX_EVENTS];
+	char lhsname[MAX_EVENTS][11];
+	char *rhs[MAX_EVENTS];
+	int *comrhs[MAX_EVENTS];
+	char *cond;
+	int *comcond;
+	int sign,nevents;
+	int hit,type[MAX_EVENTS];
+	int anypars;
+	int nointerp;
+} FLAG;
+
+
+/* --- Data --- */
+static FLAG flag[MAXFLAG];
 int NFlags=0;
-
 double STOL=1.e-10;
-double evaluate();
 
 
+/* --- Functions --- */
 int add_global(char *cond, int sign, char *rest) {
 	char temp[256];
 	int nevents,ii,k,l,lt,j=NFlags;
@@ -228,8 +256,6 @@ int compile_flags(void) {
 
 
 /*  here is the shell code for a loop around  integration step  */
-
-
 int one_flag_step(double *yold, double *ynew, int *istart, double told, double *tnew, int neq, double *s) {
 	double dt=*tnew-told;
 	double f0,f1,tol,tolmin=1e-10;
@@ -396,7 +422,6 @@ int one_flag_step(double *yold, double *ynew, int *istart, double told, double *
 
 
 /*  here are the ODE drivers */
-
 int one_flag_step_symp(double *y, double dt, double *work, int neq, double *tim, int *istart) {
 	double yold[MAXODE],told;
 	int i,hit;
@@ -531,14 +556,6 @@ int one_flag_step_rk4(double *y, double dt, double *yval[3], int neq, double *ti
 		}
 	}
 	return(1);
-}
-
-void printflaginfo(void) {
-	int i;
-	for(i=0;i<NFlags;i++) {
-		plintf(" flag %d: tstart=%g f0=%g f1=%g hit=%d tol=%g\n",
-			   i, flag[i].tstar,flag[i].f0,flag[i].f1,flag[i].hit,fabs(flag[i].f0-flag[i].f1));
-	}
 }
 
 
