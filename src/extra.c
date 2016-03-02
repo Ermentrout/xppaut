@@ -24,27 +24,52 @@ export {x,y} {xp,yp}
 #include "parserslow.h"
 #include "read_dir.h"
 
+/* --- Macros --- */
 #define PAR 0
 #define VAR 1
-char dll_lib[256];
-char dll_fun[256];
+
+
+/* --- Types --- */
+typedef struct {
+	char libname[1024];
+	char libfile[MAX_STRING_LENGTH];
+	char fun[MAX_STRING_LENGTH];
+	int loaded;
+} DLFUN;
+
+
+typedef struct {
+	char *lin,*lout;
+	int *in,*intype;
+	int *out,*outtype;
+	int nin,nout;
+	double *vin,*vout;
+} IN_OUT;
+
+
+/* --- Forward declarations --- */
+static int get_export_count(char *s);
+static int my_fun(double *in, double *out, int nin, int nout, double *v, double *c);
+static void parse_inout(char *l, int flag);
+
+
+/* --- Data --- */
+char dll_lib[MAX_STRING_LENGTH];
+char dll_fun[MAX_STRING_LENGTH];
 int dll_flag=0;
 
-IN_OUT in_out;
-DLFUN dlf;
+static IN_OUT in_out;
+static DLFUN dlf;
+
 #ifdef HAVE_LIBDL
-/* this loads a dynamically linked library of the
-   users choice
-*/
-
+/* this loads a dynamically linked library of the users choice */
 #include <dlfcn.h>
-
 #define MAXW 50
 
-int dll_loaded=0;
+static int dll_loaded=0;
 
-void *dlhandle;
-double (*fun)();
+static void *dlhandle;
+static double (*fun)();
 
 void auto_load_dll(void) {
 	if(dll_flag==3) {
@@ -76,8 +101,7 @@ void load_new_dll(void) {
 void get_import_values(int n, double *ydot, char *soname, char *sofun,
 					   int ivar, double *wgt[MAXW],
 					   double *var, double *con) {
-	int i;
-	char sofullname[256];
+	char sofullname[MAX_STRING_LENGTH];
 	char *error;
 	if(dll_loaded==1) {
 		fun(n,ivar,con,var,wgt,ydot);
@@ -107,7 +131,7 @@ void get_import_values(int n, double *ydot, char *soname, char *sofun,
 	fun(n,ivar,con,var,wgt,ydot);
 }
 
-int my_fun(double *in, double *out, int nin,int nout,double *v,double *c) {
+static int my_fun(double *in, double *out, int nin,int nout,double *v,double *c) {
 	char *error;
 	if(dlf.loaded==-1) {
 		return 0;
@@ -158,7 +182,7 @@ void load_new_dll()
 }
 
 
-int my_fun(double *in, double *out, int nin,int nout,double *v,double *c)
+static int my_fun(double *in, double *out, int nin,int nout,double *v,double *c)
 {
 	return 0;
 }
@@ -210,22 +234,20 @@ void add_export_list(char *in,char *out) {
 	in_out.outtype=(int *)malloc((i+1)*sizeof(int));
 	in_out.vout=(double *)malloc((i+1)*sizeof(double));
 	in_out.nout=i;
-	/* plintf(" in %d out %d \n",in_out.nin,in_out.nout); */
 }
 
 
-void check_inout(void) {
-	int i;
-	for(i=0;i<in_out.nin;i++) {
-		plintf(" type=%d index=%d \n",in_out.intype[i],in_out.in[i]);
+void do_export_list(void) {
+	if(in_out.nin==0 || in_out.nout==0) {
+		return;
 	}
-	for(i=0;i<in_out.nout;i++) {
-		plintf(" type=%d index=%d \n",in_out.outtype[i],in_out.out[i]);
-	}
+	parse_inout(in_out.lin,0);
+	parse_inout(in_out.lout,1);
 }
 
 
-int get_export_count(char *s) {
+/* --- Static functions --- */
+static int get_export_count(char *s) {
 	int i=0;
 	int j;
 	int l=strlen(s);
@@ -239,17 +261,7 @@ int get_export_count(char *s) {
 }
 
 
-void do_export_list(void) {
-	if(in_out.nin==0 || in_out.nout==0) {
-		return;
-	}
-	parse_inout(in_out.lin,0);
-	parse_inout(in_out.lout,1);
-	/* check_inout(); */
-}
-
-
-void parse_inout(char *l,int flag) {
+static void parse_inout(char *l,int flag) {
 	int i=0,j=0;
 	int k=0,index;
 	char new_char[20],c;
