@@ -30,109 +30,118 @@
 #include "strutil.h"
 #include "xpplim.h"
 
-
+/* --- Macros --- */
 #define cstringmaj MYSTR1
 #define cstringmin MYSTR2
 
-/* --- Functions --- */
-int IN_INCLUDED_FILE=0;
+
+/* --- Forward declarations --- */
+static void add_only(char *s);
+static void add_comment(char *s);
+static void add_varinfo(int type, char *lhs, char *rhs, int nargs, char args[20][10 +1]);
+static void break_up_list(char *rhs);
+static int check_if_ic(char *big);
+static void clrscr(void);
+static void compile_em(void);
+static int compiler(char *bob, FILE *fptr);
+static int do_new_parser(FILE *fp, char *first, int nnn);
+static int extract_args(char *s1, int i0, int *ie, int *narg, char args[20][10 +1]);
+static int extract_ode(char *s1, int *ie, int i1);
+static void find_ker(char *string, int *alt);
+static int find_the_name(char list[1949][33], int n, char *name);
+static void format_list(char **s, int n);
+static int formula_or_number(char *expr, double *z);
+static void free_varinfo(void);
+static int get_a_filename(char *filename, char *wild);
+static int if_end_include(char *old);
+static int if_include_file(char *old, char *nf);
+static void init_varinfo(void);
+static int is_comment(char *s);
+static void list_em(char *wild);
+static int next_nonspace(char *s1, int i0, int *i1);
+static int not_ker(char *s, int i);
+static int parse_a_string(char *s1, VAR_INFO *v);
+static void read_a_line(FILE *fp, char *s);
+static int read_eqn(void);
+static void remove_blanks(char *s1);
+static void show_syms(void);
+static int strparse(char *s1, char *s2, int i0, int *i1);
+static void strpiece(char *dest, char *src, int i0, int ie);
+static void take_apart(char *bob, double *value, char *name);
+static void welcome(void);
+
+/* for parsing par, init with whitespace correctly */
+static char* new_string2(char* old, int length);
+static void advance_past_first_word(char** sptr);
+static char* get_next2(char** tokens_ptr);
+static void strcpy_trim(char* dest, char* source);
+static void strncpy_trim(char* dest, char* source, int n);
+
+
+/* --- Data --- */
+static char aux_names[MAXODE][12];
+static int BVP_NL,BVP_NR,BVP_N;
+static int IN_INCLUDED_FILE=0;
+static int IN_VARS;
+static int is_a_map=0;
+static int leng[MAXODE];
+static int Naux=0;
+static int NCON_ORIG,NSYM_ORIG;
+static int N_only=0;
+static int NUMODES=0,NUMFIX=0,NUMPARAM=0,NUMMARK=0,NUMAUX=0,NUMVOLT=0,NUMSOL=0;
+static int OldStyle=1;
+static char *onlylist[MAXONLY];
+static int start_var_info=0;
+
+static VAR_INFO *my_varinfo;
+
 char uvar_names[MAXODE][12];
 char *ode_names[MAXODE];
 char upar_names[MAXPAR][11];
 char *save_eqn[MAXLINES];
+double default_ic[MAXODE];
 double default_val[MAXPAR];
 
-VAR_INFO *my_varinfo;
-int start_var_info=0;
-
+int ConvertStyle=0;
+int EqType[MAXODE];
+int FIX_VAR;
 int *my_ode[MAXODE];
-
-int leng[MAXODE];
-
-char errmsg[256];
-char *onlylist[MAXONLY];
+int n_comments=0;
+int N_plist;
+int NODE,NUPAR,NLINES;
+int NCON_START,NSYM_START;
+int NEQ_MIN;
+int NMarkov;
 int *plotlist;
-int N_only=0,N_plist;
+int PrimeStart;
 
 ACTION comments[MAXCOMMENTS];
-ACTION *orig_comments;
-int orig_ncomments=0;
-int is_a_map=0;
-int n_comments=0;
 BC_STRUCT my_bc[MAXODE];
-
-double default_ic[MAXODE];
-int NODE,NUPAR,NLINES;
-int PrimeStart;
-int NCON_START,NSYM_START;
-int BVP_NL,BVP_NR,BVP_N;
-
-int ConvertStyle=0;
 FILE *convertf;
-int OldStyle=1;
-int NCON_ORIG,NSYM_ORIG;
-int IN_VARS;
-int NMarkov;
-
-int FIX_VAR;
-
-int ICREATE=0;
-int NEQ_MIN;
-int EqType[MAXODE];
-int Naux=0;
-char aux_names[MAXODE][12];
-
-int NUMODES=0,NUMFIX=0,NUMPARAM=0,NUMMARK=0,NUMAUX=0,NUMVOLT=0,NUMSOL=0;
-
 FIXINFO fixinfo[MAXODE];
 
-char *get_first(/* char *string,char *src */);
-char *get_next(/* char *src */);
-char *getsi();
-double atof();
-
-int make_eqn(void) {
-
-	int okay;
-	NEQ=2;
-	FIX_VAR=0;
-	NMarkov=0;
-
-	/* initscr(); */
-	/*
-   pos_prn("*(r)ead or (c)reate:",0,0);
-   ch=getuch();
-   pos_prn("",0,0);
-   okay=0;
-   switch(ch)
-   {
-	case 'r':okay=read_eqn(); break;
-	case 'c': okay=create_eqn();break;
-	  default : read_eqn();break;
-   }
-   */
-	okay=read_eqn();
-
-	return(okay);
-}
-
-void strip_saveqn(void) {
-	int i;
-	int j,n;
-	for(i=0;i<NLINES;i++) {
-		n=strlen(save_eqn[i]);
-		for(j=0;j<n;j++) {
-			if(save_eqn[i][j]<32) {
-				save_eqn[i][j]=32;
-			}
+/* --- Functions --- */
+void create_plot_list(void) {
+	int i,j=0,k;
+	if(N_only==0) {
+		return;
+	}
+	plotlist=(int *)malloc(sizeof(int)*(N_only+1));
+	for(i=0;i<N_only;i++) {
+		find_variable(onlylist[i],&k);
+		if(k>=0) {
+			plotlist[j]=k;
+			j++;
 		}
+		N_plist=j;
 	}
 }
+
 
 int disc(char *string) {
 	char c;
 	int i=0,l=strlen(string),j=0,flag=0;
-	char end[256];
+	char end[MAX_STRING_LENGTH];
 	if(is_a_map==1) {
 		return 1;
 	}
@@ -156,137 +165,28 @@ int disc(char *string) {
 }
 
 
-void dump_src(void) {
-	int i;
-	for(i=0;i<NLINES;i++) {
-		plintf("%s",save_eqn[i]);
-	}
-}
-
-
-void dump_comments(void) {
-	int i;
-	for(i=0;i<n_comments;i++) {
-		plintf("%s\n",comments[i].text);
-	}
-}
-
-
-void format_list(char **s,int n) {
-	int i,ip;
-	int ncol;
-	int k,j;
-	char fmat[30];
-	int lmax=0,l=0;
-	for(i=0;i<n;i++) {
-		l=strlen(s[i]);
-		if(lmax<l) {
-			lmax=l;
-		}
-	}
-	ncol=80/(lmax+2);
-	if(ncol<1) {
-		ncol=1;
-	}
-	if(ncol>8) {
-		ncol=8;
-	}
-	k=n/ncol;
-	j=n-ncol*k;
-	sprintf(fmat,"%s%d%s","%",lmax+2,"s");
-	for(ip=0;ip<k;ip++) {
-		for(i=0;i<ncol;i++) {
-			plintf(fmat,s[ip*ncol+i]);
-		}
-		plintf("\n");
-	}
-	for(i=0;i<j;i++) {
-		plintf(fmat,s[k*ncol+i]);
-	}
-	plintf("\n");
-}
-
-int get_a_filename(char *filename,char *wild) {
-	if(XPPBatch) {
-		char string[MAXEXPLEN];
-		list_em(wild);
-		while(1) {
-			plintf("(r)un (c)d (l)ist ");
-			scanf("%s",string);
-			if(string[0]=='r') {
-				plintf("Run file: ");
-				scanf("%s",filename);
-				plintf("Loading %s\n ",filename);
-				return 1;
-			} else {
-				if(string[0]=='l') {
-					plintf("List files of type: ");
-					scanf("%s",wild);
-					list_em(wild);
-				} else {
-					if(string[0]=='c') {
-						plintf("Change to directory: ");
-						scanf("%s",string);
-						change_directory(string);
-						list_em(wild);
-					}
-				}
+int find_char(char *s1, char *s2, int i0, int *i1) {
+	int m=strlen(s2),n=strlen(s1);
+	int i=i0;
+	char ch;
+	int j;
+	while(i<n) {
+		ch=s1[i];
+		for(j=0;j<m;j++) {
+			if(ch==s2[j]) {
+				*i1=i;
+				return(j);
 			}
 		}
-	} else {
-		int status;
-		/*strcpy (filename, "lecar.ode");
-	*/
-		get_directory(filename);
-		int m = strlen(filename);
-		if(filename[m-1] != '/') {
-			strcat(filename,"/");
-		}
-		status = file_selector ("Select an ODE file", filename, wild);
-		if(status == 0) {
-			bye_bye ();
-		} else {
-			return 1;
-		}
+		i++;
 	}
-	return(0);
-}
-
-
-void list_em(char *wild) {
-	get_directory(cur_dir);
-	plintf("%s: \n",cur_dir);
-	get_fileinfo(wild,cur_dir,&my_ff);
-	plintf("DIRECTORIES:\n");
-	format_list(my_ff.dirnames,my_ff.ndirs);
-	plintf("FILES OF TYPE %s:\n",wild);
-	format_list(my_ff.filenames,my_ff.nfiles);
-
-	free_finfo(&my_ff);
-}
-
-int read_eqn(void) {
-	char wild[256],string[256];
-	FILE *fptr;
-	int okay;
-	okay=0;
-	sprintf(wild,"*.ode");
-	get_a_filename(string,wild);
-	if((fptr=fopen(string,"r"))==NULL) {
-		plintf("\n Cannot open %s \n",string);
-		return(0);
-	}
-	strcpy(this_file,string);
-	clrscr();
-	okay=get_eqn(fptr);
-	fclose(fptr);
-	return(okay);
+	return(-1);
 }
 
 
 int get_eqn(FILE *fptr) {
 	char bob[MAXEXPLEN];
-	/*char filename[256];*/
+	/*char filename[MAX_STRING_LENGTH];*/
 	char filename[XPP_MAX_NAME];
 	int done=1,nn,i;
 	int flag;
@@ -300,8 +200,7 @@ int get_eqn(FILE *fptr) {
 	BVP_NR=0;
 	NUPAR=0;
 	NWiener=0;
-	/*check_for_xpprc();  This is now done just once and in do_vis_env()
-  */
+	/*check_for_xpprc();  This is now done just once and in do_vis_env() */
 	strcpy(options,"default.opt");
 	add_var("t",0.0);
 	/* plintf(" NEQ: "); */
@@ -442,7 +341,369 @@ int get_eqn(FILE *fptr) {
 }
 
 
-int compiler(char *bob, FILE *fptr) {
+char *get_first(char *string, char *src) {
+	char *ptr;
+	ptr=strtok(string,src);
+	return(ptr);
+}
+
+
+char *get_next(char *src) {
+	char *ptr;
+	ptr=strtok(NULL,src);
+	return(ptr);
+}
+
+
+int make_eqn(void) {
+
+	int okay;
+	NEQ=2;
+	FIX_VAR=0;
+	NMarkov=0;
+
+	okay=read_eqn();
+
+	return(okay);
+}
+
+
+int search_array(char *old, char *new_char, int *i1, int *i2, int *flag) {
+	int i,j,k,l;
+	int ileft,iright;
+	int n=strlen(old);
+	char num1[20],num2[20];
+	char ch,chp;
+	ileft=n-1;
+	iright=-1;
+	*i1=0;
+	*i2=0;
+	*flag=0;
+	strcpy(num1,"0");
+	strcpy(num2,"0");
+	if(old[0]=='#' || old[1]=='#') {  /* check for comments */
+		strcpy(new_char,old);
+		return 1;
+	}
+	if(check_if_ic(old)==1) {
+		extract_ic_data(old);
+		strcpy(new_char,old);
+		return 1;
+	}
+	for(i=0;i<n;i++) {
+		ch=old[i];
+		chp=old[i+1];
+		if(ch=='.' && chp=='.') {
+			j=0;
+			*flag=1;
+			if(old[0]=='%') {
+				*flag=2;   /*   FOR LOOP CONSTRUCTION  */
+			}
+			while(1) {
+				ch=old[i+j];
+				/*        plintf(" %d %c \n",j,ch); */
+				if(ch=='[') {
+					ileft=i+j;
+					l=0;
+					for(k=i+j+1;k<i;k++) {
+						num1[l]=old[k];
+						l++;
+					}
+					num1[l]=0;
+					break;
+				}
+				j--;
+				if((i+j)<=0) {
+					*i1=0;
+					*i2=0;
+					strcpy(new_char,old);
+					plintf(" Possible error in array %s -- ignoring it \n",old);
+					return(0); /* error in array  */
+				}
+			}
+			j=2;
+			while(1) {
+				ch=old[i+j];
+				if(ch==']') {
+					iright=i+j;
+					l=0;
+					for(k=2;k<j;k++) {
+						num2[l]=old[i+k];
+						l++;
+					}
+					num2[l]=0;
+					break;
+				}
+				j++;
+				if((i+j)>=n) {
+					*i1=0;
+					*i2=0;
+					strcpy(new_char,old);
+					plintf(" Possible error in array  %s -- ignoring it \n",old);
+					return(0); /* error again   */
+				}
+			}
+		}
+	}
+	/*  printf(" I have extracted [%s] and [%s] \n",num1,num2); */
+	*i1=atoi(num1);
+	*i2=atoi(num2);
+	/* now we have the numbers and will get rid of the junk inbetween */
+	l=0;
+	for(i=0;i<=ileft;i++) {
+		new_char[l]=old[i];
+		l++;
+	}
+	if(iright>0) {
+		new_char[l]='j';
+		l++;
+		for(i=iright;i<n;i++) {
+			new_char[l]=old[i];
+			l++;
+		}
+	}
+	new_char[l]=0;
+	return 1;
+}
+
+
+void strip_saveqn(void) {
+	int i;
+	int j,n;
+	for(i=0;i<NLINES;i++) {
+		n=strlen(save_eqn[i]);
+		for(j=0;j<n;j++) {
+			if(save_eqn[i][j]<32) {
+				save_eqn[i][j]=32;
+			}
+		}
+	}
+}
+
+
+void subsk(char *big, char *new_char, int k, int flag) {
+	int i,n=strlen(big),inew,add,inum,j,m,isign,ok,multflag=0;
+	char ch,chp,num[20];
+	inew=0;
+	i=0;
+	if(is_comment(big)) {
+		strcpy(new_char,big);
+		return;
+	}
+
+	while(1) {
+		ch=big[i];
+		chp=big[i+1];
+		if(ch=='[' && chp != 'j' && not_ker(big,i)) {
+			ok=1;
+			add=0;
+			inum=0;
+			isign=1;
+			i++;
+			while(ok) {
+				ch=big[i];
+				if(ch==']') {
+					i++;
+					num[inum]=0;
+					add=atoi(num);
+					sprintf(num,"%d",add);
+					m=strlen(num);
+					for(j=0;j<m;j++) {
+						new_char[inew]=num[j];
+						inew++;
+					}
+					ok=0;
+				} else {
+					i++;
+					num[inum]=ch;
+					inum++;
+				}
+			}
+		} else {
+			if(ch=='[' && chp=='j') {
+				if(flag==0) {
+					printf(" Illegal use of [j] at %s \n",big);
+					exit(0);
+				}
+				add=0;
+				inum=0;
+				isign=1;
+				i+=2;
+				ok=1;
+				while(ok) {
+					if(i>=n) {
+						new_char[inew]=0;
+						plintf("Error in %s The expression does not terminate. Perhaps a ] is missing.\n",big);
+						exit(0);
+					}
+					ch=big[i];
+					/*        plintf("i=%d inew=%d new ch= %c \n",i,inew,ch); */
+					switch(ch) {
+					case '+':
+						isign=1;
+						i++;
+						break;
+					case '-':
+						isign=-1;
+						i++;
+						break;
+					case '*':
+						i++;
+						isign=1;
+						multflag=1;
+						break;
+					case ']':
+						i++;
+						num[inum]=0;
+						if(multflag==0) {
+							add=atoi(num)*isign+k;
+						} else {
+							add=atoi(num)*k;
+							multflag=0;
+						}
+						sprintf(num,"%d",add);
+						m=strlen(num);
+						for(j=0;j<m;j++) {
+							new_char[inew]=num[j];
+							inew++;
+						}
+						ok=0;
+						break;
+					default:
+						i++;
+						num[inum]=ch;
+						inum++;
+						break;
+					}
+				}
+			} else {
+				new_char[inew]=ch;
+				i++;
+				inew++;
+			}
+		}
+		if(i>=n) {
+			break;
+		}
+	}
+	new_char[inew]=0;
+}
+
+
+/* --- Static functions --- */
+static void format_list(char **s,int n) {
+	int i,ip;
+	int ncol;
+	int k,j;
+	char fmat[30];
+	int lmax=0,l=0;
+	for(i=0;i<n;i++) {
+		l=strlen(s[i]);
+		if(lmax<l) {
+			lmax=l;
+		}
+	}
+	ncol=80/(lmax+2);
+	if(ncol<1) {
+		ncol=1;
+	}
+	if(ncol>8) {
+		ncol=8;
+	}
+	k=n/ncol;
+	j=n-ncol*k;
+	sprintf(fmat,"%s%d%s","%",lmax+2,"s");
+	for(ip=0;ip<k;ip++) {
+		for(i=0;i<ncol;i++) {
+			plintf(fmat,s[ip*ncol+i]);
+		}
+		plintf("\n");
+	}
+	for(i=0;i<j;i++) {
+		plintf(fmat,s[k*ncol+i]);
+	}
+	plintf("\n");
+}
+
+static int get_a_filename(char *filename,char *wild) {
+	if(XPPBatch) {
+		char string[MAXEXPLEN];
+		list_em(wild);
+		while(1) {
+			plintf("(r)un (c)d (l)ist ");
+			scanf("%s",string);
+			if(string[0]=='r') {
+				plintf("Run file: ");
+				scanf("%s",filename);
+				plintf("Loading %s\n ",filename);
+				return 1;
+			} else {
+				if(string[0]=='l') {
+					plintf("List files of type: ");
+					scanf("%s",wild);
+					list_em(wild);
+				} else {
+					if(string[0]=='c') {
+						plintf("Change to directory: ");
+						scanf("%s",string);
+						change_directory(string);
+						list_em(wild);
+					}
+				}
+			}
+		}
+	} else {
+		int status;
+		/*strcpy (filename, "lecar.ode");
+	*/
+		get_directory(filename);
+		int m = strlen(filename);
+		if(filename[m-1] != '/') {
+			strcat(filename,"/");
+		}
+		status = file_selector ("Select an ODE file", filename, wild);
+		if(status == 0) {
+			bye_bye ();
+		} else {
+			return 1;
+		}
+	}
+	return(0);
+}
+
+
+static void list_em(char *wild) {
+	get_directory(cur_dir);
+	plintf("%s: \n",cur_dir);
+	get_fileinfo(wild,cur_dir,&my_ff);
+	plintf("DIRECTORIES:\n");
+	format_list(my_ff.dirnames,my_ff.ndirs);
+	plintf("FILES OF TYPE %s:\n",wild);
+	format_list(my_ff.filenames,my_ff.nfiles);
+
+	free_finfo(&my_ff);
+}
+
+static int read_eqn(void) {
+	char wild[MAX_STRING_LENGTH],string[MAX_STRING_LENGTH];
+	FILE *fptr;
+	int okay;
+	okay=0;
+	sprintf(wild,"*.ode");
+	get_a_filename(string,wild);
+	if((fptr=fopen(string,"r"))==NULL) {
+		plintf("\n Cannot open %s \n",string);
+		return(0);
+	}
+	strcpy(this_file,string);
+	clrscr();
+	okay=get_eqn(fptr);
+	fclose(fptr);
+	return(okay);
+}
+
+
+static int compiler(char *bob, FILE *fptr) {
 	double value,xlo,xhi;
 	int narg,done,nn,iflg=0,VFlag=0,nstates,alt,index,sign;
 	char *ptr,*my_string,*command;
@@ -857,15 +1118,7 @@ vrs:
 }
 
 
-void list_upar(void) {
-	int i;
-	for(i=0;i<NUPAR;i++) {
-		printf(" %s",upar_names[i]);
-	}
-}
-
-
-void welcome(void) {
+static void welcome(void) {
 	plintf("\n The commands are: \n");
 	plintf(" P(arameter) -- declare parameters <name1>=<value1>,<name2>=<value2>,...\n");
 	plintf(" F(ixed)     -- declare fixed variables\n");
@@ -887,7 +1140,7 @@ void welcome(void) {
 }
 
 
-void show_syms(void) {
+static void show_syms(void) {
 	plintf("(    ,    )    +    -      *    ^    **    / \n");
 	plintf("sin  cos  tan  atan  atan2 acos asin\n");
 	plintf("exp  ln   log  log10 tanh  cosh sinh \n");
@@ -896,7 +1149,7 @@ void show_syms(void) {
 }
 
 /* ram: do I need to strip the name of any whitespace? */
-void take_apart(char *bob, double *value, char *name) {
+static void take_apart(char *bob, double *value, char *name) {
 	int k,i,l;
 	char number[40];
 	l=strlen(bob);
@@ -915,22 +1168,8 @@ void take_apart(char *bob, double *value, char *name) {
 	}
 }
 
-
-char *get_first(char *string, char *src) {
-	char *ptr;
-	ptr=strtok(string,src);
-	return(ptr);
-}
-
-
-char *get_next(char *src) {
-	char *ptr;
-	ptr=strtok(NULL,src);
-	return(ptr);
-}
-
 /* this extracts the integral operators from the string */
-void find_ker(char *string, int *alt) {
+static void find_ker(char *string, int *alt) {
 	char new_char[MAXEXPLEN],form[MAXEXPLEN],num[MAXEXPLEN];
 	double mu=0.0;
 	int fflag=0,in=0,i=0,ifr=0,inum=0;
@@ -994,29 +1233,8 @@ void find_ker(char *string, int *alt) {
 }
 
 
-void pos_prn(char *s, int x, int y) {
-	plintf("%s\n",s);
-}
-
-
-void clrscr(void) {
+static void clrscr(void) {
 	system("clear");
-}
-
-
-int getuch(void) {
-	int ch;
-	ch=getchi();
-	if(ch>64 && ch<96) {
-		ch+=32;
-	}
-	return(ch);
-}
-
-
-/***   remove this for full PP   ***/
-int getchi(void) {
-	return(getchar());
 }
 
 
@@ -1090,8 +1308,7 @@ u(0) = value >---  initial data (replaces v, init is also OK )
 	Only functions have changed syntax ...
 
 */
-
-int if_include_file(char *old,char *nf) {
+static int if_include_file(char *old,char *nf) {
 	int i=0,j=0;
 	int n=strlen(old);
 	char c;
@@ -1115,7 +1332,8 @@ int if_include_file(char *old,char *nf) {
 	return 0;
 }
 
-int if_end_include(char *old) {
+
+static int if_end_include(char *old) {
 	if(IN_INCLUDED_FILE>0) {
 		if(strncmp(old,"#done",5)==0) {
 			return 1;
@@ -1132,7 +1350,7 @@ int if_end_include(char *old) {
 }
 
 
-void count_object(int type) {
+static void count_object(int type) {
 	switch(type) {
 	case ODE:
 	case MAP:
@@ -1157,22 +1375,23 @@ void count_object(int type) {
 	}
 }
 
-void print_count_of_object(void) {
+
+static void print_count_of_object(void) {
 	printf("NUMODES=%d \n NUMFIX=%d \n NUMPARAM=%d \n NUMMARK=%d \n NUMVOLT=%d \n NUMAUX=%d \n NUMSOL=%d \n",
 		   NUMODES,NUMFIX,NUMPARAM,NUMMARK,NUMVOLT,NUMAUX,NUMSOL);
 }
 
 
-int do_new_parser(FILE *fp, char *first, int nnn) {
+static int do_new_parser(FILE *fp, char *first, int nnn) {
 	VAR_INFO v;
 	char **markovarrays=NULL;
-	char *strings[256];
+	char *strings[MAX_STRING_LENGTH];
 	int nstrings,ns;
 	char **markovarrays2=NULL;
 	int done=0,start=0,i0,i1,i2,istates;
 	int jj1=0,jj2=0,jj,notdone=1,jjsgn=1;
 	char name[20],nstates=0;
-	/*char newfile[256];*/
+	/*char newfile[MAX_STRING_LENGTH];*/
 	char newfile[XPP_MAX_NAME];
 	FILE *fnew;
 	/*int nlin;
@@ -1464,23 +1683,8 @@ int do_new_parser(FILE *fp, char *first, int nnn) {
 	return 1;
 }
 
-void create_plot_list(void) {
-	int i,j=0,k;
-	if(N_only==0) {
-		return;
-	}
-	plotlist=(int *)malloc(sizeof(int)*(N_only+1));
-	for(i=0;i<N_only;i++) {
-		find_variable(onlylist[i],&k);
-		if(k>=0) {
-			plotlist[j]=k;
-			j++;
-		}
-		N_plist=j;
-	}
-}
 
-void add_only(char *s) {
+static void add_only(char *s) {
 	if(strlen(s)<1) {
 		return;
 	}
@@ -1493,7 +1697,8 @@ void add_only(char *s) {
 	N_only++;
 }
 
-void break_up_list(char *rhs) {
+
+static void break_up_list(char *rhs) {
 	int i=0,j=0,l=strlen(rhs);
 	char s[20],c;
 	while(i<l) {
@@ -1513,7 +1718,7 @@ void break_up_list(char *rhs) {
 }
 
 
-int find_the_name(char list[MAXODE1][MAXVNAM], int n, char *name) {
+static int find_the_name(char list[MAXODE1][MAXVNAM], int n, char *name) {
 	int i;
 
 	for(i=0;i<n;i++) {
@@ -1526,7 +1731,7 @@ int find_the_name(char list[MAXODE1][MAXVNAM], int n, char *name) {
 
 
 /* Now we try to keep track of markov, fixed, etc as well as their names  */
-void compile_em(void) {
+static void compile_em(void) {
 	VAR_INFO *v;
 	char vnames[MAXODE1][MAXVNAM],fnames[MAXODE1][MAXVNAM],anames[MAXODE1][MAXVNAM];
 	char mnames[MAXODE1][MAXVNAM];
@@ -1932,7 +2137,7 @@ void compile_em(void) {
 /* this code checks if the right-hand side for an initial
    condition is a formula (for delays) or a number
 */
-int formula_or_number(char *expr,double *z) {
+static int formula_or_number(char *expr,double *z) {
 	char num[80],form[80];
 	int flag,i=0;
 	int olderr=ERROUT;
@@ -1951,7 +2156,7 @@ int formula_or_number(char *expr,double *z) {
 }
 
 
-void strpiece(char *dest, char *src, int i0, int ie) {
+static void strpiece(char *dest, char *src, int i0, int ie) {
 	int i;
 	for(i=i0;i<=ie;i++) {
 		dest[i-i0]=src[i];
@@ -1959,7 +2164,8 @@ void strpiece(char *dest, char *src, int i0, int ie) {
 	dest[ie-i0+1]=0;
 }
 
-int parse_a_string(char *s1, VAR_INFO *v) {
+
+static int parse_a_string(char *s1, VAR_INFO *v) {
 	int i0=0,i1,i2,i3;
 	char lhs[MAXEXPLEN],rhs[MAXEXPLEN],args[MAXARG][NAMLEN+1];
 	int i,type,type2;
@@ -2057,7 +2263,6 @@ int parse_a_string(char *s1, VAR_INFO *v) {
 			return -1;
 		}
 		break;
-
 	case 4:
 		i0=i1;
 		if(strparse(s1,"T+1)=",i0,&i2)) {
@@ -2097,7 +2302,6 @@ int parse_a_string(char *s1, VAR_INFO *v) {
 	default:
 		return -1;
 	}
-
 good_type:
 	v->type=type2;
 	strcpy(v->lhs,lhs);
@@ -2106,14 +2310,14 @@ good_type:
 	for(i=0;i<narg;i++) {
 		strcpy(v->args[i],args[i]);
 	}
-
 	if(lhs[0]=='D' && type2==COMMAND) {
 		return 2;
 	}
 	return 1;
 }
 
-void init_varinfo(void) {
+
+static void init_varinfo(void) {
 	my_varinfo=(VAR_INFO *)malloc(sizeof(VAR_INFO));
 	my_varinfo->next=NULL;
 	my_varinfo->prev=NULL;
@@ -2121,7 +2325,7 @@ void init_varinfo(void) {
 }
 
 
-void add_varinfo(int type, char *lhs, char *rhs, int nargs, char args[MAXARG][NAMLEN+1]) {
+static void add_varinfo(int type, char *lhs, char *rhs, int nargs, char args[MAXARG][NAMLEN+1]) {
 	VAR_INFO *v,*vnew;
 	int i;
 	v=my_varinfo;
@@ -2152,7 +2356,8 @@ void add_varinfo(int type, char *lhs, char *rhs, int nargs, char args[MAXARG][NA
 	}
 }
 
-void free_varinfo(void) {
+
+static void free_varinfo(void) {
 	VAR_INFO *v,*vnew;
 	v=my_varinfo;
 	while(v->next != NULL) {
@@ -2168,8 +2373,9 @@ void free_varinfo(void) {
 	init_varinfo();
 }
 
+
 /* name is char 1-i1  ie is start of rhs */
-int extract_ode(char *s1, int *ie, int i1) {
+static int extract_ode(char *s1, int *ie, int i1) {
 	int i=0,n=strlen(s1);
 
 	i=i1;
@@ -2183,7 +2389,8 @@ int extract_ode(char *s1, int *ie, int i1) {
 	return 0;
 }
 
-int strparse(char *s1, char *s2, int i0, int *i1) {
+
+static int strparse(char *s1, char *s2, int i0, int *i1) {
 	int i=i0;
 	int n=strlen(s1);
 	int m=strlen(s2);
@@ -2225,7 +2432,7 @@ int strparse(char *s1, char *s2, int i0, int *i1) {
 }
 
 
-int extract_args(char *s1, int i0, int *ie, int *narg, char args[MAXARG][NAMLEN+1]) {
+static int extract_args(char *s1, int i0, int *ie, int *narg, char args[MAXARG][NAMLEN+1]) {
 	int k,i=i0,n=strlen(s1);
 	int type,na=0,i1;
 	while(i<n) {
@@ -2255,25 +2462,7 @@ int extract_args(char *s1, int i0, int *ie, int *narg, char args[MAXARG][NAMLEN+
 }
 
 
-int find_char(char *s1, char *s2, int i0, int *i1) {
-	int m=strlen(s2),n=strlen(s1);
-	int i=i0;
-	char ch;
-	int j;
-	while(i<n) {
-		ch=s1[i];
-		for(j=0;j<m;j++) {
-			if(ch==s2[j]) {
-				*i1=i;
-				return(j);
-			}
-		}
-		i++;
-	}
-	return(-1);
-}
-
-int next_nonspace(char *s1, int i0, int *i1) {
+static int next_nonspace(char *s1, int i0, int *i1) {
 	int i=i0;
 	int n=strlen(s1);
 	char ch;
@@ -2289,8 +2478,9 @@ int next_nonspace(char *s1, int i0, int *i1) {
 	return(-1);
 }
 
+
 /* removes starting blanks from s  */
-void remove_blanks(char *s1) {
+static void remove_blanks(char *s1) {
 	int i=0,n=strlen(s1),l;
 	int j;
 	char ch;
@@ -2314,7 +2504,7 @@ void remove_blanks(char *s1) {
 }
 
 
-void read_a_line(FILE *fp, char *s) {
+static void read_a_line(FILE *fp, char *s) {
 	char temp[MAXEXPLEN];
 	int i,n,nn,ok,ihat=0;
 	s[0]=0;
@@ -2353,106 +2543,7 @@ void read_a_line(FILE *fp, char *s) {
 }
 
 
-int search_array(char *old, char *new_char, int *i1, int *i2, int *flag) {
-	int i,j,k,l;
-	int ileft,iright;
-	int n=strlen(old);
-	char num1[20],num2[20];
-	char ch,chp;
-	ileft=n-1;
-	iright=-1;
-	*i1=0;
-	*i2=0;
-	*flag=0;
-	strcpy(num1,"0");
-	strcpy(num2,"0");
-	if(old[0]=='#' || old[1]=='#') {  /* check for comments */
-		strcpy(new_char,old);
-		return 1;
-	}
-	if(check_if_ic(old)==1) {
-		extract_ic_data(old);
-		strcpy(new_char,old);
-		return 1;
-	}
-	for(i=0;i<n;i++) {
-		ch=old[i];
-		chp=old[i+1];
-		if(ch=='.' && chp=='.') {
-			j=0;
-			*flag=1;
-			if(old[0]=='%') {
-				*flag=2;   /*   FOR LOOP CONSTRUCTION  */
-			}
-			while(1) {
-				ch=old[i+j];
-				/*        plintf(" %d %c \n",j,ch); */
-				if(ch=='[') {
-					ileft=i+j;
-					l=0;
-					for(k=i+j+1;k<i;k++) {
-						num1[l]=old[k];
-						l++;
-					}
-					num1[l]=0;
-					break;
-				}
-				j--;
-				if((i+j)<=0) {
-					*i1=0;
-					*i2=0;
-					strcpy(new_char,old);
-					plintf(" Possible error in array %s -- ignoring it \n",old);
-					return(0); /* error in array  */
-				}
-			}
-			j=2;
-			while(1) {
-				ch=old[i+j];
-				if(ch==']') {
-					iright=i+j;
-					l=0;
-					for(k=2;k<j;k++) {
-						num2[l]=old[i+k];
-						l++;
-					}
-					num2[l]=0;
-					break;
-				}
-				j++;
-				if((i+j)>=n) {
-					*i1=0;
-					*i2=0;
-					strcpy(new_char,old);
-					plintf(" Possible error in array  %s -- ignoring it \n",old);
-					return(0); /* error again   */
-				}
-			}
-		}
-	}
-	/*  printf(" I have extracted [%s] and [%s] \n",num1,num2); */
-	*i1=atoi(num1);
-	*i2=atoi(num2);
-	/* now we have the numbers and will get rid of the junk inbetween */
-	l=0;
-	for(i=0;i<=ileft;i++) {
-		new_char[l]=old[i];
-		l++;
-	}
-	if(iright>0) {
-		new_char[l]='j';
-		l++;
-		for(i=iright;i<n;i++) {
-			new_char[l]=old[i];
-			l++;
-		}
-	}
-	new_char[l]=0;
-	return 1;
-}
-
-
-int check_if_ic(char *big) {
+static int check_if_ic(char *big) {
 	char c;
 	int n=strlen(big);
 	int j;
@@ -2475,7 +2566,7 @@ int check_if_ic(char *big) {
 
 
 /* returns 1 if string is not 'int[' */
-int not_ker(char *s, int i) {
+static int not_ker(char *s, int i) {
 	if(i<3) {
 		return 1;
 	}
@@ -2486,7 +2577,7 @@ int not_ker(char *s, int i) {
 }
 
 
-int is_comment(char *s) {
+static int is_comment(char *s) {
 	int n=strlen(s);
 	int i=0;
 	char c;
@@ -2507,182 +2598,8 @@ int is_comment(char *s) {
 }
 
 
-void subsk(char *big, char *new_char, int k, int flag) {
-	int i,n=strlen(big),inew,add,inum,j,m,isign,ok,multflag=0;
-	char ch,chp,num[20];
-	inew=0;
-	i=0;
-	if(is_comment(big)) {
-		strcpy(new_char,big);
-		return;
-	}
-
-	while(1) {
-		ch=big[i];
-		chp=big[i+1];
-		if(ch=='[' && chp != 'j' && not_ker(big,i)) {
-			ok=1;
-			add=0;
-			inum=0;
-			isign=1;
-			i++;
-			while(ok) {
-				ch=big[i];
-				if(ch==']') {
-					i++;
-					num[inum]=0;
-					add=atoi(num);
-					sprintf(num,"%d",add);
-					m=strlen(num);
-					for(j=0;j<m;j++) {
-						new_char[inew]=num[j];
-						inew++;
-					}
-					ok=0;
-				} else {
-					i++;
-					num[inum]=ch;
-					inum++;
-				}
-			}
-		} else {
-			if(ch=='[' && chp=='j') {
-				if(flag==0) {
-					printf(" Illegal use of [j] at %s \n",big);
-					exit(0);
-				}
-				add=0;
-				inum=0;
-				isign=1;
-				i+=2;
-				ok=1;
-				while(ok) {
-					if(i>=n) {
-						new_char[inew]=0;
-						plintf("Error in %s The expression does not terminate. Perhaps a ] is missing.\n",big);
-						exit(0);
-					}
-					ch=big[i];
-					/*        plintf("i=%d inew=%d new ch= %c \n",i,inew,ch); */
-					switch(ch) {
-					case '+':
-						isign=1;
-						i++;
-						break;
-					case '-':
-						isign=-1;
-						i++;
-						break;
-					case '*':
-						i++;
-						isign=1;
-						multflag=1;
-						break;
-					case ']':
-						i++;
-						num[inum]=0;
-						if(multflag==0) {
-							add=atoi(num)*isign+k;
-						} else {
-							add=atoi(num)*k;
-							multflag=0;
-						}
-						sprintf(num,"%d",add);
-						m=strlen(num);
-						for(j=0;j<m;j++) {
-							new_char[inew]=num[j];
-							inew++;
-						}
-						ok=0;
-						break;
-					default:
-						i++;
-						num[inum]=ch;
-						inum++;
-						break;
-					}
-				}
-			} else {
-				new_char[inew]=ch;
-				i++;
-				inew++;
-			}
-		}
-		if(i>=n) {
-			break;
-		}
-	}
-	new_char[inew]=0;
-}
-
-
-void keep_orig_comments(void) {
-	int i;
-
-	if(orig_ncomments>0) {
-		return; /* already stored these so return */
-	}
-	if(n_comments==0) {
-		return; /* nothing to keep ! */
-	}
-	orig_comments=(ACTION *)malloc(sizeof(ACTION)*n_comments);
-	for(i=0;i<n_comments;i++) {
-		orig_comments[i].text=(char *)malloc(strlen(comments[i].text)+1);
-		if(comments[i].aflag) {
-			orig_comments[i].action=(char *)malloc(strlen(comments[i].action)+1);
-		}
-		strcpy(orig_comments[i].text,comments[i].text);
-		if(comments[i].aflag) {
-			strcpy(orig_comments[i].action,comments[i].action);
-		}
-		orig_comments[i].aflag=comments[i].aflag;
-	}
-}
-
-void default_comments(void) {
-	int i;
-	if(orig_ncomments==0) {
-		return;
-	}
-	/* first free up the comments */
-	free_comments();
-	for(i=0;i<orig_ncomments;i++) {
-		comments[i].text=(char *)malloc(strlen(orig_comments[i].text)+1);
-		strcpy(comments[i].text,orig_comments[i].text);
-		if(orig_comments[i].aflag) {
-			comments[i].action=(char *)malloc(strlen(orig_comments[i].action)+1);
-			strcpy(comments[i].action,orig_comments[i].action);
-		}
-		comments[i].aflag=orig_comments[i].aflag;
-	}
-}
-
-void free_comments(void) {
-	int i;
-	for(i=0;i<n_comments;i++) {
-		free(comments[i].text);
-		if(comments[i].aflag) {
-			free(comments[i].action);
-		}
-	}
-	n_comments=0;
-}
-
-void new_comment(FILE *f) {
-	char bob[256];
-	char ted[256];
-	keep_orig_comments();
-	free_comments();
-	while(!feof(f)) {
-		fgets(bob,256,f);
-		sprintf(ted,"@%s",bob);
-		add_comment(ted);
-	}
-}
-
-
-void add_comment(char *s) {
-	char text[256],action[256],ch;
+static void add_comment(char *s) {
+	char text[MAX_STRING_LENGTH],action[MAX_STRING_LENGTH],ch;
 	int n=strlen(s);
 	int i,j1=0,ja=0,noact=1;
 	if(n_comments>=MAXCOMMENTS) {
@@ -2742,14 +2659,14 @@ void add_comment(char *s) {
 }
 
 
-void advance_past_first_word(char** sptr) {
+static void advance_past_first_word(char** sptr) {
 	/* changes the string pointed to by sptr to start after the end of the string...
 	   this may seem odd, but it has to do with avoiding \0's added by strtok */
 	int len = strlen(*sptr);
 	(*sptr) += len + 1;
 }
 
-char* new_string2(char* old, int length) {
+static char* new_string2(char* old, int length) {
 	/*cout << "new_string2(\"" << old << "\", " << length << ")\n"; */
 	char* s = (char*) malloc((length + 1) * sizeof(char));
 	strncpy(s, old, length);
@@ -2762,7 +2679,7 @@ char* new_string2(char* old, int length) {
 }
 
 
-char* get_next2(char** tokens_ptr) {
+static char* get_next2(char** tokens_ptr) {
 	/* grabs (a copy of) the next block of the form var = val, ending with a \n, space, or comma */
 	/* importantly, this supports white space around the equal sign */
 	/* returns NULL if no more text */
@@ -2859,7 +2776,7 @@ char* get_next2(char** tokens_ptr) {
 	return new_string2(tokens, i);
 }
 
-void strcpy_trim(char* dest, char* source) {
+static void strcpy_trim(char* dest, char* source) {
 	/* like strcpy, except removes leading and trailing whitespace */
 	while (*source && isspace(*source)) {
 		source++;
@@ -2873,7 +2790,7 @@ void strcpy_trim(char* dest, char* source) {
 	strncpy(dest, source, i + 1);
 	dest[i + 1] = '\0';
 }
-void strncpy_trim(char* dest, char* source, int n) {
+static void strncpy_trim(char* dest, char* source, int n) {
 	/* like strncpy, except removes leading and trailing whitespace (and always ends with a \0) */
 	while (*source && isspace(*source)) {
 		source++;
