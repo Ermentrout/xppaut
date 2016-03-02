@@ -61,8 +61,39 @@
 #define READSET 42
 #define WITH 43
 
-VOCAB my_cmd[NCMD]=
-{
+
+/* --- Types --- */
+typedef struct {
+	char *name;
+	struct SET_NAME * next;
+} SET_NAME;
+
+
+typedef struct {
+	char name[10];
+	int len;
+} VOCAB;
+
+
+/* --- Forward declarations --- */
+static int is_set_name(SET_NAME *set, char *nam);
+static int parse_it(char *com);
+static SET_NAME *add_set(SET_NAME *set, char *nam);
+
+/* --- Data --- */
+static char icfilename[XPP_MAX_NAME];
+static char parfilename[XPP_MAX_NAME];
+static char readsetfile[XPP_MAX_NAME];
+static char setfilename[XPP_MAX_NAME];
+static char externaloptionsstring[1024];
+
+static int externaloptionsflag=0;
+static int loadsetfile=0;
+static int loadparfile=0;
+static int loadicfile=0;
+static int select_intern_sets=0;
+
+static VOCAB my_cmd[NCMD]= {
 	{"-m",3},
 	{"-xorfix",7},
 	{"-silent",7},
@@ -109,25 +140,12 @@ VOCAB my_cmd[NCMD]=
 	{"-with",5},
 };
 
-/* --- Functions --- */
-char setfilename[XPP_MAX_NAME];
-char parfilename[XPP_MAX_NAME];
-char icfilename[XPP_MAX_NAME];
+static SET_NAME *sets2use,*setsNOTuse;
+
 char includefilename[MaxIncludeFiles][XPP_MAX_NAME];
-
-char readsetfile[XPP_MAX_NAME];
-char externaloptionsstring[1024];
-int externaloptionsflag=0;
-int NincludedFiles=0;
-int select_intern_sets=0;
-int Nintern_2_use=0;
-
-SET_NAME *sets2use,*setsNOTuse;
-
-int loadsetfile=0;
-int loadparfile=0;
-int loadicfile=0;
 int loadincludefile=0;
+int NincludedFiles=0;
+int Nintern_2_use=0;
 int querysets=0;
 int querypars=0;
 int queryics=0;
@@ -135,57 +153,8 @@ int dryrun=0;
 int noicon=1;
 int newseed=0;
 
-int is_set_name(SET_NAME *set, char *nam) {
-	if(set==NULL) {
-		return(0);
-	}
-	SET_NAME *curr;
-	curr=set;
-	while(curr) {
-		if(strcmp(curr->name,nam)==0) {
-			return(1);
-		}
-		curr=(SET_NAME*)curr->next;
-	}
-	return(0);
-}
 
-SET_NAME *add_set(SET_NAME *set, char *nam) {
-	if(!is_set_name(set,nam)) {
-		SET_NAME *curr;
-		curr = (SET_NAME *)malloc(sizeof(SET_NAME));
-		curr->name = (char *)nam;
-		curr->next  = (struct SET_NAME *)set;
-		set=curr;
-	}
-	return(set);
-}
-
-SET_NAME * rm_set(SET_NAME *set, char *nam) {
-	SET_NAME *curr;
-	SET_NAME *prev=NULL;
-
-	if(set==NULL) {
-		return(NULL);
-	}
-	curr=set;
-	int i=1;
-	while(curr)	{
-		if(strcmp(curr->name,nam)==0) {
-			if(i==1) {
-				set=(SET_NAME*)curr->next;
-			} else {
-				prev->next=curr->next;
-			}
-			break;
-		}
-		prev = curr;
-		i++;
-	}
-	return(set);
-}
-
-
+/* --- Functions --- */
 void do_comline(int argc, char **argv) {
 	int i,k;
 
@@ -364,7 +333,6 @@ int if_needed_load_ext_options(void) {
 	FILE *fp;
 	char myopts[1024];
 	char myoptsx[1026];
-	/*   printf("flag=%d file=%s\n",externaloptionsflag,readsetfile); */
 	if(externaloptionsflag==0) {
 		return 1;
 	}
@@ -381,12 +349,48 @@ int if_needed_load_ext_options(void) {
 		fclose(fp);
 		return 1;
 	}
-
 	if(externaloptionsflag==2) {
 		sprintf(myoptsx,"$ %s",externaloptionsstring);
 		extract_action(myoptsx);
 		return 1;
 	}
+	return 0;
+}
+
+
+int if_needed_load_ic(void) {
+	if(!loadicfile) {
+		return 1;
+	}
+	plintf("Loading external initial condition file: %s\n",icfilename);
+	io_ic_file(icfilename, READEM);
+	return(1);
+}
+
+
+int if_needed_load_par(void) {
+	if(!loadparfile) {
+		return 1;
+	}
+	plintf("Loading external parameter file: %s\n",parfilename);
+	io_parameter_file(parfilename, READEM);
+	return 1;
+}
+
+
+int if_needed_load_set(void) {
+	FILE *fp;
+	if(!loadsetfile) {
+		return 1;
+	}
+	fp=fopen(setfilename,"r");
+	if(fp==NULL) {
+		plintf("Couldn't load %s\n",setfilename);
+		return 0;
+	}
+	read_lunch(fp);
+	fclose(fp);
+	return 1;
 }
 
 
@@ -420,43 +424,24 @@ int if_needed_select_sets(void) {
 }
 
 
-int if_needed_load_set(void) {
-	FILE *fp;
-	if(!loadsetfile) {
-		return 1;
+/* --- Static functions --- */
+static int is_set_name(SET_NAME *set, char *nam) {
+	if(set==NULL) {
+		return(0);
 	}
-	fp=fopen(setfilename,"r");
-	if(fp==NULL) {
-		plintf("Couldn't load %s\n",setfilename);
-		return 0;
+	SET_NAME *curr;
+	curr=set;
+	while(curr) {
+		if(strcmp(curr->name,nam)==0) {
+			return(1);
+		}
+		curr=(SET_NAME*)curr->next;
 	}
-	read_lunch(fp);
-	fclose(fp);
-	return 1;
+	return(0);
 }
 
 
-int if_needed_load_par(void) {
-	if(!loadparfile) {
-		return 1;
-	}
-	plintf("Loading external parameter file: %s\n",parfilename);
-	io_parameter_file(parfilename, READEM);
-	return 1;
-}
-
-
-int if_needed_load_ic(void) {
-	if(!loadicfile) {
-		return 1;
-	}
-	plintf("Loading external initial condition file: %s\n",icfilename);
-	io_ic_file(icfilename, READEM);
-	return(1);
-}
-
-
-int parse_it(char *com) {
+static int parse_it(char *com) {
 	int j;
 	for(j=0;j<NCMD;j++) {
 		if(strncmp(com,my_cmd[j].name,my_cmd[j].len)==0) {
@@ -497,10 +482,6 @@ int parse_it(char *com) {
 		case PWHITE:
 			plintf("-white option is no longer part of this version. \n Sorry \n");
 			break;
-			/*PaperWhite=1;
-	  notAlreadySet.PaperWhite=0;
-	  break;
-	  */
 		case RUNNOW:
 			RunImmediately=1;
 			break;
@@ -637,4 +618,16 @@ int parse_it(char *com) {
 		}
 	}
 	return 0;
+}
+
+
+static SET_NAME *add_set(SET_NAME *set, char *nam) {
+	if(!is_set_name(set,nam)) {
+		SET_NAME *curr;
+		curr = (SET_NAME *)malloc(sizeof(SET_NAME));
+		curr->name = (char *)nam;
+		curr->next  = (struct SET_NAME *)set;
+		set=curr;
+	}
+	return(set);
 }
