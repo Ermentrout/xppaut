@@ -17,12 +17,13 @@
 #include "pop_list.h"
 #include "struct.h"
 
-double atof();
-Window make_window();
 
+/* --- Forward declarations --- */
 static int dialog_event_loop(DIALOG *d, int max, int *pos, int *col);
 static void display_dialog(Window w, DIALOG d, int pos, int col);
 
+
+/* --- Functions --- */
 int get_dialog(char *wname, char *name, char *value, char *ok, char *cancel, int max) {
 	int lm=strlen(name)*DCURX;
 	int lv=max*DCURX;
@@ -89,6 +90,8 @@ int get_dialog(char *wname, char *name, char *value, char *ok, char *cancel, int
 	return(status);
 }
 
+
+/* --- Static functions --- */
 static int dialog_event_loop(DIALOG *d, int max, int *pos, int *col) {
 	int status=-1;
 	int done=0;
