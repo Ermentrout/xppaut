@@ -73,174 +73,123 @@
 #define MSWTCH(u,v) memcpy((void *)(u),(void *)(v),xpv.node*sizeof(double))
 #define NAR_IC 50
 
-int MakePlotFlag=0;
-int ar_ic_defined=0;
-double ndrand48();
 
-ARRAY_IC ar_ic[NAR_IC];
-EQ_RANGE eq_range;
-FIXPTGUESS fixptguess;
-FIXPTLIST fixptlist;
-RANGE range;
-XPPVEC xpv;
-int SuppressOut=0;
-int SuppressBounds=0;
+/* --- Types --- */
+typedef struct {
+	int index0,type;
+	char formula[MAX_STRING_LENGTH];
+	int n;
+	char var[NAR_IC];
+	int j1,j2;
+} ARRAY_IC;
 
-double atof();
-int DelayErr;
+typedef struct {
+	char item[30];
+	int steps,shoot,col,movie,mc;
+	double plow,phigh;
+} EQ_RANGE;
 
-float **get_browser_data();
-double get_ivar();
-double  MyData[MAXODE],MyTime;
-int MyStart;
-int RANGE_FLAG;
-double LastTime;
+typedef struct {
+	int n;
+	double tol;
+	double xlo[MAXODE],xhi[MAXODE];
+} FIXPTGUESS;
 
-int STOP_FLAG=0;
-int PSLineStyle;
+typedef struct {
+	int n,flag;
+	double *x[MAXFP];
+	double *er[MAXFP];
+	double *em[MAXFP];
+	double *x1[MAXFP],*x2[MAXFP],*x3[MAXFP],*x4[MAXFP];
+	int t1,t2,t3,t4;
+} FIXPTLIST;
 
+
+/* --- Forward declarations --- */
+static void batch_integrate_once(void);
+static void do_batch_dry_run(void);
+static void do_eq_range(double *x);
+static void do_monte_carlo_search(int append, int stuffbrowse,int ishoot);
+static void do_new_array_ic(char *new_char, int j1, int j2);
+static void do_plot(float *oldxpl, float *oldypl, float *oldzpl, float *xpl, float *ypl, float *zpl);
+static void do_start_flags(double *x, double *t);
+static void evaluate_ar_ic(char *v, char *f, int j1, int j2);
+static int form_ic(void);
+static void init_monte_carlo(void);
+static void monte_carlo(void);
+static void plot_one_graph(float *xv, float *xvold, int node, int neq, double ddt, int *tc);
+static void plot_the_graphs(float *xv, float *xvold, int node, int neq, double ddt, int *tc,int flag);
+static int range_item(void);
+static int range_item2(void);
+static int set_array_ic(void);
+static int set_up_eq_range(void);
+static int set_up_range(void);
+static int set_up_range2(void);
+static int stor_full(void);
+static void store_new_array_ic(char *new_char, int j1, int j2, char *formula);
+static int write_this_run(char *file, int i);
 int (*solver)();
 
-void init_ar_ic(void) {
+/* --- Data --- */
+static int ar_ic_defined=0;
+static int STOP_FLAG=0;
+static ARRAY_IC ar_ic[NAR_IC];
+static EQ_RANGE eq_range;
+static FIXPTGUESS fixptguess;
+static FIXPTLIST fixptlist;
+
+double LastTime;
+double MyData[MAXODE],MyTime;
+int DelayErr;
+int MakePlotFlag=0;
+int MyStart;
+int RANGE_FLAG;
+int SuppressBounds=0;
+int SuppressOut=0;
+RANGE range;
+XPPVEC xpv;
+
+
+/* --- Functions --- */
+void arr_ic_start(void) {
 	int i;
+	if(ar_ic_defined==0) {
+		return;
+	}
 	for(i=0;i<NAR_IC;i++) {
-		ar_ic[i].index0=-1;
-		ar_ic[i].formula[0]=0;
-		ar_ic[i].n=0;
-		ar_ic[i].var[i]=0;
-		ar_ic[i].type=0;
+		if(ar_ic[i].type==2) {
+			evaluate_ar_ic(ar_ic[i].var,ar_ic[i].formula,
+						   ar_ic[i].j1,ar_ic[i].j2);
+		}
 	}
 }
 
 
-void dump_range(FILE *fp, int f) {
-	char bob[XPP_MAX_NAME];
-	if(f==READEM) {
-		fgets(bob,255,fp);
-	} else {
-		fprintf(fp,"# Range information\n");
+void batch_integrate(void) {
+	int i;
+	if((Nintern_set==0) | (Nintern_2_use==0)) {
+		this_internset[0] = '\0';
+		do_batch_dry_run();
+		batch_integrate_once();
+		return;
 	}
-	io_string(eq_range.item,11,fp,f);
-	io_int(&eq_range.col,fp,f,"eq-range stab col");
-	io_int(&eq_range.shoot,fp,f,"shoot flag 1=on");
-	io_int(&eq_range.steps,fp,f,"eq-range steps");
-	io_double(&eq_range.plow,fp,f,"eq_range low");
-	io_double(&eq_range.phigh,fp,f,"eq_range high");
-	io_string(range.item,11,fp,f);
-	io_string(range.item2,11,fp,f);
-	io_int(&range.steps,fp,f,"Range steps");
-	io_int(&range.cycle,fp,f,"Cycle color 1=on");
-	io_int(&range.reset,fp,f,"Reset data 1=on");
-	io_int(&range.oldic,fp,f,"Use old I.C.s 1=yes");
-	io_double(&range.plow,fp,f,"Par1 low");
-	io_double(&range.plow2,fp,f,"Par2 low");
-	io_double(&range.phigh,fp,f,"Par1 high");
-	io_double(&range.phigh2,fp,f,"Par2 high");
-	dump_shoot_range(fp,f);
-	if(f==READEM) {
-		range.steps2=range.steps;
-	}
-}
-
-
-void init_range(void) {
-	eq_range.col=-1;
-	eq_range.mc=0;
-	eq_range.shoot=0;
-	eq_range.steps=10;
-	eq_range.plow=0.0;
-	eq_range.phigh=1.0;
-	eq_range.movie=0;
-	sprintf(eq_range.item,"%s",upar_names[0]);
-	range.type=0;
-	range.rtype=0;
-	range.index=range.index2=0;
-	if(notAlreadySet.RANGESTEP) {
-		range.steps=20;
-		notAlreadySet.RANGESTEP=0;
-	}
-	range.steps2=20;
-	if(notAlreadySet.RANGELOW) {
-		range.plow=range.plow2=0.0;
-		notAlreadySet.RANGELOW=0;
-	}
-	if(notAlreadySet.RANGEHIGH) {
-		range.phigh=range.phigh2=1.0;
-		notAlreadySet.RANGEHIGH=0;
-	}
-	if(notAlreadySet.RANGERESET) {
-		range.reset=1;
-		notAlreadySet.RANGERESET=0;
-	}
-	if(notAlreadySet.RANGEOLDIC) {
-		range.oldic=1;
-		notAlreadySet.RANGEOLDIC=0;
-	}
-	range.cycle=0;
-	range.movie=0;
-	if(notAlreadySet.RANGEOVER) {
-		sprintf(range.item,"%s",uvar_names[0]);
-		notAlreadySet.RANGEOVER=0;
-	}
-	sprintf(range.item2,"%s",uvar_names[0]);
-	init_shoot_range(upar_names[0]);
-	init_monte_carlo();
-}
-
-
-int set_up_eq_range(void) {
-	static char *n[]={"*2Range over","Steps","Start","End",
-					  "Shoot (Y/N)",
-					  "Stability col","Movie (Y/N)","Monte Carlo (Y/N)"};
-	char values[8][MAX_LEN_SBOX];
-	int status,i;
-	static  char *yn[]={"N","Y"};
-	sprintf(values[0],"%s",eq_range.item);
-	sprintf(values[1],"%d",eq_range.steps);
-	sprintf(values[2],"%.16g",eq_range.plow);
-	sprintf(values[3],"%.16g",eq_range.phigh);
-	sprintf(values[4],"%s",yn[eq_range.shoot]);
-	sprintf(values[5],"%d",eq_range.col);
-	sprintf(values[6],"%s",yn[eq_range.movie]);
-	sprintf(values[7],"%s",yn[eq_range.mc]);
-
-	status=do_string_box(8,8,1,"Range Equilibria",n,values,45);
-	if(status!=0) {
-		strcpy(eq_range.item,values[0]);
-		i=find_user_name(PARAMBOX,eq_range.item);
-		if(i<0) {
-			err_msg("No such parameter");
-			return(0);
+	for(i=0;i<Nintern_set;i++) {
+		sprintf(this_internset,"_%s",intern_set[i].name);
+		if(strlen(UserOUTFILE)==0) {/*Use the set name for outfile name*/
+			sprintf(batchout,"%s.dat",intern_set[i].name);
+		} else {/*Use the command line supplied outfile name*/
+			/*Will get over-written each internal set*/
+			sprintf(batchout,"%s",UserOUTFILE);
 		}
-
-		eq_range.steps=atoi(values[1]);
-		if(eq_range.steps<=0) {
-			eq_range.steps=10;
+		plintf("out=%s\n",batchout);
+		extract_internset(i);
+		chk_delay();
+		plintf(" Ok integrating now \n");
+		do_batch_dry_run();
+		if(intern_set[i].use) {
+			batch_integrate_once();
 		}
-		eq_range.plow=atof(values[2]);
-		eq_range.phigh=atof(values[3]);
-		if(values[4][0]=='Y' || values[4][0]=='y') {
-			eq_range.shoot=1;
-		} else {
-			eq_range.shoot=0;
-		}
-		if(values[6][0]=='Y' || values[6][0]=='y') {
-			eq_range.movie=1;
-		} else {
-			eq_range.movie=0;
-		}
-		if(values[7][0]=='Y' || values[6][0]=='y') {
-			eq_range.mc=1;
-		} else {
-			eq_range.mc=0;
-		}
-		eq_range.col=atoi(values[5]);
-		if(eq_range.col<=1 || eq_range.col>(NEQ+1)) {
-			eq_range.col=-1;
-		}
-		return(1);
 	}
-	return(0);
 }
 
 
@@ -270,422 +219,240 @@ void cont_integ(void) {
 }
 
 
-int range_item(void) {
-	int i;
-	char bob[XPP_MAX_NAME];
-	i=find_user_name(PARAMBOX,range.item);
-	if(i>-1) {
-		range.type=PARAMBOX;
-		range.index=i;
+/*  Sets the color according to the velocity or z-value */
+void comp_color(float *v1, float *v2, int n, double dt) {
+	int i,cur_color;
+	float sum;
+	float min_scale=(float)(MyGraph->min_scale);
+	float color_scale=(float)(MyGraph->color_scale);
+	if(MyGraph->ColorFlag==2) {
+		sum=v1[MyGraph->ColorValue];
 	} else {
-		i=find_user_name(ICBOX,range.item);
-		if(i<=-1) {
-			sprintf(bob," %s is not a parameter or variable !",range.item);
-			err_msg(bob);
-			return(0);
+		for(i=0,sum=0.0;i<n;i++) {
+			sum+=(float)fabs((double)(v1[i+1]-v2[i+1]));
 		}
-		range.type=ICBOX;
-		range.index=i;
+		sum=sum/(dt);
 	}
-	return 1;
-}
-
-
-int range_item2(void) {
-	int i;
-	char bob[XPP_MAX_NAME];
-	i=find_user_name(PARAMBOX,range.item2);
-	if(i>-1) {
-		range.type2=PARAMBOX;
-		range.index2=i;
-	} else {
-		i=find_user_name(ICBOX,range.item2);
-		if(i<=-1) {
-			sprintf(bob," %s is not a parameter or variable !",range.item2);
-			err_msg(bob);
-			return(0);
-		}
-		range.type2=ICBOX;
-		range.index2=i;
+	cur_color=(int)((sum-min_scale)*(float)color_total/color_scale);
+	if(cur_color<0) {
+		cur_color=0;
 	}
-	return 1;
-}
-
-
-int set_up_range(void) {
-	static char *n[]={"*3Range over","Steps","Start","End",
-					  "Reset storage (Y/N)",
-					  "Use old ic's (Y/N)","Cycle color (Y/N)","Movie(Y/N)"};
-	char values[8][MAX_LEN_SBOX];
-	int status;
-	static  char *yn[]={"N","Y"};
-	if(!Xup) {
-		return(range_item());
+	if(cur_color>color_total) {
+		cur_color=color_total-1;
 	}
-
-	sprintf(values[0],"%s",range.item);
-	sprintf(values[1],"%d",range.steps);
-	sprintf(values[2],"%.16g",range.plow);
-	sprintf(values[3],"%.16g",range.phigh);
-	sprintf(values[4],"%s",yn[range.reset]);
-	sprintf(values[5],"%s",yn[range.oldic]);
-	sprintf(values[6],"%s",yn[range.cycle]);
-	sprintf(values[7],"%s",yn[range.movie]);
-
-	status=do_string_box(8,8,1,"Range Integrate",n,values,45);
-	if(status!=0) {
-		strcpy(range.item,values[0]);
-		if(range_item()==0) {
-			return 0;
-		}
-		range.steps=atoi(values[1]);
-		if(range.steps<=0) {
-			range.steps=10;
-		}
-		range.plow=atof(values[2]);
-		range.phigh=atof(values[3]);
-		if(values[4][0]=='Y' || values[4][0]=='y') {
-			range.reset=1;
-		} else {
-			range.reset=0;
-		}
-		if(values[5][0]=='Y' || values[5][0]=='y') {
-			range.oldic=1;
-		} else {
-			range.oldic=0;
-		}
-		if(values[6][0]=='Y' || values[6][0]=='y') {
-			range.cycle=1;
-		} else {
-			range.cycle=0;
-		}
-		if(values[7][0]=='Y' || values[7][0]=='y') {
-			range.movie=1;
-		} else {
-			range.movie=0;
-		}
-		RANGE_FLAG=1;
-		return(1);
+	cur_color+=FIRSTCOLOR;
+	if(Xup) {
+		set_color(cur_color);
 	}
-	return(0);
-}
-
-
-int set_up_range2(void) {
-	static char *n[]={"*3Vary1","Start1","End1",
-					  "*3Vary2","Start2","End2","Steps",
-					  "Reset storage (Y/N)",
-					  "Use old ic's (Y/N)","Cycle color (Y/N)","Movie(Y/N)",
-					  "Crv(1) Array(2)","Steps2"};
-	char values[13][MAX_LEN_SBOX];
-	int status;
-	static  char *yn[]={"N","Y"};
-	if(!Xup) {
-		return(range_item());
-	}
-	sprintf(values[0],"%s",range.item);
-	sprintf(values[1],"%.16g",range.plow);
-	sprintf(values[2],"%.16g",range.phigh);
-	sprintf(values[3],"%s",range.item2);
-	sprintf(values[4],"%.16g",range.plow2);
-	sprintf(values[5],"%.16g",range.phigh2);
-	sprintf(values[6],"%d",range.steps);
-	sprintf(values[7],"%s",yn[range.reset]);
-	sprintf(values[8],"%s",yn[range.oldic]);
-	sprintf(values[9],"%s",yn[range.cycle]);
-	sprintf(values[10],"%s",yn[range.movie]);
-	if(range.rtype==2) {
-		sprintf(values[11],"2");
-	} else {
-		sprintf(values[11],"1");
-	}
-	sprintf(values[12],"%d",range.steps2);
-	status=do_string_box(13,7,2,"Double Range Integrate",n,values,45);
-	if(status!=0) {
-		strcpy(range.item,values[0]);
-
-		if(range_item()==0) {
-			return 0;
-		}
-		strcpy(range.item2,values[3]);
-
-		if(range_item2()==0) {
-			return 0;
-		}
-
-		range.steps=atoi(values[6]);
-		range.steps2=atoi(values[12]);
-		if(range.steps<=0) {
-			range.steps=10;
-		}
-		if(range.steps2<=0) {
-			range.steps2=10;
-		}
-		range.plow=atof(values[1]);
-		range.phigh=atof(values[2]);
-		range.plow2=atof(values[4]);
-		range.phigh2=atof(values[5]);
-		if(values[7][0]=='Y' || values[7][0]=='y') {
-			range.reset=1;
-		} else {
-			range.reset=0;
-		}
-		if(values[8][0]=='Y' || values[8][0]=='y') {
-			range.oldic=1;
-		} else {
-			range.oldic=0;
-		}
-		if(values[9][0]=='Y' || values[9][0]=='y') {
-			range.cycle=1;
-		} else {
-			range.cycle=0;
-		}
-		if(values[10][0]=='Y' || values[10][0]=='y') {
-			range.movie=1;
-		} else {
-			range.movie=0;
-		}
-		range.rtype=atoi(values[11]);
-		RANGE_FLAG=1;
-		return(1);
-	}
-	return(0);
-}
-
-
-void init_monte_carlo(void) {
-	int i;
-	fixptguess.tol=.001;
-	fixptguess.n=100;
-	for(i=0;i<NODE;i++) {
-		fixptguess.xlo[i]=-10;
-		fixptguess.xhi[i]=10;
-	}
-	fixptlist.flag=0;
-	fixptlist.n=0;
-}
-
-
-void monte_carlo(void) {
-	int append=0;
-	int i=0,done=0,ishoot=0;
-	double z;
-	char name[XPP_MAX_NAME];
-	new_int("Append(1/0",&append);
-	new_int("Shoot (1/0)",&ishoot);
-	new_int("# Guesses:",&fixptguess.n);
-	new_float("Tolerance:",&fixptguess.tol);
-	while(1) {
-		sprintf(name,"%s_lo :",uvar_names[i]);
-		z=fixptguess.xlo[i];
-		done=new_float(name,&z);
-		if(done==0) {
-			fixptguess.xlo[i]=z;
-		}
-		if(done==-1) {
-			break;
-		}
-		sprintf(name,"%s_hi :",uvar_names[i]);
-		z=fixptguess.xhi[i];
-		done=new_float(name,&z);
-		if(done==0) {
-			fixptguess.xhi[i]=z;
-		}
-		if(done==-1) {
-			break;
-		}
-		i++;
-		if(i>=NODE) {
-			break;
-		}
-	}
-	do_monte_carlo_search(append, 1,ishoot);
-}
-
-
-void do_monte_carlo_search(int append, int stuffbrowse,int ishoot) {
-	int i,j,k,m,n=fixptguess.n;
-	int ierr, new_int=1;
-	double x[MAXODE],sum;
-	double er[MAXODE],em[MAXODE];
-	if(append==0) {
-		fixptlist.n=0;
-	}
-	if(fixptlist.flag==0) {
-		for(i=0;i<MAXFP;i++) {
-			fixptlist.x[i]=(double *)malloc(NODE*sizeof(double));
-			fixptlist.er[i]=(double *)malloc(NODE*sizeof(double));
-			fixptlist.em[i]=(double *)malloc(NODE*sizeof(double));
-		}
-		fixptlist.flag=1;
-	}
-	for(i=0;i<n;i++) {
-		for(j=0;j<NODE;j++) {
-			x[j]=ndrand48()*(fixptguess.xhi[j]-fixptguess.xlo[j])+fixptguess.xlo[j];
-		}
-		do_sing_info(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,NODE,er,em,&ierr);
-		if(ierr==0) {
-			m=fixptlist.n;
-			if(m==0) { /* first fixed point found */
-				fixptlist.n=1;
-				plintf("Found: %d\n",m);
-				for(j=0;j<NODE;j++) {
-					fixptlist.x[0][j]=x[j];
-					fixptlist.er[0][j]=er[j];
-					fixptlist.em[0][j]=em[j];
-					if(ishoot) {
-						shoot_this_now();
-					}
-					plintf(" x[%d]= %g   eval= %g + I %g \n",j,x[j],er[j],em[j]);
-				}
-			} else { /* there are others  better compare them */
-				new_int=1;
-				for(k=0;k<m;k++) {
-					sum=0.0;
-					for(j=0;j<NODE;j++) {
-						sum+=fabs(x[j]-fixptlist.x[k][j]);
-					}
-					if(sum<fixptguess.tol) {
-						new_int=0;
-					}
-				}
-				if(new_int==1) {
-					m=fixptlist.n;
-					fixptlist.n++;
-					if(m<MAXFP) {
-						plintf("Found: %d\n",m);
-						for(j=0;j<NODE;j++) {
-							fixptlist.x[m][j]=x[j];
-							fixptlist.er[m][j]=er[j];
-							fixptlist.em[m][j]=em[j];
-							if(ishoot) {
-								shoot_this_now();
-							}
-							plintf(" x[%d]= %g   eval= %g + I %g \n",j,x[j],er[j],em[j]);
-						}
-					}
-				}
-			}
-		}
-	}
-	if(stuffbrowse) {
-		reset_browser();
-		storind=0;
-		m=fixptlist.n;
-		for(i=0;i<m;i++) {
-			storage[0][storind]=(float)i;
-			for(j=0;j<NODE;j++) {
-				storage[j+1][storind]=(float)fixptlist.x[i][j];
-			}
-			storind++;
-		}
-		refresh_browser(storind);
+	if(PltFmtFlag==1) {
+		ps_do_color(cur_color);
+	} else if(PltFmtFlag==SVGFMT) {
+		svg_do_color(cur_color);
 	}
 }
 
 
-void do_eq_range(double *x) {
-	double parlo,parhi,dpar,temp;
-	int npar,stabcol,i,j,ierr;
-	int mc;
-	char bob[XPP_MAX_NAME];
-	float stabinfo;
+void do_init_data(int com) {
+	char sr[20],ch;
+	int i,si;
+	double *x;
+	double old_dt=DELTA_T;
+	FILE *fp;
+	/*char icfile[XPP_MAX_NAME];*/
+	char icfile[XPP_MAX_NAME];
+	float xm,ym;
+	int im,jm,oldstart,iv,jv,badmouse;
 
-	if(set_up_eq_range()==0) {
-		return;
-	}
-
-	wipe_rep();
-	data_back();
-	parlo=eq_range.plow;
-	parhi=eq_range.phigh;
-
-	npar=eq_range.steps;
-	dpar=(parhi-parlo)/(double)npar;
-	stabcol=eq_range.col;
-	mc=eq_range.mc;
-	storind=0;
+	oldstart=MyStart;
+	MyStart=1;
+	x=&MyData[0];
+	RANGE_FLAG=0;
 	DelayErr=0;
-	ENDSING=0;
-	PAR_FOL=1;
-	PAUSER=0;
-	SHOOT=eq_range.shoot;
-	reset_browser();
-	if(mc==1) {
-		eq_range.movie=1;
-		SHOOT=0;
-	}
-	if(eq_range.movie) {
-		reset_film();
-	}
-	for(i=0;i<=npar;i++) {
-		if(eq_range.movie) {
-			clear_draw_window();
-		}
-		temp=parlo+dpar*(double)i;
-		set_val(eq_range.item,temp);
-		PAR_FOL=1;
-		sprintf(bob,"%s=%.16g",eq_range.item,temp);
-		bottom_msg(2,bob);
-		evaluate_derived();
-		if(mc) {
-			do_monte_carlo_search(0,0,1);
-		} else {
-			if(DelayFlag) {
-				do_delay_sing(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,
-							  NODE,&ierr,&stabinfo);
-			} else {
-				do_sing(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,
-						NODE,&ierr,&stabinfo);
-			}
-		}
-		if(eq_range.movie) {
-			draw_label(draw_win);
-			put_text_x11(5,10,bob);
-			if(film_clip()==0) {
-				err_msg("Out of film");
-			}
-		}
-		if(mc==0) {
-			storage[0][storind]=temp;
-			for(j=0;j<NODE;j++) {
-				storage[j+1][storind]=(float)x[j];
-			}
-			for(j=NODE;j<NODE+NMarkov;j++) {
-				storage[j+1][storind]=0.0;
-			}
-			if(stabcol>0) {
-				storage[stabcol-1][storind]=stabinfo;
-			}
-			storind++;
-		}
-		if(ENDSING==1) {
-			break;
-		}
-	}
-	refresh_browser(storind);
-	PAR_FOL=0;
-}
-
-
-void swap_color(int *col, int rorw) {
-	if(rorw) {
-		MyGraph->color[0]=*col;
-	} else {
-		*col=MyGraph->color[0];
-	}
-}
-
-
-void set_cycle(int flag, int *icol) {
-	if(flag==0) {
+	reset_dae();
+	if(FFT || HIST) {
 		return;
 	}
-	MyGraph->color[0]=*icol+1;
-	*icol=*icol+1;
-	if(*icol==10) {
-		*icol=0;
+	if(com==M_ID) {      /* dont want to wipe out everything! */
+		get_new_guesses();
+		return;
 	}
+
+	data_back();
+	wipe_rep();
+	MyTime=T0;
+
+	STORFLAG=1;
+	POIEXT=0;
+	storind=0;
+	reset_browser();
+
+	switch(com) {
+	case M_IR: /* do range   */
+		do_range(x,0);
+		return;
+	case M_I2:
+		do_range(x,1);
+		return;
+	case M_IS:
+	case M_IL:
+		if(INFLAG==0) {
+			ping();
+			err_msg("No prior solution");
+			return;
+		}
+		get_ic(0,x);
+		if(com==M_IS) {
+			T0=LastTime;
+			MyTime=T0;
+		}
+		if(METHOD==VOLTERRA && oldstart==0) {
+			ch=(char)TwoChoice("No","Yes","Reset integrals?","ny");
+			if(ch=='n') {
+				MyStart=oldstart;
+			}
+		}
+		break;
+	case M_IO:
+		get_ic(1,x);
+		if(DelayFlag) {
+			/* restart initial data */
+			if(do_init_delay(DELAY)==0) {
+				return;
+			}
+		}
+		set_init_guess();
+		break;
+	case M_IM:
+	case M_II:
+		iv=MyGraph->xv[0]-1;
+		jv=MyGraph->yv[0]-1;
+		if(iv<0 || iv>=NODE || jv<0 || jv>=NODE || MyGraph->grtype>=5 || jv==iv) {
+			err_msg("Not in useable 2D plane...");
+			return;
+		}
+		/*  Get mouse values  */
+		if(com==M_IM) {
+			get_ic(1,x);
+			MessageBox("Click on initial data");
+			if(GetMouseXY(&im,&jm)) {
+				scale_to_real(im,jm,&xm,&ym);
+				im=MyGraph->xv[0]-1;
+				jm=MyGraph->yv[0]-1;
+				x[iv]=(double)xm;
+				x[jv]=(double)ym;
+				last_ic[im]=x[im];
+				last_ic[jm]=x[jm];
+				KillMessageBox();
+				if(DelayFlag) {
+					/* restart initial data */
+					if(do_init_delay(DELAY)==0) {
+						return;
+					}
+				}
+			} else {
+				KillMessageBox();
+				return;
+			}
+		} else {
+			SuppressBounds=1;
+			MessageBox("Click on initial data -- ESC to quit");
+			while(1) {
+				get_ic(1,x);
+				badmouse=GetMouseXY(&im,&jm);
+				if(badmouse==0) {
+					break;
+				}
+				scale_to_real(im,jm,&xm,&ym);
+				im=MyGraph->xv[0]-1;
+				jm=MyGraph->yv[0]-1;
+				x[iv]=(double)xm;
+				x[jv]=(double)ym;
+				last_ic[im]=x[im];
+				last_ic[jm]=x[jm];
+				if(DelayFlag) {
+					/* restart initial data */
+					if(do_init_delay(DELAY)==0) {
+						break;
+					}
+				}
+				MyStart=1;
+				MyTime=T0;
+				usual_integrate_stuff(x);
+			}
+			KillMessageBox();
+			SuppressBounds=0;
+			return;
+		}
+		break;
+	case M_IN:
+		man_ic();
+		get_ic(2,x);
+		set_init_guess();
+		break;
+	case M_IU:
+		if(form_ic()==0) {
+			return;
+		}
+		get_ic(2,x);
+		break;
+	case M_IH:
+		if(ShootICFlag==0) {
+			err_msg("No shooting data available");
+			break;
+		}
+		sprintf(sr,"Which? (1-%d)",ShootIndex);
+		si=1;
+		new_int(sr,&si);
+		si--;
+		if(si<ShootIndex && si>=0) {
+			for(i=0;i<NODE;i++) {
+				last_ic[i]=ShootIC[si][i];
+			}
+			get_ic(2,x);
+		} else {
+			err_msg("Out of range");
+		}
+		break;
+	case M_IF:
+		icfile[0]=0;
+		if(!file_selector("Read initial data",icfile,"*.dat")) {
+			return;
+		}
+		if((fp=fopen(icfile,"r"))==NULL) {
+			err_msg(" Cant open IC file");
+			return;
+		}
+		for(i=0;i<NODE;i++) {
+			fscanf(fp,"%lg",&last_ic[i]);
+		}
+		fclose(fp);
+		get_ic(2,x);
+		break;
+	case M_IB:
+		DELTA_T=-fabs(DELTA_T);
+		get_ic(2,x);
+		set_init_guess();
+		if(DelayFlag) {
+			/* restart initial data */
+			if(do_init_delay(DELAY)==0) {
+				return;
+			}
+		}
+		break;
+	case M_IG:
+	default:
+		set_init_guess();
+		get_ic(2,x);
+		if(DelayFlag) {
+			/* restart initial data */
+			if(do_init_delay(DELAY)==0) {
+				return;
+			}
+		}
+		break;
+	}
+	usual_integrate_stuff(x);
+	DELTA_T=old_dt;
 }
 
 
@@ -904,6 +671,136 @@ int do_range(double *x, int flag) {
 }
 
 
+void dump_range(FILE *fp, int f) {
+	char bob[XPP_MAX_NAME];
+	if(f==READEM) {
+		fgets(bob,255,fp);
+	} else {
+		fprintf(fp,"# Range information\n");
+	}
+	io_string(eq_range.item,11,fp,f);
+	io_int(&eq_range.col,fp,f,"eq-range stab col");
+	io_int(&eq_range.shoot,fp,f,"shoot flag 1=on");
+	io_int(&eq_range.steps,fp,f,"eq-range steps");
+	io_double(&eq_range.plow,fp,f,"eq_range low");
+	io_double(&eq_range.phigh,fp,f,"eq_range high");
+	io_string(range.item,11,fp,f);
+	io_string(range.item2,11,fp,f);
+	io_int(&range.steps,fp,f,"Range steps");
+	io_int(&range.cycle,fp,f,"Cycle color 1=on");
+	io_int(&range.reset,fp,f,"Reset data 1=on");
+	io_int(&range.oldic,fp,f,"Use old I.C.s 1=yes");
+	io_double(&range.plow,fp,f,"Par1 low");
+	io_double(&range.plow2,fp,f,"Par2 low");
+	io_double(&range.phigh,fp,f,"Par1 high");
+	io_double(&range.phigh2,fp,f,"Par2 high");
+	dump_shoot_range(fp,f);
+	if(f==READEM) {
+		range.steps2=range.steps;
+	}
+}
+
+
+void export_data(FILE *fp) {
+	int ip,np=MyGraph->nvars;
+	int ZSHFT,YSHFT,XSHFT;
+	int j,kxoff,kyoff,kzoff;
+	int iiXPLT,iiYPLT,iiZPLT;
+	int strind=get_maxrow_browser();
+	int i1=0;
+	float **data;
+	data=get_browser_data();
+	XSHFT=MyGraph->xshft;
+	YSHFT=MyGraph->yshft;
+	ZSHFT=MyGraph->zshft;
+	if(i1<ZSHFT) {
+		i1=ZSHFT;
+	}
+	if(i1<YSHFT) {
+		i1=YSHFT;
+	}
+	if(i1<XSHFT) {
+		i1=XSHFT;
+	}
+	if(strind<2) {
+		return;
+	}
+	kxoff=i1-XSHFT;
+	kzoff=i1-ZSHFT;
+	kyoff=i1-YSHFT;
+
+	iiXPLT=MyGraph->xv[0];
+	iiYPLT=MyGraph->yv[0];
+	if(MyGraph->ThreeDFlag>0) {
+		iiZPLT=MyGraph->zv[0];
+		for(j=i1;j<strind;j++) {
+			fprintf(fp,"%g %g %g \n",
+					data[iiXPLT][kxoff],
+					data[iiYPLT][kyoff],
+					data[iiZPLT][kzoff]);
+			kxoff++;
+			kyoff++;
+			kzoff++;
+		}
+		return;
+	}
+	/* 2D graph so we will save y from each curve  */
+	for(j=i1;j<strind;j++) {
+		fprintf(fp,"%g ",data[iiXPLT][kxoff]);
+		for(ip=0;ip<np;ip++) {
+			iiYPLT=MyGraph->yv[ip];
+			fprintf(fp,"%g ",data[iiYPLT][kyoff]);
+		}
+		fprintf(fp,"\n");
+		kxoff++;
+		kyoff++;
+		kzoff++;
+	}
+	return;
+}
+
+
+int extract_ic_data(char *big) {
+	int i,n,j;
+	int j1,j2,flag2;
+	char front[40],new_char[50],c;
+	char back[XPP_MAX_NAME];
+	de_space(big);
+	i=0;
+	n=strlen(big);
+
+	while(1) {
+		c=big[i];
+		if(c=='(') {
+			break;
+		}
+		front[i]=c;
+		i++;
+		if(i>=n) {
+			return(-1);
+		}
+	}
+	front[i]=0;
+
+	/* lets find the back part */
+	i=i+4;
+	for(j=i;j<n;j++) {
+		back[j-i]=big[j];
+	}
+	back[j-i]=0;
+
+	/* now fix it up */
+	big[0]='#';
+	big[1]=' ';
+	search_array(front,new_char,&j1,&j2,&flag2);
+	if(flag2==1) {
+		store_new_array_ic(new_char,j1,j2,back);
+		ar_ic_defined=1;
+	}
+	return(1);
+}
+
+
 void find_equilib_com(int com) {
 	int ierr;
 	float xm,ym;
@@ -961,654 +858,6 @@ void find_equilib_com(int com) {
 }
 
 
-void batch_integrate(void) {
-	int i;
-	if((Nintern_set==0) | (Nintern_2_use==0)) {
-		this_internset[0] = '\0';
-		do_batch_dry_run();
-		batch_integrate_once();
-		return;
-	}
-	for(i=0;i<Nintern_set;i++) {
-		sprintf(this_internset,"_%s",intern_set[i].name);
-		if(strlen(UserOUTFILE)==0) {/*Use the set name for outfile name*/
-			sprintf(batchout,"%s.dat",intern_set[i].name);
-		} else {/*Use the command line supplied outfile name*/
-			/*Will get over-written each internal set*/
-			sprintf(batchout,"%s",UserOUTFILE);
-		}
-		plintf("out=%s\n",batchout);
-		extract_internset(i);
-		chk_delay();
-		plintf(" Ok integrating now \n");
-		do_batch_dry_run();
-		if(intern_set[i].use) {
-			batch_integrate_once();
-		}
-	}
-}
-
-
-void do_batch_dry_run(void) {
-	if(!dryrun) {
-		return;
-	}
-	plintf("It's a dry run...\n");
-	FILE *fp;
-	fp=fopen(batchout,"w");
-	if(fp==NULL) {
-		printf(" Unable to open %s to write \n",batchout);
-		return;
-	}
-	if(querysets) {
-		fprintf(fp,"#Internal sets query:\n");
-		int i;
-		for(i=0;i<Nintern_set;i++) {
-			fprintf(fp,"%s %d %s\n",intern_set[i].name,intern_set[i].use,intern_set[i].does);
-		}
-	}
-	if(querypars) {
-		fprintf(fp,"#Parameters query:\n");
-		int i;
-		for(i=0;i<NUPAR;i++) {
-			fprintf(fp,"%s %f\n",upar_names[i],default_val[i]);
-		}
-	}
-	if(queryics) {
-		fprintf(fp,"#Initial conditions query:\n");
-		int i;
-		for(i=0;i<NEQ;i++) {
-			fprintf(fp,"%s %f\n",uvar_names[i],last_ic[i]);
-		}
-	}
-	fclose(fp);
-	return;
-}
-
-
-
-void batch_integrate_once(void) {
-	if(dryrun) {
-		return;
-	}
-	FILE *fp;
-	double *x;
-	int i;
-	MyStart=1;
-	x=&MyData[0];
-	RANGE_FLAG=0;
-	DelayErr=0;
-	MyTime=T0;
-
-	STORFLAG=1;
-	POIEXT=0;
-	storind=0;
-	reset_browser();
-	/*  plintf("batch_range=%d\n",batch_range); */
-	if(batch_range==1 || STOCH_FLAG>0) {
-		reset_dae();
-		RANGE_FLAG=1;
-
-		if(do_range(x,0)!=0) {
-			plintf(" Errors occured in range integration \n");
-		}
-	} else {
-		get_ic(2,x);
-		if(DelayFlag) {
-			/* restart initial data */
-			if(do_init_delay(DELAY)==0) {
-				return;
-			}
-		}
-		do_start_flags(x,&MyTime);
-		if(fabs(MyTime)>=TRANS && STORFLAG==1 && POIMAP==0) {
-			storage[0][0]=(float)MyTime;
-			extra(x,MyTime,NODE,NEQ);
-			for(i=0;i<NEQ;i++) {
-				storage[1+i][0]=(float)x[i];
-			}
-			storind=1;
-		}
-		if(integrate(&MyTime,x,TEND,DELTA_T,1,NJMP,&MyStart)!=0) {
-			plintf(" Integration not completed -- will write anyway...\n");
-		}
-		INFLAG=1;
-		refresh_browser(storind);
-	}
-	post_process_stuff();
-	if(!batch_range  ||  range.reset==0) {
-		if(STOCH_FLAG==1) {
-			mean_back();
-		}
-		if(STOCH_FLAG==2) {
-			variance_back();
-		}
-		if(!SuppressOut) {
-			fp=fopen(batchout,"w");
-			if(fp==NULL) {
-				plintf(" Unable to open %s to write \n",batchout);
-				return;
-			}
-			write_mybrowser_data(fp);
-			fclose(fp);
-		}
-		if(MakePlotFlag) {
-			dump_ps(-1);
-		}
-	}
-	plintf(" Run complete ... \n");
-}
-
-int write_this_run(char *file, int i) {
-	/*char outfile[XPP_MAX_NAME];*/
-	char outfile[XPP_MAX_NAME];
-	FILE *fp;
-	if(!SuppressOut) {
-		sprintf(outfile,"%s.%d",file,i);
-		fp=fopen(outfile,"w");
-		if(fp==NULL) {
-			plintf("Couldnt open %s\n",outfile);
-			return -1;
-		}
-		write_mybrowser_data(fp);
-		fclose(fp);
-	}
-	if(MakePlotFlag) {
-		dump_ps(i);
-	}
-	return(1);
-}
-
-
-void do_init_data(int com) {
-	char sr[20],ch;
-	int i,si;
-	double *x;
-	double old_dt=DELTA_T;
-	FILE *fp;
-	/*char icfile[XPP_MAX_NAME];*/
-	char icfile[XPP_MAX_NAME];
-	float xm,ym;
-	int im,jm,oldstart,iv,jv,badmouse;
-
-	oldstart=MyStart;
-	MyStart=1;
-	x=&MyData[0];
-	RANGE_FLAG=0;
-	DelayErr=0;
-	reset_dae();
-	if(FFT || HIST) {
-		return;
-	}
-	if(com==M_ID) {      /* dont want to wipe out everything! */
-		get_new_guesses();
-		return;
-	}
-
-	data_back();
-	wipe_rep();
-	MyTime=T0;
-
-	STORFLAG=1;
-	POIEXT=0;
-	storind=0;
-	reset_browser();
-
-	switch(com) {
-	case M_IR: /* do range   */
-		do_range(x,0);
-		return;
-	case M_I2:
-		do_range(x,1);
-		return;
-	case M_IS:
-	case M_IL:
-		if(INFLAG==0) {
-			ping();
-			err_msg("No prior solution");
-			return;
-		}
-		get_ic(0,x);
-		if(com==M_IS) {
-			T0=LastTime;
-			MyTime=T0;
-		}
-		if(METHOD==VOLTERRA && oldstart==0) {
-			ch=(char)TwoChoice("No","Yes","Reset integrals?","ny");
-			if(ch=='n') {
-				MyStart=oldstart;
-			}
-		}
-		break;
-	case M_IO:
-		get_ic(1,x);
-		if(DelayFlag) {
-			/* restart initial data */
-			if(do_init_delay(DELAY)==0) {
-				return;
-			}
-		}
-		set_init_guess();
-		break;
-	case M_IM:
-	case M_II:
-		iv=MyGraph->xv[0]-1;
-		jv=MyGraph->yv[0]-1;
-		if(iv<0 || iv>=NODE || jv<0 || jv>=NODE || MyGraph->grtype>=5 || jv==iv) {
-			err_msg("Not in useable 2D plane...");
-			return;
-		}
-		/*  Get mouse values  */
-		if(com==M_IM) {
-			get_ic(1,x);
-			MessageBox("Click on initial data");
-			if(GetMouseXY(&im,&jm)) {
-				scale_to_real(im,jm,&xm,&ym);
-				im=MyGraph->xv[0]-1;
-				jm=MyGraph->yv[0]-1;
-				x[iv]=(double)xm;
-				x[jv]=(double)ym;
-				last_ic[im]=x[im];
-				last_ic[jm]=x[jm];
-				KillMessageBox();
-				if(DelayFlag) {
-					/* restart initial data */
-					if(do_init_delay(DELAY)==0) {
-						return;
-					}
-				}
-			} else {
-				KillMessageBox();
-				return;
-			}
-		} else {
-			SuppressBounds=1;
-			MessageBox("Click on initial data -- ESC to quit");
-			while(1) {
-				get_ic(1,x);
-				badmouse=GetMouseXY(&im,&jm);
-				if(badmouse==0) {
-					break;
-				}
-				scale_to_real(im,jm,&xm,&ym);
-				im=MyGraph->xv[0]-1;
-				jm=MyGraph->yv[0]-1;
-				x[iv]=(double)xm;
-				x[jv]=(double)ym;
-				last_ic[im]=x[im];
-				last_ic[jm]=x[jm];
-				if(DelayFlag) {
-					/* restart initial data */
-					if(do_init_delay(DELAY)==0) {
-						break;
-					}
-				}
-				MyStart=1;
-				MyTime=T0;
-				usual_integrate_stuff(x);
-			}
-			KillMessageBox();
-			SuppressBounds=0;
-			return;
-		}
-		break;
-	case M_IN:
-		man_ic();
-		get_ic(2,x);
-		set_init_guess();
-		break;
-	case M_IU:
-		if(form_ic()==0) {
-			return;
-		}
-		get_ic(2,x);
-		break;
-	case M_IH:
-		if(ShootICFlag==0) {
-			err_msg("No shooting data available");
-			break;
-		}
-		sprintf(sr,"Which? (1-%d)",ShootIndex);
-		si=1;
-		new_int(sr,&si);
-		si--;
-		if(si<ShootIndex && si>=0) {
-			for(i=0;i<NODE;i++) {
-				last_ic[i]=ShootIC[si][i];
-			}
-			get_ic(2,x);
-		} else {
-			err_msg("Out of range");
-		}
-		break;
-	case M_IF:
-		icfile[0]=0;
-		if(!file_selector("Read initial data",icfile,"*.dat")) {
-			return;
-		}
-		if((fp=fopen(icfile,"r"))==NULL) {
-			err_msg(" Cant open IC file");
-			return;
-		}
-		for(i=0;i<NODE;i++) {
-			fscanf(fp,"%lg",&last_ic[i]);
-		}
-		fclose(fp);
-		get_ic(2,x);
-		break;
-	case M_IB:
-		DELTA_T=-fabs(DELTA_T);
-		get_ic(2,x);
-		set_init_guess();
-		if(DelayFlag) {
-			/* restart initial data */
-			if(do_init_delay(DELAY)==0) {
-				return;
-			}
-		}
-		break;
-	case M_IG:
-	default:
-		set_init_guess();
-		get_ic(2,x);
-		if(DelayFlag) {
-			/* restart initial data */
-			if(do_init_delay(DELAY)==0) {
-				return;
-			}
-		}
-		break;
-	}
-	usual_integrate_stuff(x);
-	DELTA_T=old_dt;
-}
-
-
-void run_from_x(double *x) {
-	plintf(" %g %g \n",x[0],x[1]);
-	MyStart=1;
-	RANGE_FLAG=0;
-	DelayErr=0;
-	reset_dae();
-	MyTime=T0;
-	/* get_ic(2,x); */
-	STORFLAG=1;
-	POIEXT=0;
-	storind=0;
-	reset_browser();
-	usual_integrate_stuff(x);
-}
-
-
-void run_now(void) {
-	double *x;
-	MyStart=1;
-	x=&MyData[0];
-	RANGE_FLAG=0;
-	DelayErr=0;
-	reset_dae();
-	MyTime=T0;
-	get_ic(2,x);
-	STORFLAG=1;
-	POIEXT=0;
-	storind=0;
-	reset_browser();
-	usual_integrate_stuff(x);
-}
-
-
-void do_start_flags(double *x,double *t) {
-	int iflagstart=1;
-	double tnew=*t;
-	double sss;
-	one_flag_step(x,x,&iflagstart,*t,&tnew,NODE,&sss);
-}
-
-
-void usual_integrate_stuff(double *x) {
-	int i;
-	do_start_flags(x,&MyTime);
-	if(fabs(MyTime)>=TRANS && STORFLAG==1 && POIMAP==0) {
-		storage[0][0]=(float)MyTime;
-		extra(x,MyTime,NODE,NEQ);
-		for(i=0;i<NEQ;i++) {
-			storage[1+i][0]=(float)x[i];
-		}
-		storind=1;
-	}
-	integrate(&MyTime,x,TEND,DELTA_T,1,NJMP,&MyStart);
-
-	ping();
-	INFLAG=1;
-	refresh_browser(storind);
-	auto_freeze_it();
-	redraw_ics();
-}
-
-
-void do_new_array_ic(char *new_char, int j1, int j2) {
-	int i;
-	int ihot=-1;
-	int ifree=-1;
-	/* first check to see if this is
-	 one that has already been used and also find the first free one
-  */
-	for(i=0;i<NAR_IC;i++) {
-		if(ar_ic[i].index0==-1 && ifree==-1 && ar_ic[i].type==0) {
-			ifree=i;
-		}
-		if(strcmp(ar_ic[i].var,new_char)==0 && ar_ic[i].j1==j1 && ar_ic[i].j2==j2) {
-			ihot=i;
-		}
-	}
-	if(ihot==-1) {
-		if(ifree==-1) {
-			ihot=0;
-		} else {
-			ihot=ifree;
-		}
-		/* copy relevant stuff */
-		strcpy(ar_ic[ihot].var,new_char);
-		ar_ic[ihot].type=2;
-		ar_ic[ihot].j1=j1;
-		ar_ic[ihot].j2=j2;
-	}
-	new_string("Formula:",ar_ic[ihot].formula);
-	/* now we have everything we need */
-	evaluate_ar_ic(ar_ic[ihot].var,ar_ic[ihot].formula,
-				   ar_ic[ihot].j1,ar_ic[ihot].j2);
-}
-
-
-void store_new_array_ic(char *new_char, int j1, int j2, char *formula) {
-	int i;
-	int ihot=-1;
-	int ifree=-1;
-	/* first check to see if this is
-	 one that has already been used and also find the first free one
-  */
-	for(i=0;i<NAR_IC;i++) {
-		if(ar_ic[i].index0==-1 && ifree==-1 && ar_ic[i].type==0) {
-			ifree=i;
-		}
-		if(strcmp(ar_ic[i].var,new_char)==0 && ar_ic[i].j1==j1 && ar_ic[i].j2==j2) {
-			ihot=i;
-		}
-	}
-	if(ihot==-1) {
-		if(ifree==-1) {
-			ihot=0;
-		} else {
-			ihot=ifree;
-		}
-		/* copy relevant stuff */
-		strcpy(ar_ic[ihot].var,new_char);
-		ar_ic[ihot].type=2;
-		ar_ic[ihot].j1=j1;
-		ar_ic[ihot].j2=j2;
-	}
-	strcpy(ar_ic[ihot].formula,formula);
-}
-
-
-
-void evaluate_ar_ic(char *v, char *f, int j1, int j2) {
-	int j;
-	int i,flag;
-	double z;
-	char vp[25],fp[XPP_MAX_NAME];
-	for(j=j1;j<=j2;j++) {
-		i=-1;
-		subsk(v,vp,j,1);
-		find_variable(vp,&i);
-		if(i>0) {
-			subsk(f,fp,j,1);
-			flag=do_calc(fp,&z);
-			if(flag!=-1) {
-				last_ic[i-1]=z;
-			} else {
-				return;
-			}
-		}
-	}
-}
-
-
-int extract_ic_data(char *big) {
-	int i,n,j;
-	int j1,j2,flag2;
-	char front[40],new_char[50],c;
-	char back[XPP_MAX_NAME];
-	de_space(big);
-	i=0;
-	n=strlen(big);
-
-	while(1) {
-		c=big[i];
-		if(c=='(') {
-			break;
-		}
-		front[i]=c;
-		i++;
-		if(i>=n) {
-			return(-1);
-		}
-	}
-	front[i]=0;
-
-	/* lets find the back part */
-	i=i+4;
-	for(j=i;j<n;j++) {
-		back[j-i]=big[j];
-	}
-	back[j-i]=0;
-
-	/* now fix it up */
-	big[0]='#';
-	big[1]=' ';
-	search_array(front,new_char,&j1,&j2,&flag2);
-	if(flag2==1) {
-		store_new_array_ic(new_char,j1,j2,back);
-		ar_ic_defined=1;
-	}
-	return(1);
-}
-
-
-void arr_ic_start(void) {
-	int i;
-	if(ar_ic_defined==0) {
-		return;
-	}
-	for(i=0;i<NAR_IC;i++) {
-		if(ar_ic[i].type==2) {
-			evaluate_ar_ic(ar_ic[i].var,ar_ic[i].formula,
-						   ar_ic[i].j1,ar_ic[i].j2);
-		}
-	}
-}
-
-
-int set_array_ic(void) {
-	char junk[50];
-	char new_char[50];
-	int i,index0,myar=-1;
-	int i1,in;
-	int j1,j2,flag2;
-	double z;
-	int flag;
-	junk[0]=0;
-	if(new_string("Variable: ",junk)==0) {
-		return 0;
-	}
-	search_array(junk,new_char,&j1,&j2,&flag2);
-	if(flag2==1) {
-		do_new_array_ic(new_char,j1,j2);
-	} else {
-		find_variable(junk,&i);
-		if(i<=-1) {
-			return 0;
-		}
-		index0=i;
-		for(i=0;i<NAR_IC;i++) {
-			if(ar_ic[i].type==2) {
-				continue;
-			}
-			if(index0==ar_ic[i].index0) {
-				myar=i;
-				break;
-			}
-		}
-		if(myar<0) {
-			for(i=0;i<NAR_IC;i++) {
-				if(ar_ic[i].type==2) {
-					continue;
-				}
-				if(ar_ic[i].index0==-1) {
-					myar=i;
-					break;
-				}
-			}
-		}
-		if(myar<0) {
-			myar=0;
-		}
-		/* Now we have an element in the array index */
-		ar_ic[myar].index0=index0;
-		ar_ic[myar].type=0;
-		new_int("Number elements:",&ar_ic[myar].n);
-		new_string("u=F(t-i0):",ar_ic[myar].formula);
-		i1=index0-1;
-		in=i1+ar_ic[myar].n;
-		if(i1>NODE || in>NODE) {
-			return 0; /* out of bounds */
-		}
-		for(i=i1;i<in;i++) {
-			set_val("t",(double)(i-i1));
-			flag=do_calc(ar_ic[myar].formula,&z);
-			if(flag==-1) {
-				err_msg("Bad formula");
-				return 1;
-			}
-			last_ic[i]=z;
-		}
-	}
-	return 1;
-}
-
-
-int form_ic(void) {
-	int ans;
-	while(1) {
-		ans=set_array_ic();
-		if(ans==0) {
-			break;
-		}
-	}
-	return 1;
-}
-
-
 void get_ic(int it, double *x) {
 	int i;
 	switch(it) {
@@ -1627,147 +876,61 @@ void get_ic(int it, double *x) {
 }
 
 
-
-int ode_int(double *y, double *t, int *istart, int ishow) {
-	double error[MAXODE];
-	int kflag;
-	int nodes=xpv.node+xpv.nvec;
-	int nit,nout=NJMP;
-	double tend=TEND;
-	double dt=DELTA_T,tout;
-	if(METHOD==0) {
-		nit=tend;
-		dt=dt/fabs(dt);
-	} else {
-		nit=(tend+.1*fabs(dt))/fabs(dt);
+void init_ar_ic(void) {
+	int i;
+	for(i=0;i<NAR_IC;i++) {
+		ar_ic[i].index0=-1;
+		ar_ic[i].formula[0]=0;
+		ar_ic[i].n=0;
+		ar_ic[i].var[i]=0;
+		ar_ic[i].type=0;
 	}
-	if(ishow==1) {
-		integrate(t,y,tend,dt,1,nout,istart);
-		return(1);
-	}
-	MSWTCH(xpv.x,y);
-	evaluate_derived();
-	if(METHOD<GEAR  || METHOD==BACKEUL) {
-		kflag=solver(xpv.x,t,dt,nit,nodes,istart,WORK);
-		MSWTCH(y,xpv.x);
-		if(kflag<0) {
-			ping();
-			if(RANGE_FLAG) {
-				return(0);
-			}
-			switch(kflag)	{
-			case -1:
-				err_msg(" Singular Jacobian ");
-				break;
-			case -2:
-				err_msg("Too many iterates");
-				break;
-			}
-			return(0);
-		}
-	} else {
-		tout=*t+tend*dt/fabs(dt);
-		switch(METHOD) {
-		case GEAR:
-			if(*istart==1) {
-				*istart=0;
-			}
-			gear(nodes,t,tout,xpv.x,HMIN,HMAX,TOLER,2,error,
-				 &kflag,istart,WORK,IWORK);
-			MSWTCH(y,xpv.x);
-			if(kflag<0) {
-				ping();
-				if(RANGE_FLAG) {
-					return(0);
-				}
-				switch(kflag) {
-				case -1:
-					err_msg("kflag=-1: minimum step too big");
-					break;
-				case -2:
-					err_msg("kflag=-2: required order too big");
-					break;
-				case -3:
-					err_msg("kflag=-3: minimum step too big");
-					break;
-				case -4:
-					err_msg("kflag=-4: tolerance too small");
-					break;
-				}
-				return(0);
-			}
-			break;
-#ifdef CVODE_YES
-		case CVODE:
-			cvode(istart,xpv.x,t,nodes,tout,&kflag,&TOLER,&ATOLER);
-			MSWTCH(y,xpv.x);
-			if(kflag<0) {
-				cvode_err_msg(kflag);
-				return(0);
-			}
-			end_cv();
-			break;
-#endif
-		case DP5:
-		case DP83:
-			dp(istart,xpv.x,t,nodes,tout,&TOLER,&ATOLER,METHOD-DP5,&kflag);
-			MSWTCH(y,xpv.x);
-			if(kflag<0) {
-				if(RANGE_FLAG) {
-					return(0);
-				}
-				dp_err(kflag);
-				return 0;
-			}
-
-			break;
-		case RB23:
-			rb23(xpv.x,t,tout,istart,nodes,WORK,&kflag);
-			MSWTCH(y,xpv.x);
-			if(kflag<0) {
-				ping();
-				if(RANGE_FLAG) {
-					return(0);
-				}
-				err_msg("Step size too small");
-				return 0;
-			}
-			break;
-		case RKQS:
-		case STIFF:
-			adaptive(xpv.x,nodes,t,tout,TOLER,&dt,
-					 HMIN,WORK,&kflag,NEWT_ERR,METHOD,istart);
-			MSWTCH(y,xpv.x);
-			if(kflag) {
-				ping();
-				if(RANGE_FLAG) {
-					return(0);
-				}
-				switch(kflag) {
-				case 2:
-					err_msg("Step size too small");
-					break;
-				case 3:
-					err_msg("Too many steps");
-					break;
-				case -1:
-					err_msg("singular jacobian encountered");
-					break;
-				case 1:
-					err_msg("stepsize is close to 0");
-					break;
-				case 4:
-					err_msg("exceeded MAXTRY in stiff");
-					break;
-				}
-				return(0);
-			}
-			break;
-		}
-	}
-	return(1);
 }
 
+
+void init_range(void) {
+	eq_range.col=-1;
+	eq_range.mc=0;
+	eq_range.shoot=0;
+	eq_range.steps=10;
+	eq_range.plow=0.0;
+	eq_range.phigh=1.0;
+	eq_range.movie=0;
+	sprintf(eq_range.item,"%s",upar_names[0]);
+	range.type=0;
+	range.rtype=0;
+	range.index=range.index2=0;
+	if(notAlreadySet.RANGESTEP) {
+		range.steps=20;
+		notAlreadySet.RANGESTEP=0;
+	}
+	range.steps2=20;
+	if(notAlreadySet.RANGELOW) {
+		range.plow=range.plow2=0.0;
+		notAlreadySet.RANGELOW=0;
+	}
+	if(notAlreadySet.RANGEHIGH) {
+		range.phigh=range.phigh2=1.0;
+		notAlreadySet.RANGEHIGH=0;
+	}
+	if(notAlreadySet.RANGERESET) {
+		range.reset=1;
+		notAlreadySet.RANGERESET=0;
+	}
+	if(notAlreadySet.RANGEOLDIC) {
+		range.oldic=1;
+		notAlreadySet.RANGEOLDIC=0;
+	}
+	range.cycle=0;
+	range.movie=0;
+	if(notAlreadySet.RANGEOVER) {
+		sprintf(range.item,"%s",uvar_names[0]);
+		notAlreadySet.RANGEOVER=0;
+	}
+	sprintf(range.item2,"%s",uvar_names[0]);
+	init_shoot_range(upar_names[0]);
+	init_monte_carlo();
+}
 
 
 int integrate(double *t, double *x, double tend, double dt, int count, int nout, int *start) {
@@ -2275,157 +1438,144 @@ out:
 }
 
 
-void send_halt(double *y, double t) {
-	STOP_FLAG=1;
-}
-
-
-void send_output(double *y,double t) {
-	double yy[MAXODE];
-	int i;
-	for(i=0;i<NODE;i++) {
-		yy[i]=y[i];
+int ode_int(double *y, double *t, int *istart, int ishow) {
+	double error[MAXODE];
+	int kflag;
+	int nodes=xpv.node+xpv.nvec;
+	int nit,nout=NJMP;
+	double tend=TEND;
+	double dt=DELTA_T,tout;
+	if(METHOD==0) {
+		nit=tend;
+		dt=dt/fabs(dt);
+	} else {
+		nit=(tend+.1*fabs(dt))/fabs(dt);
 	}
-	extra(yy,t,NODE,NEQ);
-	if((STORFLAG==1) && (storind<MAXSTOR)) {
-		for(i=0;i<NEQ;i++) {
-			storage[i+1][storind]=(float)yy[i];
-		}
-		storage[0][storind]=(float)t;
-		storind++;
+	if(ishow==1) {
+		integrate(t,y,tend,dt,1,nout,istart);
+		return(1);
 	}
-}
-
-
-
-void do_plot(float *oldxpl, float *oldypl, float *oldzpl, float *xpl, float *ypl, float *zpl) {
-	int ip,np=MyGraph->nvars;
-	for(ip=0;ip<np;ip++) {
-		if(MyGraph->ColorFlag==0) {
-			set_linestyle(MyGraph->color[ip]);
-		}
-		if(MyGraph->line[ip]<=0) {
-			PointRadius=-MyGraph->line[ip];
-			if(MyGraph->ThreeDFlag==0) {
-				point_abs(xpl[ip],ypl[ip]);
-			} else {
-				point_3d(xpl[ip],ypl[ip],zpl[ip]);
+	MSWTCH(xpv.x,y);
+	evaluate_derived();
+	if(METHOD<GEAR  || METHOD==BACKEUL) {
+		kflag=solver(xpv.x,t,dt,nit,nodes,istart,WORK);
+		MSWTCH(y,xpv.x);
+		if(kflag<0) {
+			ping();
+			if(RANGE_FLAG) {
+				return(0);
 			}
-		} else {
-			if(MyGraph->ThreeDFlag==0) {
-				line_abs(oldxpl[ip],oldypl[ip],xpl[ip],ypl[ip]);
-			} else  {
-				line_3d(oldxpl[ip],oldypl[ip],oldzpl[ip],
-						xpl[ip],ypl[ip],zpl[ip]);
+			switch(kflag)	{
+			case -1:
+				err_msg(" Singular Jacobian ");
+				break;
+			case -2:
+				err_msg("Too many iterates");
+				break;
 			}
+			return(0);
+		}
+	} else {
+		tout=*t+tend*dt/fabs(dt);
+		switch(METHOD) {
+		case GEAR:
+			if(*istart==1) {
+				*istart=0;
+			}
+			gear(nodes,t,tout,xpv.x,HMIN,HMAX,TOLER,2,error,
+				 &kflag,istart,WORK,IWORK);
+			MSWTCH(y,xpv.x);
+			if(kflag<0) {
+				ping();
+				if(RANGE_FLAG) {
+					return(0);
+				}
+				switch(kflag) {
+				case -1:
+					err_msg("kflag=-1: minimum step too big");
+					break;
+				case -2:
+					err_msg("kflag=-2: required order too big");
+					break;
+				case -3:
+					err_msg("kflag=-3: minimum step too big");
+					break;
+				case -4:
+					err_msg("kflag=-4: tolerance too small");
+					break;
+				}
+				return(0);
+			}
+			break;
+#ifdef CVODE_YES
+		case CVODE:
+			cvode(istart,xpv.x,t,nodes,tout,&kflag,&TOLER,&ATOLER);
+			MSWTCH(y,xpv.x);
+			if(kflag<0) {
+				cvode_err_msg(kflag);
+				return(0);
+			}
+			end_cv();
+			break;
+#endif
+		case DP5:
+		case DP83:
+			dp(istart,xpv.x,t,nodes,tout,&TOLER,&ATOLER,METHOD-DP5,&kflag);
+			MSWTCH(y,xpv.x);
+			if(kflag<0) {
+				if(RANGE_FLAG) {
+					return(0);
+				}
+				dp_err(kflag);
+				return 0;
+			}
+
+			break;
+		case RB23:
+			rb23(xpv.x,t,tout,istart,nodes,WORK,&kflag);
+			MSWTCH(y,xpv.x);
+			if(kflag<0) {
+				ping();
+				if(RANGE_FLAG) {
+					return(0);
+				}
+				err_msg("Step size too small");
+				return 0;
+			}
+			break;
+		case RKQS:
+		case STIFF:
+			adaptive(xpv.x,nodes,t,tout,TOLER,&dt,
+					 HMIN,WORK,&kflag,NEWT_ERR,METHOD,istart);
+			MSWTCH(y,xpv.x);
+			if(kflag) {
+				ping();
+				if(RANGE_FLAG) {
+					return(0);
+				}
+				switch(kflag) {
+				case 2:
+					err_msg("Step size too small");
+					break;
+				case 3:
+					err_msg("Too many steps");
+					break;
+				case -1:
+					err_msg("singular jacobian encountered");
+					break;
+				case 1:
+					err_msg("stepsize is close to 0");
+					break;
+				case 4:
+					err_msg("exceeded MAXTRY in stiff");
+					break;
+				}
+				return(0);
+			}
+			break;
 		}
 	}
-}
-
-
-/* old restore is in restore.c */
-
-void export_data(FILE *fp) {
-	int ip,np=MyGraph->nvars;
-	int ZSHFT,YSHFT,XSHFT;
-	int j,kxoff,kyoff,kzoff;
-	int iiXPLT,iiYPLT,iiZPLT;
-	int strind=get_maxrow_browser();
-	int i1=0;
-	float **data;
-	data=get_browser_data();
-	XSHFT=MyGraph->xshft;
-	YSHFT=MyGraph->yshft;
-	ZSHFT=MyGraph->zshft;
-	if(i1<ZSHFT) {
-		i1=ZSHFT;
-	}
-	if(i1<YSHFT) {
-		i1=YSHFT;
-	}
-	if(i1<XSHFT) {
-		i1=XSHFT;
-	}
-	if(strind<2) {
-		return;
-	}
-	kxoff=i1-XSHFT;
-	kzoff=i1-ZSHFT;
-	kyoff=i1-YSHFT;
-
-	iiXPLT=MyGraph->xv[0];
-	iiYPLT=MyGraph->yv[0];
-	if(MyGraph->ThreeDFlag>0) {
-		iiZPLT=MyGraph->zv[0];
-		for(j=i1;j<strind;j++) {
-			fprintf(fp,"%g %g %g \n",
-					data[iiXPLT][kxoff],
-					data[iiYPLT][kyoff],
-					data[iiZPLT][kzoff]);
-			kxoff++;
-			kyoff++;
-			kzoff++;
-		}
-		return;
-	}
-	/* 2D graph so we will save y from each curve  */
-	for(j=i1;j<strind;j++) {
-		fprintf(fp,"%g ",data[iiXPLT][kxoff]);
-		for(ip=0;ip<np;ip++) {
-			iiYPLT=MyGraph->yv[ip];
-			fprintf(fp,"%g ",data[iiYPLT][kyoff]);
-		}
-		fprintf(fp,"\n");
-		kxoff++;
-		kyoff++;
-		kzoff++;
-	}
-	return;
-}
-
-
-void plot_the_graphs(float *xv,float *xvold,int node,int neq,double ddt,int *tc,int flag) {
-	int i;
-	int ic=current_pop;
-	if(SimulPlotFlag==0) {
-		plot_one_graph(xv,xvold,node,neq,ddt,tc);
-		return;
-	}
-
-	for(i=0;i<num_pops;i++) {
-		make_active(ActiveWinList[i],flag);
-		plot_one_graph(xv,xvold,node,neq,ddt,tc);
-	}
-	make_active(ic,flag);
-}
-
-
-void plot_one_graph(float *xv,float *xvold,int node,int neq,double ddt,int *tc) {
-	int *IXPLT,*IYPLT,*IZPLT;
-	int NPlots,ip;
-	float oldxpl[MAXPERPLOT],oldypl[MAXPERPLOT],oldzpl[MAXPERPLOT];
-	float xpl[MAXPERPLOT],ypl[MAXPERPLOT],zpl[MAXPERPLOT];
-	NPlots=MyGraph->nvars;
-	IXPLT=MyGraph->xv;
-	IYPLT=MyGraph->yv;
-	IZPLT=MyGraph->zv;
-	for(ip=0;ip<NEQ;ip++) {
-		if(itor[ip]==1) {
-			xvold[ip+1]=xvold[ip+1]+tc[ip]*TOR_PERIOD;
-		}
-	}
-	for(ip=0;ip<NPlots;ip++) {
-		oldxpl[ip]=xvold[IXPLT[ip]];
-		oldypl[ip]=xvold[IYPLT[ip]];
-		oldzpl[ip]=xvold[IZPLT[ip]];
-		xpl[ip]=xv[IXPLT[ip]];
-		ypl[ip]=xv[IYPLT[ip]];
-		zpl[ip]=xv[IZPLT[ip]];
-	}
-	if(MyGraph->ColorFlag) {
-		comp_color(xv,xvold,NODE,(float)ddt);
-	}
-	do_plot(oldxpl,oldypl,oldzpl,xpl,ypl,zpl);
+	return(1);
 }
 
 
@@ -2520,47 +1670,55 @@ void restore(int i1, int i2) {
 }
 
 
-/*  Sets the color according to the velocity or z-value */
-void comp_color(float *v1, float *v2, int n, double dt) {
-	int i,cur_color;
-	float sum;
-	float min_scale=(float)(MyGraph->min_scale);
-	float color_scale=(float)(MyGraph->color_scale);
-	if(MyGraph->ColorFlag==2) {
-		sum=v1[MyGraph->ColorValue];
-	} else {
-		for(i=0,sum=0.0;i<n;i++) {
-			sum+=(float)fabs((double)(v1[i+1]-v2[i+1]));
-		}
-		sum=sum/(dt);
-	}
-	cur_color=(int)((sum-min_scale)*(float)color_total/color_scale);
-	if(cur_color<0) {
-		cur_color=0;
-	}
-	if(cur_color>color_total) {
-		cur_color=color_total-1;
-	}
-	cur_color+=FIRSTCOLOR;
-	if(Xup) {
-		set_color(cur_color);
-	}
-	if(PltFmtFlag==1) {
-		ps_do_color(cur_color);
-	} else if(PltFmtFlag==SVGFMT) {
-		svg_do_color(cur_color);
-	}
+void run_now(void) {
+	double *x;
+	MyStart=1;
+	x=&MyData[0];
+	RANGE_FLAG=0;
+	DelayErr=0;
+	reset_dae();
+	MyTime=T0;
+	get_ic(2,x);
+	STORFLAG=1;
+	POIEXT=0;
+	storind=0;
+	reset_browser();
+	usual_integrate_stuff(x);
 }
 
 
-void shoot_easy(double *x) {
-	double t=0.0;
+void send_halt(double *y, double t) {
+	STOP_FLAG=1;
+}
+
+
+void send_output(double *y,double t) {
+	double yy[MAXODE];
 	int i;
-	SuppressBounds=1;
-	integrate(&t,x,TEND,DELTA_T,1,NJMP,&i);
-	SuppressBounds=0;
+	for(i=0;i<NODE;i++) {
+		yy[i]=y[i];
+	}
+	extra(yy,t,NODE,NEQ);
+	if((STORFLAG==1) && (storind<MAXSTOR)) {
+		for(i=0;i<NEQ;i++) {
+			storage[i+1][storind]=(float)yy[i];
+		}
+		storage[0][storind]=(float)t;
+		storind++;
+	}
 }
 
+
+void set_cycle(int flag, int *icol) {
+	if(flag==0) {
+		return;
+	}
+	MyGraph->color[0]=*icol+1;
+	*icol=*icol+1;
+	if(*icol==10) {
+		*icol=0;
+	}
+}
 
 
 void shoot(double *x, double *xg, double *evec, int sgn) {
@@ -2577,6 +1735,15 @@ void shoot(double *x, double *xg, double *evec, int sgn) {
 }
 
 
+void shoot_easy(double *x) {
+	double t=0.0;
+	int i;
+	SuppressBounds=1;
+	integrate(&t,x,TEND,DELTA_T,1,NJMP,&i);
+	SuppressBounds=0;
+}
+
+
 void stop_integration(void) {
 	/*  set some global error here... */
 	if(DelayErr==0)
@@ -2585,7 +1752,818 @@ void stop_integration(void) {
 }
 
 
-int stor_full(void) {
+void swap_color(int *col, int rorw) {
+	if(rorw) {
+		MyGraph->color[0]=*col;
+	} else {
+		*col=MyGraph->color[0];
+	}
+}
+
+
+void usual_integrate_stuff(double *x) {
+	int i;
+	do_start_flags(x,&MyTime);
+	if(fabs(MyTime)>=TRANS && STORFLAG==1 && POIMAP==0) {
+		storage[0][0]=(float)MyTime;
+		extra(x,MyTime,NODE,NEQ);
+		for(i=0;i<NEQ;i++) {
+			storage[1+i][0]=(float)x[i];
+		}
+		storind=1;
+	}
+	integrate(&MyTime,x,TEND,DELTA_T,1,NJMP,&MyStart);
+
+	ping();
+	INFLAG=1;
+	refresh_browser(storind);
+	auto_freeze_it();
+	redraw_ics();
+}
+
+
+
+
+/* --- Static functions --- */
+static void batch_integrate_once(void) {
+	if(dryrun) {
+		return;
+	}
+	FILE *fp;
+	double *x;
+	int i;
+	MyStart=1;
+	x=&MyData[0];
+	RANGE_FLAG=0;
+	DelayErr=0;
+	MyTime=T0;
+
+	STORFLAG=1;
+	POIEXT=0;
+	storind=0;
+	reset_browser();
+	/*  plintf("batch_range=%d\n",batch_range); */
+	if(batch_range==1 || STOCH_FLAG>0) {
+		reset_dae();
+		RANGE_FLAG=1;
+
+		if(do_range(x,0)!=0) {
+			plintf(" Errors occured in range integration \n");
+		}
+	} else {
+		get_ic(2,x);
+		if(DelayFlag) {
+			/* restart initial data */
+			if(do_init_delay(DELAY)==0) {
+				return;
+			}
+		}
+		do_start_flags(x,&MyTime);
+		if(fabs(MyTime)>=TRANS && STORFLAG==1 && POIMAP==0) {
+			storage[0][0]=(float)MyTime;
+			extra(x,MyTime,NODE,NEQ);
+			for(i=0;i<NEQ;i++) {
+				storage[1+i][0]=(float)x[i];
+			}
+			storind=1;
+		}
+		if(integrate(&MyTime,x,TEND,DELTA_T,1,NJMP,&MyStart)!=0) {
+			plintf(" Integration not completed -- will write anyway...\n");
+		}
+		INFLAG=1;
+		refresh_browser(storind);
+	}
+	post_process_stuff();
+	if(!batch_range  ||  range.reset==0) {
+		if(STOCH_FLAG==1) {
+			mean_back();
+		}
+		if(STOCH_FLAG==2) {
+			variance_back();
+		}
+		if(!SuppressOut) {
+			fp=fopen(batchout,"w");
+			if(fp==NULL) {
+				plintf(" Unable to open %s to write \n",batchout);
+				return;
+			}
+			write_mybrowser_data(fp);
+			fclose(fp);
+		}
+		if(MakePlotFlag) {
+			dump_ps(-1);
+		}
+	}
+	plintf(" Run complete ... \n");
+}
+
+
+static void do_batch_dry_run(void) {
+	if(!dryrun) {
+		return;
+	}
+	plintf("It's a dry run...\n");
+	FILE *fp;
+	fp=fopen(batchout,"w");
+	if(fp==NULL) {
+		printf(" Unable to open %s to write \n",batchout);
+		return;
+	}
+	if(querysets) {
+		fprintf(fp,"#Internal sets query:\n");
+		int i;
+		for(i=0;i<Nintern_set;i++) {
+			fprintf(fp,"%s %d %s\n",intern_set[i].name,intern_set[i].use,intern_set[i].does);
+		}
+	}
+	if(querypars) {
+		fprintf(fp,"#Parameters query:\n");
+		int i;
+		for(i=0;i<NUPAR;i++) {
+			fprintf(fp,"%s %f\n",upar_names[i],default_val[i]);
+		}
+	}
+	if(queryics) {
+		fprintf(fp,"#Initial conditions query:\n");
+		int i;
+		for(i=0;i<NEQ;i++) {
+			fprintf(fp,"%s %f\n",uvar_names[i],last_ic[i]);
+		}
+	}
+	fclose(fp);
+	return;
+}
+
+
+static void do_eq_range(double *x) {
+	double parlo,parhi,dpar,temp;
+	int npar,stabcol,i,j,ierr;
+	int mc;
+	char bob[XPP_MAX_NAME];
+	float stabinfo;
+
+	if(set_up_eq_range()==0) {
+		return;
+	}
+
+	wipe_rep();
+	data_back();
+	parlo=eq_range.plow;
+	parhi=eq_range.phigh;
+
+	npar=eq_range.steps;
+	dpar=(parhi-parlo)/(double)npar;
+	stabcol=eq_range.col;
+	mc=eq_range.mc;
+	storind=0;
+	DelayErr=0;
+	ENDSING=0;
+	PAR_FOL=1;
+	PAUSER=0;
+	SHOOT=eq_range.shoot;
+	reset_browser();
+	if(mc==1) {
+		eq_range.movie=1;
+		SHOOT=0;
+	}
+	if(eq_range.movie) {
+		reset_film();
+	}
+	for(i=0;i<=npar;i++) {
+		if(eq_range.movie) {
+			clear_draw_window();
+		}
+		temp=parlo+dpar*(double)i;
+		set_val(eq_range.item,temp);
+		PAR_FOL=1;
+		sprintf(bob,"%s=%.16g",eq_range.item,temp);
+		bottom_msg(2,bob);
+		evaluate_derived();
+		if(mc) {
+			do_monte_carlo_search(0,0,1);
+		} else {
+			if(DelayFlag) {
+				do_delay_sing(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,
+							  NODE,&ierr,&stabinfo);
+			} else {
+				do_sing(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,
+						NODE,&ierr,&stabinfo);
+			}
+		}
+		if(eq_range.movie) {
+			draw_label(draw_win);
+			put_text_x11(5,10,bob);
+			if(film_clip()==0) {
+				err_msg("Out of film");
+			}
+		}
+		if(mc==0) {
+			storage[0][storind]=temp;
+			for(j=0;j<NODE;j++) {
+				storage[j+1][storind]=(float)x[j];
+			}
+			for(j=NODE;j<NODE+NMarkov;j++) {
+				storage[j+1][storind]=0.0;
+			}
+			if(stabcol>0) {
+				storage[stabcol-1][storind]=stabinfo;
+			}
+			storind++;
+		}
+		if(ENDSING==1) {
+			break;
+		}
+	}
+	refresh_browser(storind);
+	PAR_FOL=0;
+}
+
+
+static void do_monte_carlo_search(int append, int stuffbrowse,int ishoot) {
+	int i,j,k,m,n=fixptguess.n;
+	int ierr, new_int=1;
+	double x[MAXODE],sum;
+	double er[MAXODE],em[MAXODE];
+	if(append==0) {
+		fixptlist.n=0;
+	}
+	if(fixptlist.flag==0) {
+		for(i=0;i<MAXFP;i++) {
+			fixptlist.x[i]=(double *)malloc(NODE*sizeof(double));
+			fixptlist.er[i]=(double *)malloc(NODE*sizeof(double));
+			fixptlist.em[i]=(double *)malloc(NODE*sizeof(double));
+		}
+		fixptlist.flag=1;
+	}
+	for(i=0;i<n;i++) {
+		for(j=0;j<NODE;j++) {
+			x[j]=ndrand48()*(fixptguess.xhi[j]-fixptguess.xlo[j])+fixptguess.xlo[j];
+		}
+		do_sing_info(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,NODE,er,em,&ierr);
+		if(ierr==0) {
+			m=fixptlist.n;
+			if(m==0) { /* first fixed point found */
+				fixptlist.n=1;
+				plintf("Found: %d\n",m);
+				for(j=0;j<NODE;j++) {
+					fixptlist.x[0][j]=x[j];
+					fixptlist.er[0][j]=er[j];
+					fixptlist.em[0][j]=em[j];
+					if(ishoot) {
+						shoot_this_now();
+					}
+					plintf(" x[%d]= %g   eval= %g + I %g \n",j,x[j],er[j],em[j]);
+				}
+			} else { /* there are others  better compare them */
+				new_int=1;
+				for(k=0;k<m;k++) {
+					sum=0.0;
+					for(j=0;j<NODE;j++) {
+						sum+=fabs(x[j]-fixptlist.x[k][j]);
+					}
+					if(sum<fixptguess.tol) {
+						new_int=0;
+					}
+				}
+				if(new_int==1) {
+					m=fixptlist.n;
+					fixptlist.n++;
+					if(m<MAXFP) {
+						plintf("Found: %d\n",m);
+						for(j=0;j<NODE;j++) {
+							fixptlist.x[m][j]=x[j];
+							fixptlist.er[m][j]=er[j];
+							fixptlist.em[m][j]=em[j];
+							if(ishoot) {
+								shoot_this_now();
+							}
+							plintf(" x[%d]= %g   eval= %g + I %g \n",j,x[j],er[j],em[j]);
+						}
+					}
+				}
+			}
+		}
+	}
+	if(stuffbrowse) {
+		reset_browser();
+		storind=0;
+		m=fixptlist.n;
+		for(i=0;i<m;i++) {
+			storage[0][storind]=(float)i;
+			for(j=0;j<NODE;j++) {
+				storage[j+1][storind]=(float)fixptlist.x[i][j];
+			}
+			storind++;
+		}
+		refresh_browser(storind);
+	}
+}
+
+
+static void do_new_array_ic(char *new_char, int j1, int j2) {
+	int i;
+	int ihot=-1;
+	int ifree=-1;
+	/* first check to see if this is
+	 one that has already been used and also find the first free one
+  */
+	for(i=0;i<NAR_IC;i++) {
+		if(ar_ic[i].index0==-1 && ifree==-1 && ar_ic[i].type==0) {
+			ifree=i;
+		}
+		if(strcmp(ar_ic[i].var,new_char)==0 && ar_ic[i].j1==j1 && ar_ic[i].j2==j2) {
+			ihot=i;
+		}
+	}
+	if(ihot==-1) {
+		if(ifree==-1) {
+			ihot=0;
+		} else {
+			ihot=ifree;
+		}
+		/* copy relevant stuff */
+		strcpy(ar_ic[ihot].var,new_char);
+		ar_ic[ihot].type=2;
+		ar_ic[ihot].j1=j1;
+		ar_ic[ihot].j2=j2;
+	}
+	new_string("Formula:",ar_ic[ihot].formula);
+	/* now we have everything we need */
+	evaluate_ar_ic(ar_ic[ihot].var,ar_ic[ihot].formula,
+				   ar_ic[ihot].j1,ar_ic[ihot].j2);
+}
+
+
+static void do_plot(float *oldxpl, float *oldypl, float *oldzpl, float *xpl, float *ypl, float *zpl) {
+	int ip,np=MyGraph->nvars;
+	for(ip=0;ip<np;ip++) {
+		if(MyGraph->ColorFlag==0) {
+			set_linestyle(MyGraph->color[ip]);
+		}
+		if(MyGraph->line[ip]<=0) {
+			PointRadius=-MyGraph->line[ip];
+			if(MyGraph->ThreeDFlag==0) {
+				point_abs(xpl[ip],ypl[ip]);
+			} else {
+				point_3d(xpl[ip],ypl[ip],zpl[ip]);
+			}
+		} else {
+			if(MyGraph->ThreeDFlag==0) {
+				line_abs(oldxpl[ip],oldypl[ip],xpl[ip],ypl[ip]);
+			} else  {
+				line_3d(oldxpl[ip],oldypl[ip],oldzpl[ip],
+						xpl[ip],ypl[ip],zpl[ip]);
+			}
+		}
+	}
+}
+
+
+static void do_start_flags(double *x,double *t) {
+	int iflagstart=1;
+	double tnew=*t;
+	double sss;
+	one_flag_step(x,x,&iflagstart,*t,&tnew,NODE,&sss);
+}
+
+
+static void evaluate_ar_ic(char *v, char *f, int j1, int j2) {
+	int j;
+	int i,flag;
+	double z;
+	char vp[25],fp[XPP_MAX_NAME];
+	for(j=j1;j<=j2;j++) {
+		i=-1;
+		subsk(v,vp,j,1);
+		find_variable(vp,&i);
+		if(i>0) {
+			subsk(f,fp,j,1);
+			flag=do_calc(fp,&z);
+			if(flag!=-1) {
+				last_ic[i-1]=z;
+			} else {
+				return;
+			}
+		}
+	}
+}
+
+
+static int form_ic(void) {
+	int ans;
+	while(1) {
+		ans=set_array_ic();
+		if(ans==0) {
+			break;
+		}
+	}
+	return 1;
+}
+
+
+static void init_monte_carlo(void) {
+	int i;
+	fixptguess.tol=.001;
+	fixptguess.n=100;
+	for(i=0;i<NODE;i++) {
+		fixptguess.xlo[i]=-10;
+		fixptguess.xhi[i]=10;
+	}
+	fixptlist.flag=0;
+	fixptlist.n=0;
+}
+
+
+static void monte_carlo(void) {
+	int append=0;
+	int i=0,done=0,ishoot=0;
+	double z;
+	char name[XPP_MAX_NAME];
+	new_int("Append(1/0",&append);
+	new_int("Shoot (1/0)",&ishoot);
+	new_int("# Guesses:",&fixptguess.n);
+	new_float("Tolerance:",&fixptguess.tol);
+	while(1) {
+		sprintf(name,"%s_lo :",uvar_names[i]);
+		z=fixptguess.xlo[i];
+		done=new_float(name,&z);
+		if(done==0) {
+			fixptguess.xlo[i]=z;
+		}
+		if(done==-1) {
+			break;
+		}
+		sprintf(name,"%s_hi :",uvar_names[i]);
+		z=fixptguess.xhi[i];
+		done=new_float(name,&z);
+		if(done==0) {
+			fixptguess.xhi[i]=z;
+		}
+		if(done==-1) {
+			break;
+		}
+		i++;
+		if(i>=NODE) {
+			break;
+		}
+	}
+	do_monte_carlo_search(append, 1,ishoot);
+}
+
+
+static void plot_one_graph(float *xv,float *xvold,int node,int neq,double ddt,int *tc) {
+	int *IXPLT,*IYPLT,*IZPLT;
+	int NPlots,ip;
+	float oldxpl[MAXPERPLOT],oldypl[MAXPERPLOT],oldzpl[MAXPERPLOT];
+	float xpl[MAXPERPLOT],ypl[MAXPERPLOT],zpl[MAXPERPLOT];
+	NPlots=MyGraph->nvars;
+	IXPLT=MyGraph->xv;
+	IYPLT=MyGraph->yv;
+	IZPLT=MyGraph->zv;
+	for(ip=0;ip<NEQ;ip++) {
+		if(itor[ip]==1) {
+			xvold[ip+1]=xvold[ip+1]+tc[ip]*TOR_PERIOD;
+		}
+	}
+	for(ip=0;ip<NPlots;ip++) {
+		oldxpl[ip]=xvold[IXPLT[ip]];
+		oldypl[ip]=xvold[IYPLT[ip]];
+		oldzpl[ip]=xvold[IZPLT[ip]];
+		xpl[ip]=xv[IXPLT[ip]];
+		ypl[ip]=xv[IYPLT[ip]];
+		zpl[ip]=xv[IZPLT[ip]];
+	}
+	if(MyGraph->ColorFlag) {
+		comp_color(xv,xvold,NODE,(float)ddt);
+	}
+	do_plot(oldxpl,oldypl,oldzpl,xpl,ypl,zpl);
+}
+
+
+static void plot_the_graphs(float *xv,float *xvold,int node,int neq,double ddt,int *tc,int flag) {
+	int i;
+	int ic=current_pop;
+	if(SimulPlotFlag==0) {
+		plot_one_graph(xv,xvold,node,neq,ddt,tc);
+		return;
+	}
+
+	for(i=0;i<num_pops;i++) {
+		make_active(ActiveWinList[i],flag);
+		plot_one_graph(xv,xvold,node,neq,ddt,tc);
+	}
+	make_active(ic,flag);
+}
+
+
+static int range_item(void) {
+	int i;
+	char bob[XPP_MAX_NAME];
+	i=find_user_name(PARAMBOX,range.item);
+	if(i>-1) {
+		range.type=PARAMBOX;
+		range.index=i;
+	} else {
+		i=find_user_name(ICBOX,range.item);
+		if(i<=-1) {
+			sprintf(bob," %s is not a parameter or variable !",range.item);
+			err_msg(bob);
+			return(0);
+		}
+		range.type=ICBOX;
+		range.index=i;
+	}
+	return 1;
+}
+
+
+static int range_item2(void) {
+	int i;
+	char bob[XPP_MAX_NAME];
+	i=find_user_name(PARAMBOX,range.item2);
+	if(i>-1) {
+		range.type2=PARAMBOX;
+		range.index2=i;
+	} else {
+		i=find_user_name(ICBOX,range.item2);
+		if(i<=-1) {
+			sprintf(bob," %s is not a parameter or variable !",range.item2);
+			err_msg(bob);
+			return(0);
+		}
+		range.type2=ICBOX;
+		range.index2=i;
+	}
+	return 1;
+}
+
+
+static int set_array_ic(void) {
+	char junk[50];
+	char new_char[50];
+	int i,index0,myar=-1;
+	int i1,in;
+	int j1,j2,flag2;
+	double z;
+	int flag;
+	junk[0]=0;
+	if(new_string("Variable: ",junk)==0) {
+		return 0;
+	}
+	search_array(junk,new_char,&j1,&j2,&flag2);
+	if(flag2==1) {
+		do_new_array_ic(new_char,j1,j2);
+	} else {
+		find_variable(junk,&i);
+		if(i<=-1) {
+			return 0;
+		}
+		index0=i;
+		for(i=0;i<NAR_IC;i++) {
+			if(ar_ic[i].type==2) {
+				continue;
+			}
+			if(index0==ar_ic[i].index0) {
+				myar=i;
+				break;
+			}
+		}
+		if(myar<0) {
+			for(i=0;i<NAR_IC;i++) {
+				if(ar_ic[i].type==2) {
+					continue;
+				}
+				if(ar_ic[i].index0==-1) {
+					myar=i;
+					break;
+				}
+			}
+		}
+		if(myar<0) {
+			myar=0;
+		}
+		/* Now we have an element in the array index */
+		ar_ic[myar].index0=index0;
+		ar_ic[myar].type=0;
+		new_int("Number elements:",&ar_ic[myar].n);
+		new_string("u=F(t-i0):",ar_ic[myar].formula);
+		i1=index0-1;
+		in=i1+ar_ic[myar].n;
+		if(i1>NODE || in>NODE) {
+			return 0; /* out of bounds */
+		}
+		for(i=i1;i<in;i++) {
+			set_val("t",(double)(i-i1));
+			flag=do_calc(ar_ic[myar].formula,&z);
+			if(flag==-1) {
+				err_msg("Bad formula");
+				return 1;
+			}
+			last_ic[i]=z;
+		}
+	}
+	return 1;
+}
+
+
+static int set_up_eq_range(void) {
+	static char *n[]={"*2Range over","Steps","Start","End",
+					  "Shoot (Y/N)",
+					  "Stability col","Movie (Y/N)","Monte Carlo (Y/N)"};
+	char values[8][MAX_LEN_SBOX];
+	int status,i;
+	static  char *yn[]={"N","Y"};
+	sprintf(values[0],"%s",eq_range.item);
+	sprintf(values[1],"%d",eq_range.steps);
+	sprintf(values[2],"%.16g",eq_range.plow);
+	sprintf(values[3],"%.16g",eq_range.phigh);
+	sprintf(values[4],"%s",yn[eq_range.shoot]);
+	sprintf(values[5],"%d",eq_range.col);
+	sprintf(values[6],"%s",yn[eq_range.movie]);
+	sprintf(values[7],"%s",yn[eq_range.mc]);
+
+	status=do_string_box(8,8,1,"Range Equilibria",n,values,45);
+	if(status!=0) {
+		strcpy(eq_range.item,values[0]);
+		i=find_user_name(PARAMBOX,eq_range.item);
+		if(i<0) {
+			err_msg("No such parameter");
+			return(0);
+		}
+
+		eq_range.steps=atoi(values[1]);
+		if(eq_range.steps<=0) {
+			eq_range.steps=10;
+		}
+		eq_range.plow=atof(values[2]);
+		eq_range.phigh=atof(values[3]);
+		if(values[4][0]=='Y' || values[4][0]=='y') {
+			eq_range.shoot=1;
+		} else {
+			eq_range.shoot=0;
+		}
+		if(values[6][0]=='Y' || values[6][0]=='y') {
+			eq_range.movie=1;
+		} else {
+			eq_range.movie=0;
+		}
+		if(values[7][0]=='Y' || values[6][0]=='y') {
+			eq_range.mc=1;
+		} else {
+			eq_range.mc=0;
+		}
+		eq_range.col=atoi(values[5]);
+		if(eq_range.col<=1 || eq_range.col>(NEQ+1)) {
+			eq_range.col=-1;
+		}
+		return(1);
+	}
+	return(0);
+}
+
+
+static int set_up_range(void) {
+	static char *n[]={"*3Range over","Steps","Start","End",
+					  "Reset storage (Y/N)",
+					  "Use old ic's (Y/N)","Cycle color (Y/N)","Movie(Y/N)"};
+	char values[8][MAX_LEN_SBOX];
+	int status;
+	static  char *yn[]={"N","Y"};
+	if(!Xup) {
+		return(range_item());
+	}
+
+	sprintf(values[0],"%s",range.item);
+	sprintf(values[1],"%d",range.steps);
+	sprintf(values[2],"%.16g",range.plow);
+	sprintf(values[3],"%.16g",range.phigh);
+	sprintf(values[4],"%s",yn[range.reset]);
+	sprintf(values[5],"%s",yn[range.oldic]);
+	sprintf(values[6],"%s",yn[range.cycle]);
+	sprintf(values[7],"%s",yn[range.movie]);
+
+	status=do_string_box(8,8,1,"Range Integrate",n,values,45);
+	if(status!=0) {
+		strcpy(range.item,values[0]);
+		if(range_item()==0) {
+			return 0;
+		}
+		range.steps=atoi(values[1]);
+		if(range.steps<=0) {
+			range.steps=10;
+		}
+		range.plow=atof(values[2]);
+		range.phigh=atof(values[3]);
+		if(values[4][0]=='Y' || values[4][0]=='y') {
+			range.reset=1;
+		} else {
+			range.reset=0;
+		}
+		if(values[5][0]=='Y' || values[5][0]=='y') {
+			range.oldic=1;
+		} else {
+			range.oldic=0;
+		}
+		if(values[6][0]=='Y' || values[6][0]=='y') {
+			range.cycle=1;
+		} else {
+			range.cycle=0;
+		}
+		if(values[7][0]=='Y' || values[7][0]=='y') {
+			range.movie=1;
+		} else {
+			range.movie=0;
+		}
+		RANGE_FLAG=1;
+		return(1);
+	}
+	return(0);
+}
+
+
+static int set_up_range2(void) {
+	static char *n[]={"*3Vary1","Start1","End1",
+					  "*3Vary2","Start2","End2","Steps",
+					  "Reset storage (Y/N)",
+					  "Use old ic's (Y/N)","Cycle color (Y/N)","Movie(Y/N)",
+					  "Crv(1) Array(2)","Steps2"};
+	char values[13][MAX_LEN_SBOX];
+	int status;
+	static  char *yn[]={"N","Y"};
+	if(!Xup) {
+		return(range_item());
+	}
+	sprintf(values[0],"%s",range.item);
+	sprintf(values[1],"%.16g",range.plow);
+	sprintf(values[2],"%.16g",range.phigh);
+	sprintf(values[3],"%s",range.item2);
+	sprintf(values[4],"%.16g",range.plow2);
+	sprintf(values[5],"%.16g",range.phigh2);
+	sprintf(values[6],"%d",range.steps);
+	sprintf(values[7],"%s",yn[range.reset]);
+	sprintf(values[8],"%s",yn[range.oldic]);
+	sprintf(values[9],"%s",yn[range.cycle]);
+	sprintf(values[10],"%s",yn[range.movie]);
+	if(range.rtype==2) {
+		sprintf(values[11],"2");
+	} else {
+		sprintf(values[11],"1");
+	}
+	sprintf(values[12],"%d",range.steps2);
+	status=do_string_box(13,7,2,"Double Range Integrate",n,values,45);
+	if(status!=0) {
+		strcpy(range.item,values[0]);
+
+		if(range_item()==0) {
+			return 0;
+		}
+		strcpy(range.item2,values[3]);
+
+		if(range_item2()==0) {
+			return 0;
+		}
+
+		range.steps=atoi(values[6]);
+		range.steps2=atoi(values[12]);
+		if(range.steps<=0) {
+			range.steps=10;
+		}
+		if(range.steps2<=0) {
+			range.steps2=10;
+		}
+		range.plow=atof(values[1]);
+		range.phigh=atof(values[2]);
+		range.plow2=atof(values[4]);
+		range.phigh2=atof(values[5]);
+		if(values[7][0]=='Y' || values[7][0]=='y') {
+			range.reset=1;
+		} else {
+			range.reset=0;
+		}
+		if(values[8][0]=='Y' || values[8][0]=='y') {
+			range.oldic=1;
+		} else {
+			range.oldic=0;
+		}
+		if(values[9][0]=='Y' || values[9][0]=='y') {
+			range.cycle=1;
+		} else {
+			range.cycle=0;
+		}
+		if(values[10][0]=='Y' || values[10][0]=='y') {
+			range.movie=1;
+		} else {
+			range.movie=0;
+		}
+		range.rtype=atoi(values[11]);
+		RANGE_FLAG=1;
+		return(1);
+	}
+	return(0);
+}
+
+
+static int stor_full(void) {
 	char ch;
 	int nrow=2*MAXSTOR;
 	if(reallocstor(NEQ+1,nrow)) {
@@ -2608,4 +2586,55 @@ ov:
 		return(1);
 	}
 	return(0);
+}
+
+
+static void store_new_array_ic(char *new_char, int j1, int j2, char *formula) {
+	int i;
+	int ihot=-1;
+	int ifree=-1;
+	/* first check to see if this is
+	 one that has already been used and also find the first free one
+  */
+	for(i=0;i<NAR_IC;i++) {
+		if(ar_ic[i].index0==-1 && ifree==-1 && ar_ic[i].type==0) {
+			ifree=i;
+		}
+		if(strcmp(ar_ic[i].var,new_char)==0 && ar_ic[i].j1==j1 && ar_ic[i].j2==j2) {
+			ihot=i;
+		}
+	}
+	if(ihot==-1) {
+		if(ifree==-1) {
+			ihot=0;
+		} else {
+			ihot=ifree;
+		}
+		/* copy relevant stuff */
+		strcpy(ar_ic[ihot].var,new_char);
+		ar_ic[ihot].type=2;
+		ar_ic[ihot].j1=j1;
+		ar_ic[ihot].j2=j2;
+	}
+	strcpy(ar_ic[ihot].formula,formula);
+}
+
+
+static int write_this_run(char *file, int i) {
+	char outfile[XPP_MAX_NAME];
+	FILE *fp;
+	if(!SuppressOut) {
+		sprintf(outfile,"%s.%d",file,i);
+		fp=fopen(outfile,"w");
+		if(fp==NULL) {
+			plintf("Couldnt open %s\n",outfile);
+			return -1;
+		}
+		write_mybrowser_data(fp);
+		fclose(fp);
+	}
+	if(MakePlotFlag) {
+		dump_ps(i);
+	}
+	return(1);
 }
