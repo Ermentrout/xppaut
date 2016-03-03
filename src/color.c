@@ -41,6 +41,11 @@ static int rfun(double y, int per);
 static int color_mode=1,color_min,color_max;
 static XColor color[MAX_COLORS];
 
+int colorline[]={0,20,21,22,23,24,25,26,27,28,29,0};
+char *color_names[]={"WHITE","RED","REDORANGE","ORANGE","YELLOWORANGE",
+					 "YELLOW","YELLOWGREEN","GREEN","BLUEGREEN",
+					 "BLUE","PURPLE","BLACK"};
+
 int color_total,COLOR;
 int periodic=0;
 int custom_color=0;

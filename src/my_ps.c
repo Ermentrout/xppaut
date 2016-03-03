@@ -23,6 +23,7 @@
 #define PS_VCHAR (PS_FONTSIZE*PS_SC)
 #define POINT_TYPES 8
 
+int PS_Color=1;
 int LastPtLine;
 int NoBreakLine=0;
 int PS_FONTSIZE=14;

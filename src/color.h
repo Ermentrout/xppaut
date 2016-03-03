@@ -12,6 +12,9 @@ extern int color_total;
 extern int custom_color;
 extern int periodic;
 
+extern char *color_names[12];
+extern int colorline[12];
+
 /* --- Functions --- */
 int ColorMap(int i);
 void get_ps_color(int i, float *r, float *g, float *b);
