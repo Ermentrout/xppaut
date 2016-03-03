@@ -24,6 +24,7 @@
 #define POINT_TYPES 8
 
 int PS_Color=1;
+int PS_Port=0;
 int LastPtLine;
 int NoBreakLine=0;
 int PS_FONTSIZE=14;
