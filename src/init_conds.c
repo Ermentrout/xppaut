@@ -59,6 +59,10 @@
 #include "bitmap/param.bitmap"
 #include "bitmap/start.bitmap"
 
+
+/* --- Macros --- */
+#define FILESELNWIN 10
+
 #define HOTWILD 2
 #define HOTFILE 1
 
@@ -77,139 +81,171 @@
 #define SB_DIM 5
 #define SB_SPC 2
 
-FILESEL filesel;
-PAR_SLIDER my_par_slide[3];
-Window make_window();
-BoxList *HotBox;
-BoxList ICBox;
+
+/* --- Types --- */
+typedef struct {
+	int n,n0,here;
+	Window base,cancel,ok,up,dn,pgup,pgdn,file,wild,w[FILESELNWIN],dir,home,start;
+	Window fw,ww;
+	char wildtxt[MAX_STRING_LENGTH],filetxt[MAX_STRING_LENGTH];
+	int nwin,minwid,minhgt;
+	int off,pos,hot;
+	char title[MAX_STRING_LENGTH];
+} FILESEL;
+
+typedef struct {
+	int use,pos,l;
+	char parname[20];
+	double lo,hi,val;
+	int hgt;
+	int type,index;
+	Window left,right,top,main,slide,go;
+} PAR_SLIDER;
+
+
+/* --- Forward declarations --- */
+static void add_edit_float(BoxList *b, int i, double z);
+static void add_editval(BoxList *b, int i, char *string);
+static void box_enter(BoxList b, Window w, int val);
+static void box_list_scroll(BoxList *b, int i);
+static int button_selector(Window w);
+static void check_box_cursor(void);
+static void create_file_selector(char *title, char *file, char *wild);
+static void crossing_selector(Window w, int c);
+static void destroy_box(BoxList *b);
+static void destroy_selector(void);
+static void display_box(BoxList b, Window w);
+static void display_file_sel(FILESEL f, Window w);
+static void do_box_button(BoxList *b, Window w);
+static void do_box_key(BoxList *b, XEvent ev, int *used);
+static int do_file_select_events(void);
+static void do_slide_button(int w, PAR_SLIDER *p);
+static void do_slide_motion(Window w, int x, PAR_SLIDER *p,int state);
+static void do_slide_release(int w, PAR_SLIDER *p);
+static void draw_editable(Window win, char *string, int off, int cursor, int mc);
+static void draw_slider(Window w, int x, int hgt, int l);
+static int edit_bitem(BoxList *b, int i, int ch);
+static int edit_fitem(int ch, char *string, Window w, int *off1, int *pos1, int mc);
+static void enter_slider(Window w, PAR_SLIDER *p, int val);
+static void expose_selector(Window w);
+static void expose_slider(Window w, PAR_SLIDER *p);
+static void fs_scroll(int i);
+static void get_nrow_from_hgt(int h, int *n, int *w);
+static void justify_string(Window w1, char *s1);
+static void load_entire_box(BoxList *b);
+static void make_box_list(BoxList *b, char *wname, char *iname, int n, int type, int use);
+static void make_box_list_window(BoxList *b, int type);
+static void make_par_slider(Window base, int x, int y, int width, int index);
+static void new_wild(void);
+static void put_edit_cursor(Window w, int pos);
+static void redraw_directory(void);
+static void redraw_entire_box(BoxList *b);
+static void redraw_file_list(void);
+static void redraw_fs_text(char *string, Window w, int flag);
+static void redraw_slide(PAR_SLIDER *p);
+static int selector_key(XEvent ev);
+static void set_default_ics(void);
+static void set_default_params(void);
+static void set_slide_pos(PAR_SLIDER *p);
+static void set_up_xvt(void);
+static void set_up_pp(void);
+static void set_up_arry(void);
+static void set_value_from_box(BoxList *b, int i);
+static void stringintersect(char *target, char *sother);
+static int to_float(char *s, double *z);
+
+
+/* --- Data --- */
+static int HotBoxItem=-1;
+static FILESEL filesel;
+static PAR_SLIDER my_par_slide[3];
+static BoxList *HotBox;
+static BoxList ICBox;
+static BoxList DelayBox;
+static BoxList BCBox;
+
 BoxList ParamBox;
-BoxList DelayBox;
-BoxList BCBox;
-
-int HotBoxItem=-1;
-int BoxMode;
-
-double atof();
 
 
-/* scroll-list gadget */
+/* --- Functions --- */
+void box_buttons(Window w) {
 
-void create_scroll_list(Window base,int x,int y,int width,
-						int height,SCROLL_LIST *sl) {
-	int tst=(DCURYs+3)+2*(SB_DIM+SB_SPC);
-	if(height<tst) {
-		height=tst;
+	if(ICBox.xuse) {
+		do_box_button(&ICBox,w);
 	}
-	sl->n=0;
-	sl->n0=0;
-	sl->pos=0;
-	sl->v=NULL;
-	sl->twid=width;
-	sl->text=make_window(base,x,y,width,height,1);
-	sl->up=make_window(base,x+width+SB_SPC,y,SB_DIM,SB_DIM,1);
-	sl->side=make_window(base,x+width+SB_SPC,y+SB_DIM+SB_SPC,
-						 SB_DIM,height-2*(SB_DIM+SB_SPC),1);
-	sl->down=make_window(base,x+width+SB_SPC,y+height-2*SB_DIM-SB_SPC,
-						 SB_DIM,SB_DIM,1);
-	sl->npos=height-2*(SB_DIM+SB_SPC);
-	sl->max=height/(DCURYs+3);
+	if(BCBox.xuse) {
+		do_box_button(&BCBox,w);
+	}
+	if(DelayBox.xuse) {
+		do_box_button(&DelayBox,w);
+	}
+	if(ParamBox.xuse) {
+		do_box_button(&ParamBox,w);
+	}
 }
 
 
-void free_scroll_list(SCROLL_LIST *sl) {
-	int n=sl->n;
+void box_enter_events(Window w, int yn) {
 	int i;
-	for(i=0;i<n;i++) {
-		free(sl->v[i]);
+	int val;
+	if(yn==1) {
+		val=2;
+	} else {
+		val=1;
 	}
-	free(sl->v);
-	sl->v=NULL;
-	sl->n=0;
-}
-
-
-void add_scroll_item(char *v,SCROLL_LIST *sl) {
-	int n=sl->n;
-	int m=strlen(v);
-	sl->v=(char **)realloc((void *)sl->v,(n+1)*sizeof(char *));
-	sl->v[n]=(char *)malloc((m+1));
-	strcpy(sl->v[n],v);
-	sl->n=n+1;
-}
-
-
-int expose_scroll_list(Window w,SCROLL_LIST sl) {
-	int i;
-	if(w==sl.up) {
-		XClearWindow(display,w);
-		XDrawLine(display,w,small_gc,0,SB_DIM,SB_DIM/2,0);
-		XDrawLine(display,w,small_gc,SB_DIM,SB_DIM,SB_DIM/2,0);
-		return 1;
+	if(ICBox.xuse) {
+		box_enter(ICBox,w,val);
 	}
-	if(w==sl.down) {
-		XClearWindow(display,w);
-		XDrawLine(display,w,small_gc,0,0,SB_DIM/2,SB_DIM);
-		XDrawLine(display,w,small_gc,SB_DIM,0,SB_DIM/2,SB_DIM);
-		return 1;
+	if(BCBox.xuse) {
+		box_enter(BCBox,w,val);
 	}
-	if(w==sl.side) {
-		XClearWindow(display,w);
-		for(i=0;i<4;i++) {
-			XDrawLine(display,w,small_gc,0,sl.npos+i,SB_DIM,sl.npos+i);
-		}
-		return 1;
+	if(ParamBox.xuse) {
+		box_enter(ParamBox,w,val);
 	}
-	if(w==sl.text) {
-		redraw_scroll_list(sl);
-		return 1;
+	if(DelayBox.xuse) {
+		box_enter(DelayBox,w,val);
 	}
-	return(0);
-}
-
-
-void redraw_scroll_list(SCROLL_LIST sl) {
-	int i,n=sl.n,j;
-	int y;
-	if(n==0) {/* nothing there */
+	if(ICBox.xuse && (w==ICBox.xvt || w==ICBox.pp || w==ICBox.arr)) {
+		XSetWindowBorderWidth(display,w,val);
+	}
+	if(ICBox.xuse==0) {
 		return;
 	}
-	XClearWindow(display,sl.text);
-	for(i=0;i<sl.max;i++) {
-		j=i+sl.n0;
-		if(j<n) {
-			XDrawString(display,sl.text,small_gc,0,CURY_OFFs+i*(DCURYs+3),
-						sl.v[j],strlen(sl.v[j]));
-			if(j==sl.ihot) {
-				y=CURY_OFFs+(i+1)*(DCURYs+3)-3;
-				XDrawLine(display,sl.text,small_gc,0,y,sl.twid,y);
-				XDrawLine(display,sl.text,small_gc,0,y+1,sl.twid,y+1);
-			}
+	for(i=0;i<ICBox.nwin;i++) {
+		if(w==ICBox.ck[i]) {
+			XSetWindowBorderWidth(display,w,val);
 		}
 	}
 }
 
 
-void c_hints(void) {
-	int i,index;
-	plintf("#include <math.h>\n\n extern double constants[]; \n");
-	plintf("main(argc,argv)\n char **argv; \n int argc;\n{\n do_main(argc,argv);\n }\n");
-
-	plintf("/* defines for %s  */ \n",this_file);
-	for(i=0;i<NUPAR;i++) {
-		index=get_param_index(upar_names[i]);
-		plintf("#define %s constants[%d]\n",upar_names[i],index);
+void box_keypress(XEvent ev, int *used) {
+	if(ICBox.xuse) {
+		do_box_key(&ICBox,ev,used);
+		if(*used) {
+			return;
+		}
 	}
-	for(i=0;i<NODE;i++) {
-		plintf("#define %s y[%d]\n",uvar_names[i],i);
-		plintf("#define %sDOT ydot[%d]\n",uvar_names[i],i);
+	if(BCBox.xuse) {
+		do_box_key(&BCBox,ev,used);
+		if(*used) {
+			return;
+		}
 	}
-	for(i=NODE;i<NEQ;i++)
-		plintf("#define %s y[%d]\n",uvar_names[i],i);
-	plintf("my_rhs(t,y,ydot,neq)\n double t,*y,*ydot; \n int neq;\n{\n  }\n");
-	plintf("set_fix_rhs(t,y,neq)\n double y,*y;\n int neq;\n{\n }\n");
-	plintf("extra(y,t,nod,neq)\n double t,*y; \n int nod,neq;\n{\n  }\n");
-
+	if(DelayBox.xuse) {
+		do_box_key(&DelayBox,ev,used);
+		if(*used) {
+			return;
+		}
+	}
+	if(ParamBox.xuse) {
+		do_box_key(&ParamBox,ev,used);
+		if(*used) {
+			return;
+		}
+	}
 }
+
 
 /* CLONE */
 void clone_ode(void) {
@@ -284,6 +320,114 @@ void clone_ode(void) {
 }
 
 
+void create_par_sliders(Window base, int x0, int h0) {
+	int i;
+	for(i=0;i<3;i++) {
+		make_par_slider(base,x0+i*36*DCURXs,h0,100,i);
+	}
+}
+
+
+/* new code is a bit tricky here - we dont want
+   to draw it if it is not visible
+	there are nwin windows covering indexes
+	n0,n0+1,...n0+nwin-1
+	if the index is beyond this dont draw it
+*/
+void draw_one_box(BoxList b, int index) {
+	Window w,we;
+	int n0=b.n0;
+	int n1=n0+b.nwin-1;
+	int i;
+	if(b.xuse==0) {
+		return;
+	}
+	if(index<n0 || index>n1) {
+		return; /* don't draw the ones out of range*/
+	}
+	i=index-n0;
+	w=b.w[i];
+	we=b.we[i];
+	switch(b.type) {
+	case PARAMBOX:
+		draw_editable(we,b.value[index],
+					  b.off[index],b.pos[index],b.mc);
+		justify_string(w,upar_names[index]);
+		break;
+	case BCBOX:
+		justify_string(w,my_bc[index].name);
+		draw_editable(we,b.value[index],b.off[index],
+					  b.pos[index],b.mc);
+		break;
+	case ICBOX:
+		draw_editable(we,b.value[index],b.off[index],
+					  b.pos[index],b.mc);
+		justify_string(w,uvar_names[index]);
+		break;
+	case DELAYBOX:
+		justify_string(w,uvar_names[index]);
+		draw_editable(we,b.value[index],b.off[index],
+					  b.pos[index],b.mc);
+		break;
+	}
+}
+
+
+void enter_slides(Window w, int val) {
+	int i;
+	for(i=0;i<3;i++) {
+		enter_slider(w,&my_par_slide[i],val);
+	}
+}
+
+
+/* this is added to take care of making sure
+	 exposure of the boxes is easily taken care of
+  */
+void expose_box(Window w) {
+	if(ICBox.xuse) {
+		display_box(ICBox,w);
+	}
+	if(BCBox.xuse) {
+		display_box(BCBox,w);
+	}
+	if(ParamBox.xuse) {
+		display_box(ParamBox,w);
+	}
+	if(DelayBox.xuse) {
+		display_box(DelayBox,w);
+	}
+}
+
+
+void expose_slides(Window w) {
+	int i;
+	for(i=0;i<3;i++) {
+		expose_slider(w,&my_par_slide[i]);
+	}
+}
+
+
+int file_selector(char *title, char *file, char *wild) {
+	int i;
+	if(!get_directory(cur_dir)) {
+		return 0;
+	}
+	if(!get_fileinfo(wild,cur_dir,&my_ff)) {
+		return 0;
+	}
+	create_file_selector(title,file,wild);
+	i=do_file_select_events();
+	destroy_selector();
+	XFlush(display);/*Need to do this otherwise the file dialog hangs around*/
+	if(i==0) {
+		return 0;
+	}
+	strcpy(file,filesel.filetxt);
+	return 1; /* got a file name */
+}
+
+
 int find_user_name(int type, char *oname) {
 	char name[25];
 	int j=0,k=0,i=-1;
@@ -313,12 +457,289 @@ int find_user_name(int type, char *oname) {
 	return(-1);
 }
 
-void create_par_sliders(Window base, int x0, int h0) {
-	int i;
-	for(i=0;i<3;i++) {
-		make_par_slider(base,x0+i*36*DCURXs,h0,100,i);
+
+void make_new_bc_box(void) {
+	if(BCBox.xuse) {
+		XRaiseWindow(display,BCBox.base);
+		return;
+	}
+	make_box_list_window(&BCBox,BCBOX);
+	make_icon((char*)bc_bits,bc_width,bc_height,BCBox.base);
+}
+
+
+void initialize_box(void) {
+	make_box_list(&ICBox,"Initial Data","ICs",NODE+NMarkov,ICBOX,1);
+	if(NUPAR>0) {
+		make_box_list(&ParamBox,"Parameters","Par",NUPAR,PARAMBOX,1);
+	} else {
+		ParamBox.use=0;
+	}
+	if(NDELAYS>0) {
+		make_box_list(&DelayBox,"Delay ICs","Delay", NODE,DELAYBOX,1);
+	} else {
+		DelayBox.use=0;
+	}
+	make_box_list(&BCBox,"Boundary Conds","BCs",NODE,BCBOX,1);
+}
+
+
+void make_new_delay_box(void) {
+	if(DelayBox.use==0) {
+		return;
+	}
+	if( DelayBox.xuse==1) {
+		XRaiseWindow(display,DelayBox.base);
+		return;
+	}
+	make_box_list_window(&DelayBox,DELAYBOX);
+	make_icon((char*)delay_bits,delay_width,delay_height,DelayBox.base);
+}
+
+
+void make_new_ic_box(void) {
+	if(ICBox.xuse) {
+		XRaiseWindow(display,ICBox.base);
+		return;
+	}
+	make_box_list_window(&ICBox,ICBOX);
+	make_icon((char*)ic_bits,ic_width,ic_height,ICBox.base);
+}
+
+
+void make_new_param_box(void) {
+	if(ParamBox.use==0) {
+		return;
+	}
+	if(ParamBox.xuse==1) {
+		XRaiseWindow(display,ParamBox.base);
+		return;
+	}
+	make_box_list_window(&ParamBox,PARAMBOX);
+	make_icon((char*)param_bits,param_width,param_height,ParamBox.base);
+}
+
+
+void man_ic(void) {
+	int done,index=0;
+	double z;
+	char name[XPP_MAX_NAME],junk[XPP_MAX_NAME];
+	while(1) {
+		sprintf(name,"%s :",uvar_names[index]);
+		z=last_ic[index];
+		done=new_float(name,&z);
+		if(done==0) {
+			last_ic[index]=z;
+			sprintf(junk,"%.16g",z);
+			set_edit_params(&ICBox,index,junk);
+			draw_one_box(ICBox,index);
+			index++;
+			if(index>=NODE+NMarkov) {
+				return;
+			}
+		}
+		if(done==-1) {
+			return;
+		}
 	}
 }
+
+
+void new_parameter(void) {
+	int done,index;
+	double z;
+	char name[XPP_MAX_NAME],value[XPP_MAX_NAME],junk[XPP_MAX_NAME];
+	while(1) {
+		name[0]=0;
+		done=new_string("Parameter:",name);
+		if(strlen(name)==0 || done==0) {
+			redo_stuff();
+			return;
+		}
+		if(strncasecmp(name,"DEFAULT",7  )==0) {
+			set_default_params();
+			continue;
+		}
+
+		if(strncasecmp(name,"!LOAD", 5 )==0) {
+			io_parameter_file(name,READEM);
+			continue;
+		}
+		if(strncasecmp(name,"!SAVE", 5 )==0) {
+			io_parameter_file(name,WRITEM);
+			continue;
+		} else {
+			index=find_user_name(PARAMBOX,name);
+			if(index>=0) {
+				get_val(upar_names[index],&z);
+				sprintf(value,"%s :",name);
+				done=new_float(value,&z);
+				if(done==0) {
+					set_val(upar_names[index],z);
+					sprintf(junk,"%.16g",z);
+					set_edit_params(&ParamBox,index,junk);
+					draw_one_box(ParamBox,index);
+					reset_sliders();
+				}
+				if(done==-1) {
+					redo_stuff();
+					return;
+				}
+			}
+		}
+	}
+}
+
+
+void redo_stuff(void) {
+	evaluate_derived();
+	re_evaluate_kernels();
+	redo_all_fun_tables();
+	evaluate_derived();
+}
+
+
+void redraw_bcs(void) {
+	int i;
+	for(i=0;i<NODE;i++) {
+		draw_one_box(BCBox,i);
+	}
+}
+
+
+void redraw_delays(void) {
+	int i;
+	if(DelayBox.use) {
+		for(i=0;i<NODE;i++) {
+			draw_one_box(DelayBox,i);
+		}
+	}
+}
+
+
+void redraw_ics(void) {
+	int i,in;
+	for(i=0;i<NODE+NMarkov;i++) {
+		add_edit_float(&ICBox,i,last_ic[i]);
+		draw_one_box(ICBox,i);
+	}
+	reset_sliders();
+	if(ICBox.xuse==0) {
+		return;
+	}
+	for(i=0;i<ICBox.nwin;i++) {
+		in=i+ICBox.n0;
+		if(ICBox.isck[in]) {
+			XDrawString(display,ICBox.ck[i],small_gc,0,CURY_OFFs,"*",1);
+		} else {
+			XClearWindow(display,ICBox.ck[i]);
+		}
+	}
+}
+
+
+void redraw_params(void) {
+	int i;
+	double z;
+	evaluate_derived();
+	if(ParamBox.use) {
+		for(i=0;i<NUPAR;i++) {
+			get_val(upar_names[i],&z);
+			add_edit_float(&ParamBox,i,z);
+			draw_one_box(ParamBox,i);
+		}
+	}
+	reset_sliders();
+}
+
+
+void reset_sliders(void) {
+	int i;
+	double val;
+	PAR_SLIDER *p;
+	for(i=0;i<3;i++) {
+		p=&my_par_slide[i];
+		if(p->use) {
+			if(p->type==ICBOX) {
+				val=last_ic[p->index];
+			} else {
+				get_val(p->parname,&val);
+			}
+			p->val=val;
+			set_slide_pos(p);
+			expose_slider(p->slide,p);
+			expose_slider(p->top,p);
+		}
+	}
+}
+
+
+void resize_par_box(Window win) {
+	unsigned int h,w;
+	int nwin = 0;
+	int ok=0;
+	BoxList *b;
+	if(ICBox.xuse==1 && win==ICBox.base) {
+		ok=1;
+		b=&ICBox;
+		get_new_size(win,&w,&h);
+		get_nrow_from_hgt(h,&nwin,(int*)&w);
+	}
+	if(ParamBox.xuse==1 && win==ParamBox.base) {
+		ok=2;
+		b=&ParamBox;
+		waitasec(ClickTime);
+		get_new_size(win,&w,&h);
+		get_nrow_from_hgt(h,&nwin,(int*)&w);
+	}
+	if(BCBox.xuse==1 && win==BCBox.base) {
+		ok=3;
+		b=&BCBox;
+		get_new_size(win,&w,&h);
+		get_nrow_from_hgt(h,&nwin,(int*)&w);
+	}
+	if(DelayBox.xuse==1 && win==DelayBox.base) {
+		ok=4;
+		b=&DelayBox;
+		get_new_size(win,&w,&h);
+		get_nrow_from_hgt(h,&nwin,(int*)&w);
+	}
+	if(ok==0) {
+		return;
+	}
+	if(nwin>b->n) {
+		nwin=b->n;
+	}
+	if(nwin==b->nwin) {
+		return;
+	}
+	b->nwin=nwin;
+	b->n0=(b->n-b->nwin);
+	/* b->n0=0;This is a work-around for the following bug (still happening):
+			 i) User scrolls to bottom of parameter list
+		 ii) then resizes window
+		 iii) then Segmentation Fault
+*/
+	switch(ok) {
+	case ICBOX:
+		destroy_box(&ICBox);
+		make_new_ic_box();
+		break;
+	case PARAMBOX:
+		destroy_box(&ParamBox);
+		make_new_param_box();
+		break;
+	case DELAYBOX:
+		destroy_box(&DelayBox);
+		make_new_delay_box();
+		break;
+	case BCBOX:
+		destroy_box(&BCBox);
+		make_new_bc_box();
+		break;
+	}
+}
+
 
 void resize_par_slides(int h) {
 	int i;
@@ -328,6 +749,19 @@ void resize_par_slides(int h) {
 	}
 }
 
+
+void set_edit_params(BoxList *b, int i, char *string) {
+	int l=strlen(string);
+	strcpy(b->value[i],string);
+	b->off[i]=0;
+	if(l>b->mc) {
+		b->pos[i]=b->mc;
+	} else {
+		b->pos[i]=l;
+	}
+}
+
+
 void slide_button_press(Window w) {
 	int i;
 	for(i=0;i<3;i++) {
@@ -336,205 +770,65 @@ void slide_button_press(Window w) {
 }
 
 
-void do_slide_button(int w, PAR_SLIDER *p) {
-	static char *n[]={"*3Par/Var","Value","Low","High"};
-	char values[4][MAX_LEN_SBOX];
-	int status;
-	double lo,hi,val;
-	if(w==p->go && p->use==1) {
-		run_now();
-	}
-	if(w!=p->top) {
-		return;
-	}
-	strcpy(values[0],p->parname);
-	sprintf(values[1],"%.16g",p->val);
-	sprintf(values[2],"%.16g",p->lo);
-	sprintf(values[3],"%.16g",p->hi);
-	status=do_string_box(4,4,1,"Set Sliders",n,values,35);
-	if(status==0) {
-		return;
-	}
-	if(strlen(values[0])==0) { /* empty string cancels */
-		p->use=0;
-		return;
-	}
-	status=find_user_name(PARAMBOX,values[0]);
-	if(status==-1) {
-		status=find_user_name(ICBOX,values[0]);
-		if(status==-1) {
-			err_msg("Not a parameter or variable !");
-			return;
-		}
-		p->type=ICBOX;
-		p->index=status;
-	} else {
-		p->type=PARAMBOX;
-		p->index=status;
-	}
-	lo=atof(values[2]);
-	hi=atof(values[3]);
-	val=atof(values[1]);
-	if(val<lo || val>hi || hi<=lo) {
-		err_msg(" low <= value <= high ");
-		return;
-	}
-	p->val=val;
-	p->hi=hi;
-	p->lo=lo;
-	strcpy(p->parname,values[0]);
-	set_val(p->parname,val);
-	if(p->type==ICBOX) {
-		last_ic[p->index]=val;
-	}
-	redraw_params();
-	redraw_ics();
-	p->use=1;
-	set_slide_pos(p);
-	redraw_slide(p);
-}
-
-
-void expose_selector(Window w) {
-	display_file_sel(filesel,w);
-}
-
-
-/* this is rather lazy and slow but hey it works */
-void redraw_directory(void) {
-	XClearWindow(display,filesel.dir);
-	expose_selector(filesel.dir);
-}
-
-void redraw_file_list(void) {
+void slide_release(Window w) {
 	int i;
-	for(i=0;i<filesel.nwin;i++) {
-		XClearWindow(display,filesel.w[i]);
-		expose_selector(filesel.w[i]);
-	}
-}
-
-void redraw_fs_text(char *string, Window w, int flag) {
-	XClearWindow(display,w);
-	filesel.off=0;
-	if(flag) {
-		filesel.pos=strlen(string);
-	}
-	XDrawString(display,w,small_gc,0,CURY_OFF,string,strlen(string));
-	if(flag) {
-		put_edit_cursor(w,DCURXs*strlen(string));
+	for(i=0;i<3;i++) {
+		do_slide_release(w,&my_par_slide[i]);
 	}
 }
 
 
-void display_file_sel(FILESEL f, Window w) {
-	int i,i0;
-	Window root;
-	int xloc;
-	int yloc;
-
-	unsigned int cwid;
-	unsigned int chgt;
-	unsigned int cbwid;
-	unsigned int cdepth;
-
-	XGetGeometry(display,f.base,&root,&xloc,&yloc,&cwid,&chgt,&cbwid,&cdepth);
-	XResizeWindow(display,f.wild,cwid-7*DCURXs-5,DCURYs);
-	XResizeWindow(display,f.file,cwid-7*DCURXs-5,DCURYs);
-	for(i=0;i<f.nwin;i++) {
-		XResizeWindow(display,f.w[i],cwid-6*DCURXs-10,DCURYs);
+void slider_motion(XEvent ev) {
+	int x,i;
+	Window w;
+	w=ev.xmotion.window;
+	x=ev.xmotion.x;
+	/* printf(" state=%d\n",ev.xmotion.state); */
+	for(i=0;i<3;i++) {
+		do_slide_motion(w,x,&my_par_slide[i],ev.xmotion.state);
 	}
-	int hgt=DCURYs+4;
-	XMoveResizeWindow(display,f.ok,cwid/2-7*DCURXs-3,chgt-hgt,7*DCURXs,DCURYs);
-	XMoveResizeWindow(display,f.cancel,cwid/2+3,chgt-hgt,7*DCURXs,DCURYs);
+}
 
-	char t[XPP_MAX_NAME];
-	if(f.here!=1) {
+
+/* --- static functions --- */
+static void add_edit_float(BoxList *b, int i, double z) {
+	char junk[XPP_MAX_NAME];
+	sprintf(junk,"%.16g",z);
+	add_editval(b,i,junk);
+}
+
+
+static void add_editval(BoxList *b, int i, char *string) {
+	int n0=b->n0,n1=b->n0+b->nwin-1;
+	int iw;
+	set_edit_params(b,i,string);
+	if(i<n0 || i>n1) {
 		return;
 	}
-
-	if(f.ok==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs,"Ok",2);
-	}
-	if(f.cancel==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs,"Cancel",6);
-	}
-	if(f.up==w) {
-		/*XDrawString(display,w,small_gc,5+DCURX/2,CURY_OFFs,"^",1);
-	*/
-	}
-	if(f.dn==w) {
-		/*XDrawString(display,w,small_gc,5+DCURX/2,CURY_OFFs,"vv",1);
-	*/
-	}
-	if(f.pgup==w) {
-		/*XDrawString(display,w,small_gc,5,CURY_OFFs,"^^",2);
-	*/
-	}
-	if(f.pgdn==w) {
-		/* XDrawString(display,w,small_gc,5,CURY_OFFs,"vv",2);
-	*/
-	}
-	if(f.file==w) {
-		XClearWindow(display,w);
-		XDrawString(display,w,small_gc,2,CURY_OFFs,
-					f.filetxt,strlen(f.filetxt));
-	}
-	if(f.wild==w) {
-		XClearWindow(display,w);
-		XDrawString(display,w,small_gc,2, CURY_OFFs,f.wildtxt,strlen(f.wildtxt));
-	}
-	if(f.fw==w) {
-		XDrawString(display,w,small_gc,5, CURY_OFFs,"File: ",6);
-	}
-	if(f.ww==w) {
-		XDrawString(display,w,small_gc,5, CURY_OFFs,"Wild: ",6);
-	}
-	if(f.dir==w) {
-		sprintf(t," %s",f.title);
-		XDrawString(display,w,small_gc,0,CURY_OFFs,t,strlen(t));
-		XTextProperty windowName;
-		sprintf(t,"%s - %s",f.wildtxt,cur_dir);
-		char *nameit[]={t};
-		XStringListToTextProperty(nameit,1,&windowName);
-		XSetWMName(display,f.base,&windowName);
-	}
-	for(i=0;i<f.nwin;i++) {
-		if(w==f.w[i]) {
-			i0=i+f.n0;
-			if(i0>=f.n) {
-				XDrawString(display,w,small_gc,5,CURY_OFFs," ",1);
-			} else {
-				if(i0<my_ff.ndirs) {
-					sprintf(t,"<>%s",my_ff.dirnames[i0]);
-				} else {
-					sprintf(t,"%s",my_ff.filenames[i0-my_ff.ndirs]);
-				}
-				XDrawString(display,w,small_gc,5,CURY_OFFs,t,strlen(t));
-			}
-		}
+	iw=i-n0;
+	if(b->xuse) {
+		draw_editable(b->we[iw],string,b->off[i],b->pos[i],b->mc);
 	}
 }
 
 
-void new_wild(void) {
-	free_finfo(&my_ff); /* delete the old file info */
-	filesel.n0=0; /* back to the top of the list */
-	get_fileinfo(filesel.wildtxt,cur_dir,&my_ff);
-	filesel.n=my_ff.ndirs+my_ff.nfiles;
-	redraw_file_list();
-	XFlush(display);
+static void box_enter(BoxList b, Window w, int val) {
+	if(w==b.ok || w==b.cancel || w==b.def || w==b.go || w==b.close ||
+	   w==b.dn || w==b.up || w==b.pgdn || w==b.pgup) {
+		XSetWindowBorderWidth(display,w,val);
+	}
 }
 
 
-void fs_scroll(int i) {
-	int n0=filesel.n0;
-	int new_int,nend;
-	int nw=filesel.nwin,n=filesel.n;
+static void box_list_scroll(BoxList *b, int i) {
+	int n0=b->n0;
+	int new_int;
+	int nw=b->nwin,n=b->n;
+	int nend;
 	if(n<=nw) {
-		return;
+		return;  /* do nothing - there is nothing to do */
 	}
-	new_int=n0-i;
+	new_int =n0-i;
 	nend=new_int+nw;
 	if(new_int<0) {
 		new_int=0;
@@ -542,12 +836,31 @@ void fs_scroll(int i) {
 	if(nend>n) {
 		new_int=n-nw;
 	}
-	filesel.n0=new_int;
-	redraw_file_list();
+	b->n0=new_int;
+	switch(b->type) {
+	case PARAMBOX:
+		load_entire_box(b);
+		redraw_params();
+		reset_sliders();
+		break;
+	case BCBOX:
+		load_entire_box(b);
+		redraw_bcs();
+		break;
+	case ICBOX:
+		load_entire_box(b);
+		redraw_ics();
+		reset_sliders();
+		break;
+	case DELAYBOX:
+		load_entire_box(b);
+		redraw_delays();
+		break;
+	}
 }
 
 
-int button_selector(Window w) {
+static int button_selector(Window w) {
 	int i,i0;
 	int k,n=filesel.n;
 	if(w==filesel.ok) {
@@ -677,71 +990,20 @@ int button_selector(Window w) {
 }
 
 
-void crossing_selector(Window w, int c) {
-	int t1=1,t2=2,i;
-	if(c==1) {
-		t1=0;
-		t2=1;
+static void check_box_cursor(void) {
+	int n0;
+	if(HotBoxItem<0 || HotBox->xuse==0) {
+		return;
 	}
-	for(i=0;i<filesel.nwin;i++) {
-		if(w==filesel.w[i]) {
-			XSetWindowBorderWidth(display,w,t1);
-			return;
-		}
-	}
-	if(w==filesel.ok || w==filesel.cancel || w==filesel.pgup || w==filesel.pgdn ||
-	   w==filesel.up || w==filesel.dn || w==filesel.file || w==filesel.wild ||
-	   w==filesel.home || w==filesel.start) {
-		XSetWindowBorderWidth(display,w,t2);
-	}
+	n0=HotBox->n0;
+	draw_editable(HotBox->we[HotBoxItem],HotBox->value[HotBoxItem+n0],
+			HotBox->off[HotBoxItem],HotBox->pos[HotBoxItem],
+			HotBox->mc);
+	HotBoxItem=-1;
 }
 
 
-int do_file_select_events(void) {
-	int done;
-	XEvent ev;
-	/* plintf("Xup=%d\n",Xup); */
-	while(1) {
-		XNextEvent(display,&ev);
-		switch(ev.type) {
-		case ConfigureNotify:
-		case Expose:
-		case MapNotify:
-			if(Xup) {
-				do_expose(ev);
-			}
-			expose_selector(ev.xany.window);
-			break;
-		case ButtonPress:
-			done=button_selector(ev.xbutton.window);
-			if(done==1) {
-				return 1; /* OK made a selection */
-			}
-			if(done==2) {
-				return 0; /* canceled the whole thing */
-			}
-			break;
-		case EnterNotify:
-			crossing_selector(ev.xcrossing.window,0);
-			break;
-		case LeaveNotify:
-			crossing_selector(ev.xcrossing.window,1);
-			break;
-		case KeyPress:
-			done=selector_key(ev);
-			if(done==2) {
-				return 0;
-			}
-			if(done==1) {
-				return 1;
-			}
-			break;
-		}
-	}
-}
-
-
-void create_file_selector(char *title, char *file, char *wild) {
+static void create_file_selector(char *title, char *file, char *wild) {
 	int n=my_ff.ndirs+my_ff.nfiles;
 	int nwin=FILESELNWIN;
 	/*int wid,hgt,i;
@@ -812,24 +1074,638 @@ void create_file_selector(char *title, char *file, char *wild) {
 }
 
 
-void stringintersect(char *target, char *sother) {
-	int m = strlen(target);
-	int n = strlen(sother);
-	if(n<m) {
-		m = n;
+static void crossing_selector(Window w, int c) {
+	int t1=1,t2=2,i;
+	if(c==1) {
+		t1=0;
+		t2=1;
 	}
-	int j=0;
-	while (j<m)	{
-		if(target[j] != sother[j])	{
-			break;
+	for(i=0;i<filesel.nwin;i++) {
+		if(w==filesel.w[i]) {
+			XSetWindowBorderWidth(display,w,t1);
+			return;
 		}
-		j++;
 	}
-	target[j] = '\0';
+	if(w==filesel.ok || w==filesel.cancel || w==filesel.pgup || w==filesel.pgdn ||
+	   w==filesel.up || w==filesel.dn || w==filesel.file || w==filesel.wild ||
+	   w==filesel.home || w==filesel.start) {
+		XSetWindowBorderWidth(display,w,t2);
+	}
 }
 
 
-int edit_fitem(int ch, char *string, Window w, int *off1, int *pos1, int mc) {
+static void destroy_box(BoxList *b) {
+	if(b->xuse==0) {
+		return;
+	}
+	b->xuse=0;
+	XFlush(display);
+	XSetInputFocus(display,main_win,RevertToParent,CurrentTime);
+	if(b->use==0) {
+		return;
+	}
+	waitasec(ClickTime);
+
+	XDestroySubwindows(display,b->base);
+	XDestroyWindow(display,b->base);
+
+	free(b->w);
+	free(b->we);
+	if(b->type==ICBOX) {
+		free(b->ck);
+		free(b->isck);
+	}
+	waitasec(200);
+	XFlush(display);
+}
+
+
+static void destroy_selector(void) {
+	filesel.here=0;
+	waitasec(ClickTime);
+	XDestroySubwindows(display,filesel.base);
+	XDestroyWindow(display,filesel.base);
+	free_finfo(&my_ff);
+}
+
+
+static void display_box(BoxList b, Window w) {
+	int i;
+	int n0=b.n0;
+	int n1=n0+b.nwin;
+	int index;
+	if(b.xuse==0) {
+		return;
+	}
+	if(b.close==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs, "Close",5);
+	}
+	if(b.go==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs, "Go",2);
+	}
+	if(b.ok==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs, "Ok",2);
+	}
+	if(b.cancel==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs, "Cancel",6);
+	}
+	if(b.def==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs, "Default",7);
+	}
+	if(b.up==w) {
+		/*XDrawString(display,w,small_gc,5+DCURX,CURY_OFFs,
+	"^",1);
+	*/
+	}
+	if(b.dn==w) {
+		/*XDrawString(display,w,small_gc,5+DCURX,CURY_OFFs,
+	"v",1);*/
+	}
+	if(b.pgup==w) {
+		/*XDrawString(display,w,small_gc,5,CURY_OFFs,
+		"^^",2);*/
+	}
+	if(b.pgdn==w) {
+		/*XDrawString(display,w,small_gc,5,CURY_OFFs,
+	"vv",2);*/
+	}
+	if(b.type==ICBOX) {
+		if(b.xvt==w) {
+			XDrawString(display,w,small_gc,3,CURY_OFFs,"xvst",4);
+		}
+		if(b.pp==w) {
+			XDrawString(display,w,small_gc,3,CURY_OFFs,"xvsy",4);
+		}
+		if(b.arr==w) {
+			XDrawString(display,w,small_gc,3,CURY_OFFs,"arry",4);
+		}
+	}
+	for(i=0;i<b.nwin;i++) {
+		if(b.w[i]==w || b.we[i]==w) {
+			draw_one_box(b,i+b.n0);
+			return;
+		}
+	}
+	if(b.type==ICBOX) {
+		for(i=0;i<b.nwin;i++) {
+			index=i+b.n0;
+			if(index>=n0 && index<n1) {
+				if(b.ck[i]==w && b.isck[index]==1) {
+					XDrawString(display,w,small_gc,5,CURY_OFFs,"*",1);
+				}
+			}
+		}
+	}
+}
+
+
+static void display_file_sel(FILESEL f, Window w) {
+	int i,i0;
+	Window root;
+	int xloc;
+	int yloc;
+
+	unsigned int cwid;
+	unsigned int chgt;
+	unsigned int cbwid;
+	unsigned int cdepth;
+
+	XGetGeometry(display,f.base,&root,&xloc,&yloc,&cwid,&chgt,&cbwid,&cdepth);
+	XResizeWindow(display,f.wild,cwid-7*DCURXs-5,DCURYs);
+	XResizeWindow(display,f.file,cwid-7*DCURXs-5,DCURYs);
+	for(i=0;i<f.nwin;i++) {
+		XResizeWindow(display,f.w[i],cwid-6*DCURXs-10,DCURYs);
+	}
+	int hgt=DCURYs+4;
+	XMoveResizeWindow(display,f.ok,cwid/2-7*DCURXs-3,chgt-hgt,7*DCURXs,DCURYs);
+	XMoveResizeWindow(display,f.cancel,cwid/2+3,chgt-hgt,7*DCURXs,DCURYs);
+
+	char t[XPP_MAX_NAME];
+	if(f.here!=1) {
+		return;
+	}
+
+	if(f.ok==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs,"Ok",2);
+	}
+	if(f.cancel==w) {
+		XDrawString(display,w,small_gc,5,CURY_OFFs,"Cancel",6);
+	}
+	if(f.up==w) {
+		/*XDrawString(display,w,small_gc,5+DCURX/2,CURY_OFFs,"^",1);
+	*/
+	}
+	if(f.dn==w) {
+		/*XDrawString(display,w,small_gc,5+DCURX/2,CURY_OFFs,"vv",1);
+	*/
+	}
+	if(f.pgup==w) {
+		/*XDrawString(display,w,small_gc,5,CURY_OFFs,"^^",2);
+	*/
+	}
+	if(f.pgdn==w) {
+		/* XDrawString(display,w,small_gc,5,CURY_OFFs,"vv",2);
+	*/
+	}
+	if(f.file==w) {
+		XClearWindow(display,w);
+		XDrawString(display,w,small_gc,2,CURY_OFFs,
+					f.filetxt,strlen(f.filetxt));
+	}
+	if(f.wild==w) {
+		XClearWindow(display,w);
+		XDrawString(display,w,small_gc,2, CURY_OFFs,f.wildtxt,strlen(f.wildtxt));
+	}
+	if(f.fw==w) {
+		XDrawString(display,w,small_gc,5, CURY_OFFs,"File: ",6);
+	}
+	if(f.ww==w) {
+		XDrawString(display,w,small_gc,5, CURY_OFFs,"Wild: ",6);
+	}
+	if(f.dir==w) {
+		sprintf(t," %s",f.title);
+		XDrawString(display,w,small_gc,0,CURY_OFFs,t,strlen(t));
+		XTextProperty windowName;
+		sprintf(t,"%s - %s",f.wildtxt,cur_dir);
+		char *nameit[]={t};
+		XStringListToTextProperty(nameit,1,&windowName);
+		XSetWMName(display,f.base,&windowName);
+	}
+	for(i=0;i<f.nwin;i++) {
+		if(w==f.w[i]) {
+			i0=i+f.n0;
+			if(i0>=f.n) {
+				XDrawString(display,w,small_gc,5,CURY_OFFs," ",1);
+			} else {
+				if(i0<my_ff.ndirs) {
+					sprintf(t,"<>%s",my_ff.dirnames[i0]);
+				} else {
+					sprintf(t,"%s",my_ff.filenames[i0-my_ff.ndirs]);
+				}
+				XDrawString(display,w,small_gc,5,CURY_OFFs,t,strlen(t));
+			}
+		}
+	}
+}
+
+
+static void do_box_button(BoxList *b, Window w) {
+	int i,n=b->nwin;
+	if(b->xuse==0) {
+		return;
+	}
+	if(w==b->close) {
+		destroy_box(b);
+		return;
+	}
+	if(w==b->ok || w==b->go) {
+		load_entire_box(b);
+	}
+	if(w==b->cancel) {
+		redraw_entire_box(b);
+	}
+	if(w==b->go) {
+		run_now();
+	}
+	if(w==b->def && b->type==PARAMBOX) {
+		set_default_params();
+	}
+	if(w==b->def && b->type==ICBOX) {
+		set_default_ics();
+	}
+	/* now for the "scrolling" */
+	if(w==b->up) {
+		box_list_scroll(b,1);
+	}
+	if(w==b->pgup) {
+		box_list_scroll(b,b->nwin);
+	}
+	if(w==b->dn) {
+		box_list_scroll(b,-1);
+	}
+	if(w==b->pgdn) {
+		box_list_scroll(b,-b->nwin);
+	}
+	for(i=0;i<n;i++) {
+		if(w==b->we[i]) {
+			XSetInputFocus(display,w,RevertToParent,CurrentTime);
+			check_box_cursor();
+			HotBoxItem=i;
+			HotBox=b;
+			draw_editable(w,b->value[i+b->n0],b->off[i+b->n0],b->pos[i+b->n0],b->mc);
+		}
+	}
+
+	if(b->type==ICBOX) {
+		for(i=0;i<b->nwin;i++) {
+			if(w==b->ck[i]) {
+				b->isck[i+b->n0]=1-b->isck[i+b->n0];
+				if(b->isck[i+b->n0]) {
+					XDrawString(display,w,small_gc,0,CURY_OFFs,"*",1);
+				} else {
+					XClearWindow(display,w);
+				}
+			}
+		}
+		if(w==b->xvt) {
+			set_up_xvt();
+		}
+		if(w==b->pp) {
+			set_up_pp();
+		}
+		if(w==b->arr) {
+			set_up_arry();
+		}
+	}
+}
+
+
+static void do_box_key(BoxList *b, XEvent ev, int *used) {
+	Window w=ev.xkey.window;
+	char ch;
+	Window focus;
+	int rev,n=b->nwin,i,j,flag;
+	*used=0;
+	if(b->xuse==0) {
+		return;
+	}
+	for(i=0;i<n;i++) {
+		if(b->we[i]==w) {
+			XGetInputFocus(display,&focus,&rev);
+			if(w==focus) {
+				*used=1;
+				ch=get_key_press(&ev);
+				flag=edit_bitem(b,i,ch);
+				if(flag==EDIT_NEXT && n>1) {
+					j=i+1;
+					if(j==n) {
+						j=0;
+					}
+					XSetInputFocus(display,b->we[j],RevertToParent,CurrentTime);
+					set_value_from_box(b,i);
+
+					HotBoxItem=j;
+					draw_editable(b->we[i],b->value[i+b->n0],
+							b->off[i+b->n0],b->pos[i+b->n0],b->mc);
+					draw_editable(b->we[j],b->value[j+b->n0],
+							b->off[j+b->n0],b->pos[j+b->n0],b->mc);
+					if(b->type==PARAMBOX || b->type==ICBOX) {
+						reset_sliders();
+					}
+				}
+				if(flag==EDIT_DONE) {
+					HotBoxItem=-1;
+					XSetInputFocus(display,main_win,RevertToParent,CurrentTime);
+					load_entire_box(b);
+				}
+				if(flag==EDIT_ESC) {
+					HotBoxItem=-1;
+					XSetInputFocus(display,main_win,RevertToParent,CurrentTime);
+				}
+			}
+		}
+	}
+}
+
+
+static int do_file_select_events(void) {
+	int done;
+	XEvent ev;
+	/* plintf("Xup=%d\n",Xup); */
+	while(1) {
+		XNextEvent(display,&ev);
+		switch(ev.type) {
+		case ConfigureNotify:
+		case Expose:
+		case MapNotify:
+			if(Xup) {
+				do_expose(ev);
+			}
+			expose_selector(ev.xany.window);
+			break;
+		case ButtonPress:
+			done=button_selector(ev.xbutton.window);
+			if(done==1) {
+				return 1; /* OK made a selection */
+			}
+			if(done==2) {
+				return 0; /* canceled the whole thing */
+			}
+			break;
+		case EnterNotify:
+			crossing_selector(ev.xcrossing.window,0);
+			break;
+		case LeaveNotify:
+			crossing_selector(ev.xcrossing.window,1);
+			break;
+		case KeyPress:
+			done=selector_key(ev);
+			if(done==2) {
+				return 0;
+			}
+			if(done==1) {
+				return 1;
+			}
+			break;
+		}
+	}
+}
+
+
+static void do_slide_button(int w, PAR_SLIDER *p) {
+	static char *n[]={"*3Par/Var","Value","Low","High"};
+	char values[4][MAX_LEN_SBOX];
+	int status;
+	double lo,hi,val;
+	if(w==p->go && p->use==1) {
+		run_now();
+	}
+	if(w!=p->top) {
+		return;
+	}
+	strcpy(values[0],p->parname);
+	sprintf(values[1],"%.16g",p->val);
+	sprintf(values[2],"%.16g",p->lo);
+	sprintf(values[3],"%.16g",p->hi);
+	status=do_string_box(4,4,1,"Set Sliders",n,values,35);
+	if(status==0) {
+		return;
+	}
+	if(strlen(values[0])==0) { /* empty string cancels */
+		p->use=0;
+		return;
+	}
+	status=find_user_name(PARAMBOX,values[0]);
+	if(status==-1) {
+		status=find_user_name(ICBOX,values[0]);
+		if(status==-1) {
+			err_msg("Not a parameter or variable !");
+			return;
+		}
+		p->type=ICBOX;
+		p->index=status;
+	} else {
+		p->type=PARAMBOX;
+		p->index=status;
+	}
+	lo=atof(values[2]);
+	hi=atof(values[3]);
+	val=atof(values[1]);
+	if(val<lo || val>hi || hi<=lo) {
+		err_msg(" low <= value <= high ");
+		return;
+	}
+	p->val=val;
+	p->hi=hi;
+	p->lo=lo;
+	strcpy(p->parname,values[0]);
+	set_val(p->parname,val);
+	if(p->type==ICBOX) {
+		last_ic[p->index]=val;
+	}
+	redraw_params();
+	redraw_ics();
+	p->use=1;
+	set_slide_pos(p);
+	redraw_slide(p);
+}
+
+
+static void do_slide_motion(Window w, int x, PAR_SLIDER *p,int state) {
+	int sp=SuppressBounds;
+	if(w==p->slide) {
+		p->pos=x;
+		if(x<2) {
+			p->pos=2;
+		}
+		if(x>(p->l-2)) {
+			p->pos=p->l-2;
+		}
+		expose_slider(p->slide,p);
+		if(p->use) {
+			p->val=p->lo+ (p->hi-p->lo)*(double)(p->pos-2)/(double)(p->l-4);
+			expose_slider(p->top,p);
+			set_val(p->parname,p->val);
+			if(p->type==ICBOX) {
+				last_ic[p->index]=p->val;
+			}
+			if(state<300) {
+				clr_all_scrns();
+				redraw_dfield();
+				create_new_cline();
+				draw_label(draw_win);
+				SuppressBounds=1;
+				run_now();
+				SuppressBounds=sp;}
+		}
+	}
+}
+
+
+static void do_slide_release(int w, PAR_SLIDER *p) {
+	if(p->use==0) {
+		return;
+	}
+	if(p->slide==w) {
+		set_val(p->parname,p->val);
+		if(p->type==ICBOX) {
+			last_ic[p->index]=p->val;
+		}
+		redraw_ics();
+		redraw_params();
+	}
+}
+
+
+/* cursor position in letters to the left */
+/* first character of string is off */
+static void draw_editable(Window win, char *string, int off, int cursor, int mc) {
+	int l=strlen(string)-off,rev,cp;
+	Window focus;
+	if(l>mc) {
+		l=mc;
+	}
+	XClearWindow(display,win);
+	XDrawString(display,win,small_gc,0,CURY_OFF,string+off,l);
+	XGetInputFocus(display,&focus,&rev);
+	if(focus==win) {
+		cp=DCURXs*(cursor-off); /* must be fixed */
+		put_edit_cursor(win,cp);
+	}
+}
+
+
+static void draw_slider(Window w, int x, int hgt, int l) {
+	int x0=x-2,i;
+	if(x0<0) {
+		x0=0;
+	}
+	if(x0>(l-4)) {
+		x0=l-4;
+	}
+	XClearWindow(display,w);
+	for(i=0;i<4;i++) {
+		XDrawLine(display,w,small_gc,x0+i,0,x0+i,hgt);
+	}
+}
+
+
+static int edit_bitem(BoxList *b, int i, int ch) {
+	Window win=b->we[i];
+	int i0=i+b->n0;
+	char *string=b->value[i0];
+	int off=b->off[i0];
+	int pos=b->pos[i0];
+	int mc=b->mc;
+	int l=strlen(string),wpos=pos-off;
+	switch(ch) {
+	case LEFT:
+		if(pos>0) {
+			pos--;
+			wpos--;
+			if(wpos<0) {
+				off=off-4;
+				if(off<0) {
+					off=0;
+				}
+				wpos=pos-off;
+			}
+		} else {
+			ping();
+		}
+		break;
+	case RIGHT:
+		if(pos<l) {
+			pos++;
+			wpos++;
+			if(wpos>mc) {
+				off=off+4;
+				if(off+mc>l) {
+					off=l-mc;
+				}
+				wpos=pos-off;
+			}
+		} else {
+			ping();
+		}
+		break;
+	case HOME:
+		pos=0;
+		wpos=0;
+		break;
+	case END:
+		pos=l;
+		wpos=mc;
+		break;
+	case BADKEY:
+		return 0;
+	case DOWN: box_list_scroll(b,-1);
+		return 0;
+	case UP:
+		box_list_scroll(b,1);
+		return 0;
+	case PGUP:
+		box_list_scroll(b,b->nwin);
+		return 0;
+	case PGDN:
+		box_list_scroll(b,-b->nwin);
+		return 0;    /* junk key  */
+	case ESC:
+		return EDIT_ESC;
+	case FINE:
+		return EDIT_NEXT;
+	case BKSP:
+	case DEL:
+		if(pos>0) {
+			memmov(&string[pos-1],&string[pos],l-pos+1);
+			pos--;
+			wpos--;
+			if(wpos<0) {
+				off=off-4;
+				if(off<0) {
+					off=0;
+				}
+				wpos=pos-off;
+			}
+			l--;
+		} else {
+			ping();
+		}
+		break;
+	case TAB:
+		return EDIT_DONE;
+	default:
+		if( (ch>=' ') && (ch <= '~')) {
+			if(strlen(string)>=256) {
+				ping();
+			} else {
+				movmem(&string[pos+1],&string[pos],l-pos+1);
+				string[pos]=ch;
+				pos=pos+1;
+				wpos++;
+				l++;
+				if(wpos>mc) {
+					off=off+4;
+					if(off+mc>l) {
+						off=l-mc;
+					}
+					wpos=pos-off;
+				}
+			}
+		}
+		break;
+	}
+	/* all done lets save everything */
+	off=pos-wpos;
+
+	b->off[i0]=off;
+	b->pos[i0]=pos;
+	draw_editable(win,string,off,pos,mc);
+	return 0;
+}
+
+
+static int edit_fitem(int ch, char *string, Window w, int *off1, int *pos1, int mc) {
 	int l=strlen(string),cp;
 	int off=*off1,pos=*pos1,wpos=pos-off;
 	/*  plintf(" pos=%d off=%d s=%s \n",
@@ -1068,200 +1944,19 @@ int edit_fitem(int ch, char *string, Window w, int *off1, int *pos1, int mc) {
 }
 
 
-int selector_key(XEvent ev) {
-	char ch;
-	int flag;
-	/* plintf(" hot=%d pos=%d \n",filesel.hot,filesel.pos); */
-	ch=get_key_press(&ev);
-	switch(filesel.hot) {
-	case HOTFILE:
-		flag=edit_fitem(ch,filesel.filetxt,filesel.file,
-						&(filesel.off),&(filesel.pos),29);
-		if(flag==EDIT_DONE) {
-			return 1;
-		}
-		if(flag==EDIT_ESC) {
-			return 2;
-		}
-		return(0);
-	case HOTWILD:
-		flag=edit_fitem(ch,filesel.wildtxt,filesel.wild,
-						&(filesel.off),&(filesel.pos),29);
-		if(flag==EDIT_DONE) {
-			new_wild();
-			return 0;
-		}
-		if(flag==EDIT_ESC) {
-			return 2;
-		}
-		return 0;
-	}
-	return 0;
-}
-
-
-void destroy_selector(void) {
-	filesel.here=0;
-	waitasec(ClickTime);
-	XDestroySubwindows(display,filesel.base);
-	XDestroyWindow(display,filesel.base);
-	free_finfo(&my_ff);
-}
-
-
-int file_selector(char *title, char *file, char *wild) {
-	int i;
-	if(!get_directory(cur_dir)) {
-		return 0;
-	}
-	if(!get_fileinfo(wild,cur_dir,&my_ff)) {
-		return 0;
-	}
-	create_file_selector(title,file,wild);
-	i=do_file_select_events();
-	destroy_selector();
-	XFlush(display);/*Need to do this otherwise the file dialog hangs around*/
-	if(i==0) {
-		return 0;
-	}
-	strcpy(file,filesel.filetxt);
-	return 1; /* got a file name */
-}
-
-
-void reset_sliders(void) {
-	int i;
-	double val;
-	PAR_SLIDER *p;
-	for(i=0;i<3;i++) {
-		p=&my_par_slide[i];
-		if(p->use) {
-			if(p->type==ICBOX) {
-				val=last_ic[p->index];
-			} else {
-				get_val(p->parname,&val);
-			}
-			p->val=val;
-			set_slide_pos(p);
-			expose_slider(p->slide,p);
-			expose_slider(p->top,p);
-		}
-	}
-}
-
-void redraw_slide(PAR_SLIDER *p) {
-	expose_slider(p->slide,p);
-	expose_slider(p->top,p);
-	expose_slider(p->left,p);
-	expose_slider(p->right,p);
-}
-
-
-void set_slide_pos(PAR_SLIDER *p) {
-	double pos;
-	int ip;
-	pos=2. + (p->l-4)*(p->val-p->lo)/(p->hi-p->lo);
-	ip=(int)pos;
-	if(ip<2) {
-		ip=2;
-	}
-	if(ip>(p->l-2)) {
-		ip=p->l-2;
-	}
-	p->pos=ip;
-}
-
-
-void slide_release(Window w) {
-	int i;
-	for(i=0;i<3;i++) {
-		do_slide_release(w,&my_par_slide[i]);
-	}
-}
-
-
-void do_slide_release(int w, PAR_SLIDER *p) {
-	if(p->use==0) {
-		return;
-	}
-	if(p->slide==w) {
-		set_val(p->parname,p->val);
-		if(p->type==ICBOX) {
-			last_ic[p->index]=p->val;
-		}
-		redraw_ics();
-		redraw_params();
-	}
-}
-
-
-void slider_motion(XEvent ev) {
-	int x,i;
-	Window w;
-	w=ev.xmotion.window;
-	x=ev.xmotion.x;
-	/* printf(" state=%d\n",ev.xmotion.state); */
-	for(i=0;i<3;i++) {
-		do_slide_motion(w,x,&my_par_slide[i],ev.xmotion.state);
-	}
-}
-
-
-void do_slide_motion(Window w, int x, PAR_SLIDER *p,int state) {
-	int sp=SuppressBounds;
-	if(w==p->slide) {
-		p->pos=x;
-		if(x<2) {
-			p->pos=2;
-		}
-		if(x>(p->l-2)) {
-			p->pos=p->l-2;
-		}
-		expose_slider(p->slide,p);
-		if(p->use) {
-			p->val=p->lo+ (p->hi-p->lo)*(double)(p->pos-2)/(double)(p->l-4);
-			expose_slider(p->top,p);
-			set_val(p->parname,p->val);
-			if(p->type==ICBOX) {
-				last_ic[p->index]=p->val;
-			}
-			if(state<300) {
-				clr_all_scrns();
-				redraw_dfield();
-				create_new_cline();
-				draw_label(draw_win);
-				SuppressBounds=1;
-				run_now();
-				SuppressBounds=sp;}
-		}
-	}
-}
-
-
-void enter_slides(Window w, int val) {
-	int i;
-	for(i=0;i<3;i++) {
-		enter_slider(w,&my_par_slide[i],val);
-	}
-}
-
-
-void enter_slider(Window w, PAR_SLIDER *p, int val) {
+static void enter_slider(Window w, PAR_SLIDER *p, int val) {
 	if(w==p->top || w==p->go) {
 		XSetWindowBorderWidth(display,w,val+1);
 	}
 }
 
 
-void expose_slides(Window w) {
-	int i;
-	for(i=0;i<3;i++) {
-		expose_slider(w,&my_par_slide[i]);
-	}
+static void expose_selector(Window w) {
+	display_file_sel(filesel,w);
 }
 
 
-void expose_slider(Window w, PAR_SLIDER *p) {
+static void expose_slider(Window w, PAR_SLIDER *p) {
 	int x,len=12*DCURXs;
 	char top[XPP_MAX_NAME];
 	if(w==p->slide) {
@@ -1306,238 +2001,108 @@ void expose_slider(Window w, PAR_SLIDER *p) {
 }
 
 
-void draw_slider(Window w, int x, int hgt, int l) {
-	int x0=x-2,i;
-	if(x0<0) {
-		x0=0;
-	}
-	if(x0>(l-4)) {
-		x0=l-4;
-	}
-	XClearWindow(display,w);
-	for(i=0;i<4;i++) {
-		XDrawLine(display,w,small_gc,x0+i,0,x0+i,hgt);
-	}
-}
-
-
-
-void make_par_slider(Window base, int x, int y, int width, int index) {
-	int mainhgt=3*(DCURYs+2);
-	int mainwid=32*DCURXs;
-	int xs;
-	Window w;
-	if(mainwid<(width+4)) {
-		mainwid=width+4;
-	}
-	w=make_plain_window(base,x,y,mainwid,mainhgt,1);
-	my_par_slide[index].main=w;
-	xs=(mainwid-width-4)/2;
-	my_par_slide[index].slide=make_window(w,xs,DCURYs+5,width+4,DCURYs-4,1);
-	my_par_slide[index].go=make_window(w,xs+width+8,DCURYs+5,3*DCURXs,DCURYs-3,1);
-	my_par_slide[index].top=make_window(w,2,2,mainwid-6,DCURYs,1);
-	my_par_slide[index].left=make_window(w,2,2*DCURYs+3,12*DCURXs,DCURYs,0);
-	my_par_slide[index].right=make_window(w,mainwid-12*DCURXs-4,2*DCURYs+3,
-										  12*DCURXs,DCURYs,0);
-	my_par_slide[index].lo=0.0;
-	my_par_slide[index].hi=1.0;
-	my_par_slide[index].val=0.5;
-	my_par_slide[index].use=0;
-	my_par_slide[index].l=width+4;
-	my_par_slide[index].pos=(width+4)/2;
-	my_par_slide[index].parname[0]=0;
-	my_par_slide[index].hgt=DCURYs-4;
-
-	if((notAlreadySet.SLIDER1==0) && (index==0)) {
-		strcpy(my_par_slide[index].parname,SLIDER1VAR);
-		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDER1LO;
-		my_par_slide[index].hi=SLIDER1HI;
-		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
-	}
-
-	if((notAlreadySet.SLIDER2==0) && (index==1)) {
-		strcpy(my_par_slide[index].parname,SLIDER2VAR);
-		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDER2LO;
-		my_par_slide[index].hi=SLIDER2HI;
-		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
-	}
-
-	if((notAlreadySet.SLIDER3==0) && (index==2)) {
-		strcpy(my_par_slide[index].parname,SLIDER3VAR);
-		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDER3LO;
-		my_par_slide[index].hi=SLIDER3HI;
-		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
-	}
-}
-/*     The rest of the code is good
-					|
-					V
-  */
-
-void make_new_ic_box(void) {
-	if(ICBox.xuse) {
-		XRaiseWindow(display,ICBox.base);
+static void fs_scroll(int i) {
+	int n0=filesel.n0;
+	int new_int,nend;
+	int nw=filesel.nwin,n=filesel.n;
+	if(n<=nw) {
 		return;
 	}
-	make_box_list_window(&ICBox,ICBOX);
-	make_icon((char*)ic_bits,ic_width,ic_height,ICBox.base);
-}
-
-
-void make_new_bc_box(void) {
-	if(BCBox.xuse) {
-		XRaiseWindow(display,BCBox.base);
-		return;
+	new_int=n0-i;
+	nend=new_int+nw;
+	if(new_int<0) {
+		new_int=0;
 	}
-	make_box_list_window(&BCBox,BCBOX);
-	make_icon((char*)bc_bits,bc_width,bc_height,BCBox.base);
-}
-
-
-void make_new_delay_box(void) {
-	if(DelayBox.use==0) {
-		return;
+	if(nend>n) {
+		new_int=n-nw;
 	}
-	if( DelayBox.xuse==1) {
-		XRaiseWindow(display,DelayBox.base);
-		return;
-	}
-	make_box_list_window(&DelayBox,DELAYBOX);
-	make_icon((char*)delay_bits,delay_width,delay_height,DelayBox.base);
-}
-
-void make_new_param_box(void) {
-	if(ParamBox.use==0) {
-		return;
-	}
-	if(ParamBox.xuse==1) {
-		XRaiseWindow(display,ParamBox.base);
-		return;
-	}
-	make_box_list_window(&ParamBox,PARAMBOX);
-	make_icon((char*)param_bits,param_width,param_height,ParamBox.base);
-}
-
-void initialize_box(void) {
-	make_box_list(&ICBox,"Initial Data","ICs",NODE+NMarkov,ICBOX,1);
-	if(NUPAR>0) {
-		make_box_list(&ParamBox,"Parameters","Par",NUPAR,PARAMBOX,1);
-	} else {
-		ParamBox.use=0;
-	}
-	if(NDELAYS>0) {
-		make_box_list(&DelayBox,"Delay ICs","Delay", NODE,DELAYBOX,1);
-	} else {
-		DelayBox.use=0;
-	}
-	make_box_list(&BCBox,"Boundary Conds","BCs",NODE,BCBOX,1);
-}
-
-
-void resize_par_box(Window win) {
-	unsigned int h,w;
-	int nwin;
-	int ok=0;
-	BoxList *b;
-	if(ICBox.xuse==1 && win==ICBox.base) {
-		ok=1;
-		b=&ICBox;
-		get_new_size(win,&w,&h);
-		get_nrow_from_hgt(h,&nwin,(int*)&w);
-	}
-	if(ParamBox.xuse==1 && win==ParamBox.base) {
-		ok=2;
-		b=&ParamBox;
-		waitasec(ClickTime);
-		get_new_size(win,&w,&h);
-		get_nrow_from_hgt(h,&nwin,(int*)&w);
-	}
-	if(BCBox.xuse==1 && win==BCBox.base) {
-		ok=3;
-		b=&BCBox;
-		get_new_size(win,&w,&h);
-		get_nrow_from_hgt(h,&nwin,(int*)&w);
-	}
-	if(DelayBox.xuse==1 && win==DelayBox.base) {
-		ok=4;
-		b=&DelayBox;
-		get_new_size(win,&w,&h);
-		get_nrow_from_hgt(h,&nwin,(int*)&w);
-	}
-	if(ok==0) {
-		return;
-	}
-	if(nwin>b->n) {
-		nwin=b->n;
-	}
-	if(nwin==b->nwin) {
-		return;
-	}
-	b->nwin=nwin;
-	b->n0=(b->n-b->nwin);
-	/* b->n0=0;This is a work-around for the following bug (still happening):
-			 i) User scrolls to bottom of parameter list
-		 ii) then resizes window
-		 iii) then Segmentation Fault
-*/
-	switch(ok) {
-	case ICBOX:
-		destroy_box(&ICBox);
-		make_new_ic_box();
-		break;
-	case PARAMBOX:
-		destroy_box(&ParamBox);
-		make_new_param_box();
-		break;
-	case DELAYBOX:
-		destroy_box(&DelayBox);
-		make_new_delay_box();
-		break;
-	case BCBOX:
-		destroy_box(&BCBox);
-		make_new_bc_box();
-		break;
-	}
+	filesel.n0=new_int;
+	redraw_file_list();
 }
 
 
 /* this returns the fixed width, the number of entries allowed */
-void get_nrow_from_hgt(int h, int *n, int *w) {
+static void get_nrow_from_hgt(int h, int *n, int *w) {
 	int hgt=DCURYs+4;
 	*w=28*DCURXs;
 	*n= h/(hgt+4)-5;
 }
 
-void destroy_box(BoxList *b) {
-	if(b->xuse==0) {
-		return;
-	}
-	b->xuse=0;
-	XFlush(display);
-	XSetInputFocus(display,main_win,RevertToParent,CurrentTime);
-	if(b->use==0) {
-		return;
-	}
-	waitasec(ClickTime);
 
-	XDestroySubwindows(display,b->base);
-	XDestroyWindow(display,b->base);
-
-	free(b->w);
-	free(b->we);
-	if(b->type==ICBOX) {
-		free(b->ck);
-		free(b->isck);
+static void justify_string(Window w1, char *s1) {
+	int n1=strlen(s1)*DCURXs,nt=10*DCURXs;
+	int i=0;
+	if(n1<nt) {
+		i=nt-n1;
 	}
-	waitasec(200);
-	XFlush(display);
+	XClearWindow(display,w1);
+	XDrawString(display,w1,small_gc,i,CURY_OFFs,s1,strlen(s1));
 }
 
 
-void make_box_list_window(BoxList *b,int type) {
+static void load_entire_box(BoxList *b) {
+	int i,n=b->n;
+
+	for(i=0;i<n;i++) {
+		set_value_from_box(b,i);
+	}
+	if(b->type==PARAMBOX) {
+		re_evaluate_kernels();
+		redo_all_fun_tables();
+		reset_sliders();
+	}
+	if(b->type==DELAYBOX) {
+		do_init_delay(DELAY);
+	}
+}
+
+
+static void make_box_list(BoxList *b, char *wname, char *iname, int n, int type, int use) {
+	int nrow,i;
+	char sss[XPP_MAX_NAME];
+	double z;
+	nrow=10;
+	if(n<10) {
+		nrow=n;
+	}
+	b->xuse=0;
+	b->use=use;
+	b->mc=21;
+	b->type=type;
+	b->n=n;
+	b->n0=0;
+	b->nwin=nrow;
+	b->value=(char **)malloc(n*sizeof(char*));
+	b->pos=(int *)malloc(n*sizeof(int));
+	b->off=(int *)malloc(n*sizeof(int));
+	b->iname=(char *)malloc(strlen(iname)+5);
+	strcpy(b->iname,iname);
+	b->wname=(char *)malloc(strlen(wname)+5);
+	strcpy(b->wname,wname);
+	for(i=0;i<n;i++) {
+		b->value[i]=(char *)malloc(256);
+		switch(type) {
+		case PARAMBOX:
+			get_val(upar_names[i],&z);
+			sprintf(sss,"%.16g",z);
+			set_edit_params(b,i,sss);
+			break;
+		case ICBOX:
+			sprintf(sss,"%.16g",last_ic[i]);
+			set_edit_params(b,i,sss);
+			break;
+		case BCBOX:
+			set_edit_params(b,i,my_bc[i].string);
+			break;
+		case DELAYBOX:
+			set_edit_params(b,i,delay_string[i]);
+			break;
+		}
+	}
+}
+
+
+static void make_box_list_window(BoxList *b,int type) {
 	int nrow,n;
 	int x,y;
 	int xb1,xb2,xb3,xb4;
@@ -1622,354 +2187,204 @@ void make_box_list_window(BoxList *b,int type) {
 }
 
 
-void make_box_list(BoxList *b, char *wname, char *iname, int n, int type, int use) {
-	int nrow,i;
-	char sss[XPP_MAX_NAME];
-	double z;
-	nrow=10;
-	if(n<10) {
-		nrow=n;
+static void make_par_slider(Window base, int x, int y, int width, int index) {
+	int mainhgt=3*(DCURYs+2);
+	int mainwid=32*DCURXs;
+	int xs;
+	Window w;
+	if(mainwid<(width+4)) {
+		mainwid=width+4;
 	}
-	b->xuse=0;
-	b->use=use;
-	b->mc=21;
-	b->type=type;
-	b->n=n;
-	b->n0=0;
-	b->nwin=nrow;
-	b->value=(char **)malloc(n*sizeof(char*));
-	b->pos=(int *)malloc(n*sizeof(int));
-	b->off=(int *)malloc(n*sizeof(int));
-	b->iname=(char *)malloc(strlen(iname)+5);
-	strcpy(b->iname,iname);
-	b->wname=(char *)malloc(strlen(wname)+5);
-	strcpy(b->wname,wname);
-	for(i=0;i<n;i++) {
-		b->value[i]=(char *)malloc(256);
-		switch(type) {
-		case PARAMBOX:
-			get_val(upar_names[i],&z);
-			sprintf(sss,"%.16g",z);
-			set_edit_params(b,i,sss);
-			break;
-		case ICBOX:
-			sprintf(sss,"%.16g",last_ic[i]);
-			set_edit_params(b,i,sss);
-			break;
-		case BCBOX:
-			set_edit_params(b,i,my_bc[i].string);
-			break;
-		case DELAYBOX:
-			set_edit_params(b,i,delay_string[i]);
-			break;
-		}
-	}
-}
+	w=make_plain_window(base,x,y,mainwid,mainhgt,1);
+	my_par_slide[index].main=w;
+	xs=(mainwid-width-4)/2;
+	my_par_slide[index].slide=make_window(w,xs,DCURYs+5,width+4,DCURYs-4,1);
+	my_par_slide[index].go=make_window(w,xs+width+8,DCURYs+5,3*DCURXs,DCURYs-3,1);
+	my_par_slide[index].top=make_window(w,2,2,mainwid-6,DCURYs,1);
+	my_par_slide[index].left=make_window(w,2,2*DCURYs+3,12*DCURXs,DCURYs,0);
+	my_par_slide[index].right=make_window(w,mainwid-12*DCURXs-4,2*DCURYs+3,
+										  12*DCURXs,DCURYs,0);
+	my_par_slide[index].lo=0.0;
+	my_par_slide[index].hi=1.0;
+	my_par_slide[index].val=0.5;
+	my_par_slide[index].use=0;
+	my_par_slide[index].l=width+4;
+	my_par_slide[index].pos=(width+4)/2;
+	my_par_slide[index].parname[0]=0;
+	my_par_slide[index].hgt=DCURYs-4;
 
+	if((notAlreadySet.SLIDER1==0) && (index==0)) {
+		strcpy(my_par_slide[index].parname,SLIDER1VAR);
+		my_par_slide[index].use=1;
+		my_par_slide[index].lo=SLIDER1LO;
+		my_par_slide[index].hi=SLIDER1HI;
+		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
+	}
 
-/* this is added to take care of making sure
-	 exposure of the boxes is easily taken care of
-  */
-void do_box_expose(Window w) {
-	if(ICBox.xuse) {
-		display_box(ICBox,w);
+	if((notAlreadySet.SLIDER2==0) && (index==1)) {
+		strcpy(my_par_slide[index].parname,SLIDER2VAR);
+		my_par_slide[index].use=1;
+		my_par_slide[index].lo=SLIDER2LO;
+		my_par_slide[index].hi=SLIDER2HI;
+		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
 	}
-	if(BCBox.xuse) {
-		display_box(BCBox,w);
-	}
-	if(ParamBox.xuse) {
-		display_box(ParamBox,w);
-	}
-	if(DelayBox.xuse) {
-		display_box(DelayBox,w);
+
+	if((notAlreadySet.SLIDER3==0) && (index==2)) {
+		strcpy(my_par_slide[index].parname,SLIDER3VAR);
+		my_par_slide[index].use=1;
+		my_par_slide[index].lo=SLIDER3LO;
+		my_par_slide[index].hi=SLIDER3HI;
+		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
 	}
 }
 
 
-void justify_string(Window w1, char *s1) {
-	int n1=strlen(s1)*DCURXs,nt=10*DCURXs;
-	int i=0;
-	if(n1<nt) {
-		i=nt-n1;
-	}
-	XClearWindow(display,w1);
-	XDrawString(display,w1,small_gc,i,CURY_OFFs,s1,strlen(s1));
+static void new_wild(void) {
+	free_finfo(&my_ff); /* delete the old file info */
+	filesel.n0=0; /* back to the top of the list */
+	get_fileinfo(filesel.wildtxt,cur_dir,&my_ff);
+	filesel.n=my_ff.ndirs+my_ff.nfiles;
+	redraw_file_list();
+	XFlush(display);
 }
 
 
-/* new code is a bit tricky here - we dont want
-   to draw it if it is not visible
-	there are nwin windows covering indexes
-	n0,n0+1,...n0+nwin-1
-	if the index is beyond this dont draw it
-*/
+static void put_edit_cursor(Window w, int pos) {
+	int x1=pos;
+	int x2=x1+1;
+	XDrawLine(display,w,small_gc,x1,1,x1,DCURYs-1);
+	XDrawLine(display,w,small_gc,x2,1,x2,DCURYs-1);
+}
 
 
-void draw_one_box(BoxList b, int index) {
-	Window w,we;
-	int n0=b.n0;
-	int n1=n0+b.nwin-1;
-	int i;
-	if(b.xuse==0) {
+static void redraw_directory(void) {
+	XClearWindow(display,filesel.dir);
+	expose_selector(filesel.dir);
+}
+
+
+static void redraw_entire_box(BoxList *b) {
+	if(b->xuse==0) {
 		return;
 	}
-	if(index<n0 || index>n1) {
-		return; /* don't draw the ones out of range*/
-	}
-	i=index-n0;
-	w=b.w[i];
-	we=b.we[i];
-	switch(b.type) {
+	switch(b->type) {
 	case PARAMBOX:
-		draw_editable(we,b.value[index],
-					  b.off[index],b.pos[index],b.mc);
-		justify_string(w,upar_names[index]);
-		break;
+		redraw_params();
+		return;
 	case BCBOX:
-		justify_string(w,my_bc[index].name);
-		draw_editable(we,b.value[index],b.off[index],
-					  b.pos[index],b.mc);
-		break;
+		redraw_bcs();
+		return;
 	case ICBOX:
-		draw_editable(we,b.value[index],b.off[index],
-					  b.pos[index],b.mc);
-		justify_string(w,uvar_names[index]);
-		break;
+		redraw_ics();
+		return;
 	case DELAYBOX:
-		justify_string(w,uvar_names[index]);
-		draw_editable(we,b.value[index],b.off[index],
-					  b.pos[index],b.mc);
-		break;
-	}
-}
-
-
-void redraw_params(void) {
-	int i;
-	double z;
-	evaluate_derived();
-	if(ParamBox.use) {
-		for(i=0;i<NUPAR;i++) {
-			get_val(upar_names[i],&z);
-			add_edit_float(&ParamBox,i,z);
-			draw_one_box(ParamBox,i);
-		}
-	}
-	reset_sliders();
-}
-
-
-void redraw_delays(void) {
-	int i;
-	if(DelayBox.use) {
-		for(i=0;i<NODE;i++) {
-			draw_one_box(DelayBox,i);
-		}
-	}
-}
-
-
-void redraw_ics(void) {
-	int i,in;
-	for(i=0;i<NODE+NMarkov;i++) {
-		add_edit_float(&ICBox,i,last_ic[i]);
-		draw_one_box(ICBox,i);
-	}
-	reset_sliders();
-	if(ICBox.xuse==0) {
+		redraw_delays();
 		return;
 	}
-	for(i=0;i<ICBox.nwin;i++) {
-		in=i+ICBox.n0;
-		if(ICBox.isck[in]) {
-			XDrawString(display,ICBox.ck[i],small_gc,0,CURY_OFFs,"*",1);
-		} else {
-			XClearWindow(display,ICBox.ck[i]);
-		}
-	}
 }
 
-void redraw_bcs(void) {
+
+static void redraw_file_list(void) {
 	int i;
-	for(i=0;i<NODE;i++) {
-		draw_one_box(BCBox,i);
+	for(i=0;i<filesel.nwin;i++) {
+		XClearWindow(display,filesel.w[i]);
+		expose_selector(filesel.w[i]);
 	}
 }
 
 
-void display_box(BoxList b, Window w) {
-	int i;
-	int n0=b.n0;
-	int n1=n0+b.nwin;
-	int index;
-	if(b.xuse==0) {
-		return;
+static void redraw_fs_text(char *string, Window w, int flag) {
+	XClearWindow(display,w);
+	filesel.off=0;
+	if(flag) {
+		filesel.pos=strlen(string);
 	}
-	if(b.close==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs, "Close",5);
-	}
-	if(b.go==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs, "Go",2);
-	}
-	if(b.ok==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs, "Ok",2);
-	}
-	if(b.cancel==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs, "Cancel",6);
-	}
-	if(b.def==w) {
-		XDrawString(display,w,small_gc,5,CURY_OFFs, "Default",7);
-	}
-	if(b.up==w) {
-		/*XDrawString(display,w,small_gc,5+DCURX,CURY_OFFs,
-	"^",1);
-	*/
-	}
-	if(b.dn==w) {
-		/*XDrawString(display,w,small_gc,5+DCURX,CURY_OFFs,
-	"v",1);*/
-	}
-	if(b.pgup==w) {
-		/*XDrawString(display,w,small_gc,5,CURY_OFFs,
-		"^^",2);*/
-	}
-	if(b.pgdn==w) {
-		/*XDrawString(display,w,small_gc,5,CURY_OFFs,
-	"vv",2);*/
-	}
-	if(b.type==ICBOX) {
-		if(b.xvt==w) {
-			XDrawString(display,w,small_gc,3,CURY_OFFs,"xvst",4);
-		}
-		if(b.pp==w) {
-			XDrawString(display,w,small_gc,3,CURY_OFFs,"xvsy",4);
-		}
-		if(b.arr==w) {
-			XDrawString(display,w,small_gc,3,CURY_OFFs,"arry",4);
-		}
-	}
-	for(i=0;i<b.nwin;i++) {
-		if(b.w[i]==w || b.we[i]==w) {
-			draw_one_box(b,i+b.n0);
-			return;
-		}
-	}
-	if(b.type==ICBOX) {
-		for(i=0;i<b.nwin;i++) {
-			index=i+b.n0;
-			if(index>=n0 && index<n1) {
-				if(b.ck[i]==w && b.isck[index]==1) {
-					XDrawString(display,w,small_gc,5,CURY_OFFs,"*",1);
-				}
-			}
-		}
+	XDrawString(display,w,small_gc,0,CURY_OFF,string,strlen(string));
+	if(flag) {
+		put_edit_cursor(w,DCURXs*strlen(string));
 	}
 }
 
 
-void box_enter_events(Window w, int yn) {
-	int i;
-	int val;
-	if(yn==1) {
-		val=2;
-	} else {
-		val=1;
-	}
-	if(ICBox.xuse) {
-		box_enter(ICBox,w,val);
-	}
-	if(BCBox.xuse) {
-		box_enter(BCBox,w,val);
-	}
-	if(ParamBox.xuse) {
-		box_enter(ParamBox,w,val);
-	}
-	if(DelayBox.xuse) {
-		box_enter(DelayBox,w,val);
-	}
-	if(ICBox.xuse && (w==ICBox.xvt || w==ICBox.pp || w==ICBox.arr)) {
-		XSetWindowBorderWidth(display,w,val);
-	}
-	if(ICBox.xuse==0) {
-		return;
-	}
-	for(i=0;i<ICBox.nwin;i++) {
-		if(w==ICBox.ck[i]) {
-			XSetWindowBorderWidth(display,w,val);
+static void redraw_slide(PAR_SLIDER *p) {
+	expose_slider(p->slide,p);
+	expose_slider(p->top,p);
+	expose_slider(p->left,p);
+	expose_slider(p->right,p);
+}
+
+
+static int selector_key(XEvent ev) {
+	char ch;
+	int flag;
+	/* plintf(" hot=%d pos=%d \n",filesel.hot,filesel.pos); */
+	ch=get_key_press(&ev);
+	switch(filesel.hot) {
+	case HOTFILE:
+		flag=edit_fitem(ch,filesel.filetxt,filesel.file,
+						&(filesel.off),&(filesel.pos),29);
+		if(flag==EDIT_DONE) {
+			return 1;
 		}
-	}
-}
-
-
-void box_enter(BoxList b, Window w, int val) {
-	if(w==b.ok || w==b.cancel || w==b.def || w==b.go || w==b.close ||
-	   w==b.dn || w==b.up || w==b.pgdn || w==b.pgup) {
-		XSetWindowBorderWidth(display,w,val);
-	}
-}
-
-
-int find_the_box(BoxList b, Window w, int *index) {
-	int i;
-	if(b.xuse==0) {
+		if(flag==EDIT_ESC) {
+			return 2;
+		}
 		return(0);
-	}
-	for(i=0;i<b.nwin;i++) {
-		if(w==b.we[i]) {
-			*index=i+b.n0;
-			return(1);
+	case HOTWILD:
+		flag=edit_fitem(ch,filesel.wildtxt,filesel.wild,
+						&(filesel.off),&(filesel.pos),29);
+		if(flag==EDIT_DONE) {
+			new_wild();
+			return 0;
 		}
+		if(flag==EDIT_ESC) {
+			return 2;
+		}
+		return 0;
 	}
-	*index=-1;
-	return(0);
+	return 0;
 }
 
 
-void set_up_xvt(void) {
+static void set_default_ics(void) {
 	int i;
-	int plot_list[10];
-	int n=0;
-	for(i=0;i<ICBox.n;i++) {
-		if(ICBox.isck[i]) {
-			if(n<10) {
-				plot_list[n]=i+1;
-				n++;
-			}
-			ICBox.isck[i]=0;
-		}
+	for(i=0;i<NODE+NMarkov;i++) {
+		last_ic[i]=default_ic[i];
 	}
-	for(i=0;i<ICBox.nwin;i++) {
-		XClearWindow(display,ICBox.ck[i]);
-	}
-	if(n>0) {
-		graph_all(plot_list,n,0);
-	}
+	redraw_ics();
 }
 
 
-void set_up_pp(void) {
+static void set_default_params(void) {
 	int i;
-	int plot_list[3],n=0;
-
-	for(i=0;i<ICBox.n;i++) {
-		if(ICBox.isck[i]) {
-			if(n<3) {
-				plot_list[n]=i+1;
-				n++;
-			}
-			ICBox.isck[i]=0;
-		}
+	char junk[XPP_MAX_NAME];
+	for(i=0;i<NUPAR;i++) {
+		set_val(upar_names[i],default_val[i]);
+		sprintf(junk,"%.16g",default_val[i]);
+		set_edit_params(&ParamBox,i,junk);
 	}
-	for(i=0;i<ICBox.nwin;i++) {
-		XClearWindow(display,ICBox.ck[i]);
-	}
-	if(n>1) {
-		graph_all(plot_list,n,1);
-	}
+	redraw_params();
+	re_evaluate_kernels();
+	redo_all_fun_tables();
 }
 
 
-void set_up_arry(void) {
+static void set_slide_pos(PAR_SLIDER *p) {
+	double pos;
+	int ip;
+	pos=2. + (p->l-4)*(p->val-p->lo)/(p->hi-p->lo);
+	ip=(int)pos;
+	if(ip<2) {
+		ip=2;
+	}
+	if(ip>(p->l-2)) {
+		ip=p->l-2;
+	}
+	p->pos=ip;
+}
+
+
+static void set_up_arry(void) {
 	int i;
 	int plot_list[2],n=0;
 
@@ -1991,547 +2406,51 @@ void set_up_arry(void) {
 }
 
 
-void redraw_entire_box(BoxList *b) {
-	if(b->xuse==0) {
-		return;
-	}
-	switch(b->type) {
-	case PARAMBOX:
-		redraw_params();
-		return;
-	case BCBOX:
-		redraw_bcs();
-		return;
-	case ICBOX:
-		redraw_ics();
-		return;
-	case DELAYBOX:
-		redraw_delays();
-		return;
-	}
-}
-
-
-void do_box_button(BoxList *b, Window w) {
-	int i,n=b->nwin;
-	if(b->xuse==0) {
-		return;
-	}
-	if(w==b->close) {
-		destroy_box(b);
-		return;
-	}
-	if(w==b->ok || w==b->go) {
-		load_entire_box(b);
-	}
-	if(w==b->cancel) {
-		redraw_entire_box(b);
-	}
-	if(w==b->go) {
-		run_now();
-	}
-	if(w==b->def && b->type==PARAMBOX) {
-		set_default_params();
-	}
-	if(w==b->def && b->type==ICBOX) {
-		set_default_ics();
-	}
-	/* now for the "scrolling" */
-	if(w==b->up) {
-		box_list_scroll(b,1);
-	}
-	if(w==b->pgup) {
-		box_list_scroll(b,b->nwin);
-	}
-	if(w==b->dn) {
-		box_list_scroll(b,-1);
-	}
-	if(w==b->pgdn) {
-		box_list_scroll(b,-b->nwin);
-	}
-	for(i=0;i<n;i++) {
-		if(w==b->we[i]) {
-			XSetInputFocus(display,w,RevertToParent,CurrentTime);
-			check_box_cursor();
-			HotBoxItem=i;
-			HotBox=b;
-			draw_editable(w,b->value[i+b->n0],b->off[i+b->n0],b->pos[i+b->n0],b->mc);
-		}
-	}
-
-	if(b->type==ICBOX) {
-		for(i=0;i<b->nwin;i++) {
-			if(w==b->ck[i]) {
-				b->isck[i+b->n0]=1-b->isck[i+b->n0];
-				if(b->isck[i+b->n0]) {
-					XDrawString(display,w,small_gc,0,CURY_OFFs,"*",1);
-				} else {
-					XClearWindow(display,w);
-				}
-			}
-		}
-		if(w==b->xvt) {
-			set_up_xvt();
-		}
-		if(w==b->pp) {
-			set_up_pp();
-		}
-		if(w==b->arr) {
-			set_up_arry();
-		}
-	}
-}
-
-
-void box_list_scroll(BoxList *b, int i) {
-	int n0=b->n0;
-	int new_int;
-	int nw=b->nwin,n=b->n;
-	int nend;
-	if(n<=nw) {
-		return;  /* do nothing - there is nothing to do */
-	}
-	new_int =n0-i;
-	nend=new_int+nw;
-	if(new_int<0) {
-		new_int=0;
-	}
-	if(nend>n) {
-		new_int=n-nw;
-	}
-	b->n0=new_int;
-	switch(b->type) {
-	case PARAMBOX:
-		load_entire_box(b);
-		redraw_params();
-		reset_sliders();
-		break;
-	case BCBOX:
-		load_entire_box(b);
-		redraw_bcs();
-		break;
-	case ICBOX:
-		load_entire_box(b);
-		redraw_ics();
-		reset_sliders();
-		break;
-	case DELAYBOX:
-		load_entire_box(b);
-		redraw_delays();
-		break;
-	}
-}
-
-
-void box_buttons(Window w) {
-
-	if(ICBox.xuse) {
-		do_box_button(&ICBox,w);
-	}
-	if(BCBox.xuse) {
-		do_box_button(&BCBox,w);
-	}
-	if(DelayBox.xuse) {
-		do_box_button(&DelayBox,w);
-	}
-	if(ParamBox.xuse) {
-		do_box_button(&ParamBox,w);
-	}
-}
-
-
-void box_keypress(XEvent ev, int *used) {
-	if(ICBox.xuse) {
-		do_box_key(&ICBox,ev,used);
-		if(*used) {
-			return;
-		}
-	}
-	if(BCBox.xuse) {
-		do_box_key(&BCBox,ev,used);
-		if(*used) {
-			return;
-		}
-	}
-	if(DelayBox.xuse) {
-		do_box_key(&DelayBox,ev,used);
-		if(*used) {
-			return;
-		}
-	}
-	if(ParamBox.xuse) {
-		do_box_key(&ParamBox,ev,used);
-		if(*used) {
-			return;
-		}
-	}
-}
-
-
-
-void do_box_key(BoxList *b, XEvent ev, int *used) {
-	Window w=ev.xkey.window;
-	char ch;
-	Window focus;
-	int rev,n=b->nwin,i,j,flag;
-	*used=0;
-	if(b->xuse==0) {
-		return;
-	}
-	for(i=0;i<n;i++) {
-		if(b->we[i]==w) {
-			XGetInputFocus(display,&focus,&rev);
-			if(w==focus) {
-				*used=1;
-				ch=get_key_press(&ev);
-				flag=edit_bitem(b,i,ch);
-				if(flag==EDIT_NEXT && n>1) {
-					j=i+1;
-					if(j==n) {
-						j=0;
-					}
-					XSetInputFocus(display,b->we[j],RevertToParent,CurrentTime);
-					set_value_from_box(b,i);
-
-					HotBoxItem=j;
-					draw_editable(b->we[i],b->value[i+b->n0],
-							b->off[i+b->n0],b->pos[i+b->n0],b->mc);
-					draw_editable(b->we[j],b->value[j+b->n0],
-							b->off[j+b->n0],b->pos[j+b->n0],b->mc);
-					if(b->type==PARAMBOX || b->type==ICBOX) {
-						reset_sliders();
-					}
-				}
-				if(flag==EDIT_DONE) {
-					HotBoxItem=-1;
-					XSetInputFocus(display,main_win,RevertToParent,CurrentTime);
-					load_entire_box(b);
-				}
-				if(flag==EDIT_ESC) {
-					HotBoxItem=-1;
-					XSetInputFocus(display,main_win,RevertToParent,CurrentTime);
-				}
-			}
-		}
-	}
-}
-
-
-void man_ic(void) {
-	int done,index=0;
-	double z;
-	char name[XPP_MAX_NAME],junk[XPP_MAX_NAME];
-	while(1) {
-		sprintf(name,"%s :",uvar_names[index]);
-		z=last_ic[index];
-		done=new_float(name,&z);
-		if(done==0) {
-			last_ic[index]=z;
-			sprintf(junk,"%.16g",z);
-			set_edit_params(&ICBox,index,junk);
-			draw_one_box(ICBox,index);
-			index++;
-			if(index>=NODE+NMarkov) {
-				return;
-			}
-		}
-		if(done==-1) {
-			return;
-		}
-	}
-}
-
-
-void new_parameter(void) {
-	int done,index;
-	double z;
-	char name[XPP_MAX_NAME],value[XPP_MAX_NAME],junk[XPP_MAX_NAME];
-	while(1) {
-		name[0]=0;
-		done=new_string("Parameter:",name);
-		if(strlen(name)==0 || done==0) {
-			redo_stuff();
-			return;
-		}
-		if(strncasecmp(name,"DEFAULT",7  )==0) {
-			set_default_params();
-			continue;
-		}
-
-		if(strncasecmp(name,"!LOAD", 5 )==0) {
-			io_parameter_file(name,READEM);
-			continue;
-		}
-		if(strncasecmp(name,"!SAVE", 5 )==0) {
-			io_parameter_file(name,WRITEM);
-			continue;
-		} else {
-			index=find_user_name(PARAMBOX,name);
-			if(index>=0) {
-				get_val(upar_names[index],&z);
-				sprintf(value,"%s :",name);
-				done=new_float(value,&z);
-				if(done==0) {
-					set_val(upar_names[index],z);
-					sprintf(junk,"%.16g",z);
-					set_edit_params(&ParamBox,index,junk);
-					draw_one_box(ParamBox,index);
-					reset_sliders();
-				}
-				if(done==-1) {
-					redo_stuff();
-					return;
-				}
-			}
-		}
-	}
-}
-
-
-void redo_stuff(void) {
-	evaluate_derived();
-	re_evaluate_kernels();
-	redo_all_fun_tables();
-	evaluate_derived();
-}
-
-
-void set_default_ics(void) {
+static void set_up_pp(void) {
 	int i;
-	for(i=0;i<NODE+NMarkov;i++) {
-		last_ic[i]=default_ic[i];
+	int plot_list[3],n=0;
+
+	for(i=0;i<ICBox.n;i++) {
+		if(ICBox.isck[i]) {
+			if(n<3) {
+				plot_list[n]=i+1;
+				n++;
+			}
+			ICBox.isck[i]=0;
+		}
 	}
-	redraw_ics();
+	for(i=0;i<ICBox.nwin;i++) {
+		XClearWindow(display,ICBox.ck[i]);
+	}
+	if(n>1) {
+		graph_all(plot_list,n,1);
+	}
 }
 
 
-
-void set_default_params(void) {
+static void set_up_xvt(void) {
 	int i;
-	char junk[XPP_MAX_NAME];
-	for(i=0;i<NUPAR;i++) {
-		set_val(upar_names[i],default_val[i]);
-		sprintf(junk,"%.16g",default_val[i]);
-		set_edit_params(&ParamBox,i,junk);
-	}
-	redraw_params();
-	re_evaluate_kernels();
-	redo_all_fun_tables();
-}
-
-
-/* cursor position in letters to the left */
-/* first character of string is off */
-void draw_editable(Window win, char *string, int off, int cursor, int mc) {
-	int l=strlen(string)-off,rev,cp;
-	Window focus;
-	if(l>mc) {
-		l=mc;
-	}
-	XClearWindow(display,win);
-	XDrawString(display,win,small_gc,0,CURY_OFF,string+off,l);
-	XGetInputFocus(display,&focus,&rev);
-	if(focus==win) {
-		cp=DCURXs*(cursor-off); /* must be fixed */
-		put_edit_cursor(win,cp);
-	}
-}
-
-
-void put_edit_cursor(Window w, int pos) {
-	int x1=pos;
-	int x2=x1+1;
-	XDrawLine(display,w,small_gc,x1,1,x1,DCURYs-1);
-	XDrawLine(display,w,small_gc,x2,1,x2,DCURYs-1);
-}
-
-
-int edit_bitem(BoxList *b, int i, int ch) {
-	Window win=b->we[i];
-	int i0=i+b->n0;
-	char *string=b->value[i0];
-	int off=b->off[i0];
-	int pos=b->pos[i0];
-	int mc=b->mc;
-	int l=strlen(string),wpos=pos-off;
-	switch(ch) {
-	case LEFT:
-		if(pos>0) {
-			pos--;
-			wpos--;
-			if(wpos<0) {
-				off=off-4;
-				if(off<0) {
-					off=0;
-				}
-				wpos=pos-off;
+	int plot_list[10];
+	int n=0;
+	for(i=0;i<ICBox.n;i++) {
+		if(ICBox.isck[i]) {
+			if(n<10) {
+				plot_list[n]=i+1;
+				n++;
 			}
-		} else {
-			ping();
+			ICBox.isck[i]=0;
 		}
-		break;
-	case RIGHT:
-		if(pos<l) {
-			pos++;
-			wpos++;
-			if(wpos>mc) {
-				off=off+4;
-				if(off+mc>l) {
-					off=l-mc;
-				}
-				wpos=pos-off;
-			}
-		} else {
-			ping();
-		}
-		break;
-	case HOME:
-		pos=0;
-		wpos=0;
-		break;
-	case END:
-		pos=l;
-		wpos=mc;
-		break;
-	case BADKEY:
-		return 0;
-	case DOWN: box_list_scroll(b,-1);
-		return 0;
-	case UP:
-		box_list_scroll(b,1);
-		return 0;
-	case PGUP:
-		box_list_scroll(b,b->nwin);
-		return 0;
-	case PGDN:
-		box_list_scroll(b,-b->nwin);
-		return 0;    /* junk key  */
-	case ESC:
-		return EDIT_ESC;
-	case FINE:
-		return EDIT_NEXT;
-	case BKSP:
-	case DEL:
-		if(pos>0) {
-			memmov(&string[pos-1],&string[pos],l-pos+1);
-			pos--;
-			wpos--;
-			if(wpos<0) {
-				off=off-4;
-				if(off<0) {
-					off=0;
-				}
-				wpos=pos-off;
-			}
-			l--;
-		} else {
-			ping();
-		}
-		break;
-	case TAB:
-		return EDIT_DONE;
-	default:
-		if( (ch>=' ') && (ch <= '~')) {
-			if(strlen(string)>=256) {
-				ping();
-			} else {
-				movmem(&string[pos+1],&string[pos],l-pos+1);
-				string[pos]=ch;
-				pos=pos+1;
-				wpos++;
-				l++;
-				if(wpos>mc) {
-					off=off+4;
-					if(off+mc>l) {
-						off=l-mc;
-					}
-					wpos=pos-off;
-				}
-			}
-		}
-		break;
 	}
-	/* all done lets save everything */
-	off=pos-wpos;
-
-	b->off[i0]=off;
-	b->pos[i0]=pos;
-	draw_editable(win,string,off,pos,mc);
-	return 0;
-}
-
-
-void add_edit_float(BoxList *b, int i, double z) {
-	char junk[XPP_MAX_NAME];
-	sprintf(junk,"%.16g",z);
-	add_editval(b,i,junk);
-}
-
-
-void set_edit_params(BoxList *b, int i, char *string) {
-	int l=strlen(string);
-	strcpy(b->value[i],string);
-	b->off[i]=0;
-	if(l>b->mc) {
-		b->pos[i]=b->mc;
-	} else {
-		b->pos[i]=l;
+	for(i=0;i<ICBox.nwin;i++) {
+		XClearWindow(display,ICBox.ck[i]);
+	}
+	if(n>0) {
+		graph_all(plot_list,n,0);
 	}
 }
 
 
-void add_editval(BoxList *b, int i, char *string) {
-	int n0=b->n0,n1=b->n0+b->nwin-1;
-	int iw;
-	set_edit_params(b,i,string);
-	if(i<n0 || i>n1) {
-		return;
-	}
-	iw=i-n0;
-	if(b->xuse) {
-		draw_editable(b->we[iw],string,b->off[i],b->pos[i],b->mc);
-	}
-}
-
-
-void check_box_cursor(void) {
-	int n0;
-	if(HotBoxItem<0 || HotBox->xuse==0) {
-		return;
-	}
-	n0=HotBox->n0;
-	draw_editable(HotBox->we[HotBoxItem],HotBox->value[HotBoxItem+n0],
-			HotBox->off[HotBoxItem],HotBox->pos[HotBoxItem],
-			HotBox->mc);
-	HotBoxItem=-1;
-}
-
-
-void prt_focus(void) {
-	Window focus;
-	int rev;
-	XGetInputFocus(display,&focus,&rev);
-	plintf(" focus=%d\n",focus);
-}
-
-
-
-int to_float(char *s, double *z) {
-	int flag;
-	*z=0.0;
-	if(s[0]=='%') {
-		flag=do_calc(&s[1],z);
-		if(flag==-1) {
-			return -1;
-		}
-		return 0;
-	}
-	*z=atof(s);
-	return(0);
-}
-
-
-void set_value_from_box(BoxList *b, int i) {
+static void set_value_from_box(BoxList *b, int i) {
 	char *s;
 	double z;
 	s=b->value[i];
@@ -2562,18 +2481,34 @@ void set_value_from_box(BoxList *b, int i) {
 }
 
 
-void load_entire_box(BoxList *b) {
-	int i,n=b->n;
+/* this is rather lazy and slow but hey it works */
+static void stringintersect(char *target, char *sother) {
+	int m = strlen(target);
+	int n = strlen(sother);
+	if(n<m) {
+		m = n;
+	}
+	int j=0;
+	while (j<m)	{
+		if(target[j] != sother[j])	{
+			break;
+		}
+		j++;
+	}
+	target[j] = '\0';
+}
 
-	for(i=0;i<n;i++) {
-		set_value_from_box(b,i);
+
+static int to_float(char *s, double *z) {
+	int flag;
+	*z=0.0;
+	if(s[0]=='%') {
+		flag=do_calc(&s[1],z);
+		if(flag==-1) {
+			return -1;
+		}
+		return 0;
 	}
-	if(b->type==PARAMBOX) {
-		re_evaluate_kernels();
-		redo_all_fun_tables();
-		reset_sliders();
-	}
-	if(b->type==DELAYBOX) {
-		do_init_delay(DELAY);
-	}
+	*z=atof(s);
+	return(0);
 }

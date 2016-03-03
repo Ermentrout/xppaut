@@ -949,7 +949,7 @@ void do_expose(XEvent ev) {
 	RedrawMessageBox(ev.xany.window);
 	draw_eq_list(ev.xany.window);
 	draw_eq_box(ev.xany.window);
-	do_box_expose(ev.xany.window);
+	expose_box(ev.xany.window);
 	expose_slides(ev.xany.window);
 	menu_expose(ev.xany.window);
 #ifdef AUTO
