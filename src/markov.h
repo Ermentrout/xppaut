@@ -39,7 +39,6 @@ void update_markov(double *x, double t, double dt);
 double new_state(double old, int index, double dt);
 void  make_gill_nu(double *nu, int n, int m, double *v);
 void  one_gill_step(int meth, int nrxn, int *rxn, double *v);
-void  do_stochast_com(int i);
 void  mean_back(void);
 void  variance_back(void);
 void  compute_em(void);
