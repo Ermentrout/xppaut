@@ -2,6 +2,7 @@
 #define XPPAUT_ADJ2_H
 
 #include <stdio.h>
+#include "xpplim.h"
 
 /* --- Types ---*/
 typedef struct {
@@ -12,18 +13,18 @@ typedef struct {
 } MY_TRANS;
 
 /* --- Data --- */
+extern char *coup_string[MAXODE];
 extern int AdjRange;
 extern int FOUR_HERE;
+extern MY_TRANS my_trans;
 
 /* --- Functions --- */
 void init_trans(void);
-void dump_transpose_info(FILE *fp, int f);
 int do_transpose(void);
 void alloc_h_stuff(void);
 void data_back(void);
 void make_adj_com(int com);
 void new_h_fun(int silent);
-void dump_h_stuff(FILE *fp, int f);
 void new_adjoint(void);
 void do_liapunov(void);
 void alloc_liap(int n);

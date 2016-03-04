@@ -31,7 +31,6 @@ void change_view_com(int com);
 void check_windows(void);
 void default_window(void);
 void draw_freeze(Window w);
-void dump_ps( int i);
 void freeze_com(int c);
 void get_3d_par_com(void);
 void get_max(int index, double *vmin, double *vmax);

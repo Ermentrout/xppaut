@@ -256,7 +256,6 @@ extern FILE *logfile;
 /* --- Functions --- */
 void add_intern_set(char *name, char *does);
 void check_for_xpprc(void);
-void dump_torus(FILE *fp, int f);
 void extract_action(char *ptr);
 void extract_internset(int j);
 void load_eqn(void);

@@ -101,16 +101,6 @@ void init_shoot_range(char *s) {
 	shoot_range.movie=0;
 }
 
-
-void dump_shoot_range(FILE *fp, int f) {
-	io_string(shoot_range.item,11,fp,f);
-	io_int(&shoot_range.side,fp,f,"BVP side");
-	io_int(&shoot_range.cycle,fp,f,"color cycle flag 1=on");
-	io_int(&shoot_range.steps,fp,f,"BVP range steps");
-	io_double(&shoot_range.plow,fp,f,"BVP range low");
-	io_double(&shoot_range.phigh,fp,f,"BVP range high");
-}
-
 void bad_shoot(int iret) {
 	switch(iret) {
 	case NOCHANGE:

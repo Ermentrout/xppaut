@@ -333,6 +333,27 @@ void ps_rel(int x, int y) {
 	fprintf(psfile,"%d %d rmoveto \n",x,y);
 }
 
+
+void ps_write_pars(FILE *fp) {
+	int div,rem,i,j;
+	double z;
+	fprintf(fp,"\n %%%% %s \n %%%% Parameters ...\n",this_file);
+	div=NUPAR/4;
+	rem=NUPAR%4;
+	for(j=0;j<div;j++) {
+		for(i=0;i<4;i++) {
+			get_val(upar_names[i+4*j],&z);
+			fprintf(fp,"%%%% %s=%.16g   ",upar_names[i+4*j],z);
+		}
+		fprintf(fp,"\n");
+	}
+	for(i=0;i<rem;i++) {
+		get_val(upar_names[i+4*div],&z);
+		fprintf(fp,"%%%% %s=%.16g   ",upar_names[i+4*div],z);
+	}
+	fprintf(fp,"\n");
+}
+
 void special_put_text_ps(int x, int y, char *str, int size) {
 	int i=0,j=0,type=1;
 	int cf=0;

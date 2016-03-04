@@ -1,6 +1,8 @@
 #ifndef XPPAUT_MY_PS_H
 #define XPPAUT_MY_PS_H
 
+#include <stdio.h>
+
 /* --- Data --- */
 extern char PS_FONT[100];
 
@@ -35,6 +37,7 @@ void ps_fnt(int cf, int scale);
 void ps_show(char *str, int type);
 void ps_abs(int x, int y);
 void ps_rel(int x, int y);
+void ps_write_pars(FILE *fp);
 void special_put_text_ps(int x, int y, char *str, int size);
 void fancy_ps_text(int x, int y, char *str, int size, int font);
 void ps_text(int x, int y, char *str);

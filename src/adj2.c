@@ -28,7 +28,6 @@
 #include "pop_list.h"
 #include "storage.h"
 #include "strutil.h"
-#include "xpplim.h"
 
 /* --- Forward Declarations --- */
 static int create_transpose(void);
@@ -43,7 +42,6 @@ static int hrw_liapunov(double *liap, int batch, double eps);
 
 /* --- Data --- */
 int AdjRange=0;
-MY_TRANS my_trans;
 static float **my_adj;
 static int adj_len;
 static float **my_h;
@@ -53,7 +51,9 @@ static int LIAP_N,LIAP_I;
 static double ADJ_EPS=1.e-8,ADJ_ERR=1.e-3;
 static int ADJ_MAXIT=20,ADJ_HERE=0,H_HERE=0,h_len,HODD_EV=0;
 static int *coup_fun[MAXODE];
-static char *coup_string[MAXODE];
+
+char *coup_string[MAXODE];
+MY_TRANS my_trans;
 
 /* --- Functions --- */
 void init_trans(void) {
@@ -65,23 +65,6 @@ void init_trans(void) {
 	my_trans.colskip=1;
 	my_trans.row0=1;
 	my_trans.col0=2;
-}
-
-
-void dump_transpose_info(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
-	if(f==READEM) {
-		fgets(bob,255,fp);
-	} else {
-		fprintf(fp,"# Transpose variables etc\n");
-	}
-
-	io_string(my_trans.firstcol,11,fp,f);
-	io_int(&my_trans.ncol,fp,f,"n columns");
-	io_int(&my_trans.nrow,fp,f,"n rows");
-	io_int(&my_trans.rowskip,fp,f,"row skip");
-	io_int(&my_trans.colskip,fp,f,"col skip");
-	io_int(&my_trans.row0,fp,f,"row 0");
 }
 
 
@@ -286,21 +269,6 @@ void new_h_fun(int silent) {
 		h_back();
 	}
 	ping();
-}
-
-
-void dump_h_stuff(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
-	int i;
-
-	if(f==READEM) {
-		fgets(bob,255,fp);
-	}else {
-		fprintf(fp,"# Coupling stuff for H funs\n");
-	}
-	for(i=0;i<NODE ;i++) {
-		io_string(coup_string[i],79,fp,f);
-	}
 }
 
 

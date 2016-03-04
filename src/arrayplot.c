@@ -54,21 +54,8 @@
 #include "many_pops.h"
 #include "pop_list.h"
 #include "scrngif.h"
-#include "xpplim.h"
 #include "bitmap/array.bitmap"
 
-
-/* --- Types --- */
-typedef struct {
-	Window base,wclose,wedit,wprint,wstyle,wscale,wmax,wmin,wplot,wredraw,wtime,wgif,wrange,wfit;
-	int index0,indexn,alive,nacross,ndown,plotdef;
-	int height,width,ploth,plotw;
-	int nstart,nskip,ncskip;
-	char name[20];
-	double tstart,tend,zmin,zmax,dt;
-	char xtitle[XPP_MAX_NAME],ytitle[XPP_MAX_NAME],filename[XPP_MAX_NAME],bottom[XPP_MAX_NAME];
-	int type;
-} APLOT;
 
 /* --- Forward Declarations --- */
 static void apbutton(Window w);
@@ -97,9 +84,9 @@ static char aplot_range_stem[XPP_MAX_NAME]="rangearray";
 static int aplot_still=1,aplot_tag=0;
 static int first_aplot_press;
 static int plot3d_auto_redraw=0;
-static APLOT aplot;
 static FILE *ap_fp;
 static GC aplot_gc;
+APLOT aplot;
 
 
 /* --- Functions --- */
@@ -165,24 +152,6 @@ void draw_one_array_plot(char *bob) {
 	sprintf(filename,"%s.%d.gif",aplot_range_stem,aplot_range_count);
 	gif_aplot_all(filename,aplot_still);
 	aplot_range_count++;
-}
-
-
-void dump_aplot(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
-
-	if(f==READEM) {
-		fgets(bob,255,fp);
-	} else {
-		fprintf(fp,"# Array plot stuff\n");
-		io_string(aplot.name,11,fp,f);
-		io_int(&aplot.nacross ,fp,f,"NCols");
-		io_int(&aplot.nstart ,fp,f,"Row 1");
-		io_int(&aplot.ndown ,fp,f,"NRows");
-		io_int(&aplot.nskip ,fp,f,"RowSkip");
-		io_double(&aplot.zmin,fp,f,"Zmin");
-		io_double(&aplot.zmax,fp,f,"Zmax");
-	}
 }
 
 

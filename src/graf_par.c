@@ -279,26 +279,6 @@ void draw_freeze(Window w) {
 }
 
 
-void dump_ps(int i) {
-	char filename[XPP_MAX_NAME];
-	if(i<0) {
-		sprintf(filename,"%s%s.%s",this_file,this_internset,PlotFormat);
-	} else {
-		/*   padnum(s,i,4); */
-		sprintf(filename,"%s%s_%04d.%s",this_file,this_internset,i,PlotFormat);
-	}
-	if(strcmp(PlotFormat,"ps")==0) {
-		if(ps_init(filename,PS_Color)) {
-			ps_restore();
-		}
-	} else if(strcmp(PlotFormat,"svg")==0) {
-		if(svg_init(filename,PS_Color)) {
-			svg_restore();
-		}
-	}
-}
-
-
 void freeze_com(int c) {
 	switch(c) {
 	case 0:

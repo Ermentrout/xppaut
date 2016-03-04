@@ -166,24 +166,6 @@ void check_for_xpprc(void) {
 }
 
 
-void dump_torus(FILE *fp, int f) {
-	int i;
-	char bob[XPP_MAX_NAME];
-	if(f==READEM) {
-		fgets(bob,255,fp);
-	} else {
-		fprintf(fp,"# Torus information \n");
-	}
-	io_int(&TORUS,fp,f," Torus flag 1=ON");
-	io_double(&TOR_PERIOD,fp,f,"Torus period");
-	if(TORUS) {
-		for(i=0;i<NEQ;i++) {
-			io_int(&itor[i],fp,f,uvar_names[i]);
-		}
-	}
-}
-
-
 void extract_action(char *ptr) {
 	char name[XPP_MAX_NAME],value[XPP_MAX_NAME];
 	char tmp[2048];

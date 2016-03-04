@@ -10,16 +10,25 @@
 
 /* --- Types --- */
 typedef struct {
+	char item[30];
+	int steps,shoot,col,movie,mc;
+	double plow,phigh;
+} EQ_RANGE;
+
+
+typedef struct {
 	char item[30],item2[30];
 	int steps,steps2,reset,oldic,index,index2,cycle,type,type2,movie;
 	double plow,phigh,plow2,phigh2;
 	int rtype;
 } RANGE;
 
+
 typedef struct {
 	int nvec,node;
 	double *x;
 } XPPVEC;
+
 
 /* --- Data --- */
 extern double LastTime;
@@ -33,6 +42,7 @@ extern int RANGE_FLAG;
 extern int SuppressBounds;
 extern int SuppressOut;
 
+extern EQ_RANGE eq_range;
 extern RANGE range;
 extern XPPVEC xpv;
 
@@ -44,7 +54,6 @@ void cont_integ(void);
 void do_init_data(int com);
 int do_auto_range_go(void);
 int do_range(double *x, int flag);
-void dump_range(FILE *fp, int f);
 void export_data(FILE *fp);
 int extract_ic_data(char *big);
 void find_equilib_com(int com);

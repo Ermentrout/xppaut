@@ -24,15 +24,111 @@
 #include "markov.h"
 #include "numerics.h"
 #include "parserslow.h"
+#include "pp_shoot.h"
 #include "storage.h"
 #include "struct.h"
 #include "volterra2.h"
 #include "xpplim.h"
 
-int set_type=0;
+/* --- Forward declarations --- */
+static void do_info(FILE *fp);
+static void dump_aplot(FILE *fp, int f);
+static void dump_eqn(FILE *fp);
+static void dump_h_stuff(FILE *fp, int f);
+static void dump_range(FILE *fp, int f);
+static void dump_shoot_range(FILE *fp, int f);
+static void dump_torus(FILE *fp, int f);
+static void dump_transpose_info(FILE *fp, int f);
+static void io_double(double *z, FILE *fp, int f, char *ss);
+static void io_exprs(int f, FILE *fp);
+static void io_int(int *i, FILE *fp, int f, char *ss);
+static void io_graph(int f, FILE *fp);
+static void io_numerics(int f, FILE *fp);
+static void io_parameters(int f, FILE *fp);
+static void io_string(char *s, int len, FILE *fp, int f);
+
+/* --- Data --- */
+static int set_type=0;
 
 /* --- Functions --- */
-double atof();
+void do_lunch(int f) {
+	int ne,np,ok,temp;
+	char bob[XPP_MAX_NAME];
+	FILE *fp;
+	time_t ttt;
+	char filename[XPP_MAX_NAME];
+	sprintf(filename,"%s.set",this_file);
+	if(f==READEM) {
+		ping();
+		if(!file_selector("Load SET File",filename,"*.set")) {
+			return;
+		}
+		fp=fopen(filename,"r");
+		if(fp==NULL) {
+			err_msg("Cannot open file");
+			return;
+		}
+		fgets(bob,255,fp);
+		if(bob[0]=='#') {
+			set_type=1;
+			io_int(&ne,fp,f," ");
+		} else {
+			ne=atoi(bob);
+			set_type=0;
+		}
+		/* io_int(&ne,fp,f); */
+		io_int(&np,fp,f," ");
+		if(ne!=NEQ || np!=NUPAR) {
+			err_msg("Incompatible parameters");
+			fclose(fp);
+			return;
+		}
+		io_numerics(f,fp);
+		if(METHOD==VOLTERRA) {
+			io_int(&temp,fp,f," ");
+			allocate_volterra(temp,1);
+			MyStart=1;
+		}
+		chk_delay();
+		io_exprs(f,fp);
+		io_graph(f,fp);
+		if(set_type==1) {
+			dump_transpose_info(fp,f);
+			dump_h_stuff(fp,f);
+			dump_aplot(fp,f);
+			dump_torus(fp,f);
+			dump_range(fp,f);
+		}
+		fclose(fp);
+		return;
+	}
+	if(!file_selector("Save SET File",filename,"*.set")) {
+		return;
+	}
+	open_write_file(&fp,filename,&ok);
+	if(!ok) {
+		return;
+	}
+	redraw_params();
+	ttt=time(0);
+	fprintf(fp,"## Set file for %s on %s",this_file,ctime(&ttt));
+	io_int(&NEQ,fp,f,"Number of equations and auxiliaries");
+	io_int(&NUPAR,fp,f,"Number of parameters");
+	io_numerics(f,fp);
+	if(METHOD==VOLTERRA) {
+		io_int(&MaxPoints,fp,f,"Max points for volterra");
+	}
+	io_exprs(f,fp);
+	io_graph(f,fp);
+	dump_transpose_info(fp,f);
+	dump_h_stuff(fp,f);
+	dump_aplot(fp,f);
+	dump_torus(fp,f);
+	dump_range(fp,f);
+	dump_eqn(fp);
+	fclose(fp);
+}
+
 
 void file_inf(void) {
 	int ok;
@@ -53,28 +149,132 @@ void file_inf(void) {
 }
 
 
-void ps_write_pars(FILE *fp) {
-	int div,rem,i,j;
-	double z;
-	fprintf(fp,"\n %%%% %s \n %%%% Parameters ...\n",this_file);
-	div=NUPAR/4;
-	rem=NUPAR%4;
-	for(j=0;j<div;j++) {
-		for(i=0;i<4;i++) {
-			get_val(upar_names[i+4*j],&z);
-			fprintf(fp,"%%%% %s=%.16g   ",upar_names[i+4*j],z);
+void io_ic_file(char *fn,int flag) {
+	char fnx[XPP_MAX_NAME],c;
+	int i,j=0;
+	int chk=0;
+	FILE *fp;
+	char msg[XPP_MAX_NAME];
+	for(i=0;i<strlen(fn);i++) {
+		c=fn[i];
+		if(c!=' ') {
+			fnx[j]=c;
+			j++;
 		}
-		fprintf(fp,"\n");
 	}
-	for(i=0;i<rem;i++) {
-		get_val(upar_names[i+4*div],&z);
-		fprintf(fp,"%%%% %s=%.16g   ",upar_names[i+4*div],z);
+	fnx[j]=0;
+	if(flag==READEM) {
+		fp=fopen(fnx,"r");
+		if(fp==NULL) {
+			err_msg("Cannot open file");
+			return;
+		}
+		for(i=0;i<NODE;i++) {
+			chk=fscanf(fp,"%lg",&last_ic[i]);
+			if(chk!=1) {
+				sprintf(msg,"Expected %d initial conditions but only found %d in %s.",NODE,i,fn);
+				err_msg(msg);
+				return;
+			}
+		}
+		while (chk != EOF) {
+			chk=fscanf(fp,"%lg",&last_ic[i]);
+			if(chk!=EOF) {
+				sprintf(msg,"Found more than %d initial conditions in %s.",NODE,fn);
+				err_msg(msg);
+				return;
+			}
+		}
+		fclose(fp);
 	}
-	fprintf(fp,"\n");
 }
 
 
-void do_info(FILE *fp) {
+void io_parameter_file(char *fn,int flag) {
+	char fnx[XPP_MAX_NAME],c;
+	int i,j=0;
+	int np;
+	FILE *fp;
+	time_t ttt;
+	for(i=6;i<strlen(fn);i++) {
+		c=fn[i];
+		if(c!=' ') {
+			fnx[j]=c;
+			j++;
+		}
+	}
+	fnx[j]=0;
+	if(flag==READEM) {
+		fp=fopen(fnx,"r");
+		if(fp==NULL) {
+			err_msg("Cannot open file");
+			return;
+		}
+		io_int(&np,fp,flag," ");
+		if(np!=NUPAR) {
+			printf("%d",np);
+			printf("%d",NUPAR);
+			err_msg("Incompatible parameters");
+			fclose(fp);
+			return;
+		}
+		io_parameters(flag,fp);
+		fclose(fp);
+		redo_stuff();
+		return;
+	}
+	fp=fopen(fnx,"w");
+	if(fp==NULL) {
+		err_msg("Cannot open file");
+		return;
+	}
+	io_int(&NUPAR,fp,flag,"Number params");
+	io_parameters(flag,fp);
+	ttt=time(0);
+	fprintf(fp,"\n\nFile:%s\n%s",this_file, ctime(&ttt));
+	fclose(fp);
+}
+
+
+int read_lunch(FILE *fp) {
+	int f=READEM,ne,np,temp;
+	char bob[XPP_MAX_NAME];
+
+	fgets(bob,255,fp);
+	if(bob[0]=='#') {
+		set_type=1;
+		io_int(&ne,fp,f," ");
+	} else {
+		ne=atoi(bob);
+		set_type=0;
+	}
+	/* io_int(&ne,fp,f); */
+	io_int(&np,fp,f," ");
+	if(ne!=NEQ || np!=NUPAR) {
+		plintf("Set file has incompatible parameters\n");
+		return 0;
+	}
+	io_numerics(f,fp);
+	if(METHOD==VOLTERRA) {
+		io_int(&temp,fp,f," ");
+		allocate_volterra(temp,1);
+		MyStart=1;
+	}
+	chk_delay();
+	io_exprs(f,fp);
+	io_graph(f,fp);
+	if(set_type==1) {
+		dump_transpose_info(fp,f);
+		dump_h_stuff(fp,f);
+		dump_aplot(fp,f);
+		dump_torus(fp,f);
+		dump_range(fp,f);
+	}
+	return 1;
+}
+
+/* --- Static functions --- */
+static void do_info(FILE *fp) {
 	int i;
 	static char *method[]={"Discrete","Euler","Mod. Euler",
 						   "Runge-Kutta","Adams","Gear","Volterra","BackEul","QualRK",
@@ -156,125 +356,25 @@ void do_info(FILE *fp) {
 }
 
 
-int read_lunch(FILE *fp) {
-	int f=READEM,ne,np,temp;
-	char bob[XPP_MAX_NAME];
+static void dump_aplot(FILE *fp, int f) {
+	char bob[MAX_STRING_LENGTH];
 
-	fgets(bob,255,fp);
-	if(bob[0]=='#') {
-		set_type=1;
-		io_int(&ne,fp,f," ");
-	} else {
-		ne=atoi(bob);
-		set_type=0;
-	}
-	/* io_int(&ne,fp,f); */
-	io_int(&np,fp,f," ");
-	if(ne!=NEQ || np!=NUPAR) {
-		plintf("Set file has incompatible parameters\n");
-		return 0;
-	}
-	io_numerics(f,fp);
-	if(METHOD==VOLTERRA) {
-		io_int(&temp,fp,f," ");
-		allocate_volterra(temp,1);
-		MyStart=1;
-	}
-	chk_delay();
-	io_exprs(f,fp);
-	io_graph(f,fp);
-	if(set_type==1) {
-		dump_transpose_info(fp,f);
-		dump_h_stuff(fp,f);
-		dump_aplot(fp,f);
-		dump_torus(fp,f);
-		dump_range(fp,f);
-	}
-	return 1;
-}
-
-
-/* f=1 to read and 0 to write */
-void do_lunch(int f) {
-	int ne,np,ok,temp;
-	char bob[XPP_MAX_NAME];
-	FILE *fp;
-	time_t ttt;
-	char filename[XPP_MAX_NAME];
-	sprintf(filename,"%s.set",this_file);
 	if(f==READEM) {
-		ping();
-		if(!file_selector("Load SET File",filename,"*.set")) {
-			return;
-		}
-		fp=fopen(filename,"r");
-		if(fp==NULL) {
-			err_msg("Cannot open file");
-			return;
-		}
 		fgets(bob,255,fp);
-		if(bob[0]=='#') {
-			set_type=1;
-			io_int(&ne,fp,f," ");
-		} else {
-			ne=atoi(bob);
-			set_type=0;
-		}
-		/* io_int(&ne,fp,f); */
-		io_int(&np,fp,f," ");
-		if(ne!=NEQ || np!=NUPAR) {
-			err_msg("Incompatible parameters");
-			fclose(fp);
-			return;
-		}
-		io_numerics(f,fp);
-		if(METHOD==VOLTERRA) {
-			io_int(&temp,fp,f," ");
-			allocate_volterra(temp,1);
-			MyStart=1;
-		}
-		chk_delay();
-		io_exprs(f,fp);
-		io_graph(f,fp);
-		if(set_type==1) {
-			dump_transpose_info(fp,f);
-			dump_h_stuff(fp,f);
-			dump_aplot(fp,f);
-			dump_torus(fp,f);
-			dump_range(fp,f);
-		}
-		fclose(fp);
-		return;
+	} else {
+		fprintf(fp,"# Array plot stuff\n");
+		io_string(aplot.name,11,fp,f);
+		io_int(&aplot.nacross ,fp,f,"NCols");
+		io_int(&aplot.nstart ,fp,f,"Row 1");
+		io_int(&aplot.ndown ,fp,f,"NRows");
+		io_int(&aplot.nskip ,fp,f,"RowSkip");
+		io_double(&aplot.zmin,fp,f,"Zmin");
+		io_double(&aplot.zmax,fp,f,"Zmax");
 	}
-	if(!file_selector("Save SET File",filename,"*.set")) {
-		return;
-	}
-	open_write_file(&fp,filename,&ok);
-	if(!ok) {
-		return;
-	}
-	redraw_params();
-	ttt=time(0);
-	fprintf(fp,"## Set file for %s on %s",this_file,ctime(&ttt));
-	io_int(&NEQ,fp,f,"Number of equations and auxiliaries");
-	io_int(&NUPAR,fp,f,"Number of parameters");
-	io_numerics(f,fp);
-	if(METHOD==VOLTERRA) {
-		io_int(&MaxPoints,fp,f,"Max points for volterra");
-	}
-	io_exprs(f,fp);
-	io_graph(f,fp);
-	dump_transpose_info(fp,f);
-	dump_h_stuff(fp,f);
-	dump_aplot(fp,f);
-	dump_torus(fp,f);
-	dump_range(fp,f);
-	dump_eqn(fp);
-	fclose(fp);
 }
 
 
-void dump_eqn(FILE *fp) {
+static void dump_eqn(FILE *fp) {
 	int i;
 	char fstr[15];
 	fprintf(fp,"RHS etc ...\n");
@@ -303,178 +403,109 @@ void dump_eqn(FILE *fp) {
 }
 
 
-void io_numerics(int f, FILE *fp) {
-	char *method[]={"Discrete","Euler","Mod. Euler",
-					"Runge-Kutta","Adams","Gear","Volterra","BackEul",
-					"Qual RK","Stiff","CVode","DorPrin5","DorPri8(3)"};
-	char *pmap[]={"Poincare None","Poincare Section","Poincare Max","Period"};
-	char temp[XPP_MAX_NAME];
-	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
-	if(f!=READEM) {
-		fprintf(fp,"# Numerical stuff\n");
-	}
-	io_int(&NJMP,fp,f," nout");
-	io_int(&NMESH,fp,f," nullcline mesh");
-	io_int(&METHOD,fp,f,method[METHOD]);
+/* f=1 to read and 0 to write */
+static void dump_h_stuff(FILE *fp, int f) {
+	char bob[MAX_STRING_LENGTH];
+	int i;
+
 	if(f==READEM) {
-		do_meth();
-		alloc_meth();
+		fgets(bob,255,fp);
+	}else {
+		fprintf(fp,"# Coupling stuff for H funs\n");
 	}
-	io_double(&TEND,fp,f,"total");
-	io_double(&DELTA_T,fp,f,"DeltaT");
-	io_double(&T0,fp,f,"T0");
-	io_double(&TRANS,fp,f,"Transient");
-	io_double(&BOUND,fp,f,"Bound");
-	io_double(&HMIN,fp,f,"DtMin");
-	io_double(&HMAX,fp,f,"DtMax");
-	io_double(&TOLER,fp,f,"Tolerance");
-	/* fix stuff concerning the tolerance */
+	for(i=0;i<NODE ;i++) {
+		io_string(coup_string[i],79,fp,f);
+	}
+}
+
+
+static void dump_range(FILE *fp, int f) {
+	char bob[XPP_MAX_NAME];
 	if(f==READEM) {
-		if(set_type==1) {
-			io_double(&ATOLER,fp,f,"Abs. Tolerance");
-		} else {
-			ATOLER=TOLER*10;
-		}
+		fgets(bob,255,fp);
 	} else {
-		io_double(&ATOLER,fp,f,"Abs. Tolerance");
+		fprintf(fp,"# Range information\n");
 	}
-	io_double(&DELAY,fp,f,"Max Delay");
-	io_int(&EVEC_ITER,fp,f,"Eigenvector iterates");
-	io_double(&EVEC_ERR,fp,f,"Eigenvector tolerance");
-	io_double(&NEWT_ERR,fp,f,"Newton tolerance");
-	io_double(&POIPLN,fp,f,"Poincare plane");
-	io_double(&BVP_TOL,fp,f,"Boundary value tolerance");
-	io_double(&BVP_EPS,fp,f,"Boundary value epsilon");
-	io_int(&BVP_MAXIT,fp,f,"Boundary value iterates");
-	io_int(&POIMAP,fp,f,pmap[POIMAP]);
-
-	io_int(&POIVAR,fp,f,"Poincare variable");
-	io_int(&POISGN,fp,f,"Poincare sign");
-	io_int(&SOS,fp,f,"Stop on Section");
-	io_int(&DelayFlag,fp,f,"Delay flag");
-	io_double(&MyTime,fp,f,"Current time");
-	io_double(&LastTime,fp,f,"Last Time");
-	io_int(&MyStart,fp,f,"MyStart");
-	io_int(&INFLAG,fp,f,"INFLAG");
-}
-
-
-void io_parameter_file(char *fn,int flag) {
-	char fnx[XPP_MAX_NAME],c;
-	int i,j=0;
-	int np;
-	FILE *fp;
-	time_t ttt;
-	for(i=6;i<strlen(fn);i++) {
-		c=fn[i];
-		if(c!=' ') {
-			fnx[j]=c;
-			j++;
-		}
-	}
-	fnx[j]=0;
-	if(flag==READEM) {
-		fp=fopen(fnx,"r");
-		if(fp==NULL) {
-			err_msg("Cannot open file");
-			return;
-		}
-		io_int(&np,fp,flag," ");
-		if(np!=NUPAR) {
-			printf("%d",np);
-			printf("%d",NUPAR);
-			err_msg("Incompatible parameters");
-			fclose(fp);
-			return;
-		}
-		io_parameters(flag,fp);
-		fclose(fp);
-		redo_stuff();
-		return;
-	}
-	fp=fopen(fnx,"w");
-	if(fp==NULL) {
-		err_msg("Cannot open file");
-		return;
-	}
-	io_int(&NUPAR,fp,flag,"Number params");
-	io_parameters(flag,fp);
-	ttt=time(0);
-	fprintf(fp,"\n\nFile:%s\n%s",this_file, ctime(&ttt));
-	fclose(fp);
-}
-
-
-void io_ic_file(char *fn,int flag) {
-	char fnx[XPP_MAX_NAME],c;
-	int i,j=0;
-	int chk=0;
-	FILE *fp;
-	char msg[XPP_MAX_NAME];
-	for(i=0;i<strlen(fn);i++) {
-		c=fn[i];
-		if(c!=' ') {
-			fnx[j]=c;
-			j++;
-		}
-	}
-	fnx[j]=0;
-	if(flag==READEM) {
-		fp=fopen(fnx,"r");
-		if(fp==NULL) {
-			err_msg("Cannot open file");
-			return;
-		}
-		for(i=0;i<NODE;i++) {
-			chk=fscanf(fp,"%lg",&last_ic[i]);
-			if(chk!=1) {
-				sprintf(msg,"Expected %d initial conditions but only found %d in %s.",NODE,i,fn);
-				err_msg(msg);
-				return;
-			}
-		}
-		while (chk != EOF) {
-			chk=fscanf(fp,"%lg",&last_ic[i]);
-			if(chk!=EOF) {
-				sprintf(msg,"Found more than %d initial conditions in %s.",NODE,fn);
-				err_msg(msg);
-				return;
-			}
-		}
-		fclose(fp);
+	io_string(eq_range.item,11,fp,f);
+	io_int(&eq_range.col,fp,f,"eq-range stab col");
+	io_int(&eq_range.shoot,fp,f,"shoot flag 1=on");
+	io_int(&eq_range.steps,fp,f,"eq-range steps");
+	io_double(&eq_range.plow,fp,f,"eq_range low");
+	io_double(&eq_range.phigh,fp,f,"eq_range high");
+	io_string(range.item,11,fp,f);
+	io_string(range.item2,11,fp,f);
+	io_int(&range.steps,fp,f,"Range steps");
+	io_int(&range.cycle,fp,f,"Cycle color 1=on");
+	io_int(&range.reset,fp,f,"Reset data 1=on");
+	io_int(&range.oldic,fp,f,"Use old I.C.s 1=yes");
+	io_double(&range.plow,fp,f,"Par1 low");
+	io_double(&range.plow2,fp,f,"Par2 low");
+	io_double(&range.phigh,fp,f,"Par1 high");
+	io_double(&range.phigh2,fp,f,"Par2 high");
+	dump_shoot_range(fp,f);
+	if(f==READEM) {
+		range.steps2=range.steps;
 	}
 }
 
 
-void io_parameters(int f, FILE *fp) {
-	int i,index;
-	char junk[XPP_MAX_NAME];
-	double z;
-	for(i=0;i<NUPAR;i++) {
-		if(f!=READEM) {
-			get_val(upar_names[i],&z);
-			io_double(&z,fp,f,upar_names[i]);
-		} else {
-			io_double(&z,fp,f," ");
-			set_val(upar_names[i],z);
-			if(!XPPBatch) {
-				index=find_user_name(PARAMBOX,upar_names[i]);
-				if(index>=0) {
-					sprintf(junk,"%.16g",z);
-					set_edit_params(&ParamBox,index,junk);
-					draw_one_box(ParamBox,index);
-				}
-			}
-		}
+static void dump_shoot_range(FILE *fp, int f) {
+	io_string(shoot_range.item,11,fp,f);
+	io_int(&shoot_range.side,fp,f,"BVP side");
+	io_int(&shoot_range.cycle,fp,f,"color cycle flag 1=on");
+	io_int(&shoot_range.steps,fp,f,"BVP range steps");
+	io_double(&shoot_range.plow,fp,f,"BVP range low");
+	io_double(&shoot_range.phigh,fp,f,"BVP range high");
+}
+
+
+static void dump_torus(FILE *fp, int f) {
+	int i;
+	char bob[XPP_MAX_NAME];
+	if(f==READEM) {
+		fgets(bob,255,fp);
+	} else {
+		fprintf(fp,"# Torus information \n");
 	}
-	if(!XPPBatch) {
-		reset_sliders();
+	io_int(&TORUS,fp,f," Torus flag 1=ON");
+	io_double(&TOR_PERIOD,fp,f,"Torus period");
+	if(TORUS) {
+		for(i=0;i<NEQ;i++) {
+			io_int(&itor[i],fp,f,uvar_names[i]);
+		}
 	}
 }
 
 
-void io_exprs(int f, FILE *fp) {
+static void dump_transpose_info(FILE *fp, int f) {
+	char bob[MAX_STRING_LENGTH];
+	if(f==READEM) {
+		fgets(bob,255,fp);
+	} else {
+		fprintf(fp,"# Transpose variables etc\n");
+	}
+
+	io_string(my_trans.firstcol,11,fp,f);
+	io_int(&my_trans.ncol,fp,f,"n columns");
+	io_int(&my_trans.nrow,fp,f,"n rows");
+	io_int(&my_trans.rowskip,fp,f,"row skip");
+	io_int(&my_trans.colskip,fp,f,"col skip");
+	io_int(&my_trans.row0,fp,f,"row 0");
+}
+
+
+static void io_double(double *z, FILE *fp, int f, char *ss) {
+	char bob[XPP_MAX_NAME];
+	if(f==READEM) {
+		fgets(bob,255,fp);
+		*z=atof(bob);
+	} else {
+		fprintf(fp,"%.16g  %s\n",*z,ss);
+	}
+}
+
+
+static void io_exprs(int f, FILE *fp) {
 	int i;
 	char temp[XPP_MAX_NAME];
 	double z;
@@ -533,7 +564,7 @@ void io_exprs(int f, FILE *fp) {
 }
 
 
-void io_graph(int f, FILE *fp) {
+static void io_graph(int f, FILE *fp) {
 	int j,k;
 	char temp[XPP_MAX_NAME];
 	if(f==READEM && set_type==1) {
@@ -596,7 +627,7 @@ void io_graph(int f, FILE *fp) {
 }
 
 
-void io_int(int *i, FILE *fp, int f, char *ss) {
+static void io_int(int *i, FILE *fp, int f, char *ss) {
 	char bob[XPP_MAX_NAME];
 	if(f==READEM) {
 		fgets(bob,255,fp);
@@ -607,29 +638,91 @@ void io_int(int *i, FILE *fp, int f, char *ss) {
 }
 
 
-void io_double(double *z, FILE *fp, int f, char *ss) {
-	char bob[XPP_MAX_NAME];
+static void io_numerics(int f, FILE *fp) {
+	char *method[]={"Discrete","Euler","Mod. Euler",
+					"Runge-Kutta","Adams","Gear","Volterra","BackEul",
+					"Qual RK","Stiff","CVode","DorPrin5","DorPri8(3)"};
+	char *pmap[]={"Poincare None","Poincare Section","Poincare Max","Period"};
+	char temp[XPP_MAX_NAME];
+	if(f==READEM && set_type==1) {
+		fgets(temp,255,fp); /* skip a line */}
+	if(f!=READEM) {
+		fprintf(fp,"# Numerical stuff\n");
+	}
+	io_int(&NJMP,fp,f," nout");
+	io_int(&NMESH,fp,f," nullcline mesh");
+	io_int(&METHOD,fp,f,method[METHOD]);
 	if(f==READEM) {
-		fgets(bob,255,fp);
-		*z=atof(bob);
+		do_meth();
+		alloc_meth();
+	}
+	io_double(&TEND,fp,f,"total");
+	io_double(&DELTA_T,fp,f,"DeltaT");
+	io_double(&T0,fp,f,"T0");
+	io_double(&TRANS,fp,f,"Transient");
+	io_double(&BOUND,fp,f,"Bound");
+	io_double(&HMIN,fp,f,"DtMin");
+	io_double(&HMAX,fp,f,"DtMax");
+	io_double(&TOLER,fp,f,"Tolerance");
+	/* fix stuff concerning the tolerance */
+	if(f==READEM) {
+		if(set_type==1) {
+			io_double(&ATOLER,fp,f,"Abs. Tolerance");
+		} else {
+			ATOLER=TOLER*10;
+		}
 	} else {
-		fprintf(fp,"%.16g  %s\n",*z,ss);
+		io_double(&ATOLER,fp,f,"Abs. Tolerance");
+	}
+	io_double(&DELAY,fp,f,"Max Delay");
+	io_int(&EVEC_ITER,fp,f,"Eigenvector iterates");
+	io_double(&EVEC_ERR,fp,f,"Eigenvector tolerance");
+	io_double(&NEWT_ERR,fp,f,"Newton tolerance");
+	io_double(&POIPLN,fp,f,"Poincare plane");
+	io_double(&BVP_TOL,fp,f,"Boundary value tolerance");
+	io_double(&BVP_EPS,fp,f,"Boundary value epsilon");
+	io_int(&BVP_MAXIT,fp,f,"Boundary value iterates");
+	io_int(&POIMAP,fp,f,pmap[POIMAP]);
+
+	io_int(&POIVAR,fp,f,"Poincare variable");
+	io_int(&POISGN,fp,f,"Poincare sign");
+	io_int(&SOS,fp,f,"Stop on Section");
+	io_int(&DelayFlag,fp,f,"Delay flag");
+	io_double(&MyTime,fp,f,"Current time");
+	io_double(&LastTime,fp,f,"Last Time");
+	io_int(&MyStart,fp,f,"MyStart");
+	io_int(&INFLAG,fp,f,"INFLAG");
+}
+
+
+static void io_parameters(int f, FILE *fp) {
+	int i,index;
+	char junk[XPP_MAX_NAME];
+	double z;
+	for(i=0;i<NUPAR;i++) {
+		if(f!=READEM) {
+			get_val(upar_names[i],&z);
+			io_double(&z,fp,f,upar_names[i]);
+		} else {
+			io_double(&z,fp,f," ");
+			set_val(upar_names[i],z);
+			if(!XPPBatch) {
+				index=find_user_name(PARAMBOX,upar_names[i]);
+				if(index>=0) {
+					sprintf(junk,"%.16g",z);
+					set_edit_params(&ParamBox,index,junk);
+					draw_one_box(ParamBox,index);
+				}
+			}
+		}
+	}
+	if(!XPPBatch) {
+		reset_sliders();
 	}
 }
 
 
-void io_float(float *z, FILE *fp, int f, char *ss) {
-	char bob[XPP_MAX_NAME];
-	if(f==READEM) {
-		fgets(bob,255,fp);
-		*z=(float)atof(bob);
-	} else {
-		fprintf(fp,"%.16g   %s\n",*z,ss);
-	}
-}
-
-
-void io_string(char *s, int len, FILE *fp, int f) {
+static void io_string(char *s, int len, FILE *fp, int f) {
 	int i;
 	if(f==READEM) {
 		fgets(s,len,fp);
