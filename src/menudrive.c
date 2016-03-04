@@ -42,11 +42,25 @@
 #include "bitmap/alert.bitmap"
 
 
-int screen;
-int status;
-MSGBOXSTRUCT MsgBox;
-char *getenv();
+/* --- Types --- */
+typedef struct {
+	Window w;
+	char text[256];
+	int here;
+} MSGBOXSTRUCT;
 
+
+/* --- Forward declarations --- */
+static void do_file_com(int com);
+
+
+/* --- Data --- */
+static int status;
+static MSGBOXSTRUCT MsgBox;
+
+int screen;
+
+/* --- Functions --- */
 void do_tutorial(void) {
 	printf("Running tutorial!\n");
 	int tut=0;
@@ -408,70 +422,6 @@ void make_adj(void) {
 }
 
 
-void do_file_com(int com) {
-	switch(com) {
-	case M_FT:
-		do_transpose();
-		break;
-	case M_FG:
-		get_intern_set();
-		break;
-	case M_FI:
-		TipsFlag=1-TipsFlag;
-		break;
-	case M_FP:
-		make_txtview();
-		break;
-	case M_FW:
-		do_lunch(WRITEM);
-		break;
-	case M_FS:
-		file_inf();
-		break;
-	case M_FA:
-#ifdef AUTO
-		do_auto_win();
-#endif
-		break;
-	case M_FC:
-		q_calc();
-		break;
-	case M_FR:
-		do_lunch(READEM);
-		break;
-	case M_FB:
-		tfBell=1-tfBell;
-		break;
-	case M_FH:
-		break;
-	case M_FX:
-		edit_xpprc();
-		break;
-	case M_FU:
-		do_tutorial();
-		break;
-	case M_FQ:
-		if(yes_no_box())bye_bye();
-		break;
-	case M_FER:
-		edit_rhs();
-		break;
-	case M_FEF:
-		edit_functions();
-		break;
-	case M_FES:
-		save_as();
-		break;
-	case M_FEL:
-		load_new_dll();
-		break;
-	case M_FL:
-		clone_ode();
-		break;
-	}
-}
-
-
 void do_gr_objs(void) {
 	char ch;
 	int i;
@@ -514,7 +464,6 @@ void do_gr_objs(void) {
 		run_the_commands(M_TT+i);
 	}
 }
-
 
 
 void new_lookup(void) {
@@ -861,4 +810,68 @@ void redraw_them_all(void) {
 
 void get_3d_par(void) {
 	run_the_commands(M_3);
+}
+
+/* --- Static functions --- */
+static void do_file_com(int com) {
+	switch(com) {
+	case M_FT:
+		do_transpose();
+		break;
+	case M_FG:
+		get_intern_set();
+		break;
+	case M_FI:
+		TipsFlag=1-TipsFlag;
+		break;
+	case M_FP:
+		make_txtview();
+		break;
+	case M_FW:
+		do_lunch(WRITEM);
+		break;
+	case M_FS:
+		file_inf();
+		break;
+	case M_FA:
+#ifdef AUTO
+		do_auto_win();
+#endif
+		break;
+	case M_FC:
+		q_calc();
+		break;
+	case M_FR:
+		do_lunch(READEM);
+		break;
+	case M_FB:
+		tfBell=1-tfBell;
+		break;
+	case M_FH:
+		break;
+	case M_FX:
+		edit_xpprc();
+		break;
+	case M_FU:
+		do_tutorial();
+		break;
+	case M_FQ:
+		if(yes_no_box())bye_bye();
+		break;
+	case M_FER:
+		edit_rhs();
+		break;
+	case M_FEF:
+		edit_functions();
+		break;
+	case M_FES:
+		save_as();
+		break;
+	case M_FEL:
+		load_new_dll();
+		break;
+	case M_FL:
+		clone_ode();
+		break;
+	}
 }
