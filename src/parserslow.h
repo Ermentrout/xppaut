@@ -62,6 +62,7 @@ extern UFUN_ARG ufun_arg[MAXUFUN];
 
 /* --- Functions --- */
 void init_rpn(void);
+double normal(double mean, double std);
 int get_var_index(char *name);
 int add_con(char *name, double value);
 int add_kernel(char *name, double mu, char *expr);
