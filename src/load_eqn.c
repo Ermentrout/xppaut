@@ -28,6 +28,7 @@
 #include "my_ps.h"
 #include "nullcline.h"
 #include "numerics.h"
+#include "odesol2.h"
 #include "parserslow.h"
 #include "read_dir.h"
 #include "storage.h"
@@ -42,198 +43,126 @@
 #define DFNORMAL 1
 #define MAXOPT 1000
 
-void nsrand48(int seed);
 
-char *interopt[MAXOPT];
-int Nopts=0;
-int RunImmediately=0;
-
-int IX_PLT[10],IY_PLT[10],IZ_PLT[10],NPltV;
-int MultiWin=0;
-double X_LO[10],Y_LO[10],X_HI[10],Y_HI[10];
-int START_LINE_TYPE=1;
-INTERN_SET intern_set[MAX_INTERN_SET];
-int Nintern_set=0;
-
-double atof();
-char *get_first();
-char *get_next();
-/*   this file has all of the phaseplane parameters defined
-	 and created.  All other files should use external stuff
-	to use them. (Except eqn forming stuff)
- */
-
-double last_ic[MAXODE];
+/* --- Forward declarations --- */
+static void do_intern_set(char *name1, char *value);
+static void fil_flt(FILE *fpt, double *val);
+static void fil_int(FILE *fpt, int *val);
+static void read_defaults(FILE *fp);
+static void split_apart(char *bob, char *name, char *value);
 int (*solver)();
 
-int rung_kut();
+
+/* --- Data --- */
+static char *interopt[MAXOPT];
+static int Nopts=0;
+static float oldhp_x,oldhp_y,my_pl_wid,my_pl_ht;
+
 char delay_string[MAXODE][80];
-int itor[MAXODE];
+char options[100];
 char this_file[XPP_MAX_NAME];
 char this_internset[XPP_MAX_NAME];
-float oldhp_x,oldhp_y,my_pl_wid,my_pl_ht;
-int mov_ind;
-int  storind,STORFLAG,INFLAG,MAXSTOR;
-double x_3d[2],y_3d[2],z_3d[2];
-int IXPLT,IYPLT,IZPLT;
-int AXES,TIMPLOT,PLOT_3D;
+double last_ic[MAXODE];
 double MY_XLO,MY_YLO,MY_XHI,MY_YHI;
 double TOR_PERIOD=6.2831853071795864770;
-int TORUS=0;
+double x_3d[2],y_3d[2],z_3d[2];
+double X_LO[10],Y_LO[10],X_HI[10],Y_HI[10];
+
+int AXES,TIMPLOT,PLOT_3D;
+int itor[MAXODE];
+int IX_PLT[10],IY_PLT[10],IZ_PLT[10],NPltV;
+int IXPLT,IYPLT,IZPLT;
+int mov_ind;
+int MultiWin=0;
 int NEQ;
-char options[100];
+int Nintern_set=0;
+int RunImmediately=0;
+int START_LINE_TYPE=1;
+int  storind,STORFLAG,INFLAG,MAXSTOR;
+int TORUS=0;
+INTERN_SET intern_set[MAX_INTERN_SET];
+
 
 /*   Numerical stuff ....   */
-
-double DELTA_T,TEND,T0,TRANS,
-NULL_ERR,EVEC_ERR,NEWT_ERR;
+double DELTA_T,TEND,T0,TRANS,NULL_ERR,EVEC_ERR,NEWT_ERR;
 double BOUND,DELAY,TOLER,ATOLER,HMIN,HMAX;
 double BVP_EPS,BVP_TOL;
-
 double POIPLN;
-
 int MaxEulIter;
 double EulTol;
 int NMESH,NJMP,color_flag,NC_ITER;
 int EVEC_ITER;
 int BVP_MAXIT,BVP_FLAG;
-
 int POIMAP,POIVAR,POISGN,SOS;
 int FFT,NULL_HERE,POIEXT;
 int HIST,HVAR,hist_ind,FOREVER;
-
 /*  control of range stuff  */
 int PAUSER,ENDSING,SHOOT,PAR_FOL;
 int xorfix,silent,got_file;
 
-/*Logical negate OR on options set. Result overwrites the first OptionsSet
-in the argument list.*/
-void notBothOptions(OptionsSet nasA,OptionsSet nasB) {
-	nasA.BIG_FONT_NAME = (nasA.BIG_FONT_NAME & nasB.BIG_FONT_NAME);
-	nasA.SMALL_FONT_NAME = (nasA.SMALL_FONT_NAME & nasB.SMALL_FONT_NAME);
-	nasA.BACKGROUND = (nasA.BACKGROUND & nasB.BACKGROUND);
-	nasA.IXPLT = (nasA.IXPLT & nasB.IXPLT);
-	nasA.IYPLT = (nasA.IYPLT & nasB.IYPLT);
-	nasA.IZPLT = (nasA.IZPLT & nasB.IZPLT);
-	nasA.AXES = (nasA.AXES & nasB.AXES);
-	nasA.NMESH = (nasA.NMESH & nasB.NMESH);
-	nasA.METHOD = (nasA.METHOD & nasB.METHOD);
-	nasA.TIMEPLOT = (nasA.TIMEPLOT & nasB.TIMEPLOT);
-	nasA.MAXSTOR = (nasA.MAXSTOR & nasB.MAXSTOR);
-	nasA.TEND = (nasA.TEND & nasB.TEND);
-	nasA.DT = (nasA.DT & nasB.DT);
-	nasA.T0 = (nasA.T0 & nasB.T0);
-	nasA.TRANS = (nasA.TRANS & nasB.TRANS);
-	nasA.BOUND = (nasA.BOUND & nasB.BOUND);
-	nasA.TOLER = (nasA.TOLER & nasB.TOLER);
-	nasA.DELAY = (nasA.DELAY & nasB.DELAY);
-	nasA.XLO = (nasA.XLO & nasB.XLO);
-	nasA.XHI = (nasA.XHI & nasB.XHI);
-	nasA.YLO = (nasA.YLO & nasB.YLO);
-	nasA.YHI = (nasA.YHI & nasB.YHI);
-	nasA.UserBlack = (nasA.UserBlack & nasB.UserBlack);
-	nasA.UserWhite = (nasA.UserWhite & nasB.UserWhite);
-	nasA.UserMainWinColor = (nasA.UserMainWinColor & nasB.UserMainWinColor);
-	nasA.UserDrawWinColor = (nasA.UserDrawWinColor & nasB.UserDrawWinColor);
-	nasA.UserGradients = (nasA.UserGradients & nasB.UserGradients);
-	nasA.UserBGBitmap = (nasA.UserBGBitmap & nasB.UserBGBitmap);
-	nasA.UserMinWidth = (nasA.UserMinWidth & nasB.UserMinWidth);
-	nasA.UserMinHeight = (nasA.UserMinHeight & nasB.UserMinHeight);
-	nasA.YNullColor = (nasA.YNullColor & nasB.YNullColor);
-	nasA.XNullColor = (nasA.XNullColor & nasB.XNullColor);
-	nasA.StableManifoldColor = (nasA.StableManifoldColor & nasB.StableManifoldColor);
-	nasA.UnstableManifoldColor = (nasA.UnstableManifoldColor & nasB.UnstableManifoldColor);
-	nasA.START_LINE_TYPE = (nasA.START_LINE_TYPE & nasB.START_LINE_TYPE);
-	nasA.RandSeed = (nasA.RandSeed & nasB.SMALL_FONT_NAME);
-	nasA.PaperWhite = (nasA.PaperWhite & nasB.PaperWhite);
-	nasA.COLORMAP = (nasA.COLORMAP & nasB.COLORMAP);
-	nasA.NPLOT = (nasA.NPLOT & nasB.NPLOT);
-	nasA.DLL_LIB = (nasA.DLL_LIB & nasB.DLL_LIB);
-	nasA.DLL_FUN = (nasA.DLL_FUN & nasB.DLL_FUN);
-	nasA.XP = (nasA.XP & nasB.XP);
-	nasA.YP = (nasA.YP & nasB.YP);
-	nasA.ZP = (nasA.ZP & nasB.ZP);
-	nasA.NOUT = (nasA.NOUT & nasB.NOUT);
-	nasA.VMAXPTS = (nasA.VMAXPTS & nasB.VMAXPTS);
-	nasA.TOR_PER = (nasA.TOR_PER & nasB.TOR_PER);
-	nasA.JAC_EPS = (nasA.JAC_EPS & nasB.JAC_EPS);
-	nasA.NEWT_TOL = (nasA.NEWT_TOL & nasB.NEWT_TOL);
-	nasA.NEWT_ITER = (nasA.NEWT_ITER & nasB.NEWT_ITER);
-	nasA.FOLD = (nasA.FOLD & nasB.FOLD);
-	nasA.DTMIN = (nasA.DTMIN & nasB.DTMIN);
-	nasA.DTMAX = (nasA.DTMAX & nasB.DTMAX);
-	nasA.ATOL = (nasA.ATOL & nasB.ATOL);
-	nasA.TOL = (nasA.TOL & nasB.TOL);
-	nasA.BANDUP = (nasA.BANDUP & nasB.BANDUP);
-	nasA.BANDLO = (nasA.BANDLO & nasB.BANDLO);
-	nasA.PHI = (nasA.PHI & nasB.PHI);
-	nasA.THETA = (nasA.THETA & nasB.THETA);
-	nasA.XMIN = (nasA.XMIN & nasB.XMIN);
-	nasA.XMAX = (nasA.XMAX & nasB.XMAX);
-	nasA.YMIN = (nasA.YMIN & nasB.YMIN);
-	nasA.YMAX = (nasA.YMAX & nasB.YMAX);
-	nasA.ZMIN = (nasA.ZMIN & nasB.ZMIN);
-	nasA.ZMAX = (nasA.ZMAX & nasB.ZMAX);
-	nasA.POIVAR = (nasA.POIVAR & nasB.POIVAR);
-	nasA.OUTPUT = (nasA.OUTPUT & nasB.OUTPUT);
-	nasA.POISGN = (nasA.POISGN & nasB.POISGN);
-	nasA.POIEXT = (nasA.POIEXT & nasB.POIEXT);
-	nasA.POISTOP = (nasA.POISTOP & nasB.POISTOP);
-	nasA.STOCH = (nasA.STOCH & nasB.STOCH);
-	nasA.POIPLN = (nasA.POIPLN & nasB.POIPLN);
-	nasA.POIMAP = (nasA.POIMAP & nasB.POIMAP);
-	nasA.RANGEOVER = (nasA.RANGEOVER & nasB.RANGEOVER);
-	nasA.RANGESTEP = (nasA.RANGESTEP & nasB.RANGESTEP);
-	nasA.RANGELOW = (nasA.RANGELOW & nasB.RANGELOW);
-	nasA.RANGEHIGH = (nasA.RANGEHIGH & nasB.RANGEHIGH);
-	nasA.RANGERESET = (nasA.RANGERESET & nasB.RANGERESET);
-	nasA.RANGEOLDIC = (nasA.RANGEOLDIC & nasB.RANGEOLDIC);
-	nasA.RANGE = (nasA.RANGE & nasB.RANGE);
-	nasA.NTST = (nasA.NTST & nasB.NTST);
-	nasA.NMAX = (nasA.NMAX & nasB.NMAX);
-	nasA.NPR = (nasA.NPR & nasB.NPR);
-	nasA.NCOL = (nasA.NCOL & nasB.NCOL);
-	nasA.DSMIN = (nasA.DSMIN & nasB.DSMIN);
-	nasA.DSMAX = (nasA.DSMAX & nasB.DSMAX);
-	nasA.DS = (nasA.DS & nasB.DS);
-	nasA.PARMAX = (nasA.PARMAX & nasB.PARMAX);
-	nasA.NORMMIN = (nasA.NORMMIN & nasB.NORMMIN);
-	nasA.NORMMAX = (nasA.NORMMAX & nasB.NORMMAX);
-	nasA.EPSL = (nasA.EPSL & nasB.EPSL);
-	nasA.EPSU = (nasA.EPSU & nasB.EPSU);
-	nasA.EPSS = (nasA.EPSS & nasB.EPSS);
-	nasA.RUNNOW = (nasA.RUNNOW & nasB.RUNNOW);
-	nasA.SEC = (nasA.SEC & nasB.SEC);
-	nasA.UEC = (nasA.UEC & nasB.UEC);
-	nasA.SPC = (nasA.SPC & nasB.SPC);
-	nasA.UPC = (nasA.UPC & nasB.UPC);
-	nasA.AUTOEVAL = (nasA.AUTOEVAL & nasB.AUTOEVAL);
-	nasA.AUTOXMAX = (nasA.AUTOXMAX & nasB.AUTOXMAX);
-	nasA.AUTOYMAX = (nasA.AUTOYMAX & nasB.AUTOYMAX);
-	nasA.AUTOXMIN = (nasA.AUTOXMIN & nasB.AUTOXMIN);
-	nasA.AUTOYMIN = (nasA.AUTOYMIN & nasB.AUTOYMIN);
-	nasA.AUTOVAR = (nasA.AUTOVAR & nasB.AUTOVAR);
-	nasA.PS_FONT = (nasA.PS_FONT & nasB.PS_FONT);
-	nasA.PS_LW = (nasA.PS_LW  & nasB.PS_LW );
-	nasA.PS_FSIZE = (nasA.PS_FSIZE & nasB.PS_FSIZE);
-	nasA.PS_COLOR = (nasA.PS_COLOR & nasB.PS_COLOR);
-	nasA.FOREVER = (nasA.FOREVER & nasB.FOREVER);
-	nasA.BVP_TOL = (nasA.BVP_TOL & nasB.BVP_TOL);
-	nasA.BVP_EPS = (nasA.BVP_EPS & nasB.BVP_EPS);
-	nasA.BVP_MAXIT = (nasA.BVP_MAXIT & nasB.BVP_MAXIT);
-	nasA.BVP_FLAG = (nasA.BVP_FLAG & nasB.BVP_FLAG);
-	nasA.SOS = (nasA.SOS & nasB.SOS);
-	nasA.FFT = (nasA.FFT & nasB.FFT);
-	nasA.HIST = (nasA.HIST & nasB.HIST);
-	nasA.PltFmtFlag = (nasA.PltFmtFlag & nasB.PltFmtFlag);
-	nasA.ATOLER = (nasA.ATOLER & nasB.ATOLER);
-	nasA.MaxEulIter = (nasA.MaxEulIter & nasB.MaxEulIter);
-	nasA.EulTol    = (nasA.EulTol    & nasB.EulTol);
-	nasA.EVEC_ITER = (nasA.EVEC_ITER & nasB.EVEC_ITER);
-	nasA.EVEC_ERR  = (nasA.EVEC_ERR  & nasB.EVEC_ERR);
-	nasA.NULL_ERR  = (nasA.NULL_ERR  & nasB.NULL_ERR);
-	nasA.NEWT_ERR  = (nasA.NEWT_ERR  & nasB.NEWT_ERR);
-	nasA.NULL_HERE = (nasA.NULL_HERE & nasB.NULL_HERE);
+
+/* --- Functions --- */
+/* here is some new code for internal set files:
+ * format of the file is a long string of the form:
+ * { x=y, z=w, q=p , .... }
+ */
+void add_intern_set(char *name, char *does) {
+	char bob[XPP_MAX_NAME],ch;
+	int i,n,j=Nintern_set,k=0;
+	if(Nintern_set>=MAX_INTERN_SET) {
+		plintf(" %s not added -- too many must be less than %d \n",
+			   name,MAX_INTERN_SET);
+		return;
+	}
+	intern_set[j].use=1;
+	n=strlen(name);
+	intern_set[j].name=(char *)malloc((n+1));
+	strcpy(intern_set[j].name,name);
+	n=strlen(does);
+	bob[0]='$';
+	bob[1]=' ';
+	k=2;
+	for(i=0;i<n;i++) {
+		ch=does[i];
+		if(ch==',') {
+			bob[k]=' ';
+			k++;
+		}
+		if(ch=='}' || ch=='{') {
+			continue;
+		}
+		if(ch!=',') {
+			bob[k]=ch;
+			k++;
+		}
+	}
+	bob[k]=0;
+	intern_set[j].does=(char *)malloc(n+3);
+	strcpy(intern_set[j].does,bob);
+	plintf(" added %s doing %s \n",
+		   intern_set[j].name,intern_set[j].does);
+	Nintern_set++;
+}
+
+
+void check_for_xpprc(void) {
+	FILE *fp;
+	char rc[XPP_MAX_NAME];
+	char bob[XPP_MAX_NAME];
+	sprintf(rc,"%s/.xpprc",getenv("HOME"));
+	fp=fopen(rc,"r");
+	if(fp==NULL) {
+		/*   plintf("Didnt find rc \n"); */
+		return;
+	}
+	while(!feof(fp)) {
+		bob[0]='\0';
+		fgets(bob,255,fp);
+		if(bob[0]=='@') {
+			stor_internopts(bob);
+		}
+	}
+	fclose(fp);
 }
 
 
@@ -252,6 +181,31 @@ void dump_torus(FILE *fp, int f) {
 			io_int(&itor[i],fp,f,uvar_names[i]);
 		}
 	}
+}
+
+
+void extract_action(char *ptr) {
+	char name[XPP_MAX_NAME],value[XPP_MAX_NAME];
+	char tmp[2048];
+	char *junk,*mystring;
+	/* plintf("ptr=%s \n",ptr);  */
+	strcpy(tmp,ptr);
+	junk=get_first(tmp," ");
+	if(junk == NULL) {
+		/*No more tokens--should this throw an error?*/
+	}
+
+	while((mystring=get_next(" ,;\n"))!=NULL) {
+		split_apart(mystring,name,value);
+		if(strlen(name)>0 && strlen(value)>0) {
+			do_intern_set(name,value);
+		}
+	}
+}
+
+
+void extract_internset(int j) {
+	extract_action(intern_set[j].does);
 }
 
 
@@ -307,48 +261,18 @@ void load_eqn(void) {
 }
 
 
-void set_X_vals(void) {
-	/*
-	Set up the default look here.
-	*/
-
-	tfBell=1;
-	/*PaperWhite=0;*/
-	/*
-	No gradients tends to look cleaner but some
-	may prefer gradients improved contrast/readability.
-	*/
-	/*UserGradients=1;
-	*/
-	/*fixed is the new X11 default fixed font. 9x15 is dead and gone.
-	*/
-	if(strlen(big_font_name)==0) {
-		strcpy(big_font_name,"fixed");
+/*  ODE options stuff  here !!   */
+int msc(char *s1, char *s2) {
+	int n=strlen(s1),i;
+	if(strlen(s2)<n) {
+		return(0);
 	}
-
-	if(strlen(small_font_name)==0) {
-		strcpy(small_font_name,"6x13");
+	for(i=0;i<n;i++) {
+		if(s1[i]!=s2[i]) {
+			return(0);
+		}
 	}
-
-	if(strlen(UserBlack)==0) {
-		sprintf(UserBlack,"#%s","000000");
-	}
-
-	if(strlen(UserWhite)==0) {
-		sprintf(UserWhite,"#%s","EDE9E3");
-	}
-
-	if(strlen(UserMainWinColor)==0) {
-		sprintf(UserMainWinColor,"#%s","808080");
-	}
-
-	if(strlen(UserDrawWinColor)==0) {
-		sprintf(UserDrawWinColor,"#%s","FFFFFF");
-	}
-
-	if(UserGradients<0) {
-		UserGradients=1;
-	}
+	return(1);
 }
 
 
@@ -664,235 +588,6 @@ void set_all_vals(void) {
 }
 
 
-void read_defaults(FILE *fp) {
-	char bob[100];
-	char *ptr;
-	fgets(bob,80,fp);
-	ptr=get_first(bob," ");
-	if(notAlreadySet.BIG_FONT_NAME) {
-		strcpy(big_font_name,ptr);
-		notAlreadySet.BIG_FONT_NAME=0;
-	}
-
-	fgets(bob,80,fp);
-	ptr=get_first(bob," ");
-	if(notAlreadySet.SMALL_FONT_NAME) {
-		strcpy(small_font_name,ptr);
-		notAlreadySet.SMALL_FONT_NAME=0;
-	}
-
-	if(notAlreadySet.PaperWhite) {
-		fil_int(fp,&PaperWhite);
-		notAlreadySet.PaperWhite=0;
-	};
-	if(notAlreadySet.IXPLT) {
-		fil_int(fp,&IXPLT);
-		notAlreadySet.IXPLT=0;
-	};
-	if(notAlreadySet.IYPLT) {
-		fil_int(fp,&IYPLT);
-		notAlreadySet.IYPLT=0;
-	};
-	if(notAlreadySet.IZPLT) {
-		fil_int(fp,&IZPLT);
-		notAlreadySet.IZPLT=0;
-	};
-	if(notAlreadySet.AXES) {
-		fil_int(fp,&AXES);
-		notAlreadySet.PaperWhite=0;
-	};
-	if(notAlreadySet.NOUT) {
-		fil_int(fp,&NJMP);
-		notAlreadySet.NOUT=0;
-	};
-	if(notAlreadySet.NMESH) {
-		fil_int(fp,&NMESH);
-		notAlreadySet.NMESH=0;
-	};
-	if(notAlreadySet.METHOD) {
-		fil_int(fp,&METHOD);
-		notAlreadySet.METHOD=0;
-	};
-
-	if(notAlreadySet.TIMEPLOT) {
-		fil_int(fp,&TIMPLOT);
-		notAlreadySet.TIMEPLOT=0;
-	};
-	if(notAlreadySet.MAXSTOR) {
-		fil_int(fp,&MAXSTOR);
-		notAlreadySet.MAXSTOR=0;
-	};
-	if(notAlreadySet.TEND) {
-		fil_flt(fp,&TEND);
-		notAlreadySet.TEND=0;
-	};
-	if(notAlreadySet.DT) {
-		fil_flt(fp,&DELTA_T);
-		notAlreadySet.DT=0;
-	};
-	if(notAlreadySet.T0) {
-		fil_flt(fp,&T0);
-		notAlreadySet.T0=0;
-	};
-	if(notAlreadySet.TRANS) {
-		fil_flt(fp,&TRANS);
-		notAlreadySet.TRANS=0;
-	};
-	if(notAlreadySet.BOUND) {
-		fil_flt(fp,&BOUND);
-		notAlreadySet.BOUND=0;
-	};
-	if(notAlreadySet.DTMIN) {
-		fil_flt(fp,&HMIN);
-		notAlreadySet.DTMIN=0;
-	};
-	if(notAlreadySet.DTMAX) {
-		fil_flt(fp,&HMAX);
-		notAlreadySet.DTMIN=0;
-	};
-	if(notAlreadySet.TOLER) {
-		fil_flt(fp,&TOLER);
-		notAlreadySet.TOLER=0;
-	};
-	if(notAlreadySet.DELAY) {
-		fil_flt(fp,&DELAY);
-		notAlreadySet.DELAY=0;
-	};
-	if(notAlreadySet.XLO) {
-		fil_flt(fp,&MY_XLO);
-		notAlreadySet.XLO=0;
-	};
-	if(notAlreadySet.XHI) {
-		fil_flt(fp,&MY_XHI);
-		notAlreadySet.XHI=0;
-	};
-	if(notAlreadySet.YLO) {
-		fil_flt(fp,&MY_YLO);
-		notAlreadySet.YLO=0;
-	};
-	if(notAlreadySet.YHI) {
-		fil_flt(fp,&MY_YHI);
-		notAlreadySet.YHI=0;
-	};
-}
-
-void fil_flt(FILE *fpt, double *val) {
-	char bob[80];
-	fgets(bob,80,fpt);
-	*val=atof(bob);
-}
-
-void fil_int(FILE *fpt, int *val) {
-	char bob[80];
-	fgets(bob,80,fpt);
-	*val=atoi(bob);
-}
-
-
-/* here is some new code for internal set files:
-   format of the file is a long string of the form:
-   { x=y, z=w, q=p , .... }
-*/
-void add_intern_set(char *name, char *does) {
-	char bob[XPP_MAX_NAME],ch;
-	int i,n,j=Nintern_set,k=0;
-	if(Nintern_set>=MAX_INTERN_SET) {
-		plintf(" %s not added -- too many must be less than %d \n",
-			   name,MAX_INTERN_SET);
-		return;
-	}
-	intern_set[j].use=1;
-	n=strlen(name);
-	intern_set[j].name=(char *)malloc((n+1));
-	strcpy(intern_set[j].name,name);
-	n=strlen(does);
-	bob[0]='$';
-	bob[1]=' ';
-	k=2;
-	for(i=0;i<n;i++) {
-		ch=does[i];
-		if(ch==',') {
-			bob[k]=' ';
-			k++;
-		}
-		if(ch=='}' || ch=='{') {
-			continue;
-		}
-		if(ch!=',') {
-			bob[k]=ch;
-			k++;
-		}
-	}
-	bob[k]=0;
-	intern_set[j].does=(char *)malloc(n+3);
-	strcpy(intern_set[j].does,bob);
-	plintf(" added %s doing %s \n",
-		   intern_set[j].name,intern_set[j].does);
-	Nintern_set++;
-}
-
-
-void extract_action(char *ptr) {
-	char name[XPP_MAX_NAME],value[XPP_MAX_NAME];
-	char tmp[2048];
-	char *junk,*mystring;
-	/* plintf("ptr=%s \n",ptr);  */
-	strcpy(tmp,ptr);
-	junk=get_first(tmp," ");
-	if(junk == NULL) {
-		/*No more tokens--should this throw an error?*/
-	}
-
-	while((mystring=get_next(" ,;\n"))!=NULL) {
-		split_apart(mystring,name,value);
-		if(strlen(name)>0 && strlen(value)>0) {
-			do_intern_set(name,value);
-		}
-	}
-}
-
-
-void extract_internset(int j) {
-	extract_action(intern_set[j].does);
-}
-
-
-void do_intern_set(char *name1, char *value) {
-	int i;
-	char name[20];
-	convert(name1,name);
-
-	i=find_user_name(ICBOX,name);
-	if(i>-1) {
-		last_ic[i]=atof(value);
-	} else {
-		i=find_user_name(PARAMBOX,name);
-		if(i>-1) {
-			set_val(name,atof(value));
-		} else {
-			set_option(name,value,1,NULL);
-		}
-	}
-	alloc_meth();
-	do_meth();
-}
-
-
-/*  ODE options stuff  here !!   */
-int msc(char *s1, char *s2) {
-	int n=strlen(s1),i;
-	if(strlen(s2)<n) {
-		return(0);
-	}
-	for(i=0;i<n;i++) {
-		if(s1[i]!=s2[i]) {
-			return(0);
-		}
-	}
-	return(1);
-}
-
-
 void set_internopts(OptionsSet *mask) {
 	int i;
 	char *ptr,name[20],value[80],*junk,*mystring;
@@ -977,57 +672,6 @@ void set_internopts_xpprc_and_comline(void) {
 		free(interopt[i]);
 	}
 	Nopts=0;
-}
-
-
-void split_apart(char *bob, char *name, char *value) {
-	int k,i,l;
-	l=strlen(bob);
-	k=strcspn(bob,"=");
-	if(k==l) {
-		value[0]=0;
-		strcpy(name,bob);
-	} else {
-		strncpy(name,bob,k);
-		name[k]='\0';
-		for(i=k+1;i<l;i++) {
-			value[i-k-1]=bob[i];
-		}
-		value[l-k-1]='\0';
-	}
-}
-
-
-void check_for_xpprc(void) {
-	FILE *fp;
-	char rc[XPP_MAX_NAME];
-	char bob[XPP_MAX_NAME];
-	sprintf(rc,"%s/.xpprc",getenv("HOME"));
-	fp=fopen(rc,"r");
-	if(fp==NULL) {
-		/*   plintf("Didnt find rc \n"); */
-		return;
-	}
-	while(!feof(fp)) {
-		bob[0]='\0';
-		fgets(bob,255,fp);
-		if(bob[0]=='@') {
-			stor_internopts(bob);
-		}
-	}
-	fclose(fp);
-}
-
-
-void stor_internopts(char *s1) {
-	int n=strlen(s1);
-	if(Nopts>MAXOPT) {
-		plintf("WARNING -- to many options set %s ignored\n",s1);
-		return;
-	}
-	interopt[Nopts]=(char *)malloc(n+1);
-	sprintf(interopt[Nopts],"%s",s1);
-	Nopts++;
 }
 
 
@@ -2290,3 +1934,227 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	}
 	plintf("!! Option %s not recognized\n",s1);
 }
+
+
+void set_X_vals(void) {
+	/*
+	Set up the default look here.
+	*/
+
+	tfBell=1;
+	/*PaperWhite=0;*/
+	/*
+	No gradients tends to look cleaner but some
+	may prefer gradients improved contrast/readability.
+	*/
+	/*UserGradients=1;
+	*/
+	/*fixed is the new X11 default fixed font. 9x15 is dead and gone.
+	*/
+	if(strlen(big_font_name)==0) {
+		strcpy(big_font_name,"fixed");
+	}
+
+	if(strlen(small_font_name)==0) {
+		strcpy(small_font_name,"6x13");
+	}
+
+	if(strlen(UserBlack)==0) {
+		sprintf(UserBlack,"#%s","000000");
+	}
+
+	if(strlen(UserWhite)==0) {
+		sprintf(UserWhite,"#%s","EDE9E3");
+	}
+
+	if(strlen(UserMainWinColor)==0) {
+		sprintf(UserMainWinColor,"#%s","808080");
+	}
+
+	if(strlen(UserDrawWinColor)==0) {
+		sprintf(UserDrawWinColor,"#%s","FFFFFF");
+	}
+
+	if(UserGradients<0) {
+		UserGradients=1;
+	}
+}
+
+
+void stor_internopts(char *s1) {
+	int n=strlen(s1);
+	if(Nopts>MAXOPT) {
+		plintf("WARNING -- to many options set %s ignored\n",s1);
+		return;
+	}
+	interopt[Nopts]=(char *)malloc(n+1);
+	sprintf(interopt[Nopts],"%s",s1);
+	Nopts++;
+}
+
+
+/* --- Static functions --- */
+static void do_intern_set(char *name1, char *value) {
+	int i;
+	char name[20];
+	convert(name1,name);
+
+	i=find_user_name(ICBOX,name);
+	if(i>-1) {
+		last_ic[i]=atof(value);
+	} else {
+		i=find_user_name(PARAMBOX,name);
+		if(i>-1) {
+			set_val(name,atof(value));
+		} else {
+			set_option(name,value,1,NULL);
+		}
+	}
+	alloc_meth();
+	do_meth();
+}
+
+
+static void fil_flt(FILE *fpt, double *val) {
+	char bob[80];
+	fgets(bob,80,fpt);
+	*val=atof(bob);
+}
+
+static void fil_int(FILE *fpt, int *val) {
+	char bob[80];
+	fgets(bob,80,fpt);
+	*val=atoi(bob);
+}
+
+
+static void read_defaults(FILE *fp) {
+	char bob[100];
+	char *ptr;
+	fgets(bob,80,fp);
+	ptr=get_first(bob," ");
+	if(notAlreadySet.BIG_FONT_NAME) {
+		strcpy(big_font_name,ptr);
+		notAlreadySet.BIG_FONT_NAME=0;
+	}
+	fgets(bob,80,fp);
+	ptr=get_first(bob," ");
+	if(notAlreadySet.SMALL_FONT_NAME) {
+		strcpy(small_font_name,ptr);
+		notAlreadySet.SMALL_FONT_NAME=0;
+	}
+
+	if(notAlreadySet.PaperWhite) {
+		fil_int(fp,&PaperWhite);
+		notAlreadySet.PaperWhite=0;
+	};
+	if(notAlreadySet.IXPLT) {
+		fil_int(fp,&IXPLT);
+		notAlreadySet.IXPLT=0;
+	};
+	if(notAlreadySet.IYPLT) {
+		fil_int(fp,&IYPLT);
+		notAlreadySet.IYPLT=0;
+	};
+	if(notAlreadySet.IZPLT) {
+		fil_int(fp,&IZPLT);
+		notAlreadySet.IZPLT=0;
+	};
+	if(notAlreadySet.AXES) {
+		fil_int(fp,&AXES);
+		notAlreadySet.PaperWhite=0;
+	};
+	if(notAlreadySet.NOUT) {
+		fil_int(fp,&NJMP);
+		notAlreadySet.NOUT=0;
+	};
+	if(notAlreadySet.NMESH) {
+		fil_int(fp,&NMESH);
+		notAlreadySet.NMESH=0;
+	};
+	if(notAlreadySet.METHOD) {
+		fil_int(fp,&METHOD);
+		notAlreadySet.METHOD=0;
+	};
+
+	if(notAlreadySet.TIMEPLOT) {
+		fil_int(fp,&TIMPLOT);
+		notAlreadySet.TIMEPLOT=0;
+	};
+	if(notAlreadySet.MAXSTOR) {
+		fil_int(fp,&MAXSTOR);
+		notAlreadySet.MAXSTOR=0;
+	};
+	if(notAlreadySet.TEND) {
+		fil_flt(fp,&TEND);
+		notAlreadySet.TEND=0;
+	};
+	if(notAlreadySet.DT) {
+		fil_flt(fp,&DELTA_T);
+		notAlreadySet.DT=0;
+	};
+	if(notAlreadySet.T0) {
+		fil_flt(fp,&T0);
+		notAlreadySet.T0=0;
+	};
+	if(notAlreadySet.TRANS) {
+		fil_flt(fp,&TRANS);
+		notAlreadySet.TRANS=0;
+	};
+	if(notAlreadySet.BOUND) {
+		fil_flt(fp,&BOUND);
+		notAlreadySet.BOUND=0;
+	};
+	if(notAlreadySet.DTMIN) {
+		fil_flt(fp,&HMIN);
+		notAlreadySet.DTMIN=0;
+	};
+	if(notAlreadySet.DTMAX) {
+		fil_flt(fp,&HMAX);
+		notAlreadySet.DTMIN=0;
+	};
+	if(notAlreadySet.TOLER) {
+		fil_flt(fp,&TOLER);
+		notAlreadySet.TOLER=0;
+	};
+	if(notAlreadySet.DELAY) {
+		fil_flt(fp,&DELAY);
+		notAlreadySet.DELAY=0;
+	};
+	if(notAlreadySet.XLO) {
+		fil_flt(fp,&MY_XLO);
+		notAlreadySet.XLO=0;
+	};
+	if(notAlreadySet.XHI) {
+		fil_flt(fp,&MY_XHI);
+		notAlreadySet.XHI=0;
+	};
+	if(notAlreadySet.YLO) {
+		fil_flt(fp,&MY_YLO);
+		notAlreadySet.YLO=0;
+	};
+	if(notAlreadySet.YHI) {
+		fil_flt(fp,&MY_YHI);
+		notAlreadySet.YHI=0;
+	};
+}
+
+
+static void split_apart(char *bob, char *name, char *value) {
+	int k,i,l;
+	l=strlen(bob);
+	k=strcspn(bob,"=");
+	if(k==l) {
+		value[0]=0;
+		strcpy(name,bob);
+	} else {
+		strncpy(name,bob,k);
+		name[k]='\0';
+		for(i=k+1;i<l;i++) {
+			value[i-k-1]=bob[i];
+		}
+		value[l-k-1]='\0';
+	}
+}
+
+

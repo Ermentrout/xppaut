@@ -254,22 +254,18 @@ extern INTERN_SET intern_set[MAX_INTERN_SET];
 extern FILE *logfile;
 
 /* --- Functions --- */
-void dump_torus(FILE *fp, int f);
-void load_eqn(void);
-void set_X_vals(void);
-void set_all_vals(void);
-void read_defaults(FILE *fp);
-void fil_flt(FILE *fpt, double *val);
-void fil_int(FILE *fpt, int *val);
 void add_intern_set(char *name, char *does);
+void check_for_xpprc(void);
+void dump_torus(FILE *fp, int f);
 void extract_action(char *ptr);
 void extract_internset(int j);
-void do_intern_set(char *name1, char *value);
+void load_eqn(void);
 int msc(char *s1, char *s2);
+void set_all_vals(void);
 void set_internopts(OptionsSet *mask);
 void set_internopts_xpprc_and_comline(void);
-void split_apart(char *bob, char *name, char *value);
-void check_for_xpprc(void);
-void stor_internopts(char *s1);
 void set_option(char *s1, char *s2,int force,OptionsSet *mask);
+void set_X_vals(void);
+void stor_internopts(char *s1);
+
 #endif /* XPPAUT_LOAD_EQN_H */

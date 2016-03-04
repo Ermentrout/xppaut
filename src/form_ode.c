@@ -1376,12 +1376,6 @@ static void count_object(int type) {
 }
 
 
-static void print_count_of_object(void) {
-	printf("NUMODES=%d \n NUMFIX=%d \n NUMPARAM=%d \n NUMMARK=%d \n NUMVOLT=%d \n NUMAUX=%d \n NUMSOL=%d \n",
-		   NUMODES,NUMFIX,NUMPARAM,NUMMARK,NUMVOLT,NUMAUX,NUMSOL);
-}
-
-
 static int do_new_parser(FILE *fp, char *first, int nnn) {
 	VAR_INFO v;
 	char **markovarrays=NULL;
