@@ -16,37 +16,19 @@
 #include "menus.h"
 #include "pop_list.h"
 
+
+/* --- Forward declarations --- */
+static void add_menu(Window base, int j, int n, char **names, char *key, char **hint);
+static void show_menu(int j);
+static void unshow_menu(int j);
+
+
+/* --- Data --- */
+static MENUDEF my_menus[3];
 int help_menu;
-MENUDEF my_menus[3];
-Window make_unmapped_window();
-
-void flash(int num)
-{
-}
 
 
-void add_menu(Window base, int j, int n, char **names, char *key, char **hint) {
-	Window w;
-	int i;
-	Cursor cursor;
-	cursor=XCreateFontCursor(display,XC_hand2);
-	w=make_plain_unmapped_window(base,0,DCURYs+DCURYb+10,16*DCURX,21*(DCURY+2)-3,1);
-	my_menus[j].base=w;
-	XDefineCursor(display,w,cursor);
-	my_menus[j].names=names;
-	my_menus[j].n=n;
-	my_menus[j].hints=hint;
-	strcpy(my_menus[j].key,key);
-	my_menus[j].title=make_unmapped_window(w,0,0,16*DCURX,DCURY,1);
-	for(i=0;i<n;i++) {
-		my_menus[j].w[i]=make_unmapped_window(w,0,(i+1)*(DCURY+2),16*DCURX,DCURY,0);
-	}
-	my_menus[j].visible=0;
-	XMapRaised(display,my_menus[j].base);
-	XMapSubwindows(display,my_menus[j].base);
-}
-
-
+/* --- Functions --- */
 void create_the_menus(Window base) {
 	char key[30];
 	strcpy(key,"icndwakgufpemtsvxr3b");
@@ -62,30 +44,25 @@ void create_the_menus(Window base) {
 }
 
 
-void show_menu(int j) {
-	XRaiseWindow(display,my_menus[j].base);
-	my_menus[j].visible=1;
-	help_menu=j;
-}
-
-
-void unshow_menu(int j) {
+void draw_help(void) {
+	int i,j=help_menu,n;
 	if(j<0) {
 		return;
 	}
-	my_menus[j].visible=0;
+	if(my_menus[j].visible==0) {
+		return;
+	}
+	n=my_menus[j].n;
+	menu_expose(my_menus[j].title);
+	for(i=0;i<n;i++) {
+		menu_expose(my_menus[j].w[i]);
+	}
 }
 
 
 void help(void) {
 	unshow_menu(help_menu);
 	show_menu(MAIN_MENU);
-}
-
-
-void help_num(void) {
-	unshow_menu(help_menu);
-	show_menu(NUM_MENU);
 }
 
 
@@ -97,6 +74,31 @@ void help_file(void) {
 	}
 	unshow_menu(help_menu);
 	show_menu(FILE_MENU);
+}
+
+
+void help_num(void) {
+	unshow_menu(help_menu);
+	show_menu(NUM_MENU);
+}
+
+
+void menu_button(Window win) {
+	int i,n,j=help_menu;
+	if(j<0) {
+		return;
+	}
+	if(my_menus[j].visible==0) {
+		return;
+	}
+	n=my_menus[j].n;
+	for(i=0;i<n;i++) {
+		if(win==my_menus[j].w[i]) {
+			XSetWindowBorderWidth(display,win,0);
+			commander(my_menus[j].key[i]);
+			return;
+		}
+	}
 }
 
 
@@ -152,36 +154,39 @@ void menu_expose(Window win) {
 }
 
 
-void menu_button(Window win) {
-	int i,n,j=help_menu;
-	if(j<0) {
-		return;
-	}
-	if(my_menus[j].visible==0) {
-		return;
-	}
-	n=my_menus[j].n;
+/* --- Static functions --- */
+static void add_menu(Window base, int j, int n, char **names, char *key, char **hint) {
+	Window w;
+	int i;
+	Cursor cursor;
+	cursor=XCreateFontCursor(display,XC_hand2);
+	w=make_plain_unmapped_window(base,0,DCURYs+DCURYb+10,16*DCURX,21*(DCURY+2)-3,1);
+	my_menus[j].base=w;
+	XDefineCursor(display,w,cursor);
+	my_menus[j].names=names;
+	my_menus[j].n=n;
+	my_menus[j].hints=hint;
+	strcpy(my_menus[j].key,key);
+	my_menus[j].title=make_unmapped_window(w,0,0,16*DCURX,DCURY,1);
 	for(i=0;i<n;i++) {
-		if(win==my_menus[j].w[i]) {
-			XSetWindowBorderWidth(display,win,0);
-			commander(my_menus[j].key[i]);
-			return;
-		}
+		my_menus[j].w[i]=make_unmapped_window(w,0,(i+1)*(DCURY+2),16*DCURX,DCURY,0);
 	}
+	my_menus[j].visible=0;
+	XMapRaised(display,my_menus[j].base);
+	XMapSubwindows(display,my_menus[j].base);
 }
 
 
-void draw_help(void) {
-	int i,j=help_menu,n;
+static void show_menu(int j) {
+	XRaiseWindow(display,my_menus[j].base);
+	my_menus[j].visible=1;
+	help_menu=j;
+}
+
+
+static void unshow_menu(int j) {
 	if(j<0) {
 		return;
 	}
-	if(my_menus[j].visible==0) {
-		return;
-	}
-	n=my_menus[j].n;
-	menu_expose(my_menus[j].title);
-	for(i=0;i<n;i++) {
-		menu_expose(my_menus[j].w[i]);
-	}
+	my_menus[j].visible=0;
 }
