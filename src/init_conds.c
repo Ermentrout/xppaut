@@ -164,6 +164,10 @@ static BoxList ICBox;
 static BoxList DelayBox;
 static BoxList BCBox;
 
+char SLIDERVAR[3][20];
+double SLIDERLO[3] = {0, 0, 0};
+double SLIDERHI[3] = {1, 1, 1};
+
 BoxList ParamBox;
 
 
@@ -2214,26 +2218,26 @@ static void make_par_slider(Window base, int x, int y, int width, int index) {
 	my_par_slide[index].hgt=DCURYs-4;
 
 	if((notAlreadySet.SLIDER1==0) && (index==0)) {
-		strcpy(my_par_slide[index].parname,SLIDER1VAR);
+		strcpy(my_par_slide[index].parname,SLIDERVAR[index]);
 		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDER1LO;
-		my_par_slide[index].hi=SLIDER1HI;
+		my_par_slide[index].lo=SLIDERLO[index];
+		my_par_slide[index].hi=SLIDERHI[index];
 		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
 	}
 
 	if((notAlreadySet.SLIDER2==0) && (index==1)) {
-		strcpy(my_par_slide[index].parname,SLIDER2VAR);
+		strcpy(my_par_slide[index].parname,SLIDERVAR[index]);
 		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDER2LO;
-		my_par_slide[index].hi=SLIDER2HI;
+		my_par_slide[index].lo=SLIDERLO[index];
+		my_par_slide[index].hi=SLIDERHI[index];
 		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
 	}
 
 	if((notAlreadySet.SLIDER3==0) && (index==2)) {
-		strcpy(my_par_slide[index].parname,SLIDER3VAR);
+		strcpy(my_par_slide[index].parname,SLIDERVAR[index]);
 		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDER3LO;
-		my_par_slide[index].hi=SLIDER3HI;
+		my_par_slide[index].lo=SLIDERLO[index];
+		my_par_slide[index].hi=SLIDERHI[index];
 		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
 	}
 }

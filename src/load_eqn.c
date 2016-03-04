@@ -1698,8 +1698,8 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("S1",s1)) {
 		if((notAlreadySet.SLIDER1 || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER1==1)))	{
-			strncpy(SLIDER1VAR,s2,20);
-			SLIDER1VAR[19]= '\0';
+			strncpy(SLIDERVAR[0],s2,20);
+			SLIDERVAR[0][sizeof(SLIDERVAR[0]) - 1] = '\0';
 			notAlreadySet.SLIDER1=0;
 		}
 		return;
@@ -1708,8 +1708,8 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("S2",s1)) {
 		if((notAlreadySet.SLIDER2 || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER2==1))) {
-			strncpy(SLIDER2VAR,s2,20);
-			SLIDER2VAR[19]= '\0';
+			strncpy(SLIDERVAR[1],s2,20);
+			SLIDERVAR[1][sizeof(SLIDERVAR[0]) - 1] = '\0';
 			notAlreadySet.SLIDER2=0;
 		}
 		return;
@@ -1717,8 +1717,8 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("S3",s1)) {
 		if((notAlreadySet.SLIDER3 || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER3==1)))	{
-			strncpy(SLIDER3VAR,s2,20);
-			SLIDER3VAR[19]= '\0';
+			strncpy(SLIDERVAR[2],s2,20);
+			SLIDERVAR[2][sizeof(SLIDERVAR[0]) - 1] = '\0';
 			notAlreadySet.SLIDER3=0;
 		}
 		return;
@@ -1726,7 +1726,7 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("SLO1",s1)) {
 		if((notAlreadySet.SLIDER1LO || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER1LO==1))) {
-			SLIDER1LO=atof(s2);
+			SLIDERLO[0]=atof(s2);
 			notAlreadySet.SLIDER1LO=0;
 		}
 		return;
@@ -1735,7 +1735,7 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("SLO2",s1)) {
 		if((notAlreadySet.SLIDER2LO || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER2LO==1))) {
-			SLIDER2LO=atof(s2);
+			SLIDERLO[1]=atof(s2);
 			notAlreadySet.SLIDER2LO=0;
 		}
 		return;
@@ -1743,7 +1743,7 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("SLO3",s1)) {
 		if((notAlreadySet.SLIDER3LO || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER3LO==1))) {
-			SLIDER3LO=atof(s2);
+			SLIDERLO[2]=atof(s2);
 			notAlreadySet.SLIDER3LO=0;
 		}
 		return;
@@ -1751,7 +1751,7 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("SHI1",s1)) {
 		if((notAlreadySet.SLIDER1HI || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER1HI==1))) {
-			SLIDER1HI=atof(s2);
+			SLIDERHI[0]=atof(s2);
 			notAlreadySet.SLIDER1HI=0;
 		}
 		return;
@@ -1759,7 +1759,7 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("SHI2",s1)) {
 		if((notAlreadySet.SLIDER2HI || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER2HI==1))) {
-			SLIDER2HI=atof(s2);
+			SLIDERHI[0]=atof(s2);
 			notAlreadySet.SLIDER2HI=0;
 		}
 		return;
@@ -1767,7 +1767,7 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("SHI3",s1)) {
 		if((notAlreadySet.SLIDER3HI || force)  ||
 		   ((mask!=NULL) && (mask->SLIDER3HI==1))) {
-			SLIDER3HI=atof(s2);
+			SLIDERHI[0]=atof(s2);
 			notAlreadySet.SLIDER3HI=0;
 		}
 		return;
