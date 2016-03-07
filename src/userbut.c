@@ -10,123 +10,36 @@
 #include "ggets.h"
 #include "kbs.h"
 #include "main.h"
+#include "pop_list.h"
 
 /* --- Macros --- */
 #define USERBUTCOLOR 24
 #define USERBUTMAX 20
 
-int nuserbut=0;
 
-USERBUT userbut[USERBUTMAX];
-Window make_fancy_window();
-
-void user_button_events(XEvent report) {
-	switch(report.type) {
-	case Expose:
-	case MapNotify:
-		user_button_draw(report.xany.window);
-		break;
-	case EnterNotify:
-		user_button_cross(report.xcrossing.window,2);
-		break;
-	case LeaveNotify:
-		user_button_cross(report.xcrossing.window,1);
-		break;
-	case ButtonPress:
-		user_button_press(report.xbutton.window);
-		break;
-	}
-}
+/* --- Types --- */
+typedef struct {
+	Window w;
+	char bname[10];
+	int com;
+} USERBUT;
 
 
-void user_button_press(Window w) {
-	int i;
-	for(i=0;i<nuserbut;i++) {
-		if(w==userbut[i].w)	{
-			run_the_commands(userbut[i].com);
-		}
-	}
-}
+/* --- Forward declarations --- */
+static void  draw_all_user_buttons(void);
+static int find_kbs(char *sc);
+static int get_button_info(char *s, char *bname, char *sc);
+static void user_button_cross(Window w, int b);
+static void user_button_draw(Window w);
+static void user_button_press(Window w);
 
 
-void  draw_all_user_buttons(void) {
-	int i=0;
-	for(i=0;i<nuserbut;i++) {
-		user_button_draw(userbut[i].w);
-	}
-}
+/* --- Data --- */
+static int nuserbut=0;
+static USERBUT userbut[USERBUTMAX];
 
 
-void user_button_draw(Window w) {
-	int i;
-	for(i=0;i<nuserbut;i++) {
-		if(w==userbut[i].w) {
-			XDrawString(display,w,small_gc,5,CURY_OFFs,
-						userbut[i].bname,strlen(userbut[i].bname));
-		}
-	}
-}
-
-
-void user_button_cross(Window w,int b) {
-	int i;
-	for(i=0;i<nuserbut;i++) {
-		if(w==userbut[i].w) {
-			XSetWindowBorderWidth(display,w,b);
-			return;
-		}
-	}
-}
-
-
-int get_button_info(char *s,char *bname,char *sc) {
-	int i=0,j=0,f=0,n=strlen(s);
-	char c;
-	if(n==0) {
-		return(-1);
-	}
-	bname[0]=0;
-	sc[0]=0;
-	while(1) {
-		if(i==n) {
-			break;
-		}
-		c=s[i];
-		if(c==':') {
-			f=1;
-			bname[j]=0;
-			j=0;
-			i++;
-		} else {
-			if(f==0) {
-				bname[j]=c;
-				j++;
-			} else {
-				sc[j]=c;
-				j++;
-			}
-			i++;
-		}
-	}
-	sc[j]=0;
-	return(1);
-}
-
-
-int find_kbs(char *sc) {
-	int i=0;
-	while(1) {
-		if(strcmp(sc,kbs[i].seq)==0) {
-			return kbs[i].com;
-		}
-		i++;
-		if(kbs[i].com==0) {
-			return (-1);
-		}
-	}
-}
-
-
+/* --- Functions --- */
 void add_user_button(char *s) {
 	char bname[10],sc[10];
 	int z;
@@ -176,4 +89,112 @@ void create_user_buttons(int x0,int y0, Window base) {
 		x=x+l+DCURXs;
 	}
 	draw_all_user_buttons();
+}
+
+
+void user_button_events(XEvent report) {
+	switch(report.type) {
+	case Expose:
+	case MapNotify:
+		user_button_draw(report.xany.window);
+		break;
+	case EnterNotify:
+		user_button_cross(report.xcrossing.window,2);
+		break;
+	case LeaveNotify:
+		user_button_cross(report.xcrossing.window,1);
+		break;
+	case ButtonPress:
+		user_button_press(report.xbutton.window);
+		break;
+	}
+}
+
+
+/* --- Static functions --- */
+static void  draw_all_user_buttons(void) {
+	int i=0;
+	for(i=0;i<nuserbut;i++) {
+		user_button_draw(userbut[i].w);
+	}
+}
+
+
+static int find_kbs(char *sc) {
+	int i=0;
+	while(1) {
+		if(strcmp(sc,kbs[i].seq)==0) {
+			return kbs[i].com;
+		}
+		i++;
+		if(kbs[i].com==0) {
+			return (-1);
+		}
+	}
+}
+
+
+static int get_button_info(char *s,char *bname,char *sc) {
+	int i=0,j=0,f=0,n=strlen(s);
+	char c;
+	if(n==0) {
+		return(-1);
+	}
+	bname[0]=0;
+	sc[0]=0;
+	while(1) {
+		if(i==n) {
+			break;
+		}
+		c=s[i];
+		if(c==':') {
+			f=1;
+			bname[j]=0;
+			j=0;
+			i++;
+		} else {
+			if(f==0) {
+				bname[j]=c;
+				j++;
+			} else {
+				sc[j]=c;
+				j++;
+			}
+			i++;
+		}
+	}
+	sc[j]=0;
+	return(1);
+}
+
+
+static void user_button_cross(Window w,int b) {
+	int i;
+	for(i=0;i<nuserbut;i++) {
+		if(w==userbut[i].w) {
+			XSetWindowBorderWidth(display,w,b);
+			return;
+		}
+	}
+}
+
+
+static void user_button_draw(Window w) {
+	int i;
+	for(i=0;i<nuserbut;i++) {
+		if(w==userbut[i].w) {
+			XDrawString(display,w,small_gc,5,CURY_OFFs,
+						userbut[i].bname,strlen(userbut[i].bname));
+		}
+	}
+}
+
+
+static void user_button_press(Window w) {
+	int i;
+	for(i=0;i<nuserbut;i++) {
+		if(w==userbut[i].w)	{
+			run_the_commands(userbut[i].com);
+		}
+	}
 }
