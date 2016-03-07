@@ -192,10 +192,10 @@ void test_fit(void) {
 	if(get_fit_params()==0)
 		return;
 
-	sprintf(collist,fin.collist);
-	sprintf(varlist,fin.varlist);
-	sprintf(parlist1,fin.parlist1);
-	sprintf(parlist2,fin.parlist2);
+	sprintf(collist,"%s",fin.collist);
+	sprintf(varlist,"%s",fin.varlist);
+	sprintf(parlist1,"%s",fin.parlist1);
+	sprintf(parlist2,"%s",fin.parlist2);
 
 	parse_collist(collist,fin.icols,&nvars);
 

@@ -91,7 +91,7 @@ void edit_xpprc(void) {
 		err_msg("Environment variable XPPEDITOR needs to be set.");
 		return;
 	} else {
-		sprintf(editor,ed);
+		sprintf(editor, "%s",ed);
 	}
 
 	child_pid = fork();

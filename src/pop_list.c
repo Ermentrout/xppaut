@@ -639,7 +639,7 @@ int pop_up_list(Window *root, char *title, char **list, char *key,
 				if(ev.xcrossing.window==p.w[i]) {
 					XSetWindowBorderWidth(display,p.w[i],1);
 					if(TipsFlag) {
-						sprintf(httxt,hints[i]);
+						sprintf(httxt,"%s",hints[i]);
 						XClearWindow(display,hwin);
 						XDrawString(display,hwin,gc,5,CURY_OFF,
 									hints[i],strlen(hints[i]));

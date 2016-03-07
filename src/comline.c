@@ -198,8 +198,8 @@ void do_comline(int argc, char **argv) {
 		}
 		if(k==5) {
 			plintf(argv[i+1]);
-			sprintf(batchout,argv[i+1]);
-			sprintf(UserOUTFILE,argv[i+1]);
+			sprintf(batchout,"%s",argv[i+1]);
+			sprintf(UserOUTFILE,"%s",argv[i+1]);
 			i++;
 		}
 		if(k==6) {
