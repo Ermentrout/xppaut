@@ -702,7 +702,7 @@ static void data_find(BROWSER *b) {
 
 	static char *name[]={"*0Variable","Value"};
 	char value[2][25];
-	int col,row;
+	int col,row=0;
 	float val;
 
 	sprintf(value[0],"%s",uvar_names[0]);
@@ -823,12 +823,14 @@ static void data_read(BROWSER *b) {
 	 This data can be plotted etc like anything else
 	*/
 	do {
-		fscanf(fp,"%c",&ch);
-		if( !isspace((int)ch) && (white)) {
+		if(fscanf(fp,"%c",&ch)<1) {
+			plintf("Error reading file %s", fp);
+		}
+		if( !isspace(ch) && (white)) {
 			white=0;
 			++count;
 		}
-		if(isspace((int)ch)  && (1-white)) {
+		if(isspace(ch)  && (1-white)) {
 			white=1;
 		}
 	} while(ch != '\n');
@@ -836,7 +838,9 @@ static void data_read(BROWSER *b) {
 	len=0;
 	while(!feof(fp)) {
 		for(k=0;k<count;k++) {
-			fscanf(fp,"%f ",&z);
+			if(fscanf(fp,"%f ",&z)<1) {
+				plintf("Error reading file %s", fp);
+			}
 			if(k<b->maxcol) {
 				b->data[k][len]=z;
 			}
