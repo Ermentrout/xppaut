@@ -8,6 +8,7 @@
 #include "flags.h"
 #include "gear.h"
 #include "load_eqn.h"
+#include "main.h"
 #include "markov.h"
 #include "numerics.h"
 #include "xpplim.h"
@@ -16,19 +17,22 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-int (*rhs)();
-int mod_euler(/* double *,double *,double,int,int,int *,double * */);
-int rung_kut(/* double *,double *,double,int,int,int *,double * */);
-int adams(/* double *,double *,double,int,int, int*,double * */);
-int abmpc(/* double *,double *,double,int */);
-double pow(),sqrt();
 
-double coefp[]={ 6.875/3.00,-7.375/3.00,4.625/3.00,-.375},
-coefc[]={ .375,2.375/3.00,-.625/3.00,0.125/3.00 };
-double *y_s[4],*y_p[4],*ypred;
+/* --- Forward declarations --- */
+static int abmpc(double *y, double *t, double dt, int neq);
+static int bandfac(double *a, int ml, int mr, int n);
+static void bandsol(double *a, double *b, int ml, int mr, int n);
+static void get_band_jac(double *a, double *y, double t, double *ypnew, double *ypold, int n, double eps, double scal);
+static void get_the_jac(double t, double *y, double *yp, double *ypnew, double *dfdy, int neq, double eps, double scal);
 
-double symp_b[]={7/24.,.75,-1./24};
-double symp_B[]={2/3.,-2./3.,1.0};
+
+/* --- Data --- */
+static double coefp[]={ 6.875/3.00,-7.375/3.00,4.625/3.00,-.375};
+static double coefc[]={ .375,2.375/3.00,-.625/3.00,0.125/3.00 };
+static double symp_b[]={7/24.,.75,-1./24};
+static double symp_B[]={2/3.,-2./3.,1.0};
+static double *y_s[4],*y_p[4],*ypred;
+
 
 /* my first symplectic integrator */
 int symplect3(double *y, double *tim, double dt, int nt, int neq, int *istart, double *work) {
@@ -378,36 +382,6 @@ n1000:
 }
 
 
-int abmpc(double *y, double *t, double dt, int neq) {
-	double x1,x0=*t;
-	int i,k;
-	for(i=0;i<neq;i++) {
-		ypred[i]=0;
-		for(k=0;k<4;k++) {
-			ypred[i]=ypred[i]+coefp[k]*y_p[k][i];
-		}
-		ypred[i]=y[i]+dt*ypred[i];
-	}
-	for(i=0;i<neq;i++) {
-		for(k=3;k>0;k--) {
-			y_p[k][i]=y_p[k-1][i];
-		}
-	}
-	x1=x0+dt;
-	rhs(x1,ypred,y_p[0],neq);
-	for(i=0;i<neq;i++) {
-		ypred[i]=0;
-		for(k=0;k<4;k++) {
-			ypred[i]=ypred[i]+coefc[k]*y_p[k][i];
-		}
-		y[i]=y[i]+dt*ypred[i];
-	}
-	*t=x1;
-	rhs(x1,y,y_p[0],neq);
-	return(1);
-}
-
-
 /* this is rosen  - rosenbock step
  * This uses banded routines as well
  */
@@ -563,57 +537,39 @@ int rosen(double *y, double *tstart, double tfinal, int *istart, int n, double *
 }
 
 
-/* this assumes that yp is already computed */
-void get_the_jac(double t, double *y, double *yp, double *ypnew, double *dfdy, int neq, double eps, double scal) {
-	int i,j;
-	double yold,del,dsy;
-	if(cv_bandflag) {
-		get_band_jac(dfdy,y,t,ypnew,yp,neq,eps,scal);
-	} else {
-		for(i=0;i<neq;i++) {
-			del=eps*MAX(eps,fabs(y[i]));
-			dsy=scal/del;
-			yold=y[i];
-			y[i]=y[i]+del;
-			rhs(t,y,ypnew,neq);
-			for(j=0;j<neq;j++) {
-				dfdy[j*neq+i]=dsy*(ypnew[j]-yp[j]);
-			}
-			y[i]=yold;
+/* --- Static functions --- */
+static int abmpc(double *y, double *t, double dt, int neq) {
+	double x1,x0=*t;
+	int i,k;
+	for(i=0;i<neq;i++) {
+		ypred[i]=0;
+		for(k=0;k<4;k++) {
+			ypred[i]=ypred[i]+coefp[k]*y_p[k][i];
+		}
+		ypred[i]=y[i]+dt*ypred[i];
+	}
+	for(i=0;i<neq;i++) {
+		for(k=3;k>0;k--) {
+			y_p[k][i]=y_p[k-1][i];
 		}
 	}
-}
-
-
-void get_band_jac(double *a, double *y, double t, double *ypnew, double *ypold, int n, double eps, double scal) {
-	int ml=cv_bandlower,mr=cv_bandupper;
-	int i,j,k,n1=n-1,mt=ml+mr+1;
-	double yhat;
-	double dy;
-	double dsy;
-
-	for(i=0;i<(n*mt);i++) {
-		a[i]=0.0;
-	}
-	for(i=0;i<n;i++) {
-		yhat=y[i];
-		dy=eps*(eps+fabs(yhat));
-		dsy=scal/dy;
-		y[i] += dy;
-		rhs(t,y,ypnew,n);
-		for(j=-ml;j<=mr;j++) {
-			k=i-j;
-			if(k<0 || k>n1) {
-				continue;
-			}
-			a[k*mt+j+ml]=dsy*(ypnew[k]-ypold[k]);
+	x1=x0+dt;
+	rhs(x1,ypred,y_p[0],neq);
+	for(i=0;i<neq;i++) {
+		ypred[i]=0;
+		for(k=0;k<4;k++) {
+			ypred[i]=ypred[i]+coefc[k]*y_p[k][i];
 		}
-		y[i]=yhat;
+		y[i]=y[i]+dt*ypred[i];
 	}
+	*t=x1;
+	rhs(x1,y,y_p[0],neq);
+	return(1);
 }
+
 
 /* factors the matrix */
-int bandfac(double *a, int ml, int mr, int n) {
+static int bandfac(double *a, int ml, int mr, int n) {
 	int i,j,k;
 	int row,rowi,m,r0,ri0;
 	double al;
@@ -653,7 +609,7 @@ int bandfac(double *a, int ml, int mr, int n) {
 
 
 /* requires that the matrix be factored */
-void bandsol(double *a, double *b, int ml, int mr, int n) {
+static void bandsol(double *a, double *b, int ml, int mr, int n) {
 	int i,j,k,r0;
 
 	int mt=ml+mr+1;
@@ -675,3 +631,54 @@ void bandsol(double *a, double *b, int ml, int mr, int n) {
 		}
 	}
 }
+
+
+/* this assumes that yp is already computed */
+static void get_the_jac(double t, double *y, double *yp, double *ypnew, double *dfdy, int neq, double eps, double scal) {
+	int i,j;
+	double yold,del,dsy;
+	if(cv_bandflag) {
+		get_band_jac(dfdy,y,t,ypnew,yp,neq,eps,scal);
+	} else {
+		for(i=0;i<neq;i++) {
+			del=eps*MAX(eps,fabs(y[i]));
+			dsy=scal/del;
+			yold=y[i];
+			y[i]=y[i]+del;
+			rhs(t,y,ypnew,neq);
+			for(j=0;j<neq;j++) {
+				dfdy[j*neq+i]=dsy*(ypnew[j]-yp[j]);
+			}
+			y[i]=yold;
+		}
+	}
+}
+
+
+static void get_band_jac(double *a, double *y, double t, double *ypnew, double *ypold, int n, double eps, double scal) {
+	int ml=cv_bandlower,mr=cv_bandupper;
+	int i,j,k,n1=n-1,mt=ml+mr+1;
+	double yhat;
+	double dy;
+	double dsy;
+
+	for(i=0;i<(n*mt);i++) {
+		a[i]=0.0;
+	}
+	for(i=0;i<n;i++) {
+		yhat=y[i];
+		dy=eps*(eps+fabs(yhat));
+		dsy=scal/dy;
+		y[i] += dy;
+		rhs(t,y,ypnew,n);
+		for(j=-ml;j<=mr;j++) {
+			k=i-j;
+			if(k<0 || k>n1) {
+				continue;
+			}
+			a[k*mt+j+ml]=dsy*(ypnew[k]-ypold[k]);
+		}
+		y[i]=yhat;
+	}
+}
+

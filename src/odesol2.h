@@ -15,12 +15,7 @@ int euler(double *y, double *tim, double dt, int nt, int neq, int *istart, doubl
 int mod_euler(double *y, double *tim, double dt, int nt, int neq, int *istart, double *work);
 int rung_kut(double *y, double *tim, double dt, int nt, int neq, int *istart, double *work);
 int adams(double *y, double *tim, double dt, int nstep, int neq, int *ist, double *work);
-int abmpc(double *y, double *t, double dt, int neq);
 int rb23(double *y, double *tstart, double tfinal, int *istart, int n, double *work, int *ierr);
 int rosen(double *y, double *tstart, double tfinal, int *istart, int n, double *work, int *ierr);
-void get_the_jac(double t, double *y, double *yp, double *ypnew, double *dfdy, int neq, double eps, double scal);
-void get_band_jac(double *a, double *y, double t, double *ypnew, double *ypold, int n, double eps, double scal);
-int bandfac(double *a, int ml, int mr, int n);
-void bandsol(double *a, double *b, int ml, int mr, int n);
 
 #endif /* XPPAUT_ODESOL2_H */

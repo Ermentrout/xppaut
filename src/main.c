@@ -116,6 +116,8 @@ char UserDrawWinColor[8];
 char UserBGBitmap[XPP_MAX_NAME];
 char UserOUTFILE[XPP_MAX_NAME];
 
+int (*rhs)();
+
 int allwinvis=0;
 int DCURYb,DCURXb,CURY_OFFb;
 int DCURYs,DCURXs,CURY_OFFs;
