@@ -41,7 +41,7 @@ static COMPLEX rtoc(double x, double y);
 
 /* --- Functions --- */
 void do_delay_sing(double *x, double eps, double err, double big, int maxit, int n, int *ierr, float *stabinfo) {
-	double rr[2];
+	double rr[2] = {0.0};
 	double colnorm=0,colmax,colsum;
 	double *work,old_x[MAXODE],sign;
 	double *coef,yp[MAXODE],y[MAXODE],xp[MAXODE],dx;
