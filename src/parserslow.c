@@ -85,8 +85,6 @@ double lgamma();
 /* --- Forward declarations --- */
 static int duplicate_name(char *junk);
 static int add_constant(char *junk);
-static int get_type(int index);
-static int check_num(int *tok, double value);
 static int is_ufun(int x);
 static int is_ucon(int x);
 static int is_uvar(int x);
@@ -388,11 +386,6 @@ int get_var_index(char *name) {
 		return(com%MAXTYPE);
 	}
 	return(-1);
-}
-
-
-int get_type(int index) {
-	return(my_symb[index].com);
 }
 
 
@@ -793,23 +786,6 @@ int add_ufun(char *junk, char *expr, int narg) {
 		printf(" ERROR IN FUNCTION DEFINITION\n");
 	}
 	return(1);
-}
-
-
-int check_num(int *tok, double value) {
-	int bob,in,i;
-
-	for(i=0;i<NSYM;i++) {
-		if(strncmp(my_symb[i].name,"NUM##",5)==0) {
-			bob=my_symb[i].com;
-			in=bob%MAXTYPE;
-			if(constants[in]==value) {
-				*tok=i;
-				return(1);
-			}
-		}
-	}
-	return(0);
 }
 
 
@@ -1222,8 +1198,8 @@ int gives_number(int token) {
 	if(token==INDX || token==NUMTOK) {
 		return(1);
 	}
-	if(i1==FUN1TYPE && !unary_sym(token) ||
-	   i1==FUN2TYPE && !binary_sym(token)) {
+	if((i1==FUN1TYPE && !unary_sym(token)) ||
+	   (i1==FUN2TYPE && !binary_sym(token))) {
 		return(1); /* two-variable function */
 	}
 	if (i1 == USTACKTYPE || isvar(i1) || iscnst(i1) || i1 == TABTYPE ||
