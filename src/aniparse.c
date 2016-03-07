@@ -577,7 +577,9 @@ int writeframe(char *filename, Window window, int wid, int hgt) {
 	  bbp,CMSK,CSHIFT,CMULT); */
 	}
 	sprintf(head,"P6\n%d %d\n255\n",ximage->width,ximage->height);
-	write(fd,head,strlen(head));
+	if(write(fd,head,strlen(head))<0) {
+		plintf("Error writing file %s", fd);
+	}
 	area=ximage->width*ximage->height;
 	pixel=(unsigned char*)ximage->data;
 	out=(unsigned char *)malloc(3*area);
@@ -613,7 +615,9 @@ int writeframe(char *filename, Window window, int wid, int hgt) {
 			}
 		}
 	}
-	write(fd,out,area*3);
+	if(write(fd,out,area*3)<0) {
+		plintf("Error writing file %s", fd);
+	}
 	close(fd);
 	free(out);
 	free(ximage);
