@@ -774,7 +774,7 @@ void svg_restore(void) {
 	if(MyGraph->Nullrestore) {
 		restore_nullclines();
 	}
-	svg_last_pt_off();
+	LastPtLine=0;
 	restore(0,my_browser.maxrow);
 	do_axes();
 	if(Xup) {

@@ -17,14 +17,79 @@
 /* --- Macros --- */
 #define POINT_TYPES 8
 
-char SVGLINETYPE;
+
+/* --- Data --- */
+static char SVGLINETYPE;
+static int cur_RGB[3];
+static int DOING_SVG_COLOR=0;
+static int DO_MARKER=0;
 
 FILE *svgfile;
-int cur_RGB[3];
-int DOING_SVG_COLOR=0;
-int DO_MARKER=0;
+
 
 /* --- Functions --- */
+void special_put_text_svg(int x, int y, char *str, int size) {
+	char anchor[7];
+
+	switch(TextJustify) {
+	case TJ_LEFT:
+		sprintf(anchor,"start");
+		break;
+	case TJ_CENTER:
+		sprintf(anchor,"middle");
+		break;
+	case TJ_RIGHT:
+		sprintf(anchor,"end");
+		break;
+	default:
+		sprintf(anchor,"start");
+		break;
+	}
+	fprintf(svgfile,"\n      <text class=\"xpptext%d\" text-anchor=\"%s\" x=\"%d\"  y=\"%d\"\n",size,anchor,x,y);
+	fprintf(svgfile,"      >%s</text>\n",str);
+}
+
+
+void svg_bead(int x, int y) {
+	DO_MARKER=1;
+}
+
+
+void svg_do_color(int color) {
+	int r,g,b;
+	if(PltFmtFlag==SCRNFMT	||
+	   PltFmtFlag==PSFMT	||
+	   PS_ColorFlag==0) {
+		return;
+	}
+	get_svg_color(color,&r,&g,&b);
+	cur_RGB[0]=r;cur_RGB[1]=g;cur_RGB[2]=b;
+	DOING_SVG_COLOR=1;
+}
+
+
+void svg_end(void) {
+	fprintf(svgfile,"%s\n","</svg>");
+	fclose(svgfile);
+	PltFmtFlag=SCRNFMT;
+	DOING_SVG_COLOR=0;
+	if(Xup) {
+		init_x11();
+	}
+}
+
+
+void svg_frect(int x, int y, int w, int h) {
+	double gray = 0;
+	if (DOING_SVG_COLOR) {
+		fprintf(svgfile,"      <rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"stroke:rgb(%d,%d,%d);fill:rgb(%d,%d,%d);\"/>",x,y,w,h,cur_RGB[0],cur_RGB[1],cur_RGB[2],cur_RGB[0],cur_RGB[1],cur_RGB[2]);
+	} else {
+		gray = (0.299*cur_RGB[0] + 0.587*cur_RGB[1] + 0.114*cur_RGB[2]);
+		fprintf(svgfile,"      <rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"stroke:rgb(%d,%d,%d);fill:rgb(%d,%d,%d);\"/>",x,y,w,h,(int)gray,(int)gray,(int)gray,(int)gray,(int)gray,(int)gray);
+	}
+}
+
+
 int svg_init(char *filename, int color) {
 	FILE *fp;
 	init_svg();
@@ -240,63 +305,6 @@ int svg_init(char *filename, int color) {
 }
 
 
-void svg_write(char *str) {
-	fprintf(svgfile,"%s\n",str);
-}
-
-
-void svg_stroke(void) {
-}
-
-
-void svg_do_color(int color) {
-	int r,g,b;
-	if(PltFmtFlag==SCRNFMT	||
-	   PltFmtFlag==PSFMT	||
-	   PS_ColorFlag==0) {
-		return;
-	}
-	get_svg_color(color,&r,&g,&b);
-	cur_RGB[0]=r;cur_RGB[1]=g;cur_RGB[2]=b;
-	DOING_SVG_COLOR=1;
-}
-
-
-void svg_setcolor(int color) {
-}
-
-
-void svg_end(void) {
-	svg_write("</svg>");
-	fclose(svgfile);
-	PltFmtFlag=SCRNFMT;
-	DOING_SVG_COLOR=0;
-	if(Xup) {
-		init_x11();
-	}
-}
-
-
-void svg_bead(int x, int y) {
-	DO_MARKER=1;
-}
-
-void svg_frect(int x, int y, int w, int h) {
-	double gray = 0;
-	if (DOING_SVG_COLOR) {
-		fprintf(svgfile,"      <rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"stroke:rgb(%d,%d,%d);fill:rgb(%d,%d,%d);\"/>",x,y,w,h,cur_RGB[0],cur_RGB[1],cur_RGB[2],cur_RGB[0],cur_RGB[1],cur_RGB[2]);
-	} else {
-		gray = (0.299*cur_RGB[0] + 0.587*cur_RGB[1] + 0.114*cur_RGB[2]);
-		fprintf(svgfile,"      <rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"stroke:rgb(%d,%d,%d);fill:rgb(%d,%d,%d);\"/>",x,y,w,h,(int)gray,(int)gray,(int)gray,(int)gray,(int)gray,(int)gray);
-	}
-}
-
-
-void svg_last_pt_off(void) {
-	LastPtLine=0;
-}
-
-
 void svg_line(int xp1, int yp1, int xp2, int yp2){
 	if (DOING_SVG_COLOR) {
 		if (DOING_AXES)	{
@@ -348,15 +356,12 @@ void svg_line(int xp1, int yp1, int xp2, int yp2){
 }
 
 
-void chk_svg_lines(void) {
-}
-
-
 void svg_linetype(int linetype) {
 	char *line = "ba0123456789c";
 	SVGLINETYPE=line[(linetype%11)+2];
 	PS_Lines=0;
 }
+
 
 void svg_point(int x, int y) {
 	char svgcol[8];
@@ -392,43 +397,6 @@ void svg_point(int x, int y) {
 	DOING_SVG_COLOR=0;
 }
 
-
-void svg_fnt(int cf, int scale) {
-}
-
-void svg_show(char *str, int type) {
-}
-
-void svg_abs(int x, int y) {
-}
-
-void svg_rel(int x, int y) {
-}
-
-void special_put_text_svg(int x, int y, char *str, int size) {
-	char anchor[7];
-
-	switch(TextJustify) {
-	case TJ_LEFT:
-		sprintf(anchor,"start");
-		break;
-	case TJ_CENTER:
-		sprintf(anchor,"middle");
-		break;
-	case TJ_RIGHT:
-		sprintf(anchor,"end");
-		break;
-	default:
-		sprintf(anchor,"start");
-		break;
-	}
-	fprintf(svgfile,"\n      <text class=\"xpptext%d\" text-anchor=\"%s\" x=\"%d\"  y=\"%d\"\n",size,anchor,x,y);
-	fprintf(svgfile,"      >%s</text>\n",str);
-}
-
-
-void fancy_svg_text(int x, int y, char *str, int size, int font) {
-}
 
 void svg_text(int x, int y, char *str) {
 	char anchor[7];
