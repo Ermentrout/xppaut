@@ -7,6 +7,7 @@
 
 #include "ggets.h"
 #include "main.h"
+#include "many_pops.h"
 
 /* --- Macros --- */
 #define RED	20
@@ -46,6 +47,9 @@ char *color_names[]={"WHITE","RED","REDORANGE","ORANGE","YELLOWORANGE",
 					 "YELLOW","YELLOWGREEN","GREEN","BLUEGREEN",
 					 "BLUE","PURPLE","BLACK"};
 
+char ColorVia[15]="speed";
+double ColorViaLo=0,ColorViaHi=1;
+int ColorizeFlag=0;
 int color_total,COLOR;
 int periodic=0;
 int custom_color=0;
@@ -182,6 +186,11 @@ void set_color(int col) {
 }
 
 
+void set_colorization_stuff(void) {
+	user_set_color_par(ColorizeFlag,ColorVia,ColorViaLo,ColorViaHi);
+}
+
+
 void set_scolor(int col) {
 	if(col<0) {
 		XSetForeground(display,small_gc,GrBack);
@@ -194,6 +203,31 @@ void set_scolor(int col) {
 		} else {
 			XSetForeground(display,small_gc,GrFore);
 		}
+	}
+}
+
+
+void user_set_color_par(int flag,char *via,double lo,double hi) {
+	int ivar;
+	MyGraph->min_scale=lo;
+	if(hi>lo) {
+		MyGraph->color_scale=(hi-lo);
+	} else {
+		MyGraph->color_scale=1;
+	}
+	if(strncasecmp("speed",via,5)==0) {
+		MyGraph->ColorFlag=1;
+	} else {
+		find_variable(via,&ivar);
+		if(ivar>=0) {
+			MyGraph->ColorValue=ivar;
+			MyGraph->ColorFlag=2;
+		} else {
+			MyGraph->ColorFlag=0; /* no valid colorizing */
+		}
+	}
+	if(flag==0) { /* force overwrite  */
+		MyGraph->ColorFlag=0;
 	}
 }
 

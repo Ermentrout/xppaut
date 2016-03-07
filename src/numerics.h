@@ -43,6 +43,5 @@ void ruelle(void);
 void set_col_par_com(int i);
 void set_delay(void);
 void set_total(double total);
-void user_set_color_par(int flag,char *via,double lo,double hi);
 
 #endif /* XPPAUT_NUMERICS_H */

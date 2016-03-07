@@ -472,31 +472,6 @@ void get_method(void) {
 }
 
 
-void user_set_color_par(int flag,char *via,double lo,double hi) {
-	int ivar;
-	MyGraph->min_scale=lo;
-	if(hi>lo) {
-		MyGraph->color_scale=(hi-lo);
-	} else {
-		MyGraph->color_scale=1;
-	}
-	if(strncasecmp("speed",via,5)==0) {
-		MyGraph->ColorFlag=1;
-	} else {
-		find_variable(via,&ivar);
-		if(ivar>=0) {
-			MyGraph->ColorValue=ivar;
-			MyGraph->ColorFlag=2;
-		} else {
-			MyGraph->ColorFlag=0; /* no valid colorizing */
-		}
-	}
-	if(flag==0) { /* force overwrite  */
-		MyGraph->ColorFlag=0;
-	}
-}
-
-
 void set_col_par_com(int i) {
 	int j,ivar;
 	double temp[2];
