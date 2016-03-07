@@ -1265,10 +1265,14 @@ static void read_bd(FILE *fp) {
 	int oldtype,type,oldbr,br,ncrv=0,len,f2;
 	float x[8000],ylo[8000],yhi[8000];
 	len=0;
-	fscanf(fp,"%g %g %g %d %d %d",&x[len],&ylo[len],&yhi[len],&oldtype,&oldbr,&f2);
+	if(fscanf(fp,"%g %g %g %d %d %d",&x[len],&ylo[len],&yhi[len],&oldtype,&oldbr,&f2)<6) {
+		plintf("Error reading variables from file %s", fp);
+	}
 	len++;
 	while(!feof(fp)) {
-		fscanf(fp,"%g %g %g %d %d %d",&x[len],&ylo[len],&yhi[len],&type,&br,&f2);
+		if(fscanf(fp,"%g %g %g %d %d %d",&x[len],&ylo[len],&yhi[len],&type,&br,&f2)<6) {
+			plintf("Error reading variables from file %s", fp);
+		}
 		if(type==oldtype && br==oldbr) {
 			len++;
 		} else {
@@ -1315,7 +1319,7 @@ static void scroll_window(void) {
 	float ylo=MyGraph->ylo;
 	float xhi=MyGraph->xhi;
 	float yhi=MyGraph->yhi;
-	float dx,dy;
+	float dx=0.0,dy=0.0;
 	int alldone=0;
 	XSelectInput(display,draw_win,
 				 KeyPressMask|ButtonPressMask|ButtonReleaseMask|
