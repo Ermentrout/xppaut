@@ -185,7 +185,7 @@ int one_step_int(double *y, double t0, double t1, int *istart) {
 
 void test_fit(void) {
 	double *yfit,a[1000],y0[1000];
-	int nvars,npars,i,ok;
+	int nvars = 0,npars,i,ok;
 	char collist[30],parlist1[30],parlist2[30],varlist[30];
 	fin.nvars=0;
 	fin.npars=0;
@@ -741,10 +741,14 @@ static int run_fit(char *filename, int npts, int npars, int nvars, int maxiter, 
 	/* load up the data to fit   */
 
 	for(i=0;i<npts;i++) {
-		fscanf(fp,"%lg ",&t);
+		if(fscanf(fp,"%lg ",&t)<1) {
+			plintf("Error reading file %s", fp);
+		}
 
 		for(j=0;j<ndim-1;j++) {
-			fscanf(fp,"%lg ",&ytemp[j]);
+			if(fscanf(fp,"%lg ",&ytemp[j])<1) {
+				plintf("Error reading file %s", fp);
+			}
 		}
 		t0[i]=t;
 
