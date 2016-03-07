@@ -47,9 +47,36 @@ and save the file.
 #include "ggets.h"
 #include "load_eqn.h"
 
-char cur_dir[XPP_MAX_NAME];
+/* --- Forward declarations --- */
+static int cmpstringp(const void *p1, const void *p2);
+static int fil_count(char *direct, int *ndir, int *nfil, char *wild, int *mld, int *mlf);
+static int IsDirectory(char *root, char *path);
+static void MakeFullPath(char *root, char *filename, char *pathname);
+static int star(char *string, char *pattern);
+static int wild_match(char *string, char *pattern);
 
+
+/* --- Data --- */
+char cur_dir[XPP_MAX_NAME];
 FILEINFO my_ff;
+
+
+/* --- Functions --- */
+int change_directory(char *path) {
+	if(path == NULL) {
+		*cur_dir = '\0';
+		return (0);
+	}
+	if(chdir(path) == -1) {
+		plintf("Can't go to directory %s\n", path);
+		return (1);
+	}
+	if(get_directory(cur_dir) != 0) {/* get cwd */
+		return (0);
+	} else {
+		return (1);
+	}
+}
 
 
 void free_finfo(FILEINFO *ff) {
@@ -65,13 +92,73 @@ void free_finfo(FILEINFO *ff) {
 }
 
 
-int cmpstringp(const void *p1, const void *p2) {
-	/* The actual arguments to this function are "pointers to
-	   pointers to char", but strcmp(3) arguments are "pointers
-	   to char", hence the following cast plus dereference */
-	return strcmp(* (char * const *) p1, * (char * const *) p2);
+int get_directory(char *direct) {
+#if defined(SYSV) || defined(SVR4)
+	extern char	   *getcwd();
+#else
+	extern char	   *getwd();
+#endif
+
+#if defined(SYSV) || defined(SVR4)
+	if(getcwd(direct, 1024) == NULL) {	/* get current working dir */
+		plintf("%s\n", "Can't get current directory");
+#else
+	if(getwd(direct) == NULL) {/* get current working dir */
+		plintf("%s\n", direct);	/* err msg is in directory */
+#endif
+		*direct = '\0';
+		return 0;
+	}
+	return 1;
 }
 
+
+int get_fileinfo(char *wild, char *direct, FILEINFO *ff) {
+	int i,ans;
+	DIR *dirp;
+	int mlf,mld;
+	int nf,nd;
+	struct dirent *dp;
+
+	ans=fil_count(direct,&nd,&nf,wild,&mld,&mlf);
+	if(ans==0){
+		return 0;
+	}
+	ff->nfiles=nf;
+	ff->ndirs=nd;
+	ff->dirnames=(char **)malloc(nd*sizeof(char *));
+	ff->filenames=(char **)malloc(nf*sizeof(char *));
+	for(i=0;i<nd;i++) {
+		ff->dirnames[i]=(char *)malloc(mld+2);
+	}
+	for(i=0;i<nf;i++) {
+		ff->filenames[i]=(char *)malloc(mlf+2);
+	}
+	dirp=opendir(direct);
+	dp=readdir(dirp);
+	nf=0;
+	nd=0;
+	while(dp != NULL) {
+		if(IsDirectory(direct,dp->d_name)) {
+			strcpy(ff->dirnames[nd],dp->d_name);
+			nd++;
+		} else {
+			if(wild_match(dp->d_name,wild)) {
+				strcpy(ff->filenames[nf],dp->d_name);
+				nf++;
+			}
+		}
+		dp=readdir(dirp);
+	}
+	if(nd > 0) {
+		qsort(&(ff->dirnames[0]),nd, sizeof(char *), cmpstringp);
+	}
+	if(nf > 0) {
+		qsort(&(ff->filenames[0]),nf, sizeof(char *), cmpstringp);
+	}
+	closedir(dirp);
+	return 1;
+}
 
 
 int get_fileinfo_tab(char *wild, char *direct, FILEINFO *ff,char *wild2) {
@@ -128,55 +215,16 @@ int get_fileinfo_tab(char *wild, char *direct, FILEINFO *ff,char *wild2) {
 }
 
 
-int get_fileinfo(char *wild, char *direct, FILEINFO *ff) {
-	int i,ans;
-	DIR *dirp;
-	int mlf,mld;
-	int nf,nd;
-	struct dirent *dp;
-
-	ans=fil_count(direct,&nd,&nf,wild,&mld,&mlf);
-	if(ans==0){
-		return 0;
-	}
-	ff->nfiles=nf;
-	ff->ndirs=nd;
-	ff->dirnames=(char **)malloc(nd*sizeof(char *));
-	ff->filenames=(char **)malloc(nf*sizeof(char *));
-	for(i=0;i<nd;i++) {
-		ff->dirnames[i]=(char *)malloc(mld+2);
-	}
-	for(i=0;i<nf;i++) {
-		ff->filenames[i]=(char *)malloc(mlf+2);
-	}
-	dirp=opendir(direct);
-	dp=readdir(dirp);
-	nf=0;
-	nd=0;
-	while(dp != NULL) {
-		if(IsDirectory(direct,dp->d_name)) {
-			strcpy(ff->dirnames[nd],dp->d_name);
-			nd++;
-		} else {
-			if(wild_match(dp->d_name,wild)) {
-				strcpy(ff->filenames[nf],dp->d_name);
-				nf++;
-			}
-		}
-		dp=readdir(dirp);
-	}
-	if(nd > 0) {
-		qsort(&(ff->dirnames[0]),nd, sizeof(char *), cmpstringp);
-	}
-	if(nf > 0) {
-		qsort(&(ff->filenames[0]),nf, sizeof(char *), cmpstringp);
-	}
-	closedir(dirp);
-	return 1;
+/* --- Static functions --- */
+static int cmpstringp(const void *p1, const void *p2) {
+	/* The actual arguments to this function are "pointers to
+	   pointers to char", but strcmp(3) arguments are "pointers
+	   to char", hence the following cast plus dereference */
+	return strcmp(* (char * const *) p1, * (char * const *) p2);
 }
 
 
-int fil_count(char *direct, int *ndir, int *nfil, char *wild, int *mld, int *mlf) {
+static int fil_count(char *direct, int *ndir, int *nfil, char *wild, int *mld, int *mlf) {
 	DIR *dirp;
 	int l;
 	struct dirent *dp;
@@ -213,45 +261,7 @@ int fil_count(char *direct, int *ndir, int *nfil, char *wild, int *mld, int *mlf
 }
 
 
-int change_directory(char *path) {
-	if(path == NULL) {
-		*cur_dir = '\0';
-		return (0);
-	}
-	if(chdir(path) == -1) {
-		plintf("Can't go to directory %s\n", path);
-		return (1);
-	}
-	if(get_directory(cur_dir) != 0) {/* get cwd */
-		return (0);
-	} else {
-		return (1);
-	}
-}
-
-
-int get_directory(char *direct) {
-#if defined(SYSV) || defined(SVR4)
-	extern char	   *getcwd();
-#else
-	extern char	   *getwd();
-#endif
-
-#if defined(SYSV) || defined(SVR4)
-	if(getcwd(direct, 1024) == NULL) {	/* get current working dir */
-		plintf("%s\n", "Can't get current directory");
-#else
-	if(getwd(direct) == NULL) {/* get current working dir */
-		plintf("%s\n", direct);	/* err msg is in directory */
-#endif
-		*direct = '\0';
-		return 0;
-	}
-	return 1;
-}
-
-
-int IsDirectory(char *root, char *path) {
+static int IsDirectory(char *root, char *path) {
 	char	    fullpath[XPP_MAX_NAME];
 	struct stat	    statbuf;
 
@@ -269,16 +279,27 @@ int IsDirectory(char *root, char *path) {
 	}
 }
 
+
 /* Function:	MakeFullPath() creates the full pathname for the given file.
  * Arguments:	filename:	Name of the file in question.
  *		pathname:	Buffer for full name.
  * Returns:	Nothing.
  * Notes:
  */
-void MakeFullPath(char *root, char *filename, char *pathname) {
+static void MakeFullPath(char *root, char *filename, char *pathname) {
 	strcpy(pathname, root);
 	strcat(pathname, "/");
 	strcat(pathname, filename);
+}
+
+
+static int star(char *string, char *pattern) {
+	while(wild_match(string, pattern) == 0){
+		if(*++string == '\0') {
+			return 0;
+		}
+	}
+	return 1;
 }
 
 /* wildmatch.c - Unix-style command line wildcards
@@ -318,12 +339,11 @@ void MakeFullPath(char *root, char *filename, char *pathname) {
 
 /* The character that inverts a character class; '!' or '^'. */
 #define INVERT '!'
-static int	star();
 
 /* Return nonzero if `string' matches Unix-style wildcard pattern
    `pattern'; zero if not. */
 
-int wild_match(char *string, char *pattern) {
+static int wild_match(char *string, char *pattern) {
 	int		    prev;	/* Previous character in character class. */
 	int		    matched;	/* If 1, character class has been matched. */
 	int		    reverse;	/* If 1, character class is inverted. */
@@ -367,14 +387,4 @@ int wild_match(char *string, char *pattern) {
 		}
 	}
 	return *string == '\0';
-}
-
-
-static int star(char *string, char *pattern) {
-	while(wild_match(string, pattern) == 0){
-		if(*++string == '\0') {
-			return 0;
-		}
-	}
-	return 1;
 }

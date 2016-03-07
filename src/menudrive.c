@@ -3,6 +3,7 @@
  */
 #include "menudrive.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +19,7 @@
 #include "extra.h"
 #include "ggets.h"
 #include "graf_par.h"
+#include "histogram.h"
 #include "init_conds.h"
 #include "integrate.h"
 #include "kinescope.h"
