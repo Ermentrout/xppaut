@@ -38,32 +38,19 @@
 #define ABORT -5
 #define ABORT_ALL -6
 
+/* --- Forward declarations --- */
+static void bad_shoot(int iret);
+static void bvshoot(double *y, double *yend, double err, double eps, int maxit, int *iret, int n, int ishow, int iper, int ipar, int ivar, double sect);
+static void do_sh_range(double *ystart, double *yend);
+static void last_shot(int flag);
+static int set_up_periodic(int *ipar, int *ivar, double *sect, int *ishow);
+static int set_up_sh_range(void);
+
+/* --- Data --- */
 SHOOT_RANGE shoot_range;
 
-double atof();
-double evaluate();
 
-/*   more general mixed boundary types   */
-void do_bc(double *y__0, double t0, double *y__1, double t1, double *f, int n) {
-	int n0=PrimeStart;
-	int i;
-
-	SETVAR(0,t0);
-	SETVAR(n0,t1);
-
-	for(i=0;i<n;i++) {
-		SETVAR(i+1,y__0[i]);
-		SETVAR(i+n0+1,y__1[i]);
-	}
-	for(i=n;i<n+FIX_VAR;i++) {
-		SETVAR(i+1,evaluate(my_ode[i]));
-	}
-	for(i=0;i<n;i++) {
-		f[i]=evaluate(my_bc[i].com);
-	}
-}
-
-
+/* --- Functions --- */
 void compile_bvp(void) {
 	int i;
 	int len;
@@ -86,154 +73,24 @@ void compile_bvp(void) {
 }
 
 
-void reset_bvp(void) {
-	BVP_FLAG=1;
-}
+/*   more general mixed boundary types   */
+void do_bc(double *y__0, double t0, double *y__1, double t1, double *f, int n) {
+	int n0=PrimeStart;
+	int i;
 
+	SETVAR(0,t0);
+	SETVAR(n0,t1);
 
-void init_shoot_range(char *s) {
-	strcpy(shoot_range.item,s);
-	shoot_range.phigh=1.0;
-	shoot_range.plow=0.0;
-	shoot_range.side=0;
-	shoot_range.cycle=0;
-	shoot_range.steps=10;
-	shoot_range.movie=0;
-}
-
-void bad_shoot(int iret) {
-	switch(iret) {
-	case NOCHANGE:
-		err_msg("No change from last point. Saving anyway");
-		break;
-	case GOODSHOT:
-		break;
-	case NUMICS:
-		err_msg("Number BCS not equal number ICs");
-		break;
-	case TOOMANY:
-		err_msg("Maximum iterates exceeded");
-		break;
-	case BADJAC:
-		err_msg("Bad Jacobian -- uninvertable");
-		break;
-	case BADINT:
-		err_msg("Unable to complete integration");
-		break;
-	case ABORT:
-		err_msg("ABORT integration");
-		break;
-	case ABORT_ALL:
-		err_msg("ABORT all");
-		break;
+	for(i=0;i<n;i++) {
+		SETVAR(i+1,y__0[i]);
+		SETVAR(i+n0+1,y__1[i]);
 	}
-}
-
-
-void do_sh_range(double *ystart, double *yend) {
-	double parlo,parhi,dpar,temp;
-	int npar,i,j,ierr;
-	int side,cycle,icol,color;
-	char bob[50];
-
-	if(set_up_sh_range()==0) {
-		return;
+	for(i=n;i<n+FIX_VAR;i++) {
+		SETVAR(i+1,evaluate(my_ode[i]));
 	}
-	swap_color(&color,0);
-	parhi=shoot_range.phigh;
-	parlo=shoot_range.plow;
-	npar=shoot_range.steps;
-	dpar=(parhi-parlo)/(double)npar;
-	side=shoot_range.side;
-	cycle=shoot_range.cycle;
-	storind=0;
-	icol=0;
-
-	if(shoot_range.movie==1) {
-		reset_film();
+	for(i=0;i<n;i++) {
+		f[i]=evaluate(my_bc[i].com);
 	}
-	for(i=0;i<=npar;i++) {
-		temp=parlo+dpar*(double)i;
-		set_val(shoot_range.item,temp);
-		sprintf(bob,"%s=%.16g",shoot_range.item,temp);
-		bottom_msg(2,bob);
-		if(shoot_range.movie==1) {
-			clr_scrn();
-		}
-		bvshoot(ystart,yend,BVP_TOL,BVP_EPS,BVP_MAXIT,&ierr,NODE,0,
-				0,0,0,0.0);
-		if(ierr==ABORT) {
-			continue;
-		}
-		if(ierr<0) {
-			bad_shoot(ierr);
-
-			refresh_browser(storind);
-			swap_color(&color,1);
-			return;
-		}
-		storage[0][storind]=temp;
-		if(side==0) {
-			for(j=0;j<NODE;j++) {
-				storage[j+1][storind]=ystart[j];
-			}
-		} else {
-			for(j=0;j<NODE;j++) {
-				storage[j+1][storind]=yend[j];
-			}
-		}
-		storind++;
-		set_cycle(cycle,&icol);
-		get_ic(0,ystart);
-		last_shot(0);
-		if(shoot_range.movie==1) {
-			film_clip();
-		}
-		ping();
-	}
-	refresh_browser(storind);
-	auto_freeze_it();
-	swap_color(&color,1);
-}
-
-
-
-
-int set_up_periodic(int *ipar, int *ivar, double *sect, int *ishow) {
-	static char *n[]={"Freq. Par.","*1Sect. Var","Section","Show(Y/N)"};
-	char values[4][MAX_LEN_SBOX];
-	int status,i;
-	static char *yn[]={"N","Y"};
-	sprintf(values[0],"%s",upar_names[*ipar]);
-	sprintf(values[1],"%s",uvar_names[*ivar]);
-	sprintf(values[2],"%g",*sect);
-	sprintf(values[3],"%s",yn[*ishow]);
-
-	status=do_string_box(4,4,1,"Periodic BCs",n,values,45);
-	if(status!=0) {
-		i=find_user_name(PARAMBOX,values[0]);
-		if(i>-1) {
-			*ipar=i;
-		} else {
-			err_msg("No such parameter");
-			return(0);
-		}
-		i=find_user_name(ICBOX,values[1]);
-		if(i>-1) {
-			*ivar=i;
-		} else {
-			err_msg("No such variable");
-			return(0);
-		}
-		*sect=atof(values[2]);
-		if(values[3][0]=='Y'||values[3][0]=='y') {
-			*ishow=1;
-		} else {
-			*ishow=0;
-		}
-		return(1);
-	}
-	return(0);
 }
 
 
@@ -312,75 +169,53 @@ bye:  TRANS=oldtrans;
 }
 
 
-void last_shot(int flag) {
-	int i;
-	double *x;
-	x=&MyData[0];
-	MyStart=1;
-	get_ic(2,x);
-	STORFLAG=flag;
-	MyTime=T0;
-	if(flag) {
-		storage[0][0]=(float)T0;
-		extra(x,T0,NODE,NEQ);
-		for(i=0;i<NEQ;i++) {
-			storage[1+i][0]=(float)x[i];
-		}
-		storind=1;
-	}
-	integrate(&MyTime,x,TEND,DELTA_T,1,NJMP,&MyStart);
+void init_shoot_range(char *s) {
+	strcpy(shoot_range.item,s);
+	shoot_range.phigh=1.0;
+	shoot_range.plow=0.0;
+	shoot_range.side=0;
+	shoot_range.cycle=0;
+	shoot_range.steps=10;
+	shoot_range.movie=0;
 }
 
 
-
-int set_up_sh_range(void) {
-	static char *n[]={"*2Range over","Steps","Start","End",
-					  "Cycle color(Y/N)",
-					  "Side(0/1)", "Movie(Y/N)" };
-	char values[7][MAX_LEN_SBOX];
-	int status,i;
-	static  char *yn[]={"N","Y"};
-	sprintf(values[0],"%s",shoot_range.item);
-	sprintf(values[1],"%d",shoot_range.steps);
-	sprintf(values[2],"%g",shoot_range.plow);
-	sprintf(values[3],"%g",shoot_range.phigh);
-	sprintf(values[4],"%s",yn[shoot_range.cycle]);
-	sprintf(values[5],"%d",shoot_range.side);
-	sprintf(values[6],"%s",yn[shoot_range.movie]);
-
-	status=do_string_box(7,7,1,"Range Shoot",n,values,45);
-	if(status!=0) {
-		strcpy(shoot_range.item,values[0]);
-		i=find_user_name(PARAMBOX,shoot_range.item);
-		if(i<0) {
-			err_msg("No such parameter");
-			return(0);
-		}
-
-		shoot_range.steps=atoi(values[1]);
-		if(shoot_range.steps<=0) {
-			shoot_range.steps=10;
-		}
-		shoot_range.plow=atof(values[2]);
-		shoot_range.phigh=atof(values[3]);
-		if(values[4][0]=='Y'||values[4][0]=='y') {
-			shoot_range.cycle=1;
-		} else {
-			shoot_range.cycle=0;
-		}
-		if(values[6][0]=='Y'||values[6][0]=='y') {
-			shoot_range.movie=1;
-		} else {
-			shoot_range.movie=0;
-		}
-		shoot_range.side=atoi(values[5]);
-		return(1);
-	}
-	return(0);
+void reset_bvp(void) {
+	BVP_FLAG=1;
 }
 
 
-void bvshoot(double *y, double *yend, double err, double eps, int maxit, int *iret, int n, int ishow, int iper, int ipar, int ivar, double sect) {
+/* --- Static functions --- */
+static void bad_shoot(int iret) {
+	switch(iret) {
+	case NOCHANGE:
+		err_msg("No change from last point. Saving anyway");
+		break;
+	case GOODSHOT:
+		break;
+	case NUMICS:
+		err_msg("Number BCS not equal number ICs");
+		break;
+	case TOOMANY:
+		err_msg("Maximum iterates exceeded");
+		break;
+	case BADJAC:
+		err_msg("Bad Jacobian -- uninvertable");
+		break;
+	case BADINT:
+		err_msg("Unable to complete integration");
+		break;
+	case ABORT:
+		err_msg("ABORT integration");
+		break;
+	case ABORT_ALL:
+		err_msg("ABORT all");
+		break;
+	}
+}
+
+
+static void bvshoot(double *y, double *yend, double err, double eps, int maxit, int *iret, int n, int ishow, int iper, int ipar, int ivar, double sect) {
 	double *jac,*f,*fdev,*y0,*y1;
 	double dev,error,ytemp;
 
@@ -526,4 +361,176 @@ bye:
 	free(jac);
 	free(fdev);
 	return;
+}
+
+
+static void do_sh_range(double *ystart, double *yend) {
+	double parlo,parhi,dpar,temp;
+	int npar,i,j,ierr;
+	int side,cycle,icol,color;
+	char bob[50];
+
+	if(set_up_sh_range()==0) {
+		return;
+	}
+	swap_color(&color,0);
+	parhi=shoot_range.phigh;
+	parlo=shoot_range.plow;
+	npar=shoot_range.steps;
+	dpar=(parhi-parlo)/(double)npar;
+	side=shoot_range.side;
+	cycle=shoot_range.cycle;
+	storind=0;
+	icol=0;
+
+	if(shoot_range.movie==1) {
+		reset_film();
+	}
+	for(i=0;i<=npar;i++) {
+		temp=parlo+dpar*(double)i;
+		set_val(shoot_range.item,temp);
+		sprintf(bob,"%s=%.16g",shoot_range.item,temp);
+		bottom_msg(2,bob);
+		if(shoot_range.movie==1) {
+			clr_scrn();
+		}
+		bvshoot(ystart,yend,BVP_TOL,BVP_EPS,BVP_MAXIT,&ierr,NODE,0,
+				0,0,0,0.0);
+		if(ierr==ABORT) {
+			continue;
+		}
+		if(ierr<0) {
+			bad_shoot(ierr);
+
+			refresh_browser(storind);
+			swap_color(&color,1);
+			return;
+		}
+		storage[0][storind]=temp;
+		if(side==0) {
+			for(j=0;j<NODE;j++) {
+				storage[j+1][storind]=ystart[j];
+			}
+		} else {
+			for(j=0;j<NODE;j++) {
+				storage[j+1][storind]=yend[j];
+			}
+		}
+		storind++;
+		set_cycle(cycle,&icol);
+		get_ic(0,ystart);
+		last_shot(0);
+		if(shoot_range.movie==1) {
+			film_clip();
+		}
+		ping();
+	}
+	refresh_browser(storind);
+	auto_freeze_it();
+	swap_color(&color,1);
+}
+
+
+static void last_shot(int flag) {
+	int i;
+	double *x;
+	x=&MyData[0];
+	MyStart=1;
+	get_ic(2,x);
+	STORFLAG=flag;
+	MyTime=T0;
+	if(flag) {
+		storage[0][0]=(float)T0;
+		extra(x,T0,NODE,NEQ);
+		for(i=0;i<NEQ;i++) {
+			storage[1+i][0]=(float)x[i];
+		}
+		storind=1;
+	}
+	integrate(&MyTime,x,TEND,DELTA_T,1,NJMP,&MyStart);
+}
+
+
+static int set_up_periodic(int *ipar, int *ivar, double *sect, int *ishow) {
+	static char *n[]={"Freq. Par.","*1Sect. Var","Section","Show(Y/N)"};
+	char values[4][MAX_LEN_SBOX];
+	int status,i;
+	static char *yn[]={"N","Y"};
+	sprintf(values[0],"%s",upar_names[*ipar]);
+	sprintf(values[1],"%s",uvar_names[*ivar]);
+	sprintf(values[2],"%g",*sect);
+	sprintf(values[3],"%s",yn[*ishow]);
+
+	status=do_string_box(4,4,1,"Periodic BCs",n,values,45);
+	if(status!=0) {
+		i=find_user_name(PARAMBOX,values[0]);
+		if(i>-1) {
+			*ipar=i;
+		} else {
+			err_msg("No such parameter");
+			return(0);
+		}
+		i=find_user_name(ICBOX,values[1]);
+		if(i>-1) {
+			*ivar=i;
+		} else {
+			err_msg("No such variable");
+			return(0);
+		}
+		*sect=atof(values[2]);
+		if(values[3][0]=='Y'||values[3][0]=='y') {
+			*ishow=1;
+		} else {
+			*ishow=0;
+		}
+		return(1);
+	}
+	return(0);
+}
+
+
+static int set_up_sh_range(void) {
+	static char *n[]={"*2Range over","Steps","Start","End",
+					  "Cycle color(Y/N)",
+					  "Side(0/1)", "Movie(Y/N)" };
+	char values[7][MAX_LEN_SBOX];
+	int status,i;
+	static  char *yn[]={"N","Y"};
+	sprintf(values[0],"%s",shoot_range.item);
+	sprintf(values[1],"%d",shoot_range.steps);
+	sprintf(values[2],"%g",shoot_range.plow);
+	sprintf(values[3],"%g",shoot_range.phigh);
+	sprintf(values[4],"%s",yn[shoot_range.cycle]);
+	sprintf(values[5],"%d",shoot_range.side);
+	sprintf(values[6],"%s",yn[shoot_range.movie]);
+
+	status=do_string_box(7,7,1,"Range Shoot",n,values,45);
+	if(status!=0) {
+		strcpy(shoot_range.item,values[0]);
+		i=find_user_name(PARAMBOX,shoot_range.item);
+		if(i<0) {
+			err_msg("No such parameter");
+			return(0);
+		}
+
+		shoot_range.steps=atoi(values[1]);
+		if(shoot_range.steps<=0) {
+			shoot_range.steps=10;
+		}
+		shoot_range.plow=atof(values[2]);
+		shoot_range.phigh=atof(values[3]);
+		if(values[4][0]=='Y'||values[4][0]=='y') {
+			shoot_range.cycle=1;
+		} else {
+			shoot_range.cycle=0;
+		}
+		if(values[6][0]=='Y'||values[6][0]=='y') {
+			shoot_range.movie=1;
+		} else {
+			shoot_range.movie=0;
+		}
+		shoot_range.side=atoi(values[5]);
+		return(1);
+	}
+	return(0);
 }
