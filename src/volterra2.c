@@ -30,23 +30,50 @@
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-int CurrentPoint;
-int KnFlag;
+
+/* --- Forward declarations --- */
+static double alpha1n(double mu, double dt, double t, double t0);
+static double alpbetjn(double mu, double dt, int l);
+static double betnn(double mu, double dt, double t0, double t);
+static void get_kn(double *y, double t);
+static void init_sums(double t0, int n, double dt, int i0, int iend, int ishift);
+static int volt_step(double *y, double t, double dt, int neq, double *yg, double *yp, double *yp2, double *ytemp, double *errvec, double *jac);
+
+
+/* --- Data --- */
+static int CurrentPoint;
+static int KnFlag;
 int AutoEvaluate=0;
 
 /* --- Functions --- */
-double alpha1n();
-double alpbetjn();
-double betnn();
-double evaluate();
-double get_ivar();
-double ker_val();
+void alloc_kernels(int flag) {
+	int i,n=MaxPoints;
+	int j;
+	double mu;
 
-double ker_val(int in) {
-	if(KnFlag) {
-		return(kernel[in].k_n);
+	for(i=0;i<NKernel;i++) {
+		if(kernel[i].flag==CONV) {
+			if(flag==1) {
+				free(kernel[i].cnv);
+			}
+			kernel[i].cnv=(double *)malloc((n+1)*sizeof(double));
+			for(j=0;j<=n;j++) {
+				SETVAR(0,T0+DELTA_T*j);
+				kernel[i].cnv[j]=evaluate(kernel[i].kerform);
+			}
+		}
+		/* Do the alpha functions here later  */
+		if(kernel[i].mu>0.0) {
+			mu=kernel[i].mu;
+			if(flag==1) {
+				free(kernel[i].al);
+			}
+			kernel[i].al=(double *)malloc((n+1)*sizeof(double));
+			for(j=0;j<=n;j++) {
+				kernel[i].al[j]=alpbetjn(mu,DELTA_T,j);
+			}
+		}
 	}
-	return(kernel[in].k_n1);
 }
 
 
@@ -121,6 +148,14 @@ void allocate_volterra(int npts, int flag) {
 }
 
 
+double ker_val(int in) {
+	if(KnFlag) {
+		return(kernel[in].k_n);
+	}
+	return(kernel[in].k_n1);
+}
+
+
 void re_evaluate_kernels(void) {
 	int i,j,n=MaxPoints;
 
@@ -133,162 +168,6 @@ void re_evaluate_kernels(void) {
 				SETVAR(0,T0+DELTA_T*j);
 				kernel[i].cnv[j]=evaluate(kernel[i].kerform);
 			}
-		}
-	}
-}
-
-
-void alloc_kernels(int flag) {
-	int i,n=MaxPoints;
-	int j;
-	double mu;
-
-	for(i=0;i<NKernel;i++) {
-		if(kernel[i].flag==CONV) {
-			if(flag==1) {
-				free(kernel[i].cnv);
-			}
-			kernel[i].cnv=(double *)malloc((n+1)*sizeof(double));
-			for(j=0;j<=n;j++) {
-				SETVAR(0,T0+DELTA_T*j);
-				kernel[i].cnv[j]=evaluate(kernel[i].kerform);
-			}
-		}
-		/* Do the alpha functions here later  */
-		if(kernel[i].mu>0.0) {
-			mu=kernel[i].mu;
-			if(flag==1) {
-				free(kernel[i].al);
-			}
-			kernel[i].al=(double *)malloc((n+1)*sizeof(double));
-			for(j=0;j<=n;j++) {
-				kernel[i].al[j]=alpbetjn(mu,DELTA_T,j);
-			}
-		}
-	}
-}
-
-
-/* the following is the main driver for evaluating the sums in the
-   kernel the results here are used in the implicit solver.  The integral
-   up to t_n-1 is evaluated and placed in sum.  Kn-> Kn-1
-
-   the weights al and bet are computed in general, but specifically
-   for mu=0,.5 since these involve no transcendental functions
-
-
-   */
-
-/***   FIX THIS TO DO MORE GENERAL STUFF
-	   K(t,t',u,u') someday...
-***/
-void init_sums(double t0, int n, double dt, int i0, int iend, int ishift) {
-	double t=t0+n*dt,tp=t0+i0*dt;
-	double sum[MAXODE],al,alpbet,mu;
-	int nvar=FIX_VAR+NODE+NMarkov;
-	int l,ioff,ker,i;
-
-	SETVAR(0,t);
-	SETVAR(PrimeStart,tp);
-	for(l=0;l<nvar;l++) {
-		SETVAR(l+1,Memory[l][ishift]);
-	}
-	for(ker=0;ker<NKernel;ker++) {
-		kernel[ker].k_n1=kernel[ker].k_n;
-		mu=kernel[ker].mu;
-		if(mu==0.0) {
-			al=.5*dt;
-		} else {
-			al=alpha1n(mu,dt,t,tp);
-		}
-		sum[ker]=al*evaluate(kernel[ker].formula);
-		if(kernel[ker].flag==CONV) {
-			sum[ker]=sum[ker]*kernel[ker].cnv[n-i0];
-		}
-	}
-	for(i=1;i<=iend;i++) {
-		ioff=(ishift+i)%MaxPoints;
-		tp+=dt;
-		SETVAR(PrimeStart,tp);
-		for(l=0;l<nvar;l++) {
-			SETVAR(l+1,Memory[l][ioff]);
-		}
-		for(ker=0;ker<NKernel;ker++) {
-			mu=kernel[ker].mu;
-			if(mu==0.0) {
-				alpbet=dt;
-			} else {
-				alpbet=kernel[ker].al[n-i0-i];      /* alpbetjn(mu,dt,t,tp); */
-			}
-			if(kernel[ker].flag==CONV) {
-				sum[ker]+=(alpbet*evaluate(kernel[ker].formula)*kernel[ker].cnv[n-i0-i]);
-			} else {
-				sum[ker]+=(alpbet*evaluate(kernel[ker].formula));
-			}
-		}
-	}
-	for(ker=0;ker<NKernel;ker++) {
-		kernel[ker].sum=sum[ker];
-	}
-}
-
-/* the following functions compute integrals for the piecewise
-   -- constant -- product integration rule.  Thus they agree with
-   the trapezoid rule for mu=0 and there is a special case for mu=.5
-   since that involves no transcendentals.  Later I will put in the
-   piecewise --linear-- method
-*/
-double alpha1n(double mu, double dt, double t, double t0) {
-	double m1;
-
-	if(mu==.5) {
-		return(sqrt(fabs(t-t0))-sqrt(fabs(t-t0-dt)));
-	}
-	m1=1-mu;
-	return(.5*(pow(fabs(t-t0),m1)-pow(fabs(t-t0-dt),m1))/m1);
-}
-
-
-double alpbetjn(double mu, double dt, int l) {
-	double m1;
-	double dif=l*dt;
-
-	if(mu==.5) {
-		return(sqrt(dif+dt)-sqrt(fabs(dif-dt)));
-	}
-	m1=1-mu;
-	return(.5*(pow(dif+dt,m1)-pow(fabs(dif-dt),m1))/m1);
-}
-
-
-double betnn(double mu, double dt, double t0, double t) {
-	double m1;
-	if(mu==.5) {
-		return(sqrt(dt));
-	}
-	m1=1-mu;
-	return(.5*pow(dt,m1)/m1);
-}
-
-
-/* uses the guessed value y to update Kn  */
-void get_kn(double *y, double t) {
-	int i;
-
-	SETVAR(0,t);
-	SETVAR(PrimeStart,t);
-	for(i=0;i<NODE;i++) {
-		SETVAR(i+1,y[i]);
-	}
-	for(i=NODE;i<NODE+FIX_VAR;i++) {
-		SETVAR(i+1,evaluate(my_ode[i]));
-	}
-	for(i=0;i<NKernel;i++) {
-		if(kernel[i].flag==CONV) {
-			kernel[i].k_n=kernel[i].sum+
-						  kernel[i].betnn*evaluate(kernel[i].formula)*kernel[i].cnv[0];
-		} else {
-			kernel[i].k_n=kernel[i].sum+kernel[i].betnn*evaluate(kernel[i].formula);
 		}
 	}
 }
@@ -367,7 +246,133 @@ int volterra(double *y, double *t, double dt, int nt, int neq, int *istart, doub
 }
 
 
-int volt_step(double *y, double t, double dt, int neq, double *yg, double *yp,
+/* --- Static functions --- */
+/* the following functions compute integrals for the piecewise
+   -- constant -- product integration rule.  Thus they agree with
+   the trapezoid rule for mu=0 and there is a special case for mu=.5
+   since that involves no transcendentals.  Later I will put in the
+   piecewise --linear-- method
+*/
+static double alpha1n(double mu, double dt, double t, double t0) {
+	double m1;
+
+	if(mu==.5) {
+		return(sqrt(fabs(t-t0))-sqrt(fabs(t-t0-dt)));
+	}
+	m1=1-mu;
+	return(.5*(pow(fabs(t-t0),m1)-pow(fabs(t-t0-dt),m1))/m1);
+}
+
+
+static double alpbetjn(double mu, double dt, int l) {
+	double m1;
+	double dif=l*dt;
+
+	if(mu==.5) {
+		return(sqrt(dif+dt)-sqrt(fabs(dif-dt)));
+	}
+	m1=1-mu;
+	return(.5*(pow(dif+dt,m1)-pow(fabs(dif-dt),m1))/m1);
+}
+
+
+static double betnn(double mu, double dt, double t0, double t) {
+	double m1;
+	if(mu==.5) {
+		return(sqrt(dt));
+	}
+	m1=1-mu;
+	return(.5*pow(dt,m1)/m1);
+}
+
+
+/* uses the guessed value y to update Kn  */
+static void get_kn(double *y, double t) {
+	int i;
+
+	SETVAR(0,t);
+	SETVAR(PrimeStart,t);
+	for(i=0;i<NODE;i++) {
+		SETVAR(i+1,y[i]);
+	}
+	for(i=NODE;i<NODE+FIX_VAR;i++) {
+		SETVAR(i+1,evaluate(my_ode[i]));
+	}
+	for(i=0;i<NKernel;i++) {
+		if(kernel[i].flag==CONV) {
+			kernel[i].k_n=kernel[i].sum+
+						  kernel[i].betnn*evaluate(kernel[i].formula)*kernel[i].cnv[0];
+		} else {
+			kernel[i].k_n=kernel[i].sum+kernel[i].betnn*evaluate(kernel[i].formula);
+		}
+	}
+}
+
+
+/* the following is the main driver for evaluating the sums in the
+   kernel the results here are used in the implicit solver.  The integral
+   up to t_n-1 is evaluated and placed in sum.  Kn-> Kn-1
+
+   the weights al and bet are computed in general, but specifically
+   for mu=0,.5 since these involve no transcendental functions
+
+
+   */
+
+/***   FIX THIS TO DO MORE GENERAL STUFF
+	   K(t,t',u,u') someday...
+***/
+static void init_sums(double t0, int n, double dt, int i0, int iend, int ishift) {
+	double t=t0+n*dt,tp=t0+i0*dt;
+	double sum[MAXODE],al,alpbet,mu;
+	int nvar=FIX_VAR+NODE+NMarkov;
+	int l,ioff,ker,i;
+
+	SETVAR(0,t);
+	SETVAR(PrimeStart,tp);
+	for(l=0;l<nvar;l++) {
+		SETVAR(l+1,Memory[l][ishift]);
+	}
+	for(ker=0;ker<NKernel;ker++) {
+		kernel[ker].k_n1=kernel[ker].k_n;
+		mu=kernel[ker].mu;
+		if(mu==0.0) {
+			al=.5*dt;
+		} else {
+			al=alpha1n(mu,dt,t,tp);
+		}
+		sum[ker]=al*evaluate(kernel[ker].formula);
+		if(kernel[ker].flag==CONV) {
+			sum[ker]=sum[ker]*kernel[ker].cnv[n-i0];
+		}
+	}
+	for(i=1;i<=iend;i++) {
+		ioff=(ishift+i)%MaxPoints;
+		tp+=dt;
+		SETVAR(PrimeStart,tp);
+		for(l=0;l<nvar;l++) {
+			SETVAR(l+1,Memory[l][ioff]);
+		}
+		for(ker=0;ker<NKernel;ker++) {
+			mu=kernel[ker].mu;
+			if(mu==0.0) {
+				alpbet=dt;
+			} else {
+				alpbet=kernel[ker].al[n-i0-i];      /* alpbetjn(mu,dt,t,tp); */
+			}
+			if(kernel[ker].flag==CONV) {
+				sum[ker]+=(alpbet*evaluate(kernel[ker].formula)*kernel[ker].cnv[n-i0-i]);
+			} else {
+				sum[ker]+=(alpbet*evaluate(kernel[ker].formula));
+			}
+		}
+	}
+	for(ker=0;ker<NKernel;ker++) {
+		kernel[ker].sum=sum[ker];
+	}
+}
+
+static int volt_step(double *y, double t, double dt, int neq, double *yg, double *yp,
 			  double *yp2, double *ytemp, double *errvec, double *jac) {
 	int i0,iend,ishift,i,iter=0,info,ipivot[MAXODE1],j,ind;
 	int n1=NODE+1;
