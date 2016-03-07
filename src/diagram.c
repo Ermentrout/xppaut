@@ -197,23 +197,32 @@ int load_diagram(FILE *fp, int node) {
 	int i,flag=0;
 	int n;
 	int calc,ibr,ntot,itp,lab,index,nfpar,icp1,icp2,icp3,icp4,flag2;
-	fscanf(fp,"%d",&n);
+	if(fscanf(fp,"%d",&n)!=1)
+			plintf("Error reading from file %s", fp);
 	if(n==0) {
 		/*    start_diagram(NODE); */
 		return(-1);
 	}
 
 	while(1) {
-		fscanf(fp,"%d %d %d %d %d %d %d %d %d %d %d %d",
+		if(fscanf(fp,"%d %d %d %d %d %d %d %d %d %d %d %d",
 			   &calc,&ibr,&ntot,&itp,&lab,&index,&nfpar,
-			   &icp1,&icp2,&icp3,&icp4,&flag2);
-		for(i=0;i<8;i++) {
-			fscanf(fp,"%lg ",&par[i]);
+			   &icp1,&icp2,&icp3,&icp4,&flag2)!=12) {
+			plintf("Error reading from file %s", fp);
 		}
-		fscanf(fp,"%lg %lg ",&norm,&per);
+		for(i=0;i<8;i++) {
+			if(fscanf(fp,"%lg ",&par[i])!=1) {
+					plintf("Error reading from file %s", fp);
+		}
+		}
+		if(fscanf(fp,"%lg %lg ",&norm,&per)!=2) {
+				plintf("Error reading from file %s", fp);
+		}
 		for(i=0;i<node;i++) {
-			fscanf(fp,"%lg %lg %lg %lg %lg %lg",&u0[i],&uhi[i],&ulo[i],
-				   &ubar[i],&evr[i],&evi[i]);
+			if(fscanf(fp,"%lg %lg %lg %lg %lg %lg",&u0[i],&uhi[i],&ulo[i],
+				   &ubar[i],&evr[i],&evi[i])!=6) {
+				plintf("Error reading from file %s", fp);
+			}
 		}
 		if(flag==0) {
 			edit_start(ibr,ntot,itp,lab,nfpar,norm,uhi,ulo,u0,ubar,par,per,node,

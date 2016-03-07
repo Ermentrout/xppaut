@@ -420,7 +420,9 @@ void do_init_data(int com) {
 			return;
 		}
 		for(i=0;i<NODE;i++) {
-			fscanf(fp,"%lg",&last_ic[i]);
+			if(fscanf(fp,"%lg",&last_ic[i])!=1) {
+				plintf("Error reading from file %s", fp);
+			}
 		}
 		fclose(fp);
 		get_ic(2,x);

@@ -2691,23 +2691,40 @@ static void save_auto_numerics(FILE *fp) {
 
 static void load_auto_numerics(FILE *fp) {
 	int i,in;
-	fscanf(fp,"%d ",&NAutoPar);
+	if(fscanf(fp,"%d ",&NAutoPar)!=1) {
+		plintf("Error reading from file %s", fp);
+	}
 	for(i=0;i<NAutoPar;i++) {
-		fscanf(fp,"%d ",&AutoPar[i]);
+		if(fscanf(fp,"%d ",&AutoPar[i])!=1) {
+			plintf("Error reading from file %s", fp);
+		}
 		in=get_param_index(upar_names[AutoPar[i]]);
 		Auto_index_to_array[i]=in;
 	}
-	fscanf(fp,"%d ",&NAutoUzr);
+	if(fscanf(fp,"%d ",&NAutoUzr)!=1) {
+		plintf("Error reading from file %s", fp);
+	}
 	for(i=0;i<9;i++) {
 		Auto.nper=NAutoUzr;
-		fscanf(fp,"%lg %d\n",&outperiod[i],&UzrPar[i]);
+		if(fscanf(fp,"%lg %d\n",&outperiod[i],&UzrPar[i])!=2) {
+			plintf("Error reading from file %s", fp);
+		}
 		Auto.period[i]=outperiod[i];
 		Auto.uzrpar[i]=UzrPar[i];
 	}
-	fscanf(fp,"%d %d %d \n",&Auto.ntst,&Auto.nmx,&Auto.npr);
-	fscanf(fp,"%lg %lg %lg \n",&Auto.ds,&Auto.dsmin,&Auto.dsmax);
-	fscanf(fp,"%lg %lg %lg %lg\n",&Auto.rl0,&Auto.rl1,&Auto.a0,&Auto.a1);
-	fscanf(fp,"%d %d %d %d %d %d %d\n",&aauto.iad,&aauto.mxbf,&aauto.iid,&aauto.itmx,&aauto.itnw,&aauto.nwtn,&aauto.iads);
+	if(fscanf(fp,"%d %d %d \n",&Auto.ntst,&Auto.nmx,&Auto.npr)!=3) {
+		plintf("Error reading from file %s", fp);
+	}
+	if(fscanf(fp,"%lg %lg %lg \n",&Auto.ds,&Auto.dsmin,&Auto.dsmax)!=3) {
+		plintf("Error reading from file %s", fp);
+	}
+	if(fscanf(fp,"%lg %lg %lg %lg\n",&Auto.rl0,&Auto.rl1,&Auto.a0,&Auto.a1)!=4) {
+		plintf("Error reading from file %s", fp);
+	}
+	if(fscanf(fp,"%d %d %d %d %d %d %d\n",&aauto.iad,&aauto.mxbf,&aauto.iid,
+			  &aauto.itmx,&aauto.itnw,&aauto.nwtn,&aauto.iads)!=7) {
+		plintf("Error reading from file %s", fp);
+	}
 }
 
 
@@ -2718,8 +2735,10 @@ static void save_auto_graph(FILE *fp) {
 
 
 static void load_auto_graph(FILE *fp) {
-	fscanf(fp,"%lg %lg %lg %lg %d %d \n",&Auto.xmin,&Auto.ymin,&Auto.xmax,&Auto.ymax,
-		   &Auto.var,&Auto.plot);
+	if(fscanf(fp,"%lg %lg %lg %lg %d %d \n",&Auto.xmin,&Auto.ymin,&Auto.xmax,&Auto.ymax,
+		   &Auto.var,&Auto.plot)!=6) {
+		plintf("Error reading from file %s", fp);
+	}
 }
 
 
@@ -2848,8 +2867,12 @@ static int move_to_label(int mylab, int *nrow, int *ndim, FILE *fp) {
 
 static void get_a_row(double *u, double *t, int n, FILE *fp) {
 	int i;
-	fscanf(fp,"%lg ",t);
+	if(fscanf(fp,"%lg ",t)!=1) {
+		plintf("Error reading from file %s", fp);
+	}
 	for(i=0;i<n;i++) {
-		fscanf(fp,"%lg ",&u[i]);
+		if(fscanf(fp,"%lg ",&u[i])!=1) {
+			plintf("Error reading from file %s", fp);
+		}
 	}
 }
