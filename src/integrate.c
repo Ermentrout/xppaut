@@ -77,7 +77,7 @@
 /* --- Types --- */
 typedef struct {
 	int index0,type;
-	char formula[MAX_STRING_LENGTH];
+	char formula[DEFAULT_STRING_LENGTH];
 	int n;
 	char var[NAR_IC];
 	int j1,j2;

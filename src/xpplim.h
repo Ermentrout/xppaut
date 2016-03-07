@@ -21,7 +21,7 @@
 #define MAX_INTERN_SET 500
 #define MAX_LEN_SBOX 25
 #define MaxIncludeFiles 10
-#define MAX_STRING_LENGTH 256
+#define DEFAULT_STRING_LENGTH 256
 
 /*
 The acutual max filename length is determined by the

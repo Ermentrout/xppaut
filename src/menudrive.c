@@ -82,8 +82,8 @@ void do_tutorial(void) {
 
 void edit_xpprc(void) {
 	pid_t child_pid;
-	char rc[MAX_STRING_LENGTH];
-	char editor[MAX_STRING_LENGTH];
+	char rc[DEFAULT_STRING_LENGTH];
+	char editor[DEFAULT_STRING_LENGTH];
 	int child_status;
 
 	char* ed = getenv("XPPEDITOR");
@@ -111,7 +111,7 @@ void edit_xpprc(void) {
 
 
 void xpp_hlp(void) {
-	char cmd[MAX_STRING_LENGTH];
+	char cmd[DEFAULT_STRING_LENGTH];
 
 	if(getenv("XPPHELP")==NULL) {
 		err_msg("Environment variable XPPHELP undefined.");

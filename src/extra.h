@@ -5,8 +5,8 @@
 
 /* --- Data --- */
 extern int dll_flag;
-extern char dll_fun[MAX_STRING_LENGTH];
-extern char dll_lib[MAX_STRING_LENGTH];
+extern char dll_fun[DEFAULT_STRING_LENGTH];
+extern char dll_lib[DEFAULT_STRING_LENGTH];
 
 /* --- Functions --- */
 void add_export_list(char *in, char *out);

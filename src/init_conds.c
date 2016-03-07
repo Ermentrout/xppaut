@@ -87,10 +87,10 @@ typedef struct {
 	int n,n0,here;
 	Window base,cancel,ok,up,dn,pgup,pgdn,file,wild,w[FILESELNWIN],dir,home,start;
 	Window fw,ww;
-	char wildtxt[MAX_STRING_LENGTH],filetxt[MAX_STRING_LENGTH];
+	char wildtxt[DEFAULT_STRING_LENGTH],filetxt[DEFAULT_STRING_LENGTH];
 	int nwin,minwid,minhgt;
 	int off,pos,hot;
-	char title[MAX_STRING_LENGTH];
+	char title[DEFAULT_STRING_LENGTH];
 } FILESEL;
 
 typedef struct {

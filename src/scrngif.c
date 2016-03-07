@@ -65,9 +65,9 @@ static int GifFrameDelay=5,GifFrameLoop=1000;
 static short need = 8;
 static int NGlobalColors=0;
 static int UseGlobalMap=0;
-static GIFCOL gifcol[MAX_STRING_LENGTH];
-static GIFCOL gifGcol[MAX_STRING_LENGTH];
-static GifTree *empty[MAX_STRING_LENGTH];
+static GIFCOL gifcol[DEFAULT_STRING_LENGTH];
+static GIFCOL gifGcol[DEFAULT_STRING_LENGTH];
+static GifTree *empty[DEFAULT_STRING_LENGTH];
 static GifTree GifRoot = {LOOKUP, 0, 0, empty, NULL, NULL};
 static GifTree *topNode, *baseNode, **nodeArray, **lastArray;
 

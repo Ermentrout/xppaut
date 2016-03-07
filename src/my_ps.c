@@ -335,7 +335,7 @@ void special_put_text_ps(int x, int y, char *str, int size) {
 	int cf=0;
 	int n=strlen(str);
 	int cy=0;
-	char tmp[MAX_STRING_LENGTH],c;
+	char tmp[DEFAULT_STRING_LENGTH],c;
 	int sub,sup,pssz;
 	static int sz[]= {8,10,14,18,24};
 	fprintf(psfile, "0 0 0 setrgbcolor \n");

@@ -78,7 +78,7 @@ void alloc_kernels(int flag) {
 
 
 void alloc_v_memory(void) {/* allocate stuff for volterra equations */
-	int i,len,formula[MAX_STRING_LENGTH],j;
+	int i,len,formula[DEFAULT_STRING_LENGTH],j;
 
 	/* First parse the kernels   since these were deferred */
 	for(i=0;i<NKernel;i++) {

@@ -148,8 +148,8 @@ void add_intern_set(char *name, char *does) {
 
 void check_for_xpprc(void) {
 	FILE *fp;
-	char rc[XPP_MAX_NAME];
-	char bob[XPP_MAX_NAME];
+	char rc[DEFAULT_STRING_LENGTH];
+	char bob[DEFAULT_STRING_LENGTH];
 	sprintf(rc,"%s/.xpprc",getenv("HOME"));
 	fp=fopen(rc,"r");
 	if(fp==NULL) {
@@ -158,7 +158,9 @@ void check_for_xpprc(void) {
 	}
 	while(!feof(fp)) {
 		bob[0]='\0';
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		if(bob[0]=='@') {
 			stor_internopts(bob);
 		}
@@ -2007,27 +2009,35 @@ static void do_intern_set(char *name1, char *value) {
 
 static void fil_flt(FILE *fpt, double *val) {
 	char bob[80];
-	fgets(bob,80,fpt);
+	if(fgets(bob,80,fpt)==NULL) {
+		plintf("Couldnt read file %s", fpt);
+	}
 	*val=atof(bob);
 }
 
 static void fil_int(FILE *fpt, int *val) {
 	char bob[80];
-	fgets(bob,80,fpt);
+	if(fgets(bob,80,fpt)==NULL) {
+		plintf("Couldnt read file %s", fpt);
+	}
 	*val=atoi(bob);
 }
 
 
 static void read_defaults(FILE *fp) {
-	char bob[100];
+	char bob[80];
 	char *ptr;
-	fgets(bob,80,fp);
+	if(fgets(bob,80,fp)==NULL) {
+		plintf("Couldnt read file %s", fp);
+	}
 	ptr=get_first(bob," ");
 	if(notAlreadySet.BIG_FONT_NAME) {
 		strcpy(big_font_name,ptr);
 		notAlreadySet.BIG_FONT_NAME=0;
 	}
-	fgets(bob,80,fp);
+	if(fgets(bob,80,fp)==NULL) {
+		plintf("Couldnt read file %s", fp);
+	}
 	ptr=get_first(bob," ");
 	if(notAlreadySet.SMALL_FONT_NAME) {
 		strcpy(small_font_name,ptr);

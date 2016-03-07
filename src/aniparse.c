@@ -443,7 +443,7 @@ int getppmbits(Window window,int *wid,int *hgt, unsigned char *out) {
 	int bbp=0,bbc=0;
 	int lobits,midbits,hibits;
 	unsigned x,y;
-	XColor palette[MAX_STRING_LENGTH];
+	XColor palette[DEFAULT_STRING_LENGTH];
 	XColor pix;
 	unsigned char *dst,*pixel;
 
@@ -543,7 +543,7 @@ int writeframe(char *filename, Window window, int wid, int hgt) {
 
 	unsigned x,y;
 	char head[100];
-	XColor palette[MAX_STRING_LENGTH];
+	XColor palette[DEFAULT_STRING_LENGTH];
 	XColor pix;
 	unsigned char *pixel;
 	unsigned area;
@@ -1082,7 +1082,7 @@ static void ani_flip1(int n) {
 static void ani_flip(void) {
 	double y[MAXODE];
 	double t;
-	char fname[MAX_STRING_LENGTH];
+	char fname[DEFAULT_STRING_LENGTH];
 	FILE *angiffile=NULL;
 	float **ss;
 	int i,row,done;
@@ -1184,7 +1184,7 @@ static void ani_flip(void) {
 
 static void ani_disk_warn(void) {
 	unsigned int total=(my_browser.maxrow*vcr.wid*vcr.hgt*3)/(mpeg.skip*vcr.inc);
-	char junk[MAX_STRING_LENGTH];
+	char junk[DEFAULT_STRING_LENGTH];
 	char ans;
 	total=total/(1024*1024);
 	if(total>10) {
@@ -2515,7 +2515,7 @@ static void draw_ani_text(int j) {
 
 
 static void draw_ani_vtext(int j) {
-	char s2[MAX_STRING_LENGTH];
+	char s2[DEFAULT_STRING_LENGTH];
 	int n;
 	char *s;
 	double x1=my_ani[j].zx1,y1=my_ani[j].zy1;
@@ -2546,15 +2546,16 @@ static void tst_pix_draw(void) {
 
 
 static void read_ani_line(FILE *fp, char *s) {
-	char temp[MAX_STRING_LENGTH];
+	char temp[DEFAULT_STRING_LENGTH];
 	int i,n,ok,ihat=0;
 	/*int nn; Not used anywhere?*/
 	s[0]=0;
 	ok=1;
 	while(ok) {
 		ok=0;
-		fgets(temp,256,fp);
-		/*nn=strlen(temp)+1;Not used*/
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Error reading file %s", fp);
+		}
 		n=strlen(temp);
 		for(i=n-1;i>=0;i--) {
 			if(temp[i]=='\\') {
@@ -2578,8 +2579,8 @@ static void read_ani_line(FILE *fp, char *s) {
 
 /*************************  GRABBER CODE *****************************/
 static int add_grab_command(char *xs,char *ys,char *ts, FILE *fp) {
-	char start[MAX_STRING_LENGTH],end[MAX_STRING_LENGTH];
-	int com[MAX_STRING_LENGTH];
+	char start[DEFAULT_STRING_LENGTH],end[DEFAULT_STRING_LENGTH];
+	int com[DEFAULT_STRING_LENGTH];
 	int nc,j,k,ans;
 	double z;
 	read_ani_line(fp,start);
@@ -2626,8 +2627,8 @@ static int add_grab_command(char *xs,char *ys,char *ts, FILE *fp) {
 static int ani_grab_tasks(char *line, int igrab,int which) {
 	int i,k;
 	int n=strlen(line);
-	char form[MAX_STRING_LENGTH],c;
-	char rhs[MAX_STRING_LENGTH],lhs[20];
+	char form[DEFAULT_STRING_LENGTH],c;
+	char rhs[DEFAULT_STRING_LENGTH],lhs[20];
 	k=0;
 	for(i=0;i<n;i++) {
 		c=line[i];
@@ -2711,7 +2712,7 @@ static void do_grab_tasks(int which) {
 
 
 static int add_grab_task(char *lhs,char *rhs, int igrab,int which) {
-	int com[MAX_STRING_LENGTH];
+	int com[DEFAULT_STRING_LENGTH];
 	int i,nc,k;
 	int rn;
 	if(which==1) {

@@ -621,7 +621,7 @@ static int hrw_liapunov(double *liap,int batch,double eps) {
 	double yp[MAXODE],nrm,dy[MAXODE];
 	double t0,t1;
 	double sum=0.0;
-	char bob[MAX_STRING_LENGTH];
+	char bob[DEFAULT_STRING_LENGTH];
 	int istart=1;
 	int i,j;
 

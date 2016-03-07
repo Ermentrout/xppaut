@@ -141,7 +141,7 @@ void create_plot_list(void) {
 int disc(char *string) {
 	char c;
 	int i=0,l=strlen(string),j=0,flag=0;
-	char end[MAX_STRING_LENGTH];
+	char end[DEFAULT_STRING_LENGTH];
 	if(is_a_map==1) {
 		return 1;
 	}
@@ -186,7 +186,7 @@ int find_char(char *s1, char *s2, int i0, int *i1) {
 
 int get_eqn(FILE *fptr) {
 	char bob[MAXEXPLEN];
-	/*char filename[MAX_STRING_LENGTH];*/
+	/*char filename[DEFAULT_STRING_LENGTH];*/
 	char filename[XPP_MAX_NAME];
 	int done=1,nn,i;
 	int flag;
@@ -204,7 +204,9 @@ int get_eqn(FILE *fptr) {
 	strcpy(options,"default.opt");
 	add_var("t",0.0);
 	/* plintf(" NEQ: "); */
-	fgets(bob,MAXEXPLEN,fptr);
+	if(fgets(bob,MAXEXPLEN,fptr)==NULL) {
+		plintf("Couldnt read file %s", fptr);
+	}
 	nn=strlen(bob)+1;
 	if(NLINES>MAXLINES) {
 		fprintf(stderr,"whoops! NLINES>MAXLINES in form_ode.c ...\n");
@@ -243,7 +245,9 @@ int get_eqn(FILE *fptr) {
 			fprintf(convertf,"# converted %s \n",this_file);
 		}
 		while(done) {
-			fgets(bob,MAXEXPLEN,fptr);
+			if(fgets(bob,MAXEXPLEN,fptr)==NULL) {
+				plintf("Couldnt read file %s", fptr);
+			}
 			nn=strlen(bob)+1;
 			if((save_eqn[NLINES]=(char *)malloc(nn))==NULL) {
 				exit(0);
@@ -685,7 +689,7 @@ static void list_em(char *wild) {
 }
 
 static int read_eqn(void) {
-	char wild[MAX_STRING_LENGTH],string[MAX_STRING_LENGTH];
+	char wild[DEFAULT_STRING_LENGTH],string[DEFAULT_STRING_LENGTH];
 	FILE *fptr;
 	int okay;
 	okay=0;
@@ -1379,13 +1383,13 @@ static void count_object(int type) {
 static int do_new_parser(FILE *fp, char *first, int nnn) {
 	VAR_INFO v;
 	char **markovarrays=NULL;
-	char *strings[MAX_STRING_LENGTH];
+	char *strings[DEFAULT_STRING_LENGTH];
 	int nstrings,ns;
 	char **markovarrays2=NULL;
 	int done=0,start=0,i0,i1,i2,istates;
 	int jj1=0,jj2=0,jj,notdone=1,jjsgn=1;
 	char name[20],nstates=0;
-	/*char newfile[MAX_STRING_LENGTH];*/
+	/*char newfile[DEFAULT_STRING_LENGTH];*/
 	char newfile[XPP_MAX_NAME];
 	FILE *fnew;
 	/*int nlin;
@@ -1539,7 +1543,6 @@ static int do_new_parser(FILE *fp, char *first, int nnn) {
 							for(istates=0;istates<nstates;istates++) {
 								markovarrays[istates]=(char *)malloc(MAXEXPLEN);
 								markovarrays2[istates]=(char *)malloc(MAXEXPLEN);
-								/* fgets(markovarrays[istates],MAXEXPLEN,fp); */
 
 								if(is_array==2)	{
 									strcpy(markovarrays[istates],strings[ns+1+istates]);
@@ -2506,7 +2509,9 @@ static void read_a_line(FILE *fp, char *s) {
 
 	while(ok) {
 		ok=0;
-		fgets(temp,MAXEXPLEN,fp);
+		if(fgets(temp,MAXEXPLEN,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 
 		nn=strlen(temp)+1;
 		if((save_eqn[NLINES]=(char *)malloc(nn))==NULL) {
@@ -2593,7 +2598,7 @@ static int is_comment(char *s) {
 
 
 static void add_comment(char *s) {
-	char text[MAX_STRING_LENGTH],action[MAX_STRING_LENGTH],ch;
+	char text[DEFAULT_STRING_LENGTH],action[DEFAULT_STRING_LENGTH],ch;
 	int n=strlen(s);
 	int i,j1=0,ja=0,noact=1;
 	if(n_comments>=MAXCOMMENTS) {

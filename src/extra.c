@@ -32,8 +32,8 @@ export {x,y} {xp,yp}
 /* --- Types --- */
 typedef struct {
 	char libname[1024];
-	char libfile[MAX_STRING_LENGTH];
-	char fun[MAX_STRING_LENGTH];
+	char libfile[DEFAULT_STRING_LENGTH];
+	char fun[DEFAULT_STRING_LENGTH];
 	int loaded;
 } DLFUN;
 
@@ -54,8 +54,8 @@ static void parse_inout(char *l, int flag);
 
 
 /* --- Data --- */
-char dll_lib[MAX_STRING_LENGTH];
-char dll_fun[MAX_STRING_LENGTH];
+char dll_lib[DEFAULT_STRING_LENGTH];
+char dll_fun[DEFAULT_STRING_LENGTH];
 int dll_flag=0;
 
 static IN_OUT in_out;
@@ -101,7 +101,7 @@ void load_new_dll(void) {
 void get_import_values(int n, double *ydot, char *soname, char *sofun,
 					   int ivar, double *wgt[MAXW],
 					   double *var, double *con) {
-	char sofullname[MAX_STRING_LENGTH];
+	char sofullname[DEFAULT_STRING_LENGTH];
 	char *error;
 	if(dll_loaded==1) {
 		fun(n,ivar,con,var,wgt,ydot);

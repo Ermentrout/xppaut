@@ -68,7 +68,9 @@ void do_lunch(int f) {
 			err_msg("Cannot open file");
 			return;
 		}
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		if(bob[0]=='#') {
 			set_type=1;
 			io_int(&ne,fp,f," ");
@@ -238,9 +240,11 @@ void io_parameter_file(char *fn,int flag) {
 
 int read_lunch(FILE *fp) {
 	int f=READEM,ne,np,temp;
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 
-	fgets(bob,255,fp);
+	if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+		plintf("Couldnt read file %s", fp);
+	}
 	if(bob[0]=='#') {
 		set_type=1;
 		io_int(&ne,fp,f," ");
@@ -357,10 +361,12 @@ static void do_info(FILE *fp) {
 
 
 static void dump_aplot(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
+	char bob[DEFAULT_STRING_LENGTH];
 
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 	} else {
 		fprintf(fp,"# Array plot stuff\n");
 		io_string(aplot.name,11,fp,f);
@@ -405,11 +411,13 @@ static void dump_eqn(FILE *fp) {
 
 /* f=1 to read and 0 to write */
 static void dump_h_stuff(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
+	char bob[DEFAULT_STRING_LENGTH];
 	int i;
 
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 	}else {
 		fprintf(fp,"# Coupling stuff for H funs\n");
 	}
@@ -422,7 +430,9 @@ static void dump_h_stuff(FILE *fp, int f) {
 static void dump_range(FILE *fp, int f) {
 	char bob[XPP_MAX_NAME];
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 	} else {
 		fprintf(fp,"# Range information\n");
 	}
@@ -461,9 +471,11 @@ static void dump_shoot_range(FILE *fp, int f) {
 
 static void dump_torus(FILE *fp, int f) {
 	int i;
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 	} else {
 		fprintf(fp,"# Torus information \n");
 	}
@@ -478,9 +490,11 @@ static void dump_torus(FILE *fp, int f) {
 
 
 static void dump_transpose_info(FILE *fp, int f) {
-	char bob[MAX_STRING_LENGTH];
+	char bob[DEFAULT_STRING_LENGTH];
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 	} else {
 		fprintf(fp,"# Transpose variables etc\n");
 	}
@@ -495,9 +509,11 @@ static void dump_transpose_info(FILE *fp, int f) {
 
 
 static void io_double(double *z, FILE *fp, int f, char *ss) {
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		*z=atof(bob);
 	} else {
 		fprintf(fp,"%.16g  %s\n",*z,ss);
@@ -507,10 +523,13 @@ static void io_double(double *z, FILE *fp, int f, char *ss) {
 
 static void io_exprs(int f, FILE *fp) {
 	int i;
-	char temp[XPP_MAX_NAME];
+	char temp[DEFAULT_STRING_LENGTH];
 	double z;
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Delays\n");
 	}
@@ -518,7 +537,10 @@ static void io_exprs(int f, FILE *fp) {
 		io_string(delay_string[i],100,fp,f);
 	}
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Bndry conds\n");
 	}
@@ -526,7 +548,10 @@ static void io_exprs(int f, FILE *fp) {
 		io_string(my_bc[i].string,100,fp,f);
 	}
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Old ICs\n");
 	}
@@ -534,7 +559,10 @@ static void io_exprs(int f, FILE *fp) {
 		io_double(&last_ic[i],fp,f,uvar_names[i]);
 	}
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Ending  ICs\n");
 	}
@@ -542,7 +570,10 @@ static void io_exprs(int f, FILE *fp) {
 		io_double(&MyData[i],fp,f,uvar_names[i]);
 	}
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Parameters\n");
 	}
@@ -566,9 +597,12 @@ static void io_exprs(int f, FILE *fp) {
 
 static void io_graph(int f, FILE *fp) {
 	int j,k;
-	char temp[XPP_MAX_NAME];
+	char temp[DEFAULT_STRING_LENGTH];
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Graphics\n");
 	}
@@ -628,9 +662,11 @@ static void io_graph(int f, FILE *fp) {
 
 
 static void io_int(int *i, FILE *fp, int f, char *ss) {
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	if(f==READEM) {
-		fgets(bob,255,fp);
+		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		*i=atoi(bob);
 	} else {
 		fprintf(fp,"%d   %s\n",*i,ss);
@@ -643,9 +679,12 @@ static void io_numerics(int f, FILE *fp) {
 					"Runge-Kutta","Adams","Gear","Volterra","BackEul",
 					"Qual RK","Stiff","CVode","DorPrin5","DorPri8(3)"};
 	char *pmap[]={"Poincare None","Poincare Section","Poincare Max","Period"};
-	char temp[XPP_MAX_NAME];
+	char temp[DEFAULT_STRING_LENGTH];
 	if(f==READEM && set_type==1) {
-		fgets(temp,255,fp); /* skip a line */}
+		if(fgets(temp,DEFAULT_STRING_LENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		} /* skip a line */
+	}
 	if(f!=READEM) {
 		fprintf(fp,"# Numerical stuff\n");
 	}
@@ -725,7 +764,9 @@ static void io_parameters(int f, FILE *fp) {
 static void io_string(char *s, int len, FILE *fp, int f) {
 	int i;
 	if(f==READEM) {
-		fgets(s,len,fp);
+		if(fgets(s,len,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		i=0;
 		while(i<strlen(s)) {
 			if(s[i]=='\n') {

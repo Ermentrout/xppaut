@@ -85,7 +85,7 @@ static char icfilename[XPP_MAX_NAME];
 static char parfilename[XPP_MAX_NAME];
 static char readsetfile[XPP_MAX_NAME];
 static char setfilename[XPP_MAX_NAME];
-static char externaloptionsstring[1024];
+static char externaloptionsstring[MAXEXPLEN];
 
 static int externaloptionsflag=0;
 static int loadsetfile=0;
@@ -331,7 +331,7 @@ void do_comline(int argc, char **argv) {
 
 int if_needed_load_ext_options(void) {
 	FILE *fp;
-	char myopts[1024];
+	char myopts[MAXEXPLEN];
 	char myoptsx[1026];
 	if(externaloptionsflag==0) {
 		return 1;
@@ -342,7 +342,9 @@ int if_needed_load_ext_options(void) {
 			plintf("%s external set not found\n",readsetfile);
 			return 0;
 		}
-		fgets(myopts,1024,fp);
+		if(fgets(myopts,MAXEXPLEN,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		sprintf(myoptsx,"$ %s",myopts);
 		plintf("Got this string: {%s}\n",myopts);
 		extract_action(myoptsx);

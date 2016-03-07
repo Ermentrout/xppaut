@@ -2734,7 +2734,9 @@ static void save_q_file(FILE *fp) {
 		return;
 	}
 	while(!feof(fq)) {
-		fgets(string,500,fq);
+		if(fgets(string,500,fq)==NULL) {
+			auto_err("Couldnt read q-file");
+		}
 		fputs(string,fp);
 		/* break; */
 	}
@@ -2753,7 +2755,9 @@ static void make_q_file(FILE *fp) {
 		return;
 	}
 	while(!feof(fp)) {
-		fgets(string,500,fp);
+		if(fgets(string,500,fp)==NULL) {
+			auto_err("Couldnt read s-file");
+		}
 		if(!noinfo(string)) {
 			fputs(string,fq);
 		}
@@ -2819,7 +2823,9 @@ static int move_to_label(int mylab, int *nrow, int *ndim, FILE *fp) {
 	int i;
 	char line[MAXLINELENGTH];
 	while(1) {
-		fgets(line,MAXLINELENGTH,fp);
+		if(fgets(line,MAXLINELENGTH,fp)==NULL) {
+			plintf("Couldnt read file %s", fp);
+		}
 		sscanf(line,"%d%d %d %d %d %d %d %d %d",
 			   &ibr,&ntot,&itp,&lab,&nfpar,&isw,&ntpl,&nar,&nskip);
 		if(mylab==lab) {
@@ -2828,7 +2834,9 @@ static int move_to_label(int mylab, int *nrow, int *ndim, FILE *fp) {
 			return(1);
 		}
 		for(i=0;i<nskip;i++) {
-			fgets(line,MAXLINELENGTH,fp);
+			if(fgets(line,MAXLINELENGTH,fp)==NULL) {
+				plintf("Couldnt read file %s", fp);
+			}
 		}
 		if(feof(fp)) {
 			break;

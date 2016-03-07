@@ -93,7 +93,7 @@ void svg_frect(int x, int y, int w, int h) {
 int svg_init(char *filename, int color) {
 	FILE *fp;
 	init_svg();
-	char css[MAX_STRING_LENGTH];
+	char css[DEFAULT_STRING_LENGTH];
 	LastPSX=-10000;
 	LastPSY=-10000;
 
@@ -291,10 +291,12 @@ int svg_init(char *filename, int color) {
 	fp=fopen(css,"r");
 	if(fp!=NULL) {
 		plintf("Styling svg image according to %s\n",css);
-		char bob[MAX_STRING_LENGTH];
+		char bob[DEFAULT_STRING_LENGTH];
 		while(!feof(fp)) {
 			bob[0]='\0';
-			fgets(bob,255,fp);
+			if(fgets(bob,DEFAULT_STRING_LENGTH-1,fp)==NULL) {
+				plintf("Couldnt read file %s", fp);
+			}
 			fprintf(svgfile,"%s",bob);
 		}
 		fclose(fp);

@@ -166,7 +166,7 @@ including derived parameters but XPP takes care of this so start at 0
 typedef struct {
 	int type,ncon,n;
 	char name[20];
-	char soname[MAX_STRING_LENGTH],sofun[MAX_STRING_LENGTH];
+	char soname[DEFAULT_STRING_LENGTH],sofun[DEFAULT_STRING_LENGTH];
 	int root,root2;
 	int f[20];
 	int iwgt;
@@ -214,10 +214,10 @@ int add_spec_fun(char *name, char *rhs) {
 	int iwgt,itau,iind,ivar,ivar2;
 	int ntype,ntot,ncon,ntab;
 	char *str;
-	char junk[MAX_STRING_LENGTH];
+	char junk[DEFAULT_STRING_LENGTH];
 	char rootname[20],wgtname[20],tauname[20],indname[20];
 	char root2name[20],fname[20];
-	char sofun[MAX_STRING_LENGTH],soname[MAX_STRING_LENGTH],*tname[MAXW];
+	char sofun[DEFAULT_STRING_LENGTH],soname[DEFAULT_STRING_LENGTH],*tname[MAXW];
 	type=is_network(rhs);
 	if(type==0) {
 		return 0;
@@ -1599,7 +1599,7 @@ static double net_interp(double x, int i) {
 
 
 static int parse_import(char *s,  char *soname,char *sofun,int *n, char *vname,int *m, char *tname[MAXW]) {
-	char temp[MAX_STRING_LENGTH];
+	char temp[DEFAULT_STRING_LENGTH];
 	int j;
 	char c;
 	int i=0;

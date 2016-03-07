@@ -110,7 +110,7 @@ void append_stoch(int first, int length) {
 
 int build_markov(char **ma, char *name) {
 	int len=0,ll;
-	char line[MAX_STRING_LENGTH],expr[MAX_STRING_LENGTH];
+	char line[DEFAULT_STRING_LENGTH],expr[DEFAULT_STRING_LENGTH];
 	int istart;
 	int i,j,nstates,index;
 	index=-1;
@@ -247,7 +247,7 @@ void nsrand48(int seed) {
 int old_build_markov(FILE *fptr, char *name) {
 	/*int nn;*/
 	int len=0,ll;
-	char line[MAX_STRING_LENGTH],expr[MAX_STRING_LENGTH];
+	char line[DEFAULT_STRING_LENGTH],expr[DEFAULT_STRING_LENGTH];
 	int istart;
 	int i,j,nstates,index;
 	index=-1;
@@ -272,7 +272,9 @@ int old_build_markov(FILE *fptr, char *name) {
 	}
 	plintf(" Building %s ...\n",name);
 	for(i=0;i<nstates;i++) {
-		fgets(line,MAX_STRING_LENGTH,fptr);
+		if(fgets(line,DEFAULT_STRING_LENGTH,fptr)==NULL) {
+			plintf("Couldnt read file %s", fptr);
+		}
 		if(ConvertStyle) {
 			fprintf(convertf,"%s",line);
 		}
@@ -391,7 +393,7 @@ static int compile_markov(int index, int j, int k) {
 	char *expr;
 	int l0=markov[index].nstates*j+k,leng;
 	int i;
-	int com[MAX_STRING_LENGTH];
+	int com[DEFAULT_STRING_LENGTH];
 	expr=markov[index].trans[l0];
 
 	if(add_expr(expr,com,&leng)) {
