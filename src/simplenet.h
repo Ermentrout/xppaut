@@ -25,6 +25,7 @@ typedef struct {
 
 /* --- Functions --- */
 int get_vector_info();
+double vector_value(double x, int i);
 double net_interp(double x, int i);
 double network_value(double x, int i);
 void init_net(double *v, int n);

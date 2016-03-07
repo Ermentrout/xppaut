@@ -125,6 +125,8 @@ including derived parameters but XPP takes care of this so start at 0
 #include <stdlib.h>
 #include <string.h>
 
+#include "delay_handle.h"
+#include "fftn.h"
 #include "form_ode.h"
 #include "ggets.h"
 #include "markov.h"
@@ -227,9 +229,6 @@ void add_vectorizer_name(char *name, char *rhs) {
 double vector_value(double x, int i) {
 	int il=my_vec[i].il,ir=my_vec[i].ir,n=my_vec[i].length,k=(int)x;
 	int root=my_vec[i].root;
-	if((k>=0)&&(k<n))  {
-		return variables[root+k];
-	}
 	if(il==PERIODIC) {
 		return variables[root+((k+n)%n)];
 	}
@@ -238,8 +237,9 @@ double vector_value(double x, int i) {
 			return 0.0;
 		}
 		return variables[root-k-1];
-	}
-	if(k>=n) {
+	} else if((k>=0)&&(k<n))  {
+		return variables[root+k];
+	} else {
 		if(ir==ZERO) {
 			return 0.0;
 		}

@@ -9,8 +9,11 @@
 #include "comline.h"
 #include "delay_handle.h"
 #include "ggets.h"
+#include "markov.h"
+#include "simplenet.h"
 #include "strutil.h"
 #include "tabular.h"
+#include "volterra2.h"
 #include "xpplim.h"
 
 /* --- Macros --- */
@@ -74,112 +77,93 @@ double lgamma();
 # define M_PI	3.14159265358979323846264338327950288
 #endif
 
-double zippy;
-int nsrand48(int seed);
+/* --- Forward declarations --- */
+static int duplicate_name(char *junk);
+static int add_constant(char *junk);
+static int get_type(int index);
+static int check_num(int *tok, double value);
+static int is_ufun(int x);
+static int is_ucon(int x);
+static int is_uvar(int x);
+static int isvar(int y);
+static int iscnst(int y);
+static int isker(int y);
+static int is_lookup(int x);
+static void find_name(char *string, int *index);
+static int alg_to_rpn(int *toklist, int *command);
+static void show_where(char *string, int index);
+static int function_sym(int token);
+static int unary_sym(int token);
+static int binary_sym(int token);
+static int pure_number(int token);
+static int gives_number(int token);
+static int check_syntax(int oldtoken, int newtoken);
+static int make_toks(char *dest, int *my_token);
+static void tokeninfo(int tok);
+static void find_tok(char *source, int *index, int *tok);
+static double pmod(double x, double y);
+
+static double bessel_j(double x, double y);
+static double bessel_y(double x, double y);
+static double bessi(double nn, double x);
+static double bessi0(double x);
+static double bessi1(double x);
+static double do_shift(double shift, double variable);
+static double do_ishift(double shift, double variable);
+static double do_delay_shift(double delay, double shift, double variable);
+static double do_delay(double delay, double i);
+static void one_arg(void);
+static double max(double x, double y);
+static double min(double x, double y);
+
+static double neg(double z);
+static double recip(double z);
+static double heaviside(double z);
+static double rndom(double z);
+static double signum(double z);
+
+static double dnot(double x);
+static double dand(double x, double y);
+static double dor(double x, double y);
+static double dge(double x, double y);
+static double dle(double x, double y);
+static double deq(double x, double y);
+static double dne(double x, double y);
+static double dgt(double x, double y);
+static double dlt(double x, double y);
+
+static void two_args(void);
+static double eval_rpn(/* int* */ );
 
 
-/* #define COM(a) my_symb[toklist[(a)]].com */
-int    ERROUT;
-int NDELAYS=0;
-/*double pow2(); */
-double get_delay();
-double delay_stab_eval();
-double lookup(),network_value(),vector_value();
-double atof(),poidev();
-double ndrand48();
-double ker_val();
-double hom_bcs();
-double BoxMuller;
-int BoxMullerFlag=0;
+/* --- Data --- */
+static double BoxMuller;
+static int BoxMullerFlag=0;
+static double CurrentIndex=0;
+static int SumIndex=1;
+static int stack_pointer,uptr;
+static double stack[200], ustack[200];
+static double zippy;
+
 int RandSeed=12345678;
+int ERROUT;
+int MaxPoints;
+double *Memory[MAXKER];
+int NDELAYS=0;
+int NKernel;
+int NTable;
 
-double CurrentIndex=0;
-int SumIndex=1;
-
-void free_ufuns(void);
-int duplicate_name(char *junk);
-int add_constant(char *junk);
-int get_type(int index);
-int check_num(int *tok, double value);
-int is_ufun(int x);
-int is_ucon(int x);
-int is_uvar(int x);
-int isvar(int y);
-int iscnst(int y);
-int isker(int y);
-int is_kernel(int x);
-int is_lookup(int x);
-void find_name(char *string, int *index);
-int alg_to_rpn(int *toklist, int *command);
-void pr_command(int *command);
-void show_where(char *string, int index);
-int function_sym(int token);
-int unary_sym(int token);
-int binary_sym(int token);
-int pure_number(int token);
-int gives_number(int token);
-int check_syntax(int oldtoken, int newtoken);
-int make_toks(char *dest, int *my_token);
-void tokeninfo(int tok);
-void find_tok(char *source, int *index, int *tok);
-double pmod(double x, double y);
-void two_args(void);
-double bessel_j(double x, double y);
-double bessel_y(double x, double y);
-double bessi(double nn, double x);
-double bessi0(double x);
-double bessi1(double x);
-char *com_name(int com);
-double do_shift(double shift, double variable);
-double do_ishift(double shift, double variable);
-double do_delay_shift(double delay, double shift, double variable);
-double do_delay(double delay, double i);
-void one_arg(void);
-double normal(double mean, double std);
-double max(double x, double y);
-double min(double x, double y);
-
-double neg(double z);
-double recip(double z);
-double heaviside(double z);
-double rndom(double z);
-double signum(double z);
-
-double dnot(double x);
-double dand(double x, double y);
-double dor(double x, double y);
-double dge(double x, double y);
-double dle(double x, double y);
-double deq(double x, double y);
-double dne(double x, double y);
-double dgt(double x, double y);
-double dlt(double x, double y);
-
-double evaluate(/* int* */ );
-
-double get_ivar(/* int i */ );
-
-double eval_rpn(/* int* */ );
-double ker_val();
-double pop(  );
-/* FIXXX */
-int stack_pointer,uptr;
 double constants[MAXPAR];
 double variables[MAXODE1];
 int *ufun[MAXUFUN];
 char *ufun_def[MAXUFUN];
 char ufun_names[MAXUFUN][12];
 int narg_fun[MAXUFUN];
-double stack[200],ustack[200];
 
-int NKernel;
-int MaxPoints;
-double *Memory[MAXKER];
-int NTable;
 
 KERNEL kernel[MAXKER];
 UFUN_ARG ufun_arg[MAXUFUN];
-SYMBOL my_symb[MAX_SYMBS] = {
+static SYMBOL my_symb[MAX_SYMBS] = {
 	{"(",1,999,0,1},      /*  0   */
 	{")",1,999,0,2},
 	{",",1,999,0,3},
@@ -340,15 +324,6 @@ void init_rpn(void) {
 		RandSeed=time(0);
 	}
 	nsrand48(RandSeed);
-}
-
-
-void free_ufuns(void) {
-	int i;
-	for(i=0;i<NFUN;i++)	{
-		free(ufun[i]);
-		free(ufun_def[i]);
-	}
 }
 
 
@@ -872,14 +847,6 @@ int isker(int y) {
 }
 
 
-int is_kernel(int x) {
-	if((x/MAXTYPE)==KERTYPE) {
-		return(1);
-	}
-	return(0);
-}
-
-
 int is_lookup(int x) {
 	if((x/MAXTYPE)==TABTYPE) {
 		return(1);
@@ -1170,20 +1137,6 @@ next:
 	}
 	command[comptr]=my_symb[ENDTOK].com;
 	return(0);
-}
-
-
-void pr_command(int *command) {
-	int i=0;
-	int token;
-	while(1) {
-		token=command[i];
-		plintf("%d %d \n",i,token);
-		if(token==ENDEXP) {
-			return;
-		}
-		i++;
-	}
 }
 
 
@@ -1638,21 +1591,6 @@ double bessi1(double x) {
 /*********************************************
 		  FANCY DELAY HERE                   *-------------------------<<<
 *********************************************/
-char *com_name(int com) {
-	int i;
-	for( i=0;i<NSYM;i++) {
-		if( my_symb[i].com == com ) {
-			break;
-		}
-	}
-	if( i < NSYM ) {
-		return my_symb[i].name;
-	} else {
-		return "";
-	}
-}
-
-
 double do_shift(double shift, double variable) {
 	int it, in;
 	int i=(int)(variable),ish=(int)shift;
