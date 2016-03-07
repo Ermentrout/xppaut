@@ -612,7 +612,7 @@ static void axes_opts(void) {
 	sprintf(values[3],"%d",MyGraph->xorgflag);
 	sprintf(values[4],"%d",MyGraph->yorgflag);
 	sprintf(values[5],"%d",MyGraph->zorgflag);
-	sprintf(values[6],"%d",PS_FONTSIZE);
+	sprintf(values[6],"%d",PS_FontSize);
 	status=do_string_box(7,7,1,"Axes options",n,values,25);
 	if(status!=0) {
 		MyGraph->xorg=atof(values[0]);
@@ -621,7 +621,7 @@ static void axes_opts(void) {
 		MyGraph->xorgflag=atoi(values[3]);
 		MyGraph->yorgflag=atoi(values[4]);
 		MyGraph->zorgflag=atoi(values[5]);
-		PS_FONTSIZE=atoi(values[6]);
+		PS_FontSize=atoi(values[6]);
 		redraw_the_graph();
 	}
 }
@@ -817,15 +817,15 @@ static void create_ps(void) {
 	char values[5][MAX_LEN_SBOX];
 	sprintf(values[0],"%d",PS_Color);
 	sprintf(values[1],"%d",PS_Port);
-	sprintf(values[2],"%d",PS_FONTSIZE);
+	sprintf(values[2],"%d",PS_FontSize);
 	sprintf(values[3],"%s",PS_FONT);
-	sprintf(values[4],"%g",PS_LW);
+	sprintf(values[4],"%g",PS_LineWidth);
 	status=do_string_box(5,5,1,"Postscript parameters",nn,values,25);
 	if(status!=0) {
 		PS_Color=atoi(values[0]);
 		PS_Port=atoi(values[1]);
-		PS_FONTSIZE=atoi(values[2]);
-		PS_LW=atof(values[4]);
+		PS_FontSize=atoi(values[2]);
+		PS_LineWidth=atof(values[4]);
 		sprintf(PS_FONT,"%s",values[3]);
 		sprintf(filename,"%s.ps",this_file);
 		ping();

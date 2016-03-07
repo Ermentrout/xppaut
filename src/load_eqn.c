@@ -1657,18 +1657,18 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 		}
 		return;
 	}
-	if(msc("PS_LW",s1)) {
-		if((notAlreadySet.PS_LW || force) ||
-		   ((mask!=NULL) && (mask->PS_LW==1))) {
-			PS_LW=atof(s2);
-			notAlreadySet.PS_LW=0;
+	if(msc("PS_LineWidth",s1)) {
+		if((notAlreadySet.PS_LineWidth || force) ||
+		   ((mask!=NULL) && (mask->PS_LineWidth==1))) {
+			PS_LineWidth=atof(s2);
+			notAlreadySet.PS_LineWidth=0;
 		}
 		return;
 	}
 	if(msc("PS_FSIZE",s1)) {
 		if((notAlreadySet.PS_FSIZE || force) ||
 		   ((mask!=NULL) && (mask->PS_FSIZE==1))) {
-			PS_FONTSIZE=atoi(s2);
+			PS_FontSize=atoi(s2);
 			notAlreadySet.PS_FSIZE=0;
 		}
 		return;
@@ -1677,8 +1677,8 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 	if(msc("PS_COLOR",s1)) {
 		if((notAlreadySet.PS_COLOR || force) ||
 		   ((mask!=NULL) && (mask->PS_COLOR==1))) {
-			PSColorFlag=atoi(s2);
-			PS_Color=PSColorFlag;
+			PS_ColorFlag=atoi(s2);
+			PS_Color=PS_ColorFlag;
 			notAlreadySet.PS_COLOR=0;
 		}
 		return;

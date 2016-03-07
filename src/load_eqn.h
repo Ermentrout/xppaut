@@ -122,7 +122,7 @@ typedef struct {
 	int AUTOYMIN;
 	int AUTOVAR;
 	int PS_FONT;
-	int PS_LW;
+	int PS_LineWidth;
 	int PS_FSIZE;
 	int PS_COLOR;
 	int FOREVER;

@@ -253,7 +253,7 @@ void svg_do_color(int color) {
 	int r,g,b;
 	if(PltFmtFlag==SCRNFMT	||
 	   PltFmtFlag==PSFMT	||
-	   PSColorFlag==0) {
+	   PS_ColorFlag==0) {
 		return;
 	}
 	get_svg_color(color,&r,&g,&b);
@@ -355,7 +355,7 @@ void chk_svg_lines(void) {
 void svg_linetype(int linetype) {
 	char *line = "ba0123456789c";
 	SVGLINETYPE=line[(linetype%11)+2];
-	PSLines=0;
+	PS_Lines=0;
 }
 
 void svg_point(int x, int y) {
@@ -387,7 +387,7 @@ void svg_point(int x, int y) {
 	} else  {
 		fprintf(svgfile,"      <use xlink:href = \"#xpppoint%c\" x=\"%d\" y=\"%d\" style=\"stroke:#%s; fill:%s\"/>\n",point[number+1],x,y,svgcol,svgfill);
 	}
-	PSLines=0;
+	PS_Lines=0;
 	LastPtLine=0;
 	DOING_SVG_COLOR=0;
 }

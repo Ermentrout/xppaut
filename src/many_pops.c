@@ -669,32 +669,6 @@ void make_icon(char *icon, int wid, int hgt, Window w) {
 }
 
 
-void ps_restore(void) {
-	if(Xup) {
-		redraw_dfield();
-		ps_do_color(0);
-		if(MyGraph->Nullrestore) {
-			restore_nullclines();
-			ps_stroke();
-		}
-	}
-	ps_last_pt_off();
-
-	restore(0,my_browser.maxrow);
-
-	do_batch_nclines();
-	do_batch_dfield();
-	do_axes();
-
-	ps_do_color(0);
-	if(Xup) {
-		draw_label(draw_win);
-		draw_freeze(draw_win);
-	}
-	ps_end();
-}
-
-
 void resize_all_pops(int wid, int hgt) {
 	int nw=wid-16-16*DCURX+7,nh=hgt-3*DCURYb-4*DCURYs-24;
 	nw=4*((nw/4));

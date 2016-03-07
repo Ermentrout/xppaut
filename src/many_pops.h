@@ -35,7 +35,6 @@ void hi_lite(Window wi);
 void init_grafs(int x, int y, int w, int h);
 void make_active(int i,int flag);
 void make_icon(char *icon, int wid, int hgt, Window w);
-void ps_restore(void);
 void resize_all_pops(int wid, int hgt);
 void restore_off(void);
 void restore_on(void);

@@ -462,7 +462,7 @@ void do_main(int argc, char **argv) {
 	notAlreadySet.AUTOYMIN=1;
 	notAlreadySet.AUTOVAR=1;
 	notAlreadySet.PS_FONT=1;
-	notAlreadySet.PS_LW=1;
+	notAlreadySet.PS_LineWidth=1;
 	notAlreadySet.PS_FSIZE=1;
 	notAlreadySet.PS_COLOR=1;
 	notAlreadySet.FOREVER=1;
