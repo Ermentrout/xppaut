@@ -52,7 +52,9 @@ typedef struct {
 
 /* --- Forward declarations --- */
 static void do_file_com(int com);
-
+static void get_pmap_pars_com(int l);
+static void quick_num(int com);
+static void set_col_par_com(int i);
 
 /* --- Data --- */
 static int status;
@@ -873,5 +875,136 @@ static void do_file_com(int com) {
 	case M_FL:
 		clone_ode();
 		break;
+	}
+}
+
+
+static void get_pmap_pars_com(int l) {
+	static char mkey[]="nsmp";
+	char ch;
+	static char *n[]={"*0Variable","Section","Direction (+1,-1,0)","Stop on sect(y/n)"};
+	char values[4][MAX_LEN_SBOX];
+	static char *yn[]={"N","Y"};
+	int status;
+	char n1[15];
+	int i1=POIVAR;
+	ch=mkey[l];
+	POIMAP=0;
+	if(ch=='s') {
+		POIMAP=1;
+	}
+	if(ch=='m') {
+		POIMAP=2;
+	}
+	if(ch=='p') {
+		POIMAP=3;
+	}
+	if(POIMAP==0) {
+		return;
+	}
+	ind_to_sym(i1,n1);
+	sprintf(values[0],"%s",n1);
+	sprintf(values[1],"%.16g",POIPLN);
+	sprintf(values[2],"%d",POISGN);
+	sprintf(values[3],"%s",yn[SOS]);
+	status=do_string_box(4,4,1,"Poincare map",n,values,45);
+	if(status!=0) {
+		find_variable(values[0],&i1);
+		if(i1<0) {
+			POIMAP=0;
+			err_msg("No such section");
+			return;
+		}
+		POIVAR=i1;
+		POISGN=atoi(values[2]);
+		if(values[3][0]=='Y' || values[3][0]=='y') {
+			SOS=1;
+		} else {
+			SOS=0;
+		}
+		POIPLN=atof(values[1]);
+	}
+}
+
+
+static void quick_num(int com) {
+	char key[]="tsrdnviobec";
+	if(com>=0 && com<11) {
+		get_num_par(key[com]);
+	}
+}
+
+
+static void set_col_par_com(int i) {
+	int j,ivar;
+	double temp[2];
+	float maxder=0.0,minder=0.0,sum=0.0;
+	char ch,name[20];
+	MyGraph->ColorFlag=i;
+	/* set color to black/white */
+	if(MyGraph->ColorFlag==0) {
+		return;
+	}
+	if(MyGraph->ColorFlag==2) {
+		ind_to_sym(MyGraph->ColorValue,name);
+		new_string("Color via:",name);
+		find_variable(name,&ivar);
+		if(ivar>=0) {
+			MyGraph->ColorValue=ivar;
+		} else {
+			err_msg("No such quantity!");
+			MyGraph->ColorFlag=0;
+			return;
+		}
+	}
+
+	/*   This will be uncommented    ..... */
+	ch=TwoChoice("(O)ptimize","(C)hoose","Color","oc");
+
+	if(ch=='c') {
+		temp[0]=MyGraph->min_scale;
+		temp[1]=MyGraph->min_scale+MyGraph->color_scale;
+		new_float("Min :",&temp[0]);
+		new_float("Max :",&temp[1]);
+		if(temp[1]>temp[0]				&&
+		   ((MyGraph->ColorFlag==2)	||
+			(MyGraph->ColorFlag==1		&&
+			 temp[0]>=0.0))) {
+			MyGraph->min_scale=temp[0];
+			MyGraph->color_scale=(temp[1]-temp[0]);
+		} else {
+			err_msg("Min>=Max or Min<0 error");
+		}
+		return;
+	}
+	if(MyGraph->ColorFlag==1) {
+		if(storind<2) {
+			return;
+		}
+		maxder=0.0;
+		minder=1.e20;
+		for(i=1;i<my_browser.maxrow;i++) {
+			sum=0.0;
+			for(j=0;j<NODE;j++) {
+				sum+=(float)fabs((double)(my_browser.data[1+j][i]-my_browser.data[1+j][i-1]));
+			}
+			if(sum<minder) {
+				minder=sum;
+			}
+			if(sum>maxder) {
+				maxder=sum;
+			}
+		}
+		if(minder>=0.0 && maxder>minder) {
+			MyGraph->color_scale=(maxder-minder)/(fabs(DELTA_T*NJMP));
+			MyGraph->min_scale=minder/(fabs(DELTA_T*NJMP));
+		}
+	} else {
+		get_max(MyGraph->ColorValue,&temp[0],&temp[1]);
+		MyGraph->min_scale=temp[0];
+		MyGraph->color_scale=(temp[1]-temp[0]);
+		if(MyGraph->color_scale==0.0) {
+			MyGraph->color_scale=1.0;
+		}
 	}
 }

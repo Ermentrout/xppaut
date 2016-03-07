@@ -102,6 +102,7 @@ typedef struct {
 
 /* --- Forward declarations --- */
 static void batch_integrate_once(void);
+static void compute_one_period(double period,double *x, char *name);
 static void do_batch_dry_run(void);
 static void do_eq_range(double *x);
 static void do_monte_carlo_search(int append, int stuffbrowse,int ishoot);
@@ -179,7 +180,7 @@ void batch_integrate(void) {
 		}
 		plintf("out=%s\n",batchout);
 		extract_internset(i);
-		chk_delay();
+		check_delay();
 		plintf(" Ok integrating now \n");
 		do_batch_dry_run();
 		if(intern_set[i].use) {
@@ -1821,6 +1822,56 @@ static void batch_integrate_once(void) {
 		}
 	}
 	plintf(" Run complete ... \n");
+}
+
+
+static
+
+
+void compute_one_period(double period,double *x,char *name) {
+	int opm=POIMAP;
+	char filename[256];
+	double ot=TRANS,ote=TEND;
+	FILE *fp;
+	TRANS=0;
+	T0=0;
+	MyTime=0;
+	TEND=period;
+	POIMAP=0; /* turn off poincare map */
+	reset_browser();
+
+	usual_integrate_stuff(x);
+	sprintf(filename,"orbit.%s.dat",name);
+	fp=fopen(filename,"w");
+	if(fp!=NULL) {
+		write_mybrowser_data(fp);
+		fclose(fp);
+	} else {
+		TRANS=ot;
+		POIMAP=opm;
+		TEND=ote;
+		return;
+	}
+	new_adjoint();
+	sprintf(filename,"adjoint.%s.dat",name);
+	fp=fopen(filename,"w");
+	if(fp!=NULL) {
+		write_mybrowser_data(fp);
+		fclose(fp);
+		data_back();
+	}
+	new_h_fun(1);
+	sprintf(filename,"hfun.%s.dat",name);
+	fp=fopen(filename,"w");
+	if(fp!=NULL) {
+		write_mybrowser_data(fp);
+		fclose(fp);
+		data_back();
+	}
+	reset_browser();
+	TRANS=ot;
+	POIMAP=opm;
+	TEND=ote;
 }
 
 

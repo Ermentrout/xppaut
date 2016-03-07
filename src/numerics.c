@@ -17,6 +17,7 @@
 #include "delay_handle.h"
 #include "flags.h"
 #include "form_ode.h"
+#include "gear.h"
 #include "ggets.h"
 #include "graf_par.h"
 #include "integrate.h"
@@ -27,6 +28,7 @@
 #include "menu.h"
 #include "menudrive.h"
 #include "menus.h"
+#include "odesol2.h"
 #include "parserslow.h"
 #include "pop_list.h"
 #include "pp_shoot.h"
@@ -34,7 +36,6 @@
 #include "struct.h"
 #include "volterra2.h"
 
-double atof();
 
 /*   This is numerics.c
  *   The input is primitive and eventually, I want to make it so
@@ -42,53 +43,77 @@ double atof();
 	For now, I just will let it remain command driven
 */
 
-POINCARE_MAP my_pmap;
-
-int METHOD;
-
+/* --- Forward declarations --- */
+static void check_pos(int *j);
+static void get_method(void);
+static void ruelle(void);
 int (*solver)();
-float *fft_data,*hist_data,color_scale,min_scale;
 
-int  gear();
-int discrete();
-int euler();
-int mod_euler();
-int rung_kut();
-int adams();
-int volterra();
-int bak_euler();
-int symplect3();
+
+/* --- Data --- */
+int METHOD;
 int cv_bandflag=0,cv_bandupper=1,cv_bandlower=1;
 
 
-void chk_volterra(void) {
-	if (NKernel>0) {
+/* --- Functions --- */
+void check_delay(void) {
+	if(DELAY>0.0) {
+		free_delay();
+		if(alloc_delay(DELAY)) {
+			INFLAG=0; /*  Make sure no last ics allowed */
+		}
+	} else {
+		free_delay();
+	}
+}
+
+
+void do_meth(void) {
+	if(NKernel>0) {
 		METHOD=VOLTERRA;
 	}
-}
-
-void  check_pos(int *j) {
-	if(*j<=0) {
-		*j=1;
+	switch(METHOD) {
+	case 0:
+		solver=discrete;
+		DELTA_T=1;
+		break;
+	case 1:
+		solver=euler;
+		break;
+	case 2:
+		solver=mod_euler;
+		break;
+	case 3:
+		solver=rung_kut;
+		break;
+	case 4:
+		solver=adams;
+		break;
+	case 5:
+		NJMP=1;
+		break;
+	case 6:
+		solver=volterra;
+		break;
+	case SYMPLECT:
+		solver=symplect3;
+		break;
+	case BACKEUL:
+		solver=bak_euler;
+		break;
+	case RKQS:
+	case STIFF:
+	case CVODE:
+	case DP5:
+	case DP83:
+	case RB23:
+		NJMP=1; break;
+	default: solver=rung_kut;
 	}
 }
 
 
-void quick_num(int com) {
-	char key[]="tsrdnviobec";
-	if(com>=0 && com<11) {
-		get_num_par(key[com]);
-	}
-}
-
-
-void set_total(double total) {
-	int n;
-	n=(total/fabs(DELTA_T))+1;
-	TEND=n*fabs(DELTA_T);
-}
-
-void  get_num_par(int ch) {
+void get_num_par(int ch) {
 	double temp;
 	int tmp;
 	switch(ch) {
@@ -263,18 +288,6 @@ void  get_num_par(int ch) {
 }
 
 
-void chk_delay(void) {
-	if(DELAY>0.0) {
-		free_delay();
-		if(alloc_delay(DELAY)) {
-			INFLAG=0; /*  Make sure no last ics allowed */
-		}
-	} else {
-		free_delay();
-	}
-}
-
-
 void set_delay(void) {
 	if(NDELAYS==0) {
 		return;
@@ -288,162 +301,22 @@ void set_delay(void) {
 }
 
 
-void ruelle(void) {
-	new_int("x-axis shift ",&(MyGraph->xshft));
-	new_int("y-axis shift ",&(MyGraph->yshft));
-	new_int("z-axis shift",&(MyGraph->zshft));
-	if(MyGraph->xshft<0) {
-		MyGraph->xshft=0;
-	}
-	if(MyGraph->yshft<0) {
-		MyGraph->yshft=0;
-	}
-	if(MyGraph->zshft<0) {
-		MyGraph->zshft=0;
-	}
-}
-
-/*    these are the default values of the numerical parameters   */
-void init_numerics(void) {
-	DELTA_T=.05;
-	TEND=20.0;
-	T0=0.0;
-	TRANS=0.0;
-	NULL_ERR=.001;
-	EVEC_ERR=.001;
-	NEWT_ERR=.001;
-	BOUND=100.0;
-	DELAY=0.0;
-	TOLER=.00001;
-	HMIN=.001;
-	HMAX=1.0;
-
-	POIPLN=0.0;
-	NMESH=50;
-	NJMP=1;
-	METHOD=4;
-	NC_ITER=100;
-	EVEC_ITER=100;
-
-	/* new improved poincare map */
-	my_pmap.maxvar=1;
-	my_pmap.type=0;
-	my_pmap.sos=0;
-	my_pmap.sign=1;
-	my_pmap.tmod=8.*atan(1.0);
-	sprintf(my_pmap.section," ");
-
-	POIMAP=0;
-	POIVAR=1;
-	POISGN=1;
-	SOS=0;
+void set_total(double total) {
+	int n;
+	n=(total/fabs(DELTA_T))+1;
+	TEND=n*fabs(DELTA_T);
 }
 
 
-void meth_dialog(void) {
-	char values[8][MAX_LEN_SBOX];
-	sprintf(values[0],"%d",METHOD);
-	sprintf(values[1],"%g",ATOLER);
-	sprintf(values[2],"%g",TOLER);
-}
-
-
-void compute_one_period(double period,double *x,char *name) {
-	int opm=POIMAP;
-	char filename[256];
-	double ot=TRANS,ote=TEND;
-	FILE *fp;
-	TRANS=0;
-	T0=0;
-	MyTime=0;
-	TEND=period;
-	POIMAP=0; /* turn off poincare map */
-	reset_browser();
-
-	usual_integrate_stuff(x);
-	sprintf(filename,"orbit.%s.dat",name);
-	fp=fopen(filename,"w");
-	if(fp!=NULL) {
-		write_mybrowser_data(fp);
-		fclose(fp);
-	} else {
-		TRANS=ot;
-		POIMAP=opm;
-		TEND=ote;
-		return;
-	}
-	new_adjoint();
-	sprintf(filename,"adjoint.%s.dat",name);
-	fp=fopen(filename,"w");
-	if(fp!=NULL) {
-		write_mybrowser_data(fp);
-		fclose(fp);
-		data_back();
-	}
-	new_h_fun(1);
-	sprintf(filename,"hfun.%s.dat",name);
-	fp=fopen(filename,"w");
-	if(fp!=NULL) {
-		write_mybrowser_data(fp);
-		fclose(fp);
-		data_back();
-	}
-	reset_browser();
-	TRANS=ot;
-	POIMAP=opm;
-	TEND=ote;
-}
-
-
-void get_pmap_pars_com(int l) {
-	static char mkey[]="nsmp";
-	char ch;
-	static char *n[]={"*0Variable","Section","Direction (+1,-1,0)","Stop on sect(y/n)"};
-	char values[4][MAX_LEN_SBOX];
-	static char *yn[]={"N","Y"};
-	int status;
-	char n1[15];
-	int i1=POIVAR;
-	ch=mkey[l];
-	POIMAP=0;
-	if(ch=='s') {
-		POIMAP=1;
-	}
-	if(ch=='m') {
-		POIMAP=2;
-	}
-	if(ch=='p') {
-		POIMAP=3;
-	}
-	if(POIMAP==0) {
-		return;
-	}
-	ind_to_sym(i1,n1);
-	sprintf(values[0],"%s",n1);
-	sprintf(values[1],"%.16g",POIPLN);
-	sprintf(values[2],"%d",POISGN);
-	sprintf(values[3],"%s",yn[SOS]);
-	status=do_string_box(4,4,1,"Poincare map",n,values,45);
-	if(status!=0) {
-		find_variable(values[0],&i1);
-		if(i1<0) {
-			POIMAP=0;
-			err_msg("No such section");
-			return;
-		}
-		POIVAR=i1;
-		POISGN=atoi(values[2]);
-		if(values[3][0]=='Y' || values[3][0]=='y') {
-			SOS=1;
-		} else {
-			SOS=0;
-		}
-		POIPLN=atof(values[1]);
+/* --- Static functions --- */
+static void check_pos(int *j) {
+	if(*j<=0) {
+		*j=1;
 	}
 }
 
 
-void get_method(void) {
+static void get_method(void) {
 	char ch;
 	int i;
 	int nmeth;
@@ -472,121 +345,17 @@ void get_method(void) {
 }
 
 
-void set_col_par_com(int i) {
-	int j,ivar;
-	double temp[2];
-	float maxder=0.0,minder=0.0,sum=0.0;
-	char ch,name[20];
-	MyGraph->ColorFlag=i;
-	/* set color to black/white */
-	if(MyGraph->ColorFlag==0) {
-		return;
+static void ruelle(void) {
+	new_int("x-axis shift ",&(MyGraph->xshft));
+	new_int("y-axis shift ",&(MyGraph->yshft));
+	new_int("z-axis shift",&(MyGraph->zshft));
+	if(MyGraph->xshft<0) {
+		MyGraph->xshft=0;
 	}
-	if(MyGraph->ColorFlag==2) {
-		ind_to_sym(MyGraph->ColorValue,name);
-		new_string("Color via:",name);
-		find_variable(name,&ivar);
-		if(ivar>=0) {
-			MyGraph->ColorValue=ivar;
-		} else {
-			err_msg("No such quantity!");
-			MyGraph->ColorFlag=0;
-			return;
-		}
+	if(MyGraph->yshft<0) {
+		MyGraph->yshft=0;
 	}
-
-	/*   This will be uncommented    ..... */
-	ch=TwoChoice("(O)ptimize","(C)hoose","Color","oc");
-
-	if(ch=='c') {
-		temp[0]=MyGraph->min_scale;
-		temp[1]=MyGraph->min_scale+MyGraph->color_scale;
-		new_float("Min :",&temp[0]);
-		new_float("Max :",&temp[1]);
-		if(temp[1]>temp[0]				&&
-		   ((MyGraph->ColorFlag==2)	||
-			(MyGraph->ColorFlag==1		&&
-			 temp[0]>=0.0))) {
-			MyGraph->min_scale=temp[0];
-			MyGraph->color_scale=(temp[1]-temp[0]);
-		} else {
-			err_msg("Min>=Max or Min<0 error");
-		}
-		return;
-	}
-	if(MyGraph->ColorFlag==1) {
-		if(storind<2) {
-			return;
-		}
-		maxder=0.0;
-		minder=1.e20;
-		for(i=1;i<my_browser.maxrow;i++) {
-			sum=0.0;
-			for(j=0;j<NODE;j++) {
-				sum+=(float)fabs((double)(my_browser.data[1+j][i]-my_browser.data[1+j][i-1]));
-			}
-			if(sum<minder) {
-				minder=sum;
-			}
-			if(sum>maxder) {
-				maxder=sum;
-			}
-		}
-		if(minder>=0.0 && maxder>minder) {
-			MyGraph->color_scale=(maxder-minder)/(fabs(DELTA_T*NJMP));
-			MyGraph->min_scale=minder/(fabs(DELTA_T*NJMP));
-		}
-	} else {
-		get_max(MyGraph->ColorValue,&temp[0],&temp[1]);
-		MyGraph->min_scale=temp[0];
-		MyGraph->color_scale=(temp[1]-temp[0]);
-		if(MyGraph->color_scale==0.0) {
-			MyGraph->color_scale=1.0;
-		}
-	}
-}
-
-
-void do_meth(void) {
-	if(NKernel>0) {
-		METHOD=VOLTERRA;
-	}
-	switch(METHOD) {
-	case 0:
-		solver=discrete;
-		DELTA_T=1;
-		break;
-	case 1:
-		solver=euler;
-		break;
-	case 2:
-		solver=mod_euler;
-		break;
-	case 3:
-		solver=rung_kut;
-		break;
-	case 4:
-		solver=adams;
-		break;
-	case 5:
-		NJMP=1;
-		break;
-	case 6:
-		solver=volterra;
-		break;
-	case SYMPLECT:
-		solver=symplect3;
-		break;
-	case BACKEUL:
-		solver=bak_euler;
-		break;
-	case RKQS:
-	case STIFF:
-	case CVODE:
-	case DP5:
-	case DP83:
-	case RB23:
-		NJMP=1; break;
-	default: solver=rung_kut;
+	if(MyGraph->zshft<0) {
+		MyGraph->zshft=0;
 	}
 }

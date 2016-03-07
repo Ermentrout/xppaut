@@ -119,7 +119,7 @@ void do_txt_action(char *s) {
 	extract_action(s);
 	ping();
 	tfBell=tb;
-	chk_delay();
+	check_delay();
 	redraw_params();
 	redraw_ics();
 	reset_graph();

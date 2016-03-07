@@ -45,6 +45,7 @@
 
 
 /* --- Forward declarations --- */
+static void check_volterra(void);
 static void do_intern_set(char *name1, char *value);
 static void fil_flt(FILE *fpt, double *val);
 static void fil_int(FILE *fpt, int *val);
@@ -519,7 +520,7 @@ void set_all_vals(void) {
 	init_trans();
 	init_my_aplot();
 	init_txtview();
-	chk_volterra();
+	check_volterra();
 
 	if(IZPLT>NEQ) {
 		IZPLT=NEQ;
@@ -562,7 +563,7 @@ void set_all_vals(void) {
 	if(AXES>=5) {
 		PLOT_3D=1;
 	}
-	chk_delay(); /* check for delay allocation */
+	check_delay(); /* check for delay allocation */
 	alloc_h_stuff();
 	alloc_v_memory();  /* allocate stuff for volterra equations */
 	alloc_meth();
@@ -1976,6 +1977,13 @@ void stor_internopts(char *s1) {
 
 
 /* --- Static functions --- */
+static void check_volterra(void) {
+	if (NKernel>0) {
+		METHOD=VOLTERRA;
+	}
+}
+
+
 static void do_intern_set(char *name1, char *value) {
 	int i;
 	char name[20];

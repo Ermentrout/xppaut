@@ -556,7 +556,7 @@ void get_intern_set(void) {
 	}
 	get_graph();
 	extract_internset(j);
-	chk_delay();
+	check_delay();
 	redraw_params();
 	redraw_ics();
 	reset_graph();

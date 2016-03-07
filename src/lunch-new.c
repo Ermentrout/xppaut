@@ -89,7 +89,7 @@ void do_lunch(int f) {
 			allocate_volterra(temp,1);
 			MyStart=1;
 		}
-		chk_delay();
+		check_delay();
 		io_exprs(f,fp);
 		io_graph(f,fp);
 		if(set_type==1) {
@@ -260,7 +260,7 @@ int read_lunch(FILE *fp) {
 		allocate_volterra(temp,1);
 		MyStart=1;
 	}
-	chk_delay();
+	check_delay();
 	io_exprs(f,fp);
 	io_graph(f,fp);
 	if(set_type==1) {
