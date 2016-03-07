@@ -1,5 +1,10 @@
 #include "parserslow.h"
 
+#ifndef HAVE_WCTYPE_H
+# include <ctype.h>
+#else
+# include <wctype.h>
+#endif
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
