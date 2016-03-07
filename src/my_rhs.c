@@ -8,6 +8,7 @@
 #include "main.h"
 #include "markov.h"
 #include "parserslow.h"
+#include "simplenet.h"
 #include "xpplim.h"
 
 

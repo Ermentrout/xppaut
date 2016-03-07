@@ -126,6 +126,7 @@ including derived parameters but XPP takes care of this so start at 0
 #include <string.h>
 
 #include "delay_handle.h"
+#include "extra.h"
 #include "fftn.h"
 #include "form_ode.h"
 #include "ggets.h"
@@ -135,6 +136,7 @@ including derived parameters but XPP takes care of this so start at 0
 #include "tabular.h"
 
 /* --- Macros --- */
+#define MAXW 50
 #define EVEN 0
 #define ZERO 1
 #define PERIODIC 2
@@ -160,123 +162,62 @@ including derived parameters but XPP takes care of this so start at 0
 #define IMPORT  50 /* not really a network type   */
 
 
-int n_vector=0;
-VECTORIZER my_vec[MAXVEC];
-NETWORK my_net[MAXNET];
+/* --- Types --- */
+typedef struct {
+	int type,ncon,n;
+	char name[20];
+	char soname[MAX_STRING_LENGTH],sofun[MAX_STRING_LENGTH];
+	int root,root2;
+	int f[20];
+	int iwgt;
+	int *gcom; /* for group commands */
+	double *values,*weight,*index,*taud; /* for delays  */
+	double *fftr,*ffti,*dr,*di;
+	double *wgtlist[MAXW];
+} NETWORK;
 
-char *get_first(/* char *string,char *src */);
-char *get_next(/* char *src */);
-
-double evaluate();
-void get_import_values();
-int parse_import();
-
-int n_network=0;
-double net_interp(double x, int i) {
-	int jlo=(int)x;
-	double *y;
-	int n=my_net[i].n;
-	double dx=x-(double)jlo;
-	y=&variables[my_net[i].root];
-	if(jlo<0 || jlo>(n-1)) {
-		return 0.0; /* out of range */
-	}
-	return (1-dx)*y[jlo]+dx*y[jlo+1];
-}
+typedef struct {
+	char name[20];
+	int root,length,il,ir;
+} VECTORIZER;
 
 
-int add_vectorizer(char *name,char *rhs) {
-	int i,ivar,il,ir;
-	int ind;
-	int len;
-	int flag;
+/* --- Forward declarations */
+static void fft_conv(int it,int n,double *values,double *yy,double *fftr,double *ffti,double *dr,double *di);
+static int g_namelist(char *s, char *root, int *flag, int *i1, int *i2);
+static int getimpstr(char *in,int *i,char *out);
+static int get_vector_info(char *str, char *name,int *root, int *length, int *il, int *ir);
+static int gilparse(char *s, int *ind, int *nn);
+static int import_error(void);
+static void init_net(double *v, int n);
+static int is_network(char *s);
+static double net_interp(double x, int i);
+static int parse_import(char *s,  char *soname,char *sofun,int *n, char *vname,int *m, char *tname[MAXW]);
+static void update_fft(int ind);
 
-	for(i=0;i<n_vector;i++) {
-		if(strcmp(name,my_vec[i].name)==0) {
-			break;
-		}
-	}
-	ind=i;
-	flag=get_vector_info(rhs,name,&ivar,&len,&il,&ir);
+/* extra.c */
+void get_import_values(int n, double *ydot, char *soname, char *sofun,
+					   int ivar, double *wgt[MAXW],
+					   double *var, double *con);
 
-	if(flag==0) {
-		return 0;
-	}
-	my_vec[ind].root=ivar;
-	my_vec[ind].length=len;
-	my_vec[ind].il=il;
-	my_vec[ind].ir=ir;
-	plintf("adding vector %s based on variable %d of length %d ends %d %d\n",
-		   name,ivar,len,il,ir);
-	return 1;
-}
+/* --- Data --- */
+static int n_vector=0;
+static int n_network=0;
+static VECTORIZER my_vec[MAXVEC];
+static NETWORK my_net[MAXNET];
 
 
-void add_vectorizer_name(char *name, char *rhs) {
-	if(n_vector>=MAXVEC) {
-		plintf("Too many vectors \n");
-		exit(0);
-	}
-	strcpy(my_vec[n_vector].name,name);
-	if(add_vector_name( n_vector,name)) {
-		exit(0);
-	}
-	n_vector++;
-
-}
-
-
-double vector_value(double x, int i) {
-	int il=my_vec[i].il,ir=my_vec[i].ir,n=my_vec[i].length,k=(int)x;
-	int root=my_vec[i].root;
-	if(il==PERIODIC) {
-		return variables[root+((k+n)%n)];
-	}
-	if(k<0) {
-		if(il==ZERO) {
-			return 0.0;
-		}
-		return variables[root-k-1];
-	} else if((k>=0)&&(k<n))  {
-		return variables[root+k];
-	} else {
-		if(ir==ZERO) {
-			return 0.0;
-		}
-		return variables[2*n-k-1+root];
-	}
-}
-
-
-double network_value(double x, int i) {
-	int j=(int)x;
-	if(my_net[i].type==INTERP) {
-		return net_interp(x,i);
-	}
-	if(j>=0&&j<my_net[i].n) {
-		return my_net[i].values[j];
-	}
-	return 0.0;
-}
-
-
-void init_net(double *v,int n){
-	int i;
-	for(i=0;i<n;i++) {
-		v[i]=0.0;
-	}
-}
-
+/* --- Functions --- */
 int add_spec_fun(char *name, char *rhs) {
 	int i,ind,elen,err;
 	int type;
 	int iwgt,itau,iind,ivar,ivar2;
 	int ntype,ntot,ncon,ntab;
 	char *str;
-	char junk[256];
+	char junk[MAX_STRING_LENGTH];
 	char rootname[20],wgtname[20],tauname[20],indname[20];
 	char root2name[20],fname[20];
-	char sofun[256],soname[256],*tname[MAXW];
+	char sofun[MAX_STRING_LENGTH],soname[MAX_STRING_LENGTH],*tname[MAXW];
 	type=is_network(rhs);
 	if(type==0) {
 		return 0;
@@ -986,52 +927,44 @@ void add_special_name(char *name, char *rhs) {
 }
 
 
-int is_network(char *s) {
-	/*int n;
-  */
-	de_space(s);
-	strupr(s);
-	/* n=strlen(s); Not used*/
-	if(s[0]=='C' &&s[1]=='O' &&s[2]=='N' && s[3]=='V') {
-		return 1;
+int add_vectorizer(char *name,char *rhs) {
+	int i,ivar,il,ir;
+	int ind;
+	int len;
+	int flag;
+
+	for(i=0;i<n_vector;i++) {
+		if(strcmp(name,my_vec[i].name)==0) {
+			break;
+		}
 	}
-	if(s[0]=='S' &&s[1]=='P' &&s[2]=='A' && s[3]=='R') {
-		return 2;
+	ind=i;
+	flag=get_vector_info(rhs,name,&ivar,&len,&il,&ir);
+
+	if(flag==0) {
+		return 0;
 	}
-	if(s[0]=='F'&&s[1]=='C' &&s[2]=='O' &&s[3]=='N' && s[4]=='V'){
-		return 3;
+	my_vec[ind].root=ivar;
+	my_vec[ind].length=len;
+	my_vec[ind].il=il;
+	my_vec[ind].ir=ir;
+	plintf("adding vector %s based on variable %d of length %d ends %d %d\n",
+		   name,ivar,len,il,ir);
+	return 1;
+}
+
+
+void add_vectorizer_name(char *name, char *rhs) {
+	if(n_vector>=MAXVEC) {
+		plintf("Too many vectors \n");
+		exit(0);
 	}
-	if(s[0]=='F' && s[1]=='S' &&s[2]=='P' &&s[3]=='A' && s[4]=='R') {
-		return 4;
+	strcpy(my_vec[n_vector].name,name);
+	if(add_vector_name( n_vector,name)) {
+		exit(0);
 	}
-	if(s[0]=='F' && s[1]=='F' && s[2]=='T' && s[3]=='C' ) {
-		return 5;
-	}
-	if(s[0]=='M' &&s[1]=='M' &&s[2]=='U' && s[3]=='L') {
-		return 6;
-	}
-	if(s[0]=='F'&& s[1]=='M' &&s[2]=='M' &&s[3]=='U' && s[4]=='L') {
-		return 7;
-	}
-	if(s[0]=='G'&& s[1]=='I' &&s[2]=='L' &&s[3]=='L') {
-		return 10;
-	}
-	if(s[0]=='I' && s[1]=='N' &&s[2]=='T' && s[3]=='E' && s[4]=='R') {
-		return INTERP;
-	}
-	if(s[0]=='F' && s[1]=='I' &&s[2]=='N' && s[3]=='D' && s[4]=='E') {
-		return FINDEXT;
-	}
-	if(s[0]=='D' &&s[1]=='E' &&s[2]=='L' && s[3]=='M') {
-		return DEL_MUL;
-	}
-	if(s[0]=='D' &&s[1]=='E' &&s[2]=='L' && s[3]=='S') {
-		return DEL_SPAR;
-	}
-	if(s[0]=='I' &&s[1]=='M' &&s[2]=='P' && s[3]=='O') {
-		return IMPORT;
-	}
-	return 0;
+	n_vector++;
+
 }
 
 
@@ -1292,6 +1225,18 @@ void evaluate_network(int ind) {
 }
 
 
+double network_value(double x, int i) {
+	int j=(int)x;
+	if(my_net[i].type==INTERP) {
+		return net_interp(x,i);
+	}
+	if(j>=0&&j<my_net[i].n) {
+		return my_net[i].values[j];
+	}
+	return 0.0;
+}
+
+
 void update_all_ffts(void) {
 	int i;
 
@@ -1303,56 +1248,30 @@ void update_all_ffts(void) {
 }
 
 
-/*
- tabular weights are of size 2k+1
- and go from -k ... k
- for FFT's
- they are reordered as follows
- fftr[i]=wgt[i+k] i = 0.. k
- fftr[i+k]=wgt[i] i=1 .. k-1
-*/
-void update_fft(int ind) {
-	int i;
-	int dims[2];
-	double *w=my_net[ind].weight;
-	double *fftr=my_net[ind].fftr;
-	double *ffti=my_net[ind].ffti;
-	int n,n2;
-	int type=my_net[ind].type;
-	if(type==FFTCONP) {
-		n=my_net[ind].n;
-		n2=n/2;
-		for(i=0;i<n;i++) {
-			ffti[i]=0.0;
-		}
-		for(i=0;i<=n2;i++) {
-			fftr[i]=w[i+n2];
-		}
-		for(i=0;i<n2;i++) {
-			fftr[n2+i+1]=w[i];
-		}
-		dims[0]=n;
-		fftn(1,dims,fftr,ffti,1,1.);
+double vector_value(double x, int i) {
+	int il=my_vec[i].il,ir=my_vec[i].ir,n=my_vec[i].length,k=(int)x;
+	int root=my_vec[i].root;
+	if(il==PERIODIC) {
+		return variables[root+((k+n)%n)];
 	}
-	if(type==FFTCON0) {
-		n=2*my_net[ind].n;
-		n2=n/2;
-		for(i=0;i<n;i++) {
-			ffti[i]=0.0;
+	if(k<0) {
+		if(il==ZERO) {
+			return 0.0;
 		}
-		for(i=0;i<=n2;i++) {
-			fftr[i]=w[i+n2];
+		return variables[root-k-1];
+	} else if((k>=0)&&(k<n))  {
+		return variables[root+k];
+	} else {
+		if(ir==ZERO) {
+			return 0.0;
 		}
-		for(i=1;i<n2;i++) {
-			fftr[n2+i]=w[i];
-		}
-		dims[0]=n;
-		fftn(1,dims,fftr,ffti,1,1.);
+		return variables[2*n-k-1+root];
 	}
 }
 
 
-void fft_conv(int it,int n,double *values,double *yy,double *fftr,double *ffti,double *dr,double *di) {
+/* --- Static functions --- */
+static void fft_conv(int it,int n,double *values,double *yy,double *fftr,double *ffti,double *dr,double *di) {
 	int i;
 	int dims[2];
 	double x,y;
@@ -1403,63 +1322,8 @@ void fft_conv(int it,int n,double *values,double *yy,double *fftr,double *ffti,d
 }
 
 
-/* parsing stuff to get gillespie code quickly */
-int gilparse(char *s,int *ind,int *nn) {
-	int i=0,n=strlen(s);
-	char piece[50],b[20],bn[25],c;
-	int i1,i2,jp=0,f;
-	int k=0,iv;
-	int id,m;
-	plintf("s=|%s|",s);
-	while(1) {
-		c=s[i];
-		if(c==','||i>(n-1)) {
-			piece[jp]=0;
-			if(g_namelist(piece,b,&f,&i1,&i2)==0) {
-				printf("Bad gillespie list %s\n",s);
-				return 0;
-			}
-			if(f==0) {
-				plintf("added %s\n",b);
-				iv=get_var_index(b);
-				if(iv<0) {
-					plintf("No such name %s\n",b);
-					return 0;
-				}
-				ind[k]=iv;
-				k++;
-			} else {
-				plintf("added %s{%d-%d}\n",b,i1,i2);
-				m=i2-i1+1;
-				for(id=0;id<m;id++) {
-					sprintf(bn,"%s%d",b,id+i1);
-					iv=get_var_index(bn);
-					if(iv<0) {
-						plintf("No such name %s\n",bn);
-						return 0;
-					}
-					ind[k]=iv;
-					k++;
-				}
-			}
-			if(i>(n-1)) {
-				*nn=k;
-				return 1;
-			}
-			jp=0;
-		} else {
-			piece[jp]=c;
-			jp++;
-		}
-		i++;
-	}
-	*nn=k;
-	return 1;
-}
-
-
 /* plucks info out of  xxx{aa-bb}  or returns string */
-int g_namelist(char *s,char *root,int *flag,int *i1,int*i2) {
+static int g_namelist(char *s,char *root,int *flag,int *i1,int*i2) {
 	int i,n=strlen(s),ir=-1,j=0;
 	char c,num[20];
 	*flag=0;
@@ -1508,7 +1372,7 @@ int g_namelist(char *s,char *root,int *flag,int *i1,int*i2) {
 }
 
 
-int getimpstr(char *in,int *i,char *out) {
+static int getimpstr(char *in,int *i,char *out) {
 	int j=0;
 	int done=1;
 	char c;
@@ -1534,64 +1398,7 @@ int getimpstr(char *in,int *i,char *out) {
 }
 
 
-int import_error(void) {
-	printf("k=import(soname,sofun,nret,var0,w1,...,wm)");
-	return 0;
-}
-
-
-int parse_import(char *s,  char *soname,char *sofun,int *n, char *vname,int *m, char *tname[MAXW]) {
-	char temp[256];
-	int j;
-	char c;
-	int i=0;
-	int done=1;
-
-	while(done>0) {
-		c=s[i];
-		i++;
-		if(c=='(') {
-			done=0;
-		}
-	}
-
-	j=getimpstr(s,&i,temp);
-	strcpy(soname,temp);
-	if(j==1) {
-		return(import_error());
-	}
-	j=getimpstr(s,&i,temp);
-	strcpy(sofun,temp);
-	if(j==1) {
-		return(import_error());
-	}
-	j=getimpstr(s,&i,temp);
-	*n=atoi(temp);
-	if(j==1||*n<=0) {
-		return(import_error());
-	}
-	j=getimpstr(s,&i,temp);
-	strcpy(vname,temp);
-	/*  plintf("%s %s %d %s\n",soname,sofun,*n,vname); */
-	*m=0;
-	if(j==1) {
-		printf("No weights....\n");
-		return(1);
-	}
-	done=1;
-	while(done>0) {
-		j=getimpstr(s,&i,temp);
-		strcpy(tname[*m],temp);
-		*m=*m+1;
-		if(j==1) {
-			done=0;
-		}
-	}
-	return 1;
-}
-
-
-int get_vector_info(char *str, char *name,int *root, int *length, int *il, int *ir) {
+static int get_vector_info(char *str, char *name,int *root, int *length, int *il, int *ir) {
 	int i=0;
 	int ivar;
 	int n=strlen(str);
@@ -1657,4 +1464,235 @@ int get_vector_info(char *str, char *name,int *root, int *length, int *il, int *
 		*ir=ZERO;
 	}
 	return 1;
+}
+
+
+/* parsing stuff to get gillespie code quickly */
+static int gilparse(char *s,int *ind,int *nn) {
+	int i=0,n=strlen(s);
+	char piece[50],b[20],bn[25],c;
+	int i1,i2,jp=0,f;
+	int k=0,iv;
+	int id,m;
+	plintf("s=|%s|",s);
+	while(1) {
+		c=s[i];
+		if(c==','||i>(n-1)) {
+			piece[jp]=0;
+			if(g_namelist(piece,b,&f,&i1,&i2)==0) {
+				printf("Bad gillespie list %s\n",s);
+				return 0;
+			}
+			if(f==0) {
+				plintf("added %s\n",b);
+				iv=get_var_index(b);
+				if(iv<0) {
+					plintf("No such name %s\n",b);
+					return 0;
+				}
+				ind[k]=iv;
+				k++;
+			} else {
+				plintf("added %s{%d-%d}\n",b,i1,i2);
+				m=i2-i1+1;
+				for(id=0;id<m;id++) {
+					sprintf(bn,"%s%d",b,id+i1);
+					iv=get_var_index(bn);
+					if(iv<0) {
+						plintf("No such name %s\n",bn);
+						return 0;
+					}
+					ind[k]=iv;
+					k++;
+				}
+			}
+			if(i>(n-1)) {
+				*nn=k;
+				return 1;
+			}
+			jp=0;
+		} else {
+			piece[jp]=c;
+			jp++;
+		}
+		i++;
+	}
+	*nn=k;
+	return 1;
+}
+
+
+static int import_error(void) {
+	printf("k=import(soname,sofun,nret,var0,w1,...,wm)");
+	return 0;
+}
+
+
+static void init_net(double *v,int n){
+	int i;
+	for(i=0;i<n;i++) {
+		v[i]=0.0;
+	}
+}
+
+
+static int is_network(char *s) {
+	/*int n;
+  */
+	de_space(s);
+	strupr(s);
+	/* n=strlen(s); Not used*/
+	if(s[0]=='C' &&s[1]=='O' &&s[2]=='N' && s[3]=='V') {
+		return 1;
+	}
+	if(s[0]=='S' &&s[1]=='P' &&s[2]=='A' && s[3]=='R') {
+		return 2;
+	}
+	if(s[0]=='F'&&s[1]=='C' &&s[2]=='O' &&s[3]=='N' && s[4]=='V'){
+		return 3;
+	}
+	if(s[0]=='F' && s[1]=='S' &&s[2]=='P' &&s[3]=='A' && s[4]=='R') {
+		return 4;
+	}
+	if(s[0]=='F' && s[1]=='F' && s[2]=='T' && s[3]=='C' ) {
+		return 5;
+	}
+	if(s[0]=='M' &&s[1]=='M' &&s[2]=='U' && s[3]=='L') {
+		return 6;
+	}
+	if(s[0]=='F'&& s[1]=='M' &&s[2]=='M' &&s[3]=='U' && s[4]=='L') {
+		return 7;
+	}
+	if(s[0]=='G'&& s[1]=='I' &&s[2]=='L' &&s[3]=='L') {
+		return 10;
+	}
+	if(s[0]=='I' && s[1]=='N' &&s[2]=='T' && s[3]=='E' && s[4]=='R') {
+		return INTERP;
+	}
+	if(s[0]=='F' && s[1]=='I' &&s[2]=='N' && s[3]=='D' && s[4]=='E') {
+		return FINDEXT;
+	}
+	if(s[0]=='D' &&s[1]=='E' &&s[2]=='L' && s[3]=='M') {
+		return DEL_MUL;
+	}
+	if(s[0]=='D' &&s[1]=='E' &&s[2]=='L' && s[3]=='S') {
+		return DEL_SPAR;
+	}
+	if(s[0]=='I' &&s[1]=='M' &&s[2]=='P' && s[3]=='O') {
+		return IMPORT;
+	}
+	return 0;
+}
+
+
+static double net_interp(double x, int i) {
+	int jlo=(int)x;
+	double *y;
+	int n=my_net[i].n;
+	double dx=x-(double)jlo;
+	y=&variables[my_net[i].root];
+	if(jlo<0 || jlo>(n-1)) {
+		return 0.0; /* out of range */
+	}
+	return (1-dx)*y[jlo]+dx*y[jlo+1];
+}
+
+
+static int parse_import(char *s,  char *soname,char *sofun,int *n, char *vname,int *m, char *tname[MAXW]) {
+	char temp[MAX_STRING_LENGTH];
+	int j;
+	char c;
+	int i=0;
+	int done=1;
+
+	while(done>0) {
+		c=s[i];
+		i++;
+		if(c=='(') {
+			done=0;
+		}
+	}
+
+	j=getimpstr(s,&i,temp);
+	strcpy(soname,temp);
+	if(j==1) {
+		return(import_error());
+	}
+	j=getimpstr(s,&i,temp);
+	strcpy(sofun,temp);
+	if(j==1) {
+		return(import_error());
+	}
+	j=getimpstr(s,&i,temp);
+	*n=atoi(temp);
+	if(j==1||*n<=0) {
+		return(import_error());
+	}
+	j=getimpstr(s,&i,temp);
+	strcpy(vname,temp);
+	/*  plintf("%s %s %d %s\n",soname,sofun,*n,vname); */
+	*m=0;
+	if(j==1) {
+		printf("No weights....\n");
+		return(1);
+	}
+	done=1;
+	while(done>0) {
+		j=getimpstr(s,&i,temp);
+		strcpy(tname[*m],temp);
+		*m=*m+1;
+		if(j==1) {
+			done=0;
+		}
+	}
+	return 1;
+}
+
+
+/*
+ tabular weights are of size 2k+1
+ and go from -k ... k
+ for FFT's
+ they are reordered as follows
+ fftr[i]=wgt[i+k] i = 0.. k
+ fftr[i+k]=wgt[i] i=1 .. k-1
+*/
+static void update_fft(int ind) {
+	int i;
+	int dims[2];
+	double *w=my_net[ind].weight;
+	double *fftr=my_net[ind].fftr;
+	double *ffti=my_net[ind].ffti;
+	int n,n2;
+	int type=my_net[ind].type;
+	if(type==FFTCONP) {
+		n=my_net[ind].n;
+		n2=n/2;
+		for(i=0;i<n;i++) {
+			ffti[i]=0.0;
+		}
+		for(i=0;i<=n2;i++) {
+			fftr[i]=w[i+n2];
+		}
+		for(i=0;i<n2;i++) {
+			fftr[n2+i+1]=w[i];
+		}
+		dims[0]=n;
+		fftn(1,dims,fftr,ffti,1,1.);
+	}
+	if(type==FFTCON0) {
+		n=2*my_net[ind].n;
+		n2=n/2;
+		for(i=0;i<n;i++) {
+			ffti[i]=0.0;
+		}
+		for(i=0;i<=n2;i++) {
+			fftr[i]=w[i+n2];
+		}
+		for(i=1;i<n2;i++) {
+			fftr[n2+i]=w[i];
+		}
+		dims[0]=n;
+		fftn(1,dims,fftr,ffti,1,1.);
+	}
 }
