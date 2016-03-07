@@ -11,9 +11,11 @@
 #include "many_pops.h"
 #include "main.h"
 
+/* --- Forward declarations --- */
 static void rbox(int i1, int j1, int i2, int j2, Window w, int f);
 
 
+/* --- Functions --- */
 int rubber(int *x1, int *y1, int *x2, int *y2, Window w, int f) {
 	XEvent ev;
 	int there=0;
@@ -100,6 +102,7 @@ int rubber(int *x1, int *y1, int *x2, int *y2, Window w, int f) {
 }
 
 
+/* --- Static functions --- */
 static void rbox(int i1, int j1, int i2, int j2, Window w, int f) {
 	int x1=i1,x2=i2,y1=j1,y2=j2;
 	if(f==RUBLINE) {
