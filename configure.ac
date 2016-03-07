@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([xppaut], [7.0.0], [xppaut-l_at_mailman.ucsd.edu])
+AC_INIT([xppaut], [8.0.0], [xppaut-l_at_mailman.ucsd.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
@@ -23,15 +23,15 @@ AC_CHECK_LIB([m], [floor])
 # Checks for header files.
 AC_PATH_X
 AC_CHECK_HEADERS([ \
-    fcntl.h \
-    limits.h \
-    memory.h \
-    stdlib.h \
-    string.h \
-    strings.h \
-    sys/time.h \
-    unistd.h \
-    wctype.h])
+	fcntl.h \
+	limits.h \
+	memory.h \
+	stdlib.h \
+	string.h \
+	strings.h \
+	sys/time.h \
+	unistd.h \
+	wctype.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -46,19 +46,19 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([ \
-    atexit \
-    floor \
-    getcwd \
-    gettimeofday \
-    memmove \
-    memset \
-    pow \
-    sqrt \
-    strcasecmp \
-    strcspn \
-    strdup \
-    strncasecmp \
-    strupr])
+	atexit \
+	floor \
+	getcwd \
+	gettimeofday \
+	memmove \
+	memset \
+	pow \
+	sqrt \
+	strcasecmp \
+	strcspn \
+	strdup \
+	strncasecmp \
+	strupr])
 
 AM_CONDITIONAL([HAVE_STRUPR], [test x$HAVE_STRUPR != x])
 
@@ -68,14 +68,14 @@ MINORVER=${PACKAGE_VERSION##*.}
 AC_SUBST([MINORVER])
 
 AC_CONFIG_FILES([
-    Makefile
-    betty/Makefile
-    bin/Makefile
-    canonical/Makefile
-    doc/Makefile
-    help/Makefile
-    ode/Makefile
-    share/Makefile
-    src/Makefile
-    src/cvodesrc/Makefile])
+	Makefile
+	betty/Makefile
+	bin/Makefile
+	canonical/Makefile
+	doc/Makefile
+	help/Makefile
+	ode/Makefile
+	share/Makefile
+	src/Makefile
+	src/cvodesrc/Makefile])
 AC_OUTPUT
