@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 
+#include "browse.h"
 #include "ggets.h"
 #include "main.h"
 #include "many_pops.h"
