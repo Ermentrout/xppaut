@@ -209,10 +209,10 @@ static NETWORK my_net[MAXNET];
 
 /* --- Functions --- */
 int add_spec_fun(char *name, char *rhs) {
-	int i,ind,elen,err;
+	int i,ind,elen;
 	int type;
 	int iwgt,itau,iind,ivar,ivar2;
-	int ntype,ntot,ncon,ntab;
+	int ntype,ntot,ncon=0,ntab=0;
 	char *str;
 	char junk[DEFAULT_STRING_LENGTH];
 	char rootname[20],wgtname[20],tauname[20],indname[20];
@@ -727,7 +727,7 @@ int add_spec_fun(char *name, char *rhs) {
 		for(i=0;i<MAXW;i++) {
 			tname[i]=(char *)malloc(25);
 		}
-		err=parse_import(rhs,soname,sofun,&ncon,rootname,&ntab,tname);
+		parse_import(rhs,soname,sofun,&ncon,rootname,&ntab,tname);
 		my_net[ind].values=(double *)malloc((ncon+1)*sizeof(double));
 		init_net(my_net[ind].values,ncon);
 		my_net[ind].n=ncon;
@@ -986,7 +986,7 @@ void evaluate_network(int ind) {
 	double sum,z;
 	int n=my_net[ind].n,*f;
 	int ncon=my_net[ind].ncon;
-	double *w,*y,*cc,*values,*yp,*tau;
+	double *w,*y,*cc,*values,*tau;
 	int twon=2*n,root=my_net[ind].root,root2=my_net[ind].root2;
 	cc=my_net[ind].index;
 	w=my_net[ind].weight;
