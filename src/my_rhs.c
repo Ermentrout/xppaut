@@ -10,13 +10,8 @@
 #include "parserslow.h"
 #include "xpplim.h"
 
-double evaluate(/* int *ar */);
 
-int main(int argc, char **argv) {
-	do_main(argc,argv);
-	exit(0);
-}
-
+/* --- Functions --- */
 void extra(double *y__y, double t, int nod, int neq)  {
 	int i;
 	if(nod>=neq) {
@@ -40,20 +35,17 @@ void extra(double *y__y, double t, int nod, int neq)  {
 }
 
 
-void set_fix_rhs(double t, double *y) {
+void fix_only(void) {
 	int i;
-	SETVAR(0,t);
-	for(i=0;i<NODE;i++) {
-		SETVAR(i+1,y[i]);
-	}
-	for(i=0;i<NMarkov;i++) {
-		SETVAR(i+1+NODE+FIX_VAR,y[i+NODE]);
-	}
 	for(i=NODE;i<NODE+FIX_VAR;i++) {
 		SETVAR(i+1,evaluate(my_ode[i]));
 	}
-	eval_all_nets();
-	do_in_out();
+}
+
+
+int main(int argc, char **argv) {
+	do_main(argc,argv);
+	exit(0);
 }
 
 
@@ -72,28 +64,7 @@ int my_rhs(double t, double *y, double *ydot, int neq) {
 	for(i=0;i<NODE;i++) {
 		ydot[i]=evaluate(my_ode[i]);
 	}
-	if(neq>NODE) {
-		vec_rhs(t,y,ydot,neq);
-	}
 	return(1);
-}
-
-
-void update_based_on_current(void) {
-	int i;
-	for(i=NODE;i<NODE+FIX_VAR;i++) {
-		SETVAR(i+1,evaluate(my_ode[i]));
-	}
-	eval_all_nets();
-	do_in_out();
-}
-
-
-void fix_only(void) {
-	int i;
-	for(i=NODE;i<NODE+FIX_VAR;i++) {
-		SETVAR(i+1,evaluate(my_ode[i]));
-	}
 }
 
 
@@ -105,5 +76,28 @@ void rhs_only(double *y,double *ydot) {
 }
 
 
-void vec_rhs(double t, double *y, double *ydot, int neq) {
+void set_fix_rhs(double t, double *y) {
+	int i;
+	SETVAR(0,t);
+	for(i=0;i<NODE;i++) {
+		SETVAR(i+1,y[i]);
+	}
+	for(i=0;i<NMarkov;i++) {
+		SETVAR(i+1+NODE+FIX_VAR,y[i+NODE]);
+	}
+	for(i=NODE;i<NODE+FIX_VAR;i++) {
+		SETVAR(i+1,evaluate(my_ode[i]));
+	}
+	eval_all_nets();
+	do_in_out();
+}
+
+
+void update_based_on_current(void) {
+	int i;
+	for(i=NODE;i<NODE+FIX_VAR;i++) {
+		SETVAR(i+1,evaluate(my_ode[i]));
+	}
+	eval_all_nets();
+	do_in_out();
 }
