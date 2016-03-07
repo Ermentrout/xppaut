@@ -88,7 +88,7 @@ static int leng[MAXODE];
 static int Naux=0;
 static int NCON_ORIG,NSYM_ORIG;
 static int N_only=0;
-static int NUMODES=0,NUMFIX=0,NUMPARAM=0,NUMMARK=0,NUMAUX=0,NUMVOLT=0,NUMSOL=0;
+static int NUMODES=0,NUMFIX=0,NUMPARAM=0,NUMMARK=0,NUMVOLT=0,NUMSOL=0;
 static int OldStyle=1;
 static char *onlylist[MAXONLY];
 static int start_var_info=0;
@@ -635,21 +635,29 @@ static int get_a_filename(char *filename,char *wild) {
 		list_em(wild);
 		while(1) {
 			plintf("(r)un (c)d (l)ist ");
-			scanf("%s",string);
+			if(scanf("%s",string)<0) {
+				plintf("Error reading string %s", string);
+			}
 			if(string[0]=='r') {
 				plintf("Run file: ");
-				scanf("%s",filename);
+				if(scanf("%s",filename)<0) {
+					plintf("Error reading string %s", filename);
+				}
 				plintf("Loading %s\n ",filename);
 				return 1;
 			} else {
 				if(string[0]=='l') {
 					plintf("List files of type: ");
-					scanf("%s",wild);
+					if(scanf("%s",wild)<0) {
+						plintf("Error reading string %s", wild);
+					}
 					list_em(wild);
 				} else {
 					if(string[0]=='c') {
 						plintf("Change to directory: ");
-						scanf("%s",string);
+						if(scanf("%s",string)<0) {
+							plintf("Error reading string %s", string);
+						}
 						change_directory(string);
 						list_em(wild);
 					}
@@ -1238,7 +1246,9 @@ static void find_ker(char *string, int *alt) {
 
 
 static void clrscr(void) {
-	system("clear");
+	if(system("clear")==-1) {
+		plintf("Error executing command clear");
+	}
 }
 
 
