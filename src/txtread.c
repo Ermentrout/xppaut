@@ -29,11 +29,122 @@
 
 #include "bitmap/txtview.bitmap"
 
-TXTVIEW txtview;
+
+/* --- Types ---*/
+typedef struct {
+	Window up,down,pgup,pgdn,kill,home,end,base,text,src,action;
+	int here,first,hgt,wid,nlines,which;
+	int dh,dw;
+} TXTVIEW;
+
+
+/* --- Forward declarations --- */
+static void do_txt_action(char *s);
+static void enter_txtview(Window w, int val);
+static void resize_txtview(int w, int h);
+static void txtview_keypress(XEvent ev);
+static void txtview_press(Window w, int x, int y);
+static void redraw_txtview_text(void);
+
+
+/* --- Data --- */
 /*
   [Up]   [Down]  [PgUp]  [PgDn] [Kill]
   [Home] [End]   [Src]   [Actn]
 */
+
+static TXTVIEW txtview;
+
+/* --- Functions --- */
+void init_txtview(void) {
+	txtview.here=0;
+	txtview.dh=DCURY;
+	txtview.dw=DCURX;
+	txtview.which=0;
+	txtview.first=0;
+}
+
+
+void make_txtview(void) {
+	int minwid=DCURXs*60,minlen=3*DCURYs+8+10*DCURY;
+	Window base;
+	int ww=9*DCURXs,hh=DCURYs+4;
+	static char *wname[]={"Text Viewer"},*iname[]={"Txtview"};
+
+	XTextProperty winname,iconname;
+	XSizeHints size_hints;
+	if(txtview.here==1) {
+		return;
+	}
+	base=make_plain_window(RootWindow(display,screen),0,0,minwid,minlen,4);
+	txtview.base=base;
+	XSelectInput(display,base,ExposureMask|KeyPressMask|ButtonPressMask|
+				 StructureNotifyMask);
+
+	XStringListToTextProperty(wname,1,&winname);
+	XStringListToTextProperty(iname,1,&iconname);
+	size_hints.flags=PPosition|PSize|PMinSize;
+	size_hints.min_width=minwid;
+	size_hints.min_height=minlen;
+	size_hints.x=0;
+	size_hints.y=0;
+
+	XSetWMProperties(display,base,&winname,&iconname,
+					 NULL,0,&size_hints,NULL,NULL);
+	make_icon((char*)txtview_bits,txtview_width,txtview_height,base);
+	txtview.up=make_window(base,DCURXs,2,8*DCURXs,DCURYs,1);
+	txtview.down=make_window(base,DCURXs+ww,2,8*DCURXs,DCURYs,1);
+	txtview.pgup=make_window(base,DCURXs+2*ww,2,8*DCURXs,DCURYs,1);
+	txtview.pgdn=make_window(base,DCURXs+3*ww,2,8*DCURXs,DCURYs,1);
+	txtview.kill=make_window(base,DCURXs+4*ww,2,8*DCURXs,DCURYs,1);
+	txtview.home=make_window(base,DCURXs,2+hh,8*DCURXs,DCURYs,1);
+	txtview.end=make_window(base,DCURXs+ww,2+hh,8*DCURXs,DCURYs,1);
+	txtview.src=make_window(base,DCURXs+2*ww,2+hh,8*DCURXs,DCURYs,1);
+	txtview.action=make_window(base,DCURXs+3*ww,2+hh,8*DCURXs,DCURYs,1);
+	txtview.text=make_plain_window(base,2,3*DCURYs+5,minwid-4,10*DCURY,1);
+	txtview.here=1;
+	txtview.nlines=10;
+	txtview.which=0;
+	txtview.first=0;
+	txtview.dh=DCURY;
+	txtview.dw=DCURX;
+}
+
+
+void redraw_txtview(Window w) {
+	if(w==txtview.text) {
+		redraw_txtview_text();
+	}
+	if(w==txtview.up) {
+		xds("Up");
+	}
+	if(w==txtview.down) {
+		xds("Down");
+	}
+	if(w==txtview.pgup) {
+		xds("PgUp");
+	}
+	if(w==txtview.pgdn) {
+		xds("PgDn");
+	}
+	if(w==txtview.kill) {
+		xds("Kill");
+	}
+	if(w==txtview.home) {
+		xds("Home");
+	}
+	if(w==txtview.end) {
+		xds("End");
+	}
+	if(w==txtview.src) {
+		xds("Source");
+	}
+	if(w==txtview.action) {
+		xds("Action");
+	}
+}
+
+
 void txt_view_events(XEvent ev) {
 	int x,y;
 
@@ -69,7 +180,38 @@ void txt_view_events(XEvent ev) {
 }
 
 
-void txtview_keypress(XEvent ev) {
+/* --- Static functions -- */
+static void do_txt_action(char *s) {
+	int tb=tfBell;
+	tfBell=1;
+	get_graph();
+	extract_action(s);
+	ping();
+	tfBell=tb;
+	check_delay();
+	redraw_params();
+	redraw_ics();
+	reset_graph();
+}
+
+
+static void enter_txtview(Window w,int val) {
+	if(w==txtview.up||w==txtview.down||w==txtview.pgup||
+	   w==txtview.pgdn||w==txtview.home||w==txtview.end||
+	   w==txtview.src||w==txtview.action||w==txtview.kill) {
+		XSetWindowBorderWidth(display,w,val);
+	}
+}
+
+
+static void resize_txtview(int w,int h) {
+	int hgt=h-8-3*DCURYs;
+	XMoveResizeWindow(display,txtview.text,2,3*DCURYs+5,w-4,hgt);
+	txtview.nlines=(int)(hgt/DCURY);
+}
+
+
+static void txtview_keypress(XEvent ev) {
 	Window w=ev.xkey.window;
 	char ks;
 
@@ -103,37 +245,7 @@ void txtview_keypress(XEvent ev) {
 }
 
 
-void enter_txtview(Window w,int val) {
-	if(w==txtview.up||w==txtview.down||w==txtview.pgup||
-	   w==txtview.pgdn||w==txtview.home||w==txtview.end||
-	   w==txtview.src||w==txtview.action||w==txtview.kill) {
-		XSetWindowBorderWidth(display,w,val);
-	}
-}
-
-
-void do_txt_action(char *s) {
-	int tb=tfBell;
-	tfBell=1;
-	get_graph();
-	extract_action(s);
-	ping();
-	tfBell=tb;
-	check_delay();
-	redraw_params();
-	redraw_ics();
-	reset_graph();
-}
-
-
-void resize_txtview(int w,int h) {
-	int hgt=h-8-3*DCURYs;
-	XMoveResizeWindow(display,txtview.text,2,3*DCURYs+5,w-4,hgt);
-	txtview.nlines=(int)(hgt/DCURY);
-}
-
-
-void txtview_press(Window w,int x,int y) {
+static void txtview_press(Window w,int x,int y) {
 	int j;
 	int nt;
 	if(txtview.which==1) {
@@ -212,41 +324,7 @@ void txtview_press(Window w,int x,int y) {
 }
 
 
-void redraw_txtview(Window w) {
-	if(w==txtview.text) {
-		redraw_txtview_text();
-	}
-	if(w==txtview.up) {
-		xds("Up");
-	}
-	if(w==txtview.down) {
-		xds("Down");
-	}
-	if(w==txtview.pgup) {
-		xds("PgUp");
-	}
-	if(w==txtview.pgdn) {
-		xds("PgDn");
-	}
-	if(w==txtview.kill) {
-		xds("Kill");
-	}
-	if(w==txtview.home) {
-		xds("Home");
-	}
-	if(w==txtview.end) {
-		xds("End");
-	}
-	if(w==txtview.src) {
-		xds("Source");
-	}
-	if(w==txtview.action) {
-		xds("Action");
-	}
-}
-
-
-void redraw_txtview_text(void) {
+static void redraw_txtview_text(void) {
 	int i,j;
 
 	XClearWindow(display,txtview.text);
@@ -266,59 +344,4 @@ void redraw_txtview_text(void) {
 			break;
 		}
 	}
-}
-
-
-void init_txtview(void) {
-	txtview.here=0;
-	txtview.dh=DCURY;
-	txtview.dw=DCURX;
-	txtview.which=0;
-	txtview.first=0;
-}
-
-
-void make_txtview(void) {
-	int minwid=DCURXs*60,minlen=3*DCURYs+8+10*DCURY;
-	Window base;
-	int ww=9*DCURXs,hh=DCURYs+4;
-	static char *wname[]={"Text Viewer"},*iname[]={"Txtview"};
-
-	XTextProperty winname,iconname;
-	XSizeHints size_hints;
-	if(txtview.here==1) {
-		return;
-	}
-	base=make_plain_window(RootWindow(display,screen),0,0,minwid,minlen,4);
-	txtview.base=base;
-	XSelectInput(display,base,ExposureMask|KeyPressMask|ButtonPressMask|
-				 StructureNotifyMask);
-
-	XStringListToTextProperty(wname,1,&winname);
-	XStringListToTextProperty(iname,1,&iconname);
-	size_hints.flags=PPosition|PSize|PMinSize;
-	size_hints.min_width=minwid;
-	size_hints.min_height=minlen;
-	size_hints.x=0;
-	size_hints.y=0;
-
-	XSetWMProperties(display,base,&winname,&iconname,
-					 NULL,0,&size_hints,NULL,NULL);
-	make_icon((char*)txtview_bits,txtview_width,txtview_height,base);
-	txtview.up=make_window(base,DCURXs,2,8*DCURXs,DCURYs,1);
-	txtview.down=make_window(base,DCURXs+ww,2,8*DCURXs,DCURYs,1);
-	txtview.pgup=make_window(base,DCURXs+2*ww,2,8*DCURXs,DCURYs,1);
-	txtview.pgdn=make_window(base,DCURXs+3*ww,2,8*DCURXs,DCURYs,1);
-	txtview.kill=make_window(base,DCURXs+4*ww,2,8*DCURXs,DCURYs,1);
-	txtview.home=make_window(base,DCURXs,2+hh,8*DCURXs,DCURYs,1);
-	txtview.end=make_window(base,DCURXs+ww,2+hh,8*DCURXs,DCURYs,1);
-	txtview.src=make_window(base,DCURXs+2*ww,2+hh,8*DCURXs,DCURYs,1);
-	txtview.action=make_window(base,DCURXs+3*ww,2+hh,8*DCURXs,DCURYs,1);
-	txtview.text=make_plain_window(base,2,3*DCURYs+5,minwid-4,10*DCURY,1);
-	txtview.here=1;
-	txtview.nlines=10;
-	txtview.which=0;
-	txtview.first=0;
-	txtview.dh=DCURY;
-	txtview.dw=DCURX;
 }
