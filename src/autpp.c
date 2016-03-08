@@ -95,10 +95,10 @@ int bcnd(integer ndim, double *par, integer *icp, integer nbc, double *u0, doubl
 int icnd(integer *ndim, double *par, integer *icp, integer *nint,
 		 double *u, double *uold, double *udot, double *upold, double *fi,
 		 integer *ijac, double *dint) {
+	/*
 	int i;
 	double dum=0.0;
-	/*
-  for(i=0;i<Homo_n;i++)
+	for(i=0;i<Homo_n;i++)
 	dum+=upold[i]*(u[i]-uold[i]);
   fi[0]=dum;
    */
