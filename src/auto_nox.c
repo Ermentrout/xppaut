@@ -156,6 +156,8 @@ static void save_auto_numerics(FILE *fp);
 static void save_q_file(FILE *fp);
 static void setautopoint(void);
 static void torus_choice(void);
+int go_go_auto(void);
+
 
 /* --- Data --- */
 int SEc=20;
@@ -961,7 +963,7 @@ void auto_start_at_homoclinic(void) {
 	}
 	flag=get_homo_info(HomoFlag,&xAuto.nunstab,&xAuto.nstab,homo_l,homo_r);
 	if(flag) {
-		do_auto(opn,close,Auto.itp);
+		do_auto(opn,cls,Auto.itp);
 	}
 }
 
@@ -1857,18 +1859,6 @@ static void auto_zoom_out(int i1, int j1, int i2, int j2) {
 }
 
 
-static int plot_point(int flag2, int icp1, int icp2) {
-	int j=1;
-	if(icp1!=Auto.icp1) {
-		j=0;
-	}
-	if(flag2>0 && icp2!=Auto.icp2) {
-		j=0;
-	}
-	return(j);
-}
-
-
 static void auto_line(double x1i, double y1i, double x2i, double y2i) {
 	double xmin,ymin,xmax,ymax;
 	float x1=x1i,x2=x2i,y1=y1i,y2=y2i;
@@ -2369,31 +2359,6 @@ static int get_homo_info(int flg,int *nun,int *nst,double *ul, double *ur) {
 }
 
 
-static void three_parameter_homoclinic(void) {
-	Auto.irs=grabpt.lab;
-	Auto.itp=grabpt.itp;
-
-	TypeOfCalc=HO2;
-	AutoTwoParam=HO2;
-	NewPeriodFlag=1;
-	Auto.ips=9;
-
-	Auto.nfpar=3;
-	Auto.ilp=0;
-	Auto.isw=1;
-	Auto.isp=0;
-	Auto.nbc=0;
-
-	if(HomoFlag==1) {
-		xAuto.iequib=1;
-	}
-	if(HomoFlag==2) {
-		xAuto.iequib=-2;
-	}
-	do_auto(OPEN_3,APPEND,Auto.itp);
-}
-
-
 /* same for extending periodic  */
 static void auto_new_per(void) {
 	blrtn.torper=grabpt.torper;
@@ -2680,7 +2645,7 @@ static void save_auto_numerics(FILE *fp) {
 	}
 	fprintf(fp,"%d\n",NAutoUzr);
 	for(i=0;i<9;i++) {
-		fprintf(fp,"%g %d\n",outperiod[i],UzrPar[i]);
+		fprintf(fp,"%g %ld\n",outperiod[i],UzrPar[i]);
 	}
 	fprintf(fp,"%d %d %d \n",Auto.ntst,Auto.nmx,Auto.npr);
 	fprintf(fp,"%g %g %g \n",Auto.ds,Auto.dsmin,Auto.dsmax);
@@ -2706,7 +2671,7 @@ static void load_auto_numerics(FILE *fp) {
 	}
 	for(i=0;i<9;i++) {
 		Auto.nper=NAutoUzr;
-		if(fscanf(fp,"%lg %d\n",&outperiod[i],&UzrPar[i])!=2) {
+		if(fscanf(fp,"%lg %ld\n",&outperiod[i],&UzrPar[i])!=2) {
 			plintf("Error reading from file %s", fp);
 		}
 		Auto.period[i]=outperiod[i];
