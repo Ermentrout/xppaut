@@ -318,12 +318,11 @@ void auto_scroll_window(void) {
 	int i=0,j=0;
 	int i0=0,j0=0;
 	int state=0;
-	float x,y,x0,y0;
 	float xlo=Auto.xmin;
 	float ylo=Auto.ymin;
 	float xhi=Auto.xmax;
 	float yhi=Auto.ymax;
-	float dx,dy;
+	float dx=0.0,dy=0.0;
 	int alldone=0;
 	XSelectInput(display,AutoW.canvas,
 				 KeyPressMask|ButtonPressMask|ButtonReleaseMask|
