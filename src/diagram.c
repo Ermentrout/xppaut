@@ -142,10 +142,10 @@ void kill_diagrams(void) {
 
 void load_browser_with_branch(int ibr,int pts,int pte) {
 	DIAGRAM *d;
-	int type,i,j,pt;
-	int icp1,icp2;
+	int i,j,pt;
+	int icp1;
 	double *par;
-	double par1,par2=0,*u0,per;
+	double par1,*u0;
 	int first,last,nrows;
 	first=abs(pts);
 	last=abs(pte);
@@ -161,21 +161,13 @@ void load_browser_with_branch(int ibr,int pts,int pte) {
 	}
 	j=0;
 	while(1) {
-		type=get_bif_type(d->ibr,d->ntot,d->lab);
 		pt=abs(d->ntot);
 		if((d->ibr==ibr) && (pt>=first) && (pt<=last)) {
 			icp1=d->icp1;
-			icp2=d->icp2;
 			par=d->par;
-			per=d->per;
 			u0=d->u0;
 
 			par1=par[icp1];
-			if(icp2<NAutoPar) {
-				par2=par[icp2];
-			} else {
-				par2=par1;
-			}
 			storage[0][j]=par1;
 			for(i=0;i<NODE;i++) {
 				storage[i+1][j]=u0[i];
@@ -404,7 +396,7 @@ void write_info_out(void) {
 	DIAGRAM *d;
 	int type,i;
 	int status;
-	int icp1,icp2,icp3,icp4;
+	int icp1,icp2;
 	double *par;
 	double par1,par2=0,*uhigh,*ulow,per;
 	FILE *fp;
