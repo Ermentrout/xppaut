@@ -135,7 +135,7 @@ static void justify_string(Window w1, char *s1);
 static void load_entire_box(BoxList *b);
 static void make_box_list(BoxList *b, char *wname, char *iname, int n, int type, int use);
 static void make_box_list_window(BoxList *b, int type);
-static void make_par_slider(Window base, int x, int y, int width, int index);
+static void make_par_slider(Window base, int x, int y, int width, int index, int var_index);
 static void new_wild(void);
 static void put_edit_cursor(Window w, int pos);
 static void redraw_directory(void);
@@ -324,10 +324,10 @@ void clone_ode(void) {
 }
 
 
-void create_par_sliders(Window base, int x0, int h0) {
+void create_par_sliders(Window base, int x0, int h0, int var_ind[3]) {
 	int i;
 	for(i=0;i<3;i++) {
-		make_par_slider(base,x0+i*36*DCURXs,h0,100,i);
+		make_par_slider(base,x0+i*36*DCURXs,h0,100,i, var_ind[i]);
 	}
 }
 
@@ -2191,7 +2191,7 @@ static void make_box_list_window(BoxList *b,int type) {
 }
 
 
-static void make_par_slider(Window base, int x, int y, int width, int index) {
+static void make_par_slider(Window base, int x, int y, int width, int index, int var_index) {
 	int mainhgt=3*(DCURYs+2);
 	int mainwid=32*DCURXs;
 	int xs;
@@ -2217,28 +2217,12 @@ static void make_par_slider(Window base, int x, int y, int width, int index) {
 	my_par_slide[index].parname[0]=0;
 	my_par_slide[index].hgt=DCURYs-4;
 
-	if((notAlreadySet.SLIDER1==0) && (index==0)) {
-		strcpy(my_par_slide[index].parname,SLIDERVAR[index]);
-		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDERLO[index];
-		my_par_slide[index].hi=SLIDERHI[index];
-		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
-	}
-
-	if((notAlreadySet.SLIDER2==0) && (index==1)) {
-		strcpy(my_par_slide[index].parname,SLIDERVAR[index]);
-		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDERLO[index];
-		my_par_slide[index].hi=SLIDERHI[index];
-		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
-	}
-
-	if((notAlreadySet.SLIDER3==0) && (index==2)) {
-		strcpy(my_par_slide[index].parname,SLIDERVAR[index]);
-		my_par_slide[index].use=1;
-		my_par_slide[index].lo=SLIDERLO[index];
-		my_par_slide[index].hi=SLIDERHI[index];
-		get_val(my_par_slide[index].parname,&my_par_slide[index].val);
+	if (var_index >= 0) {
+		strcpy(my_par_slide[index].parname, SLIDERVAR[var_index]);
+		my_par_slide[index].use = 1;
+		my_par_slide[index].lo = SLIDERLO[var_index];
+		my_par_slide[index].hi = SLIDERHI[var_index];
+		get_val(my_par_slide[index].parname, &my_par_slide[index].val);
 	}
 }
 

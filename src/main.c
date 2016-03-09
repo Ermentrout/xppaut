@@ -1170,7 +1170,12 @@ static void make_pops(void) {
 	int x,y;
 	unsigned int h,w,bw,d;
 	Window wn;
-	/*Cursor cursor;*/
+	int var_ind[3] = {
+		notAlreadySet.SLIDER1 ? -1 : 0,
+		notAlreadySet.SLIDER2 ? -1 : 1,
+		notAlreadySet.SLIDER3 ? -1 : 2,
+	};
+
 	XGetGeometry(display,main_win,&wn,&x,&y,&w,&h,&bw,&d);
 	create_the_menus(main_win);
 
@@ -1186,7 +1191,7 @@ static void make_pops(void) {
 	XMapWindow(display,info_pop);
 	XMapWindow(display,command_pop);
 	init_grafs(16*DCURX+6,DCURYs+DCURYb+6,w-16-16*DCURX,h-6*DCURY-16);
-	create_par_sliders(main_win,0,h-5*DCURY+8);
+	create_par_sliders(main_win,0,h-5*DCURY+8, var_ind);
 	get_draw_area();
 }
 
