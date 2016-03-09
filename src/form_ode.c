@@ -200,10 +200,7 @@ int get_eqn(FILE *fptr) {
 	BVP_NR=0;
 	NUPAR=0;
 	NWiener=0;
-	/*check_for_xpprc();  This is now done just once and in do_vis_env() */
-	strcpy(options,"default.opt");
 	add_var("t",0.0);
-	/* plintf(" NEQ: "); */
 	if(fgets(bob,MAXEXPLEN,fptr)==NULL) {
 		plintf("Couldnt read file %s", fptr);
 	}
@@ -218,7 +215,6 @@ int get_eqn(FILE *fptr) {
 	}
 
 	strncpy(save_eqn[NLINES++],bob,nn);
-	/* plintf("incr NLINE in geteqn  %s \n",bob); */
 	i=atoi(bob);
 	if(i<=0) { /* New parser ---   */
 
@@ -843,12 +839,8 @@ static int compiler(char *bob, FILE *fptr) {
 		}
 		plintf("\n");
 		break;
-	case 'c': my_string=get_next(" \n");
-		strcpy(options,my_string);
-		plintf(" Loading new options file:<%s>\n",my_string);
-		if(ConvertStyle) {
-			fprintf(convertf,"option %s\n",options);
-		}
+	case 'c':
+		plintf("options command is obsolete and ignored.\n");
 		break;
 	case 'f':iflg=0;
 		plintf("\nFixed variables:\n");
@@ -1266,7 +1258,6 @@ markov name #states (replaces m r)
 .
 .
 { }  ..... { }
-options filename
 aux name = expression
 bndry ....
 global ...

@@ -84,7 +84,6 @@
 static void check_for_quiet(int argc, char **argv);
 static XKeyEvent createKeyEvent(Window win, Window winRoot, int press, int keycode, int modifiers);
 static void do_events(unsigned int min_wid, unsigned int min_hgt);
-static void do_vis_env(void);
 static Window init_win(unsigned int bw, char *icon_name, char *win_name, int x, int y, unsigned int min_wid, unsigned int min_hgt, int argc, char **argv);
 static void getGC(GC *gc);
 static int getxcolors(XWindowAttributes *win_info, XColor **colors);
@@ -534,6 +533,8 @@ int main(int argc, char **argv) {
 	notAlreadySet.COLORIZE=1;
 	notAlreadySet.COLORHI=1;
 	notAlreadySet.COLORLO=1;
+	loadeqn_init_options();
+	loadeqn_load_xpprc();
 
 	unsigned int min_wid=450,min_hgt=360;
 
@@ -564,8 +565,7 @@ int main(int argc, char **argv) {
 		/*Initialize what's needed to open a browser based on the
 		 * current options.
 		 */
-		do_vis_env();
-		set_all_vals();
+		set_internopts_comline();
 		init_X();
 		/* Now swap back the options for proper precedence ordering of options. */
 		notAlreadySet = *tempNS;
@@ -579,8 +579,9 @@ int main(int argc, char **argv) {
 	free(tempNS);
 
 	init_alloc_info();
-	do_vis_env();
-	set_all_vals();
+	set_internopts_comline();
+
+	loadeqn_setup_all();
 
 	init_alloc_info();
 	set_init_guess();
@@ -812,13 +813,6 @@ static void do_events(unsigned int min_wid, unsigned int min_hgt) {
 		XNextEvent(display,&report);
 		xpp_events(report,min_wid,min_hgt);
 	} /* end while */
-}
-
-
-static void do_vis_env(void) {
-	set_X_vals();
-	check_for_xpprc();
-	set_internopts_xpprc_and_comline();
 }
 
 

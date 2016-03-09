@@ -173,7 +173,6 @@ typedef struct {
 
 /* --- Data --- */
 extern char delay_string[MAXODE][80];
-extern char options[100];
 extern char this_file[XPP_MAX_NAME];
 extern char this_internset[XPP_MAX_NAME];
 
@@ -255,16 +254,16 @@ extern FILE *logfile;
 
 /* --- Functions --- */
 void add_intern_set(char *name, char *does);
-void check_for_xpprc(void);
 void extract_action(char *ptr);
 void extract_internset(int j);
 void load_eqn(void);
+void loadeqn_load_xpprc(void);
+void loadeqn_init_options(void);
+void loadeqn_setup_all(void);
 int msc(char *s1, char *s2);
-void set_all_vals(void);
 void set_internopts(OptionsSet *mask);
-void set_internopts_xpprc_and_comline(void);
+void set_internopts_comline(void);
 void set_option(char *s1, char *s2,int force,OptionsSet *mask);
-void set_X_vals(void);
 void stor_internopts(char *s1);
 
 #endif /* XPPAUT_LOAD_EQN_H */

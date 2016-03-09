@@ -47,9 +47,8 @@
 /* --- Forward declarations --- */
 static void check_volterra(void);
 static void do_intern_set(char *name1, char *value);
-static void fil_flt(FILE *fpt, double *val);
-static void fil_int(FILE *fpt, int *val);
-static void read_defaults(FILE *fp);
+static void init_X_vals(void);
+static void set_internopt_line(char *line, int force, OptionsSet *mask);
 static void split_apart(char *bob, char *name, char *value);
 int (*solver)();
 
@@ -60,7 +59,6 @@ static int Nopts=0;
 static float oldhp_x,oldhp_y,my_pl_wid,my_pl_ht;
 
 char delay_string[MAXODE][80];
-char options[100];
 char this_file[XPP_MAX_NAME];
 char this_internset[XPP_MAX_NAME];
 double last_ic[MAXODE];
@@ -146,24 +144,35 @@ void add_intern_set(char *name, char *does) {
 }
 
 
-void check_for_xpprc(void) {
-	FILE *fp;
+/*
+ * Load an ~/.xpprc if it exists.
+ *
+ * The RC file has the following syntax:
+ *
+ *   file   <- line*
+ *   line   <- '@' <SP> assign ((<SP>|',') assign)*
+ *   assign <- char+ '=' char+
+ *
+ * Lines not starting with '@' are ignored.
+ */
+void loadeqn_load_xpprc(void) {
 	char rc[DEFAULT_STRING_LENGTH];
-	char bob[DEFAULT_STRING_LENGTH];
+
 	sprintf(rc,"%s/.xpprc",getenv("HOME"));
-	fp=fopen(rc,"r");
+	FILE *fp=fopen(rc, "r");
 	if(fp==NULL) {
-		/*   plintf("Didnt find rc \n"); */
 		return;
 	}
 	while(!feof(fp)) {
+		char bob[DEFAULT_STRING_LENGTH];
 		bob[0]='\0';
-		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
+		if(fgets(bob, sizeof(bob) - 1, fp)==NULL) {
 			plintf("Couldnt read file %s", fp);
 		}
-		if(bob[0]=='@') {
-			stor_internopts(bob);
+		if (bob[0] != '@') {
+			continue;
 		}
+		set_internopt_line(bob, 1, NULL);
 	}
 	fclose(fp);
 }
@@ -261,130 +270,38 @@ int msc(char *s1, char *s2) {
 }
 
 
-void set_all_vals(void) {
-	int i;
-	FILE *fp;
-
-	if(notAlreadySet.TIMEPLOT) {
-		TIMPLOT=1;
-		notAlreadySet.TIMEPLOT=0;
-	};
-	if(notAlreadySet.FOREVER) {
-		FOREVER=0;
-		notAlreadySet.FOREVER=0;
-	};
-	if(notAlreadySet.BVP_TOL) {
-		BVP_TOL=1.e-5;
-		notAlreadySet.BVP_TOL=0;
-	};
-	if(notAlreadySet.BVP_EPS) {
-		BVP_EPS=1.e-5;
-		notAlreadySet.BVP_EPS=0;
-	};
-	if(notAlreadySet.BVP_MAXIT) {
-		BVP_MAXIT=20;
-		notAlreadySet.BVP_MAXIT=0;
-	};
-	if(notAlreadySet.BVP_FLAG) {
-		BVP_FLAG=0;
-		notAlreadySet.BVP_FLAG=0;
-	};
-	if(notAlreadySet.NMESH) {
-		NMESH=40;
-		notAlreadySet.NMESH=0;
-	};
-	if(notAlreadySet.NOUT) {
-		NJMP=1;
-		notAlreadySet.NOUT=0;};
-	if(notAlreadySet.SOS) {
-		SOS=0;
-		notAlreadySet.SOS=0;
-	};
-	if(notAlreadySet.FFT) {
-		FFT=0;
-		notAlreadySet.FFT=0;
-	};
-	if(notAlreadySet.HIST) {
-		HIST=0;
-		notAlreadySet.HIST=0;
-	};
-	if(notAlreadySet.PltFmtFlag) {
-		PltFmtFlag=0;
-		notAlreadySet.PltFmtFlag=0;
-	};
-	if(notAlreadySet.AXES) {
-		AXES=0;
-		notAlreadySet.AXES=0;
-	};
-	if(notAlreadySet.TOLER) {
-		TOLER=0.001;
-		notAlreadySet.TOLER=0;
-	};
-	if(notAlreadySet.ATOLER) {
-		ATOLER=0.001;
-		notAlreadySet.ATOLER=0;
-	};
-	if(notAlreadySet.MaxEulIter) {
-		MaxEulIter=10;
-		notAlreadySet.MaxEulIter=0;
-	}
-	if(notAlreadySet.EulTol) {
-		EulTol=1.e-7;
-		notAlreadySet.EulTol=0;
-	};
-	if(notAlreadySet.DELAY) {
-		DELAY=0.0;
-		notAlreadySet.DELAY=0;
-	};
-	if(notAlreadySet.DTMIN) {
-		HMIN=1e-12;
-		notAlreadySet.DTMIN=0;
-	};
-	if(notAlreadySet.EVEC_ITER) {
-		EVEC_ITER=100;
-		notAlreadySet.EVEC_ITER=0;
-	};
-	if(notAlreadySet.EVEC_ERR) {
-		EVEC_ERR=.001;
-		notAlreadySet.EVEC_ERR=0;
-	};
-	if(notAlreadySet.NULL_ERR) {
-		NULL_ERR=.001;
-		notAlreadySet.NULL_ERR=0;
-	};
-	if(notAlreadySet.NEWT_ERR) {
-		NEWT_ERR=.001;
-		notAlreadySet.NEWT_ERR=0;
-	};
-	if(notAlreadySet.NULL_HERE) {
-		NULL_HERE=0;
-		notAlreadySet.NULL_HERE=0;
-	};
+void loadeqn_init_options(void) {
+	TIMPLOT=1;
+	FOREVER=0;
+	BVP_TOL=1.e-5;
+	BVP_EPS=1.e-5;
+	BVP_MAXIT=20;
+	BVP_FLAG=0;
+	NMESH=40;
+	NJMP=1;
+	SOS=0;
+	FFT=0;
+	HIST=0;
+	PltFmtFlag=0;
+	AXES=0;
+	TOLER=0.001;
+	ATOLER=0.001;
+	MaxEulIter=10;
+	EulTol=1.e-7;
+	DELAY=0.0;
+	HMIN=1e-12;
+	EVEC_ITER=100;
+	EVEC_ERR=.001;
+	NULL_ERR=.001;
+	NEWT_ERR=.001;
+	NULL_HERE=0;
 	del_stab_flag=DFNORMAL;
-	if(notAlreadySet.DTMAX) {
-		HMAX=1.000;
-		notAlreadySet.DTMAX=0;
-	};
-	if(notAlreadySet.POIMAP) {
-		POIMAP=0;
-		notAlreadySet.POIMAP=0;
-	};
-	if(notAlreadySet.POIVAR) {
-		POIVAR=1;
-		notAlreadySet.POIVAR=0;
-	};
-	if(notAlreadySet.POIEXT) {
-		POIEXT=0;
-		notAlreadySet.POIEXT=0;
-	};
-	if(notAlreadySet.POISGN) {
-		POISGN=1;
-		notAlreadySet.POISGN=0;
-	};
-	if(notAlreadySet.POIPLN) {
-		POIPLN=0.0;
-		notAlreadySet.POIPLN=0;
-	};
+	HMAX=1.000;
+	POIMAP=0;
+	POIVAR=1;
+	POIEXT=0;
+	POISGN=1;
+	POIPLN=0.0;
 	storind=0;
 	mov_ind=0;
 	STORFLAG=0;
@@ -394,136 +311,56 @@ void set_all_vals(void) {
 	oldhp_y=-100000.0;
 	solver=rung_kut;
 	PLOT_3D=0;
-	if(notAlreadySet.METHOD) {
-		METHOD=3;
-		notAlreadySet.METHOD=0;
-	};
-	if(notAlreadySet.XLO) {
-		MY_XLO=0.0;
-		x_3d[0]=MY_XLO;
-		notAlreadySet.XLO=0;
-		notAlreadySet.XMIN=0;
-	};
-	if(notAlreadySet.XHI) {
-		MY_XHI=20.0;
-		x_3d[1]=MY_XHI;
-		notAlreadySet.XHI=0;
-		notAlreadySet.XMAX=0;
-	};
-	if(notAlreadySet.YLO) {
-		MY_YLO=-1;
-		y_3d[0]=MY_YLO;
-		notAlreadySet.YLO=0;
-		notAlreadySet.YMIN=0;
-	};
-	if(notAlreadySet.YHI) {
-		MY_YHI=1;
-		y_3d[0]=MY_YHI;
-		notAlreadySet.YHI=0;
-		notAlreadySet.YMAX=0;
-	};
 
-	if(notAlreadySet.BOUND) {
-		BOUND=100;
-		notAlreadySet.BOUND=0;
-	};
-	if(notAlreadySet.MAXSTOR) {
-		MAXSTOR=5000;
-		notAlreadySet.MAXSTOR=0;
-	};
+	METHOD=3;
+	MY_XLO=0.0;
+	MY_XHI=20.0;
+	MY_YLO=-1;
+	MY_YHI=1;
+	x_3d[0]=-12;
+	x_3d[1]=12;
+	y_3d[0]=-12;
+	y_3d[1]=12;
+	z_3d[0]=-12;
+	z_3d[1]=12;
+
+	BOUND=100;
+	MAXSTOR=5000;
 	my_pl_wid=10000. ;
 	my_pl_ht=7000.  ;
 
 	/* TORUS=0; */
-	if(notAlreadySet.T0) {
-		T0=0.0;
-		notAlreadySet.T0=0;
-	};
-	if(notAlreadySet.TRANS) {
-		TRANS=0.0;
-		notAlreadySet.TRANS=0;
-	};
-	if(notAlreadySet.DT) {
-		DELTA_T=.05;
-		notAlreadySet.DT=0;
-	};
-
-	if(notAlreadySet.XMIN) {
-		x_3d[0]=-12;
-		notAlreadySet.XMIN=0;
-		notAlreadySet.XLO=0;
-	};
-	if(notAlreadySet.XMAX) {
-		x_3d[1]=12;
-		notAlreadySet.XMAX=0;
-		notAlreadySet.XHI=0;
-	};
-	if(notAlreadySet.YMIN) {
-		y_3d[0]=-12;
-		notAlreadySet.YMIN=0;
-		notAlreadySet.YLO=0;
-	};
-	if(notAlreadySet.YMAX) {
-		y_3d[1]=12;
-		notAlreadySet.YMAX=0;
-		notAlreadySet.YHI=0;
-	};
-	if(notAlreadySet.ZMIN) {
-		z_3d[0]=-12;
-		notAlreadySet.ZMIN=0;
-	};
-	if(notAlreadySet.ZMAX) {
-		z_3d[1]=12;
-		notAlreadySet.ZMAX=0;
-	};
-	if(notAlreadySet.TEND) {
-		TEND=20.00;
-		notAlreadySet.TEND=0;
-	};
+	T0=0.0;
+	TRANS=0.0;
+	DELTA_T=.05;
+	TEND=20.00;
 	TOR_PERIOD=6.2831853071795864770;
-	if(notAlreadySet.IXPLT) {
-		IXPLT=0;
-		notAlreadySet.IXPLT=0;
+	IXPLT=0;
+	IYPLT=1;
+	IZPLT=1;
+	if(NEQ>2) {
+		IZPLT=2;
 	}
-	if(notAlreadySet.IYPLT) {
-		IYPLT=1;
-		notAlreadySet.IYPLT=0;
+	NPltV=1;
+	for(int i=0;i<10;i++) {
+		IX_PLT[i]=IXPLT;
+		IY_PLT[i]=IYPLT;
+		IZ_PLT[i]=IZPLT;
+		X_LO[i]=0;
+		Y_LO[i]=-1;
+		X_HI[i]=20;
+		Y_HI[i]=1;
 	}
-	if(notAlreadySet.IZPLT) {
-		IZPLT=1;
-		notAlreadySet.IZPLT=0;
-	}
-	if(notAlreadySet.NPLOT) {
-		if(NEQ>2) {
-			if(notAlreadySet.IZPLT) {
-				IZPLT=2;
-			}
-		}
-		NPltV=1;
-		for(i=0;i<10;i++) {
-			IX_PLT[i]=IXPLT;
-			IY_PLT[i]=IYPLT;
-			IZ_PLT[i]=IZPLT;
-			X_LO[i]=0;
-			Y_LO[i]=-1;
-			X_HI[i]=20;
-			Y_HI[i]=1;
-		}
-		notAlreadySet.NPLOT=0;
-	}
-	/* internal options go here  */
-	set_internopts(NULL);
 
-	if((fp=fopen(options,"r"))!=NULL) {
-		read_defaults(fp);
-		fclose(fp);
-	}
-	init_range();
-	init_trans();
+	integrate_init_range();
+	adj2_init_trans();
 	init_my_aplot();
 	init_txtview();
-	check_volterra();
+	init_X_vals();
+}
 
+
+void loadeqn_setup_all(void) {
 	if(IZPLT>NEQ) {
 		IZPLT=NEQ;
 	}
@@ -565,6 +402,11 @@ void set_all_vals(void) {
 	if(AXES>=5) {
 		PLOT_3D=1;
 	}
+	check_volterra();
+
+	integrate_setup_range();
+	adj2_setup_trans();
+	init_stor(MAXSTOR, NEQ + 1);
 	check_delay(); /* check for delay allocation */
 	alloc_h_stuff();
 	alloc_v_memory();  /* allocate stuff for volterra equations */
@@ -574,31 +416,21 @@ void set_all_vals(void) {
 
 
 void set_internopts(OptionsSet *mask) {
-	int i;
-	char *ptr,name[20],value[80],*junk,*mystring;
-	if(Nopts==0)return;
-	/*  parsem here   */
-	for(i=0;i<Nopts;i++) {
-		ptr=interopt[i];
-		junk=get_first(ptr," ,");
-		if(junk == NULL) {
-			/*No more tokens.  Should this throw an error?*/
-		}
-		while((mystring=get_next(" ,\n\r"))!=NULL) {
-			split_apart(mystring,name,value);
-			if(strlen(name)>0 && strlen(value)>0)	{
-				set_option(name,value,0,mask);
-			}
-		}
+	if (Nopts == 0)
+		return;
+
+	for (int i = 0; i < Nopts; i++) {
+		set_internopt_line(interopt[i], 0, mask);
 	}
-	for(i=0;i<Nopts;i++) {
+
+	for (int i = 0; i < Nopts; i++) {
 		free(interopt[i]);
 	}
 	Nopts = 0;
 }
 
 
-void set_internopts_xpprc_and_comline(void) {
+void set_internopts_comline(void) {
 	int i;
 	char *ptr,name[20],value[80],*junk,*mystring;
 	if(Nopts==0) {
@@ -1921,48 +1753,19 @@ void set_option(char *s1, char *s2, int force, OptionsSet *mask) {
 }
 
 
-void set_X_vals(void) {
-	/*
-	Set up the default look here.
-	*/
-
+static void init_X_vals(void) {
 	tfBell=1;
-	/*PaperWhite=0;*/
+	strcpy(big_font_name,"fixed");
+	strcpy(small_font_name,"6x13");
+	sprintf(UserBlack,"#%s","000000");
+	sprintf(UserWhite,"#%s","EDE9E3");
+	sprintf(UserMainWinColor,"#%s","808080");
+	sprintf(UserDrawWinColor,"#%s","FFFFFF");
 	/*
-	No gradients tends to look cleaner but some
-	may prefer gradients improved contrast/readability.
-	*/
-	/*UserGradients=1;
-	*/
-	/*fixed is the new X11 default fixed font. 9x15 is dead and gone.
-	*/
-	if(strlen(big_font_name)==0) {
-		strcpy(big_font_name,"fixed");
-	}
-
-	if(strlen(small_font_name)==0) {
-		strcpy(small_font_name,"6x13");
-	}
-
-	if(strlen(UserBlack)==0) {
-		sprintf(UserBlack,"#%s","000000");
-	}
-
-	if(strlen(UserWhite)==0) {
-		sprintf(UserWhite,"#%s","EDE9E3");
-	}
-
-	if(strlen(UserMainWinColor)==0) {
-		sprintf(UserMainWinColor,"#%s","808080");
-	}
-
-	if(strlen(UserDrawWinColor)==0) {
-		sprintf(UserDrawWinColor,"#%s","FFFFFF");
-	}
-
-	if(UserGradients<0) {
-		UserGradients=1;
-	}
+	 * No gradients tends to look cleaner but some
+	 * may prefer gradients improved contrast/readability.
+	 */
+	UserGradients=1;
 }
 
 
@@ -2007,136 +1810,17 @@ static void do_intern_set(char *name1, char *value) {
 }
 
 
-static void fil_flt(FILE *fpt, double *val) {
-	char bob[80];
-	if(fgets(bob,80,fpt)==NULL) {
-		plintf("Couldnt read file %s", fpt);
-	}
-	*val=atof(bob);
-}
+static void set_internopt_line(char *line, int force, OptionsSet *mask) {
+	char name[20], value[80];
+	char *mystring;
 
-static void fil_int(FILE *fpt, int *val) {
-	char bob[80];
-	if(fgets(bob,80,fpt)==NULL) {
-		plintf("Couldnt read file %s", fpt);
+	get_first(line," ,");
+	while((mystring=get_next(" ,\n\r"))!=NULL) {
+		split_apart(mystring,name,value);
+		if(strlen(name)>0 && strlen(value)>0)	{
+			set_option(name, value, force, mask);
+		}
 	}
-	*val=atoi(bob);
-}
-
-
-static void read_defaults(FILE *fp) {
-	char bob[80];
-	char *ptr;
-	if(fgets(bob,80,fp)==NULL) {
-		plintf("Couldnt read file %s", fp);
-	}
-	ptr=get_first(bob," ");
-	if(notAlreadySet.BIG_FONT_NAME) {
-		strcpy(big_font_name,ptr);
-		notAlreadySet.BIG_FONT_NAME=0;
-	}
-	if(fgets(bob,80,fp)==NULL) {
-		plintf("Couldnt read file %s", fp);
-	}
-	ptr=get_first(bob," ");
-	if(notAlreadySet.SMALL_FONT_NAME) {
-		strcpy(small_font_name,ptr);
-		notAlreadySet.SMALL_FONT_NAME=0;
-	}
-
-	if(notAlreadySet.PaperWhite) {
-		fil_int(fp,&PaperWhite);
-		notAlreadySet.PaperWhite=0;
-	};
-	if(notAlreadySet.IXPLT) {
-		fil_int(fp,&IXPLT);
-		notAlreadySet.IXPLT=0;
-	};
-	if(notAlreadySet.IYPLT) {
-		fil_int(fp,&IYPLT);
-		notAlreadySet.IYPLT=0;
-	};
-	if(notAlreadySet.IZPLT) {
-		fil_int(fp,&IZPLT);
-		notAlreadySet.IZPLT=0;
-	};
-	if(notAlreadySet.AXES) {
-		fil_int(fp,&AXES);
-		notAlreadySet.PaperWhite=0;
-	};
-	if(notAlreadySet.NOUT) {
-		fil_int(fp,&NJMP);
-		notAlreadySet.NOUT=0;
-	};
-	if(notAlreadySet.NMESH) {
-		fil_int(fp,&NMESH);
-		notAlreadySet.NMESH=0;
-	};
-	if(notAlreadySet.METHOD) {
-		fil_int(fp,&METHOD);
-		notAlreadySet.METHOD=0;
-	};
-
-	if(notAlreadySet.TIMEPLOT) {
-		fil_int(fp,&TIMPLOT);
-		notAlreadySet.TIMEPLOT=0;
-	};
-	if(notAlreadySet.MAXSTOR) {
-		fil_int(fp,&MAXSTOR);
-		notAlreadySet.MAXSTOR=0;
-	};
-	if(notAlreadySet.TEND) {
-		fil_flt(fp,&TEND);
-		notAlreadySet.TEND=0;
-	};
-	if(notAlreadySet.DT) {
-		fil_flt(fp,&DELTA_T);
-		notAlreadySet.DT=0;
-	};
-	if(notAlreadySet.T0) {
-		fil_flt(fp,&T0);
-		notAlreadySet.T0=0;
-	};
-	if(notAlreadySet.TRANS) {
-		fil_flt(fp,&TRANS);
-		notAlreadySet.TRANS=0;
-	};
-	if(notAlreadySet.BOUND) {
-		fil_flt(fp,&BOUND);
-		notAlreadySet.BOUND=0;
-	};
-	if(notAlreadySet.DTMIN) {
-		fil_flt(fp,&HMIN);
-		notAlreadySet.DTMIN=0;
-	};
-	if(notAlreadySet.DTMAX) {
-		fil_flt(fp,&HMAX);
-		notAlreadySet.DTMIN=0;
-	};
-	if(notAlreadySet.TOLER) {
-		fil_flt(fp,&TOLER);
-		notAlreadySet.TOLER=0;
-	};
-	if(notAlreadySet.DELAY) {
-		fil_flt(fp,&DELAY);
-		notAlreadySet.DELAY=0;
-	};
-	if(notAlreadySet.XLO) {
-		fil_flt(fp,&MY_XLO);
-		notAlreadySet.XLO=0;
-	};
-	if(notAlreadySet.XHI) {
-		fil_flt(fp,&MY_XHI);
-		notAlreadySet.XHI=0;
-	};
-	if(notAlreadySet.YLO) {
-		fil_flt(fp,&MY_YLO);
-		notAlreadySet.YLO=0;
-	};
-	if(notAlreadySet.YHI) {
-		fil_flt(fp,&MY_YHI);
-		notAlreadySet.YHI=0;
-	};
 }
 
 
@@ -2156,5 +1840,3 @@ static void split_apart(char *bob, char *name, char *value) {
 		value[l-k-1]='\0';
 	}
 }
-
-

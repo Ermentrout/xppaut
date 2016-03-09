@@ -405,8 +405,6 @@ below).
 # comment line - name of file, etc   
 ...
 #include <filename>
-... 
-options <filename>
 ...
 d<name>/dt=<formula>
 <name>'=<formula>
@@ -490,20 +488,6 @@ Continuous variables, auxiliary quantities, and Markov variables are
 all plottable quantities in XPP.  That is, once you have solved your
 equation, you can plot or view any of the continuous and Markov
 variables or the auxiliary quantities. 
-
-\TCC{Options files}
-XPP uses a bunch of defaults when it is started up by looking for a
-file called ``default.opt.'' If it cannot find it, it uses internal
-options.  Alternatively, you can tell XPP the name of the options file
-you want to use.  The description of these files is below.
-The format for such a statement is:
-\bvb
-option <filename>
-\end{verbatim}
-which loads the options file specified in {\tt<filename>}. You will
-probably not want to use this very much as you can now specify all of
-the parameters in the options file within your ODE file by using the
-``@'' symbol. 
 
 \TCC{Include files} XPP lets you include files in the ODE file so that
 for example, you can create a library of functions which your XPP ode
@@ -4995,49 +4979,6 @@ the meaning of the numbers:
 {\bf 0-Black/White; 1-Red; 2-Red Orange; 3-Orange;
 4-Yellow Orange; 5-Yellow; 6-Yellow Green; 7-Green; 8-Blue Green; 9-Blue;
 10-Purple.}
-
-\section{The options file}
-\label{optfiles}
-You can have many options files.  They are useful for initializing
-XPP. However, because you can now set options from within the ODE
-file, options files are probably obsolete. They have the following format:
-\bvb
-9x15    BIG_FONT_NAME   <-- menu fonts
-fixed   SMALL_FONT_NAME <-- IC, browser, etc fonts
-0       BACKGROUND (1=white,0=black)
-0	IXPLT <--  X-axis variable (0=time)
-1	IYPLT <--  Y-axis variable
-1	IZPLT <--  Z-axis variable
-0	AXES <-- type of axis (0-2d 5-3d)
-1	NJMP <-- nOutput
-40	NMESH <-- Nullcline mesh
-4	METHOD <-- Integration method
-1	TIMEPLOT <--- set to zero if one axis is not time
-8000	MAXSTOR <--- maximum rows stored
-20.0	TEND <-- total integration time
-.05	DT <--- time step
-0.0	T0 <-- start time
-0.0	TRANS <-- transient
-100.	BOUND <--- bounds
-.0001	HMIN <-- min step for GEAR
-1.0	HMAX <-- max ``   ``   ``
-.00001	TOLER <-- tolerance for GEAR
-0.0	DELAY <-- maximal delay
-0.0	XLO  <--- 2D window sizes
-20.0	XHI
--2.0	YLO
-2.0	YHI
-\end{verbatim}
-
-Within an ODE file, you can call up a different options file by
-typing
-\bvb
-option <filename>
-\end{verbatim}
-where {\tt <filename>} is the name of an options file.
-  
-
-
 
 \end{document}
 

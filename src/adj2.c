@@ -56,15 +56,20 @@ char *coup_string[MAXODE];
 MY_TRANS my_trans;
 
 /* --- Functions --- */
-void init_trans(void) {
+void adj2_init_trans(void) {
 	my_trans.here=0;
-	strcpy(my_trans.firstcol,uvar_names[0]);
+	my_trans.firstcol[0] = '\0';
 	my_trans.ncol=2;
 	my_trans.nrow=1;
 	my_trans.rowskip=1;
 	my_trans.colskip=1;
 	my_trans.row0=1;
 	my_trans.col0=2;
+}
+
+
+void adj2_setup_trans(void) {
+	strcpy(my_trans.firstcol, uvar_names[0]);
 }
 
 

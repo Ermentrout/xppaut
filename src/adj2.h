@@ -19,7 +19,8 @@ extern int FOUR_HERE;
 extern MY_TRANS my_trans;
 
 /* --- Functions --- */
-void init_trans(void);
+void adj2_init_trans(void);
+void adj2_setup_trans(void);
 int do_transpose(void);
 void alloc_h_stuff(void);
 void data_back(void);
