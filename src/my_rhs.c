@@ -44,12 +44,6 @@ void fix_only(void) {
 }
 
 
-int main(int argc, char **argv) {
-	do_main(argc,argv);
-	exit(0);
-}
-
-
 int my_rhs(double t, double *y, double *ydot, int neq) {
 	int i;
 	SETVAR(0,t);

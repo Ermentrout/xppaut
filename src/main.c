@@ -351,12 +351,35 @@ void commander(int ch) {
 }
 
 
-void do_main(int argc, char **argv) {
-	/* Moved to init_X() */
-	/*  char *icon_name="xpp"; */
-	/*char myfile[256];*/
+void FixWindowSize(Window w, int width, int height, int flag) {
+	XSizeHints size_hints;
+	switch(flag) {
+	case FIX_SIZE:
+		size_hints.flags=PSize|PMinSize|PMaxSize;
+		size_hints.width=width;
+		size_hints.min_width=width;
+		size_hints.max_width=width;
+		size_hints.height=height;
+		size_hints.min_height=height;
+		size_hints.max_height=height;
+		break;
+	case FIX_MIN_SIZE:
+		size_hints.flags=PMinSize;
+		size_hints.min_width=width;
+		size_hints.min_height=height;
+		break;
+	case FIX_MAX_SIZE:
+		size_hints.flags=PMaxSize;
+		size_hints.max_width=width;
+		size_hints.max_height=height;
+		break;
+	}
+	XSetWMProperties(display,w,NULL,NULL,NULL,0,&size_hints,NULL,NULL);
+}
+
+
+int main(int argc, char **argv) {
 	char myfile[XPP_MAX_NAME];
-	/*  char *win_name; */
 	char pptitle[80];
 
 	/*Track which options have not been set already*/
@@ -514,10 +537,6 @@ void do_main(int argc, char **argv) {
 
 	unsigned int min_wid=450,min_hgt=360;
 
-	/*  unsigned int x=0,y=0; */
-	/*
-  sprintf(myfile,"lecar.ode");
-  */
 	get_directory(myfile);
 
 	SCALEX=640;
@@ -527,32 +546,28 @@ void do_main(int argc, char **argv) {
 	sprintf(batchout,"output.dat");
 	sprintf(PlotFormat,"ps");
 
-	/*Read visualization environement variables here
-  since some may be overridden by command line
-  */
+	/*Read visualization environement variables here since some
+	 * may be overridden by command line
+	 */
 	logfile=stdout;
 	check_for_quiet(argc, argv);
 	do_comline(argc, argv);
 
 
-	/*We need to init_X here if there is no file on command line
-  so that a file browser can be opened.
-  */
+	/* We need to init_X here if there is no file on command line
+	 * so that a file browser can be opened.
+	 */
 	if(!XPPBatch) {
-		/*Swap out the current options for a temporary place holder
-	   */
+		/* Swap out the current options for a temporary place holder */
 		OptionsSet *tempNS = (OptionsSet*)malloc(sizeof(OptionsSet));
 		*tempNS = notAlreadySet;
-		/*Initialize what's needed to open a browser based on
-	   the current options.
-	   */
+		/*Initialize what's needed to open a browser based on the
+		 * current options.
+		 */
 		do_vis_env();
 		set_all_vals();
 		init_X();
-		/*       XSynchronize(display,1); */
-		/*
-	   Now swap back the options for proper precedence ordering of options.
-	   */
+		/* Now swap back the options for proper precedence ordering of options. */
 		notAlreadySet = *tempNS;
 		free(tempNS);
 	}
@@ -609,7 +624,7 @@ void do_main(int argc, char **argv) {
 		batch_integrate();
 		silent_nullclines();
 		silent_dfields();
-		exit(0);
+		return 0;
 	}
 
 	gtitle_text(pptitle, main_win);
@@ -651,33 +666,8 @@ void do_main(int argc, char **argv) {
 	}
 	default_window();
 	do_events(min_wid,min_hgt);
-}
 
-
-void FixWindowSize(Window w, int width, int height, int flag) {
-	XSizeHints size_hints;
-	switch(flag) {
-	case FIX_SIZE:
-		size_hints.flags=PSize|PMinSize|PMaxSize;
-		size_hints.width=width;
-		size_hints.min_width=width;
-		size_hints.max_width=width;
-		size_hints.height=height;
-		size_hints.min_height=height;
-		size_hints.max_height=height;
-		break;
-	case FIX_MIN_SIZE:
-		size_hints.flags=PMinSize;
-		size_hints.min_width=width;
-		size_hints.min_height=height;
-		break;
-	case FIX_MAX_SIZE:
-		size_hints.flags=PMaxSize;
-		size_hints.max_width=width;
-		size_hints.max_height=height;
-		break;
-	}
-	XSetWMProperties(display,w,NULL,NULL,NULL,0,&size_hints,NULL,NULL);
+	return 0;
 }
 
 

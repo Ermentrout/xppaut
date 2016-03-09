@@ -84,8 +84,8 @@ extern XFontStruct *small_font;
 void bye_bye(void);
 void clr_scrn(void);
 void commander(int ch);
-void do_main(int argc, char **argv);
 void FixWindowSize(Window w, int width, int height, int flag);
+int  main(int argc, char **argv);
 void redraw_all(void);
 void top_button_draw(Window w);
 

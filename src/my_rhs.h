@@ -4,7 +4,6 @@
 /* --- Functions --- */
 void extra(double *y__y, double t, int nod, int neq);
 void fix_only(void);
-int main(int argc, char **argv);
 int my_rhs(double t, double *y, double *ydot, int neq);
 void rhs_only(double *y, double *ydot);
 void set_fix_rhs(double t, double *y);
