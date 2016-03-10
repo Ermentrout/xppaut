@@ -106,7 +106,7 @@ int xorfix,silent,got_file;
  * { x=y, z=w, q=p , .... }
  */
 void add_intern_set(char *name, char *does) {
-	char bob[XPP_MAX_NAME],ch;
+	char bob[DEFAULT_STRING_LENGTH],ch;
 	int i,n,j=Nintern_set,k=0;
 	if(Nintern_set>=MAX_INTERN_SET) {
 		plintf(" %s not added -- too many must be less than %d \n",

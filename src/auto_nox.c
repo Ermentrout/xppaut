@@ -1031,7 +1031,7 @@ int check_plot_type(int flag2,int icp1, int icp2) {
 
 
 void do_auto_win(void) {
-	char bob[256];
+	char bob[DEFAULT_STRING_LENGTH];
 	if(Auto.exist==0) {
 		if(NODE>NAUTO) {
 			sprintf(bob,"Auto restricted to less than %d variables",NAUTO);
@@ -1293,7 +1293,7 @@ void load_auto_orbitx(int ibr,int flag, int lab, double per) {
 	int i,j,nstor;
 	double u[NAUTO],t;
 	double period;
-	char string[256];
+	char string[DEFAULT_STRING_LENGTH];
 	int nrow,ndim,label,flg;
 	/* printf("Loading orbit ibr=%d ips=%d flag=%d\n",grabpt.ibr,Auto.ips, grabpt.flag);  */
 
@@ -1418,7 +1418,7 @@ void storeautopoint(double x,double y) {
 
 
 int yes_reset_auto(void) {
-	char string[256];
+	char string[DEFAULT_STRING_LENGTH];
 	if(NBifs<=1) {
 		return(0);
 	}

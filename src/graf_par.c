@@ -979,7 +979,7 @@ static void edit_frz_crv(int i) {
 
 static void export_graf_data(void) {
 	FILE *fp;
-	/*char filename[256];*/
+	/*char filename[DEFAULT_STRING_LENGTH];*/
 	char filename[XPP_MAX_NAME];
 	sprintf(filename,"curve.dat");
 	ping();
@@ -1075,7 +1075,7 @@ static int freeze_crv(int ind) {
 
 static void frz_bd(void) {
 	FILE *fp;
-	/*char filename[256];*/
+	/*char filename[DEFAULT_STRING_LENGTH];*/
 	char filename[XPP_MAX_NAME];
 	sprintf(filename,"diagram.dat");
 	ping();

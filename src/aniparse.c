@@ -133,7 +133,7 @@ typedef struct {
 	int flag;
 	int skip;
 	char root[100];
-	char filter[256];
+	char filter[DEFAULT_STRING_LENGTH];
 	int aviflag,filflag;
 } MPEG_SAVE;
 
@@ -1222,7 +1222,7 @@ static int ani_new_file(char *filename) {
 
 
 static int load_ani_file(FILE *fp) {
-	char old[XPP_MAX_NAME],new_char[XPP_MAX_NAME],big[XPP_MAX_NAME];
+	char old[DEFAULT_STRING_LENGTH],new_char[DEFAULT_STRING_LENGTH],big[DEFAULT_STRING_LENGTH];
 	int notdone=1,jj1,jj2,jj;
 	int ans=0,flag;
 	ani_line=1;
@@ -1252,7 +1252,9 @@ static int load_ani_file(FILE *fp) {
 *	command requires that you load in two additional lines
 */
 static int parse_ani_string(char *s, FILE *fp) {
-	char x1[XPP_MAX_NAME],x2[XPP_MAX_NAME],x3[XPP_MAX_NAME],x4[XPP_MAX_NAME],col[XPP_MAX_NAME],thick[XPP_MAX_NAME];
+	char x1[DEFAULT_STRING_LENGTH],x2[DEFAULT_STRING_LENGTH],
+		 x3[DEFAULT_STRING_LENGTH],x4[DEFAULT_STRING_LENGTH];
+	char col[DEFAULT_STRING_LENGTH],thick[DEFAULT_STRING_LENGTH];
 	char *ptr,*nxt;
 	char *command;
 	int type=-1;
@@ -1761,7 +1763,7 @@ static int chk_ani_color(char *s, int *index) {
 
 static int add_ani_expr(char *x, int *c) {
 	int i,n;
-	int com[XPP_MAX_NAME];
+	int com[DEFAULT_STRING_LENGTH];
 	int err;
 
 	err=add_expr(x,com,&n);

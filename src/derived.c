@@ -49,7 +49,7 @@ int add_derived(char *name, char *rhs) {
 /* This compiles all of the formulae. t is called only once during the session */
 int compile_derived(void) {
 	int i,k;
-	int f[256],n;
+	int f[DEFAULT_STRING_LENGTH],n;
 	for(i=0;i<nderived;i++) {
 		if(add_expr(derived[i].rhs,f,&n)==1) {
 			plintf(" Bad right-hand side for derived parameters \n");

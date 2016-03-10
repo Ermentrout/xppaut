@@ -53,7 +53,7 @@ static int set_type=0;
 /* --- Functions --- */
 void do_lunch(int f) {
 	int ne,np,ok,temp;
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	FILE *fp;
 	time_t ttt;
 	char filename[XPP_MAX_NAME];
@@ -428,7 +428,7 @@ static void dump_h_stuff(FILE *fp, int f) {
 
 
 static void dump_range(FILE *fp, int f) {
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	if(f==READEM) {
 		if(fgets(bob,DEFAULT_STRING_LENGTH,fp)==NULL) {
 			plintf("Couldnt read file %s", fp);

@@ -255,7 +255,6 @@ void do_init_data(int com) {
 	double *x;
 	double old_dt=DELTA_T;
 	FILE *fp;
-	/*char icfile[XPP_MAX_NAME];*/
 	char icfile[XPP_MAX_NAME];
 	float xm,ym;
 	int im,jm,oldstart,iv,jv,badmouse;
@@ -464,7 +463,7 @@ int do_auto_range_go(void) {
 
 /* flag is 0 for 1-param 1 for 2 parameter 2 for Auto range */
 int do_range(double *x, int flag) {
-	char bob[XPP_MAX_NAME],parn[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH],parn[DEFAULT_STRING_LENGTH];
 	int ivar=0,ivar2=0,res=0,oldic=0;
 	int nit=20,i=0,j=0,itype=0,itype2=0,cycle=0,icol=0,nit2=0,iii=0;
 	int color=MyGraph->color[0];
@@ -733,7 +732,7 @@ int extract_ic_data(char *big) {
 	int i,n,j;
 	int j1,j2,flag2;
 	char front[40],new_char[50],c;
-	char back[XPP_MAX_NAME];
+	char back[DEFAULT_STRING_LENGTH];
 	de_space(big);
 	i=0;
 	n=strlen(big);
@@ -1819,7 +1818,7 @@ static
 
 void compute_one_period(double period,double *x,char *name) {
 	int opm=POIMAP;
-	char filename[256];
+	char filename[DEFAULT_STRING_LENGTH];
 	double ot=TRANS,ote=TEND;
 	FILE *fp;
 	TRANS=0;
@@ -1905,7 +1904,7 @@ static void do_eq_range(double *x) {
 	double parlo,parhi,dpar,temp;
 	int npar,stabcol,i,j,ierr;
 	int mc;
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	float stabinfo;
 
 	if(set_up_eq_range()==0) {
@@ -2157,7 +2156,7 @@ static void evaluate_ar_ic(char *v, char *f, int j1, int j2) {
 	int j;
 	int i,flag;
 	double z;
-	char vp[25],fp[XPP_MAX_NAME];
+	char vp[25],fp[DEFAULT_STRING_LENGTH];
 	for(j=j1;j<=j2;j++) {
 		i=-1;
 		subsk(v,vp,j,1);
@@ -2284,7 +2283,7 @@ static void plot_the_graphs(float *xv,float *xvold,int node,int neq,double ddt,i
 
 static int range_item(void) {
 	int i;
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	i=find_user_name(PARAMBOX,range.item);
 	if(i>-1) {
 		range.type=PARAMBOX;
@@ -2305,7 +2304,7 @@ static int range_item(void) {
 
 static int range_item2(void) {
 	int i;
-	char bob[XPP_MAX_NAME];
+	char bob[DEFAULT_STRING_LENGTH];
 	i=find_user_name(PARAMBOX,range.item2);
 	if(i>-1) {
 		range.type2=PARAMBOX;

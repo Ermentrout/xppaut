@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <X11/Xlib.h>
 
+#include "xpplim.h"
+
 /* --- Macros --- */
 #define xds(a) { XDrawString(display,w,small_gc,5,CURY_OFFs,a,strlen(a));\
 	return;}
@@ -32,7 +34,7 @@ typedef struct {
 	Window label[BMAXCOL];
 	Window time;
 	Window hint;
-	char hinttxt[256];
+	char hinttxt[DEFAULT_STRING_LENGTH];
 	int dataflag,xflag;
 	int col0,row0,ncol,nrow;
 	int maxrow,maxcol;

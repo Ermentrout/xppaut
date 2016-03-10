@@ -220,7 +220,7 @@ int save_as(void) {
 	int i,ok;
 	FILE *fp;
 	double z;
-	char filename[256];
+	char filename[DEFAULT_STRING_LENGTH];
 	sprintf(filename,"%s",this_file);
 	ping();
 	if(!file_selector("Save As",filename,"*.ode")) {
@@ -282,7 +282,7 @@ int save_as(void) {
 
 
 void user_fun_info(FILE *fp) {
-	char fundef[256];
+	char fundef[DEFAULT_STRING_LENGTH];
 	int i,j;
 	for(j=0;j<NFUN;j++) {
 		sprintf(fundef,"%s(",ufun_names[j]);

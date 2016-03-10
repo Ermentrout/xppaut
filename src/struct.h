@@ -68,7 +68,7 @@ typedef struct {
 	        int xorgflag,yorgflag,zorgflag;
 		int ColorFlag,ColorValue;
 	        char xlabel[30],ylabel[30],zlabel[30];
-                char gr_info[256];
+                char gr_info[DEFAULT_STRING_LENGTH];
 		} GRAPH;
 
 typedef struct {

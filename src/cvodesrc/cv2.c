@@ -71,7 +71,7 @@ static void cvf(n,t,y,ydot,fdata)
 void cvode_err_msg(kflag)
 	 int kflag;
 {
-  char s[256];
+  char s[DEFAULT_STRING_LENGTH];
   strcpy(s,"");
   switch(kflag){
   case 0: strcpy(s,"");

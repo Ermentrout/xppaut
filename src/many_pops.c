@@ -185,7 +185,7 @@ int check_active_plot(int k) {
 
 void check_draw_button(XEvent ev) {
 	int k;
-	char buf[XPP_MAX_NAME];
+	char buf[DEFAULT_STRING_LENGTH];
 
 	int button;
 	int i,j;
@@ -341,7 +341,7 @@ void do_motion_events(XEvent ev) {
 	int i=ev.xmotion.x;
 	int j=ev.xmotion.y;
 	float x,y;
-	char buf[256];
+	char buf[DEFAULT_STRING_LENGTH];
 	slider_motion(ev);
 #ifdef AUTO
 	auto_motion(ev);

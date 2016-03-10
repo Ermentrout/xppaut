@@ -610,7 +610,7 @@ static int check_for_stor(float **data) {
 
 static void chk_seq(char *f,int *seq, double *a1, double *a2) {
 	int i,j=-1;
-	char n1[256],n2[256];
+	char n1[DEFAULT_STRING_LENGTH],n2[256];
 	int n=strlen(f);
 	*seq=0;
 	*a1=0.0;
@@ -796,7 +796,7 @@ static void data_pgup(BROWSER *b) {
 
 static void data_read(BROWSER *b) {
 	int status;
-	char fil[256];
+	char fil[DEFAULT_STRING_LENGTH];
 	char ch;
 	FILE *fp;
 	int k;
@@ -933,7 +933,7 @@ static void data_up( BROWSER *b) {
 
 static void data_write(BROWSER *b) {
 	int status;
-	char fil[256];
+	char fil[DEFAULT_STRING_LENGTH];
 	FILE *fp;
 	int i,j;
 	int ok;

@@ -527,7 +527,7 @@ void make_new_param_box(void) {
 void man_ic(void) {
 	int done,index=0;
 	double z;
-	char name[XPP_MAX_NAME],junk[XPP_MAX_NAME];
+	char name[XPP_MAX_NAME],junk[DEFAULT_STRING_LENGTH];
 	while(1) {
 		sprintf(name,"%s :",uvar_names[index]);
 		z=last_ic[index];
@@ -552,7 +552,7 @@ void man_ic(void) {
 void new_parameter(void) {
 	int done,index;
 	double z;
-	char name[XPP_MAX_NAME],value[XPP_MAX_NAME],junk[XPP_MAX_NAME];
+	char name[DEFAULT_STRING_LENGTH],value[DEFAULT_STRING_LENGTH],junk[DEFAULT_STRING_LENGTH];
 	while(1) {
 		name[0]=0;
 		done=new_string("Parameter:",name);
@@ -796,7 +796,7 @@ void slider_motion(XEvent ev) {
 
 /* --- static functions --- */
 static void add_edit_float(BoxList *b, int i, double z) {
-	char junk[XPP_MAX_NAME];
+	char junk[DEFAULT_STRING_LENGTH];
 	sprintf(junk,"%.16g",z);
 	add_editval(b,i,junk);
 }
@@ -1224,7 +1224,7 @@ static void display_file_sel(FILESEL f, Window w) {
 	XMoveResizeWindow(display,f.ok,cwid/2-7*DCURXs-3,chgt-hgt,7*DCURXs,DCURYs);
 	XMoveResizeWindow(display,f.cancel,cwid/2+3,chgt-hgt,7*DCURXs,DCURYs);
 
-	char t[XPP_MAX_NAME];
+	char t[DEFAULT_STRING_LENGTH];
 	if(f.here!=1) {
 		return;
 	}
@@ -1888,7 +1888,7 @@ static int edit_fitem(int ch, char *string, Window w, int *off1, int *pos1, int 
 			}
 		} else if(filesel.n > 1) {/*Expand the file text to most generic currently represented*/
 			int j=0;
-			char U[XPP_MAX_NAME];
+			char U[DEFAULT_STRING_LENGTH];
 			if(my_ff.ndirs > 0) {
 				strcpy(U,my_ff.dirnames[0]);
 			} else {
@@ -1962,7 +1962,7 @@ static void expose_selector(Window w) {
 
 static void expose_slider(Window w, PAR_SLIDER *p) {
 	int x,len=12*DCURXs;
-	char top[XPP_MAX_NAME];
+	char top[DEFAULT_STRING_LENGTH];
 	if(w==p->slide) {
 		draw_slider(w,p->pos,p->hgt,p->l);
 		return;
@@ -2345,7 +2345,7 @@ static void set_default_ics(void) {
 
 static void set_default_params(void) {
 	int i;
-	char junk[XPP_MAX_NAME];
+	char junk[DEFAULT_STRING_LENGTH];
 	for(i=0;i<NUPAR;i++) {
 		set_val(upar_names[i],default_val[i]);
 		sprintf(junk,"%.16g",default_val[i]);

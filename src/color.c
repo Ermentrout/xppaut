@@ -97,7 +97,8 @@ void MakeColormap(void) {
 	int	i;
 	int clo=20;
 
-	int r[XPP_MAX_NAME],g[XPP_MAX_NAME],b[XPP_MAX_NAME];
+	int r[DEFAULT_STRING_LENGTH], g[DEFAULT_STRING_LENGTH],
+			b[DEFAULT_STRING_LENGTH];
 
 	cmap=(Colormap)NULL;
 	color_min = 30;

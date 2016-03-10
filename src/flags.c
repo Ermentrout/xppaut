@@ -113,7 +113,7 @@ double STOL=1.e-10;
 
 /* --- Functions --- */
 int add_global(char *cond, int sign, char *rest) {
-	char temp[256];
+	char temp[DEFAULT_STRING_LENGTH];
 	int nevents,ii,k,l,lt,j=NFlags;
 	char ch;
 	if(NFlags>=MAXFLAG) {
@@ -195,7 +195,7 @@ void show_flags(void) {
 int compile_flags(void) {
 	int j;
 	int i,k,index,nc;
-	int command[256];
+	int command[DEFAULT_STRING_LENGTH];
 	if(NFlags==0) {
 		return 0;
 	}

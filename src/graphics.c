@@ -306,7 +306,7 @@ void eq_symb(double *x, int type) {
 
 void fancy_text_abs(double x, double y, char *old, int size, int font) {
 	int xp,yp;
-	char text[256];
+	char text[DEFAULT_STRING_LENGTH];
 	scale_to_screen(x,y,&xp,&yp);
 	fillintext(old,text);
 	if(PltFmtFlag==PSFMT) {
@@ -322,7 +322,7 @@ void fancy_text_abs(double x, double y, char *old, int size, int font) {
 void fillintext(char *old, char *new_char) {
 	int i,l=strlen(old);
 	int j,m,k,ans;
-	char name[256],c,c2;
+	char name[DEFAULT_STRING_LENGTH],c,c2;
 	double z;
 	char val[25];
 	i=0;
@@ -817,7 +817,7 @@ void special_put_text_x11(int x, int y, char *str, int size) {
 	int cx=x,cy=y;
 	int cf=0,cs;
 	int n=strlen(str),dx=0;
-	char tmp[256],c;
+	char tmp[DEFAULT_STRING_LENGTH],c;
 	int sub,sup;
 	cs=size;
 	if(avromfonts[size]==1) {

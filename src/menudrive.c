@@ -47,7 +47,7 @@
 /* --- Types --- */
 typedef struct {
 	Window w;
-	char text[256];
+	char text[DEFAULT_STRING_LENGTH];
 	int here;
 } MSGBOXSTRUCT;
 

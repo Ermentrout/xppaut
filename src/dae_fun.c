@@ -96,7 +96,7 @@ int add_aeqn(char *rhs) {
 
 /* this compiles formulas to set to zero */
 int compile_svars(void) {
-	int i,f[256],n,k;
+	int i,f[DEFAULT_STRING_LENGTH],n,k;
 	if(nsvar!=naeqn) {
 		plintf(" #SOLV_VAR(%d) must equal #ALG_EQN(%d) ! \n",nsvar,naeqn);
 		return 1;

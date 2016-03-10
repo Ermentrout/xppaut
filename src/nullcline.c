@@ -939,7 +939,7 @@ static void restor_null(float *v, int n, int d) {
 static void save_frozen_clines(char *fn) {
 	NCLINES *z;
 	FILE *fp;
-	char fnx[256];
+	char fnx[DEFAULT_STRING_LENGTH];
 	char ch;
 	int i=1;
 	if(n_nstore==0) {
@@ -981,7 +981,7 @@ static void save_frozen_clines(char *fn) {
  */
 static void save_the_nullclines(void) {
 	FILE *fp;
-	char filename[256];
+	char filename[DEFAULT_STRING_LENGTH];
 	if(NULL_HERE==0) {
 		return;
 	}

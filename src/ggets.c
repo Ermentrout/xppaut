@@ -194,7 +194,7 @@ int get_key_press(XEvent *ev) {
 
 
 void cput_text(void) {
-	char string[256],new_char[256];
+	char string[DEFAULT_STRING_LENGTH],new_char[256];
 	int x,y,size=2,font=0;
 	Window temp;
 	temp=main_win;

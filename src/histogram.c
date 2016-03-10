@@ -759,7 +759,7 @@ static void new_four(int nmodes, int col) {
 
 static void new_hist(int nbins, double zlo, double zhi, int col, int col2, char *condition, int which) {
 	int i,j,index;
-	int command[256];
+	int command[DEFAULT_STRING_LENGTH];
 	int cond=0,flag=1;
 	double z,y;
 	double dz;

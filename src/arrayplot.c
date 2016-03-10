@@ -80,7 +80,7 @@ static void wborder(Window w, int i, APLOT ap);
 /* --- Data --- */
 int aplot_range;
 static int aplot_range_count=0;
-static char aplot_range_stem[XPP_MAX_NAME]="rangearray";
+static char aplot_range_stem[DEFAULT_STRING_LENGTH]="rangearray";
 static int aplot_still=1,aplot_tag=0;
 static int first_aplot_press;
 static int plot3d_auto_redraw=0;
