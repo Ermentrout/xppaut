@@ -53,7 +53,6 @@
 #include "help_defs.h"
 #include "init_conds.h"
 #include "integrate.h"
-#include "load_eqn.h"
 #include "lunch-new.h"
 #include "many_pops.h"
 #include "menu.h"

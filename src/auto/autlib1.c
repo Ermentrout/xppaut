@@ -1,6 +1,6 @@
 #include "auto_f2c.h"
 #include "auto_c.h"
-#include "xAuto.h"
+#include "../xAuto.h"
 extern XAUTO xAuto;
 extern int NODE;
 extern int RestartLabel;

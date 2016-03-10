@@ -13,8 +13,8 @@
 
 #include "autevd.h"
 #include "autlim.h"
-#include "auto_c.h"
-#include "auto_f2c.h"
+#include "auto/auto_c.h"
+#include "auto/auto_f2c.h"
 #include "auto_x11.h"
 #include "axes2.h"
 #include "browse.h"

@@ -6,8 +6,8 @@
 #include <stdlib.h>
 
 #include "autlim.h"
-#include "auto_c.h"
-#include "auto_def2.h"
+#include "auto/auto_c.h"
+#include "auto/auto_def2.h"
 #include "auto_nox.h"
 #include "diagram.h"
 #include "gear.h"

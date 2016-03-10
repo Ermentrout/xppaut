@@ -2,8 +2,8 @@
 #define XPPAUT_AUTEVD_H
 
 #include "autlim.h"
-#include "auto_f2c.h"
-#include "auto_c.h"
+#include "auto/auto_f2c.h"
+#include "auto/auto_c.h"
 
 /* --- Data --- */
 extern int DiagFlag;

@@ -7,5 +7,6 @@ SUBDIRS = \
 	ode \
 	share \
 	src/cvodesrc \
+	src/auto \
 	src
 

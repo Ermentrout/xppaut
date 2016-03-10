@@ -5,7 +5,8 @@ AM_CPPFLAGS = \
 	-DCVODE_YES \
 	-DMYSTR1=$(MAJORVER) \
 	-DMYSTR2=$(MINORVER) \
-	-Icvodesrc
+	-Icvodesrc \
+	-Iauto
 
 bin_PROGRAMS = \
 	xppaut
@@ -21,11 +22,7 @@ noinst_HEADERS = \
 	array_print.h \
 	autevd.h \
 	autlim.h \
-	auto_c.h \
-	auto_def2.h \
-	auto_f2c.h \
 	auto_nox.h \
-	auto_types.h \
 	auto_x11.h \
 	axes2.h \
 	browse.h \
@@ -123,7 +120,8 @@ bitmap_headers = \
 	bitmap/txtview.bitmap
 
 xppaut_LDADD = \
-	cvodesrc/libcvode.a
+	cvodesrc/libcvode.a \
+	auto/libauto.a
 
 xppaut_SOURCES = \
 	abort.c \
@@ -131,26 +129,25 @@ xppaut_SOURCES = \
 	aniparse.c \
 	arrayplot.c \
 	array_print.c \
+	autevd.c \
+	auto_nox.c \
+	auto_x11.c \
+	autpp.c \
 	axes2.c \
 	browse.c \
-	cabs.c \
 	calc.c \
 	color.c \
 	comline.c \
-	conpar2.c \
 	dae_fun.c \
 	delay_handle.c \
 	del_stab.c \
 	derived.c \
 	dialog_box.c \
-	d_imag.c \
-	d_lg10.c \
+	diagram.c \
 	do_fit.c \
 	dormpri.c \
-	d_sign.c \
 	edit_rhs.c \
 	eig_list.c \
-	eispack.c \
 	extra.c \
 	fftn.c \
 	flags.c \
@@ -161,8 +158,6 @@ xppaut_SOURCES = \
 	graf_par.c \
 	graphics.c \
 	histogram.c \
-	i_dnnt.c \
-	i_nint.c \
 	init_conds.c \
 	integrate.c \
 	kinescope.c \
@@ -182,15 +177,10 @@ xppaut_SOURCES = \
 	odesol2.c \
 	parserslow.c \
 	pop_list.c \
-	pow_dd.c \
-	pow_di.c \
-	pow_ii.c \
 	pp_shoot.c \
 	read_dir.c \
-	r_lg10.c \
 	rubber.c \
 	scrngif.c \
-	setubv2.c \
 	simplenet.c \
 	stiff.c \
 	storage.c \
@@ -199,12 +189,7 @@ xppaut_SOURCES = \
 	txtread.c \
 	userbut.c \
 	volterra2.c \
-	worker2.c \
-	z_abs.c \
-	z_exp.c \
-	z_log.c \
-	$(strutil_sources) \
-	$(auto_sources)
+	$(strutil_sources)
 
 libxpp_a_SOURCES = \
 	abort.c \
@@ -212,26 +197,25 @@ libxpp_a_SOURCES = \
 	aniparse.c \
 	arrayplot.c \
 	array_print.c \
+	autevd.c \
+	auto_nox.c \
+	auto_x11.c \
+	autpp.c \
 	axes2.c \
 	browse.c \
-	cabs.c \
 	calc.c \
 	color.c \
 	comline.c \
-	conpar2.c \
 	dae_fun.c \
 	delay_handle.c \
 	del_stab.c \
 	derived.c \
 	dialog_box.c \
-	d_imag.c \
-	d_lg10.c \
+	diagram.c \
 	do_fit.c \
 	dormpri.c \
-	d_sign.c \
 	edit_rhs.c \
 	eig_list.c \
-	eispack.c \
 	extra.c \
 	fftn.c \
 	flags.c \
@@ -242,8 +226,6 @@ libxpp_a_SOURCES = \
 	graf_par.c \
 	graphics.c \
 	histogram.c \
-	i_dnnt.c \
-	i_nint.c \
 	init_conds.c \
 	integrate.c \
 	kinescope.c \
@@ -263,15 +245,10 @@ libxpp_a_SOURCES = \
 	odesol2.c \
 	parserslow.c \
 	pop_list.c \
-	pow_dd.c \
-	pow_di.c \
-	pow_ii.c \
 	pp_shoot.c \
 	read_dir.c \
-	r_lg10.c \
 	rubber.c \
 	scrngif.c \
-	setubv2.c \
 	simplenet.c \
 	stiff.c \
 	storage.c \
@@ -280,23 +257,6 @@ libxpp_a_SOURCES = \
 	txtread.c \
 	userbut.c \
 	volterra2.c \
-	worker2.c \
-	z_abs.c \
-	z_exp.c \
-	z_log.c \
-	$(strutil_sources) \
-	$(auto_sources)
-
-auto_sources = \
-	autlib1.c \
-	autlib2.c \
-	autlib3.c \
-	autlib4.c \
-	autlib5.c \
-	autevd.c \
-	autpp.c \
-	diagram.c \
-	auto_nox.c \
-	auto_x11.c
+	$(strutil_sources)
 
 strutil_sources = strutil.c

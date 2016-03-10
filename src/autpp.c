@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "autlim.h"
-#include "auto_f2c.h"
+#include "auto/auto_f2c.h"
 #include "auto_nox.h"
 #include "derived.h"
 #include "load_eqn.h"

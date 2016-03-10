@@ -5,6 +5,7 @@
 
 #include "autevd.h"
 #include "auto_nox.h"
+#include "auto_x11.h"
 #include "browse.h"
 #include "form_ode.h"
 #include "ggets.h"
