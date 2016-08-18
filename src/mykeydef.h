@@ -1,0 +1,21 @@
+#ifndef XPPAUT_MYKEYDEF_H
+#define XPPAUT_MYKEYDEF_H
+
+enum xppKeyCodes {
+	BADKEY = 0,
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN,
+	PGUP,
+	PGDOWN,
+	HOME,
+	FINE,
+	END,
+	DELETE,
+	BACKSPACE,
+	TAB,
+	ESC
+};
+
+#endif /* XPPAUT_MYKEYDEF_H */

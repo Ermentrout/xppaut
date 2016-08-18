@@ -1,0 +1,16 @@
+*.o
+*.so
+*.a
+*.deps
+*.pdf
+*.*~
+Makefile.in
+Makefile
+/aclocal.m4
+/autom4te.cache/
+/build-aux/
+/configure
+config.status
+src/xppaut
+/src/config.h.in
+*.user
