@@ -20,7 +20,7 @@ HELP=help/*.html
 # Use Gnu compiler
 #CC= gcc
 # Use c99 to compile according to newer ISO C standards (IEEE Std 1003.1-2001)
-CC= gcc -std=c99 -pedantic -D_XOPEN_SOURCE=600 -Wall  
+CC= gcc -std=c99 -pedantic -D_XOPEN_SOURCE=600 -Wall -fcommon
 #AUTLIBS=  -lsundials_cvode -lX11 -lm 
 #These are the 32bit compat libraries.
 #AUTLIBS= -lf2c -lsundials_cvode -lX11 -lm 
