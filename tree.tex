@@ -51,6 +51,7 @@ I have been pretty bad at keeping the documentation up to date. So, rather than 
 \item m(I)ce - use mouse to put in multiple initial conditions
 \item (D)AE guess - reset the guess for differential algebraic systems 
 \item (B)ackward - like (G)o but integrate backward in time
+\item (P)eriodic - takes the existing trajectory and tries to get the periodic orbit from it. It then changes Total to the period and phase shifts to the peak of the variable on the time axis or along the x-axis in phase-plane view.
 \end{itemize}
 \item (C)ontinue - add more time to the current solution extending the integrating time
 \item (N)ullcline 
@@ -223,6 +224,8 @@ since {\tt open} seems to know how to handle html files by opening Safari.
 \item {\tt c(L)one} will attempt to write a new ODE file with the current initial data and parameters. You will be prompted for the file name. If the ODE file uses the array formulation, this will make a pretty big unreadable file.
 \item {\tt .(X)pprc} will bring up your .xpprc file if you have defined the environmental variable {\tt XPPEDITOR}.
 \item {\tt t(U)torial} brings up a series of little suggestions. A work in progress to be sure.
+\item {\tt Do script} runs an xpp script
+\item {\tt recOrd script} records a script  
 \end{itemize}
 
 
@@ -295,6 +298,8 @@ H(\phi) := \frac{1}{T} \int_0^T Z(t)\cdot G(U(t),U(t+\phi))\ dt
 \]
 where $Z(t)$ is the adjoint, $U(t)$ is the periodic orbit, and $G$ is the weak interaction. In typing the right-hand sides, use the variable names for the components of $U(t)$ and their primed counterparts for $U(t+\phi).$ For example, for diffusion of voltage, the right-hand dise is written {\tt V'-V} which means $V(t+\phi)-V(t).$  If you have 4 or more columns, the third and fourth will be replaced by the odd and even parts of the interaction function. The first column is time ($\phi$)  and the second is $H$.  
 \item {\tt (A)djoint,(O)rbit,(H)fun} bring back the previously computed adjoint, orbit, and interaction function, respectively. 
+\item {\tt (I)sostable,(F)loquet rho,(B)correction} are also computed when the adjoint is computed. These are for higher order phase reduction
+\item {\tt (2) H2 } is the higher order coupling function (valid only for a pair of coupled oscillators)  
 \item {\tt (P)arameters} allows you to change the parameters for the adjoint computation.
 \item {\tt (R)ange} sets a flag, {\tt AdjRange} to ON for computing averaging functions over a range of parameters. This is tricky to do, so here is how. 
 \begin{enumerate}

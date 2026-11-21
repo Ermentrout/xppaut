@@ -3,7 +3,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" groff xppaut.1 -man -T ps > xppman.ps to make a copy
 .\" other parameters are allowed: see man(7), man(1)
-.TH XPPAUT 1 "Dec  30, 2012" "Version 7.0" "XPPAUT Documentation"
+.TH XPPAUT 1 "November 2026" "Version 8.4.2" "XPPAUT Documentation"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -40,6 +40,10 @@ xppaut \- X Phase plane plus AUTO.  Solves many kinds of equations.
 \fR[\fB\-anifile \fIfile\fR] [file...] \fR[\fB\-mkplot\fR] \fR[\fB\-plotfmt \fIformat\fR] 
 .IP
 \fR[\fB\-ncdraw \fIboolean\fR] \fR[\fB\-dfdraw \fIN\fR] \fR[\fB\-version\fR] \fR[\fB\-noout\fR] 
+.IP
+\fR[\fB\-readset \fIfile\fR] [\fB\-with \fIstring\fR] [\fB\-equil \fIN\fR]
+.IP
+\fR[\fB\-script \fIfile\fR] [\fB\-nopause\fR] [\fB\-scriptexit\fR]
 .PD
 .br
 .SH DESCRIPTION 
@@ -69,11 +73,11 @@ the X Window System protocol client library Xlib <http://www.xfree86.org>.
 \fBxppaut\fP capabilities:
 .PD 0
 .IP \(bu 4
-Handles up to 1950 differential equations.
+Handles up to 5000 differential equations.
 .IP \(bu 4
 There are over a dozen solvers including several for stiff systems, a solver for integral equations and a symplectic solver
 .IP \(bu 4
-Up to 10 graphics windows can be visible at once and a variety of color combinations is supported
+Up to 21 graphics windows can be visible at once and a variety of color combinations is supported
 .IP \(bu 4
 PostScript output is supported as well as GIF and animated GIF movies
 .IP \(bu 4
@@ -96,6 +100,14 @@ A curve-fitter based on the Marquardt-Levenberg algorithm which lets you fit dyn
 Generate "movies" of three-dimensional views of attractors or parametric changes in the attractor as some parameters vary
 .IP \(bu 4
 Dynamically link to external subroutines
+.IP \(bu 4
+AUTO bifurcation analysis of equilibria, periodic orbits, two-parameter curves, homoclinic and heteroclinic orbits (and of delay equations), with the sign of the first Lyapunov coefficient shown along Hopf curves
+.IP \(bu 4
+The full spectrum of Lyapunov exponents, computed by the QR method
+.IP \(bu 4
+Adjoints, isostable quantities and interaction functions for phase reduction and weakly coupled oscillators
+.IP \(bu 4
+Scripts: a text file of commands that XPPAUT carries out for you, and recording of a session as a script (File, recOrd script)
 .IP \(bu 4
 From the command line type /dev/stdin as the file and you can write the ODE on the fly
 .PD
@@ -122,7 +134,7 @@ Brings XPP up with all the windows visible
 .TP
 .B \-white
 .br                                
-Swaps foreground and background colors 
+No longer supported (use \-forecolor and \-backcolor)
 .TP
 .B \-setfile \fIfilename   
 Loads the set file before starting up
@@ -244,6 +256,24 @@ Output the version of this software and exit.
 .TP 
 .B \-noout 
 During a batch run (see -silent) no solution output (.dat) file will be produced.
+.TP 
+.B \-readset \fIfilename
+Read a file that has the form of an internal set and apply it.
+.TP 
+.B \-with \fIstring
+Apply the assignments in the string, which must be quoted, as if they were an internal set, e.g. -with "iapp=0.1,total=200".
+.TP 
+.B \-equil \fIN
+In a batch run, find an equilibrium from the initial conditions and write it to equil.dat; if N=1 the one-dimensional manifolds are also written (um1.dat, ..., sm2.dat).
+.TP 
+.B \-script \fIfilename
+Run a script of XPPAUT commands (set, keys, ans, pause, ...) as soon as the program starts. See the scripting chapter of the manual.
+.TP 
+.B \-nopause
+With -script: skip the pause, wait and speed commands.
+.TP 
+.B \-scriptexit
+With -script: quit when the script ends (implies -nopause).
 .LP
 .SH ENVIRONMENT
  
@@ -259,6 +289,10 @@ Path to the XPPAUT documentation file <xpphelp.html> (e.g. /usr/share/doc/xppaut
 .TP
 .B \fBXPPBROWSER\fP
 Web browser to view documentation (e.g. /usr/bin/firefox)
+.RE
+.TP
+.B \fBXPPEDITOR\fP
+Editor used to open the .xpprc file from the File menu
 .RE
 .SH FILES
 Each user can customize the behavior and appearance of Xppaut via the
@@ -305,11 +339,18 @@ BACKIMAGE,
 BANDLO,
 BANDUP,
 BELL,
+BIG,
 BIGFONT,
 BOUND,
 BUT,
+COLORHI,
+COLORIZE,
+COLORLO,
 COLORMAP,
+COLORVIA,
 DELAY,
+DFDRAW,
+DFGRID,
 DLL_FUN,
 DLL_LIB,
 DS,
@@ -326,10 +367,14 @@ FOLD,
 FORECOLOR,
 GRADS,
 HEIGHT,
-HISTI,
-HISTLO,
 HISTBINS,
+HISTBINS2,
 HISTCOL,
+HISTCOL2,
+HISTHI,
+HISTHI2,
+HISTLO,
+HISTLO2,
 JAC_EPS,
 LOGFILE,
 LT,
@@ -337,6 +382,7 @@ MAXSTOR,
 METH,
 MULTIWIN,
 MWCOLOR,
+NCDRAW,
 NCOL,
 NEWT_ITER,
 NEWT_TOL,
@@ -345,14 +391,15 @@ NMAX,
 NMESH,
 NORMMAX,
 NORMMIN,
+NOUT,
 NPLOT,
 NPR,
 NTST,
-OUT,
 OUTPUT,
 PARMAX,
 PARMIN,
 PHI,
+PLOTFMT,
 POIMAP,
 POIPLN,
 POISGN,
@@ -372,6 +419,56 @@ RANGEOVER,
 RANGERESET,
 RANGESTEP,
 RUNNOW,
+S1,
+S2,
+S3,
+SEC,
+SEED,
+SHI1,
+SHI2,
+SHI3,
+SIMPLOT,
+SLO1,
+SLO2,
+SLO3,
+SMALL,
+SMALLFONT,
+SMC,
+SPC,
+SPECCOL,
+SPECCOL2,
+SPECWIDTH,
+SPECWIN,
+STOCH,
+T0,
+THETA,
+TOL,
+TOR_PER,
+TOTAL,
+TRANS,
+TUTORIAL,
+UEC,
+UMC,
+UPC,
+VMAXPTS,
+WIDTH,
+XHI,
+XLO,
+XMAX,
+XMIN,
+XNC,
+XP,
+YHI,
+YLO,
+YMAX,
+YMIN,
+YNC,
+YP,
+ZMAX,
+ZMIN,
+ZP.
+
+The plot options XP, YP, ZP, XLO, XHI, YLO and YHI also exist with the suffixes 2 to 8 (XP2, ..., YHI8) for additional plots.
 S#,
 SLO#,
 SHI#,
