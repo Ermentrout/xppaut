@@ -1139,6 +1139,14 @@ int *toklist,*command;
 	    if((my_symb[oldtok%THOUS].arg==2)&&
 	    (my_symb[oldtok%THOUS].com/MAXTYPE==FUN2TYPE)) */
 
+     /* a unary minus is a prefix operator: there is nothing to its left that it could finish, so it is
+        just put on the stack (otherwise  2*-x  and  2^-x  would pop the * or ^ too early) */
+     if(newtok==NEGATE){
+       tokstak[tokptr]=newtok;
+       oldtok=newtok;
+       tokptr++;
+       goto getnew;
+     }
      if(my_symb[oldtok].pri>=my_symb[newtok].pri)
            {
             command[comptr]=my_symb[oldtok].com;
@@ -1395,6 +1403,8 @@ int check_syntax(oldtoken,newtoken) /* 1 is BAD!   */
 
 
 
+#define PLUS_TOK 3      /* the + in my_symb */
+
 int make_toks(dest,my_token)
  char *dest;
  int *my_token;
@@ -1418,9 +1428,14 @@ int make_toks(dest,my_token)
   {
    lastindex=index;
    find_tok(dest,&index,&token);
-   if((token==MINUS)&&
-   ((old_tok==STARTTOK)||(old_tok==COMMA)||(old_tok==LPAREN)))
-  token=NEGATE;
+   /* a - or + is a sign (not an operator) at the start, after a comma or ( and also after another
+      operator or sign:  2*-3, 2^-x, 2--3, x>-1, 2*+3  */
+   if(((token==MINUS)||(token==PLUS_TOK))&&
+   ((old_tok==STARTTOK)||(old_tok==COMMA)||(old_tok==LPAREN)||(old_tok==NEGATE)||binary_sym(old_tok)))
+   {
+     if(token==PLUS_TOK)continue;        /* a unary plus does nothing */
+     token=NEGATE;
+   }
   if(token==LPAREN)++nparen;
   if(token==RPAREN)--nparen;
   
