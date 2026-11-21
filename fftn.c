@@ -1,4 +1,4 @@
-#include <stdlib.h> 
+#include "stdfix.h" 
 /*--------------------------------*-C-*---------------------------------*
  * File:
  *	fftn.c
@@ -172,7 +172,7 @@ eg, something like -D__FILE__=\"fftn.c\"
 #endif
 */
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include <math.h>
 #include "fftn.h"
 

@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include "load_eqn.h"
 
@@ -104,6 +104,13 @@ void free_finfo(ff)
   for(i=0;i<ff->nfiles;i++)
     free(ff->filenames[i]);
   free(ff->filenames);
+  /* leave an empty list behind: if the next lookup fails before filling it in
+     (Tab completion in the file selector), the old counts and the freed
+     pointers must not be used */
+  ff->dirnames=NULL;
+  ff->filenames=NULL;
+  ff->ndirs=0;
+  ff->nfiles=0;
 }
 
 

@@ -2,7 +2,7 @@
 
 #include "color.h"
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <stdio.h>
 #include <X11/Xlib.h>

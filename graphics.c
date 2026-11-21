@@ -2,7 +2,7 @@
 #include "my_ps.h"
 #include "my_svg.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +33,7 @@ extern int IXPLT,IYPLT,IZPLT;
 extern int AXES,TIMPLOT,PLOT_3D;
 extern int START_LINE_TYPE;
 extern double MY_XLO,MY_YLO,MY_XHI,MY_YHI;
-
+extern int Xup;
 extern int COLOR,colorline[]; 
 extern int DCURXs,DCURYs;
 extern int PltFmtFlag;
@@ -344,10 +344,19 @@ void rect_x11(x,y,w,h)
  XFillRectangle(display,draw_win,gc_graph,x,y,w,h);
 }
 
+void draw_many_lines()
+{
+  int NLINE=500000;
+  int i;
+  for(i=0;i<NLINE;i++)
+    XDrawLine(display,draw_win,gc_graph,rand()%200,rand()%200,rand()%200,rand()%200);
+  printf("Done\n");
+}
+  
 void line_x11(xp1,yp1,xp2,yp2)
      int xp1,yp1,xp2,yp2;
 {
-  XDrawLine(display,draw_win,gc_graph,xp1,yp1,xp2,yp2);
+  XDrawLine(display,draw_win,gc_graph,xp1,yp1,xp2,yp2);  
 }
 
 void put_text_x11(x,y,str)
@@ -588,12 +597,25 @@ void set_extra_graphs()
   }
 }
 
+void check_flags(void);
+
 void reset_graph()
 {
   if(AXES>=5)
     PLOT_3D=1;
   else
     PLOT_3D=0;
+  /* For a 2D plot XPP keeps xmin,xmax,ymin,ymax equal to xlo,xhi,ylo,yhi (the
+     Window dialog, zoom_in and the loader all do).  The 2D View dialog reads
+     xmin..ymax, so without this a window loaded through the internal options
+     is drawn correctly but XPP still reports -- and later restores -- the old
+     one. */
+  if(AXES<5){
+    x_3d[0]=MY_XLO;
+    x_3d[1]=MY_XHI;
+    y_3d[0]=MY_YLO;
+    y_3d[1]=MY_YHI;
+  }
   MyGraph->xv[0]=IXPLT;
   MyGraph->yv[0]=IYPLT;
   MyGraph->zv[0]=IZPLT;
@@ -614,6 +636,10 @@ void reset_graph()
     MyGraph->xhi=MY_XHI;
     MyGraph->yhi=MY_YHI;
     MyGraph->grtype=AXES;
+    /* refresh TimeFlag/ThreeDFlag from the plotted variables *before* redrawing:
+       a set that changes xp,yp must switch XPP out of "time plot" mode, or
+       nullclines, direction fields etc. are ignored */
+    check_flags();
     check_windows();
     set_normal_scale();
     redraw_the_graph();
@@ -1421,6 +1447,7 @@ double *x;
   float dx=6.0*(float)(MyGraph->xhi-MyGraph->xlo)*SYMSIZE;
   float dy=6.0*(float)(MyGraph->yhi-MyGraph->ylo)*SYMSIZE;
  int ix=MyGraph->xv[0]-1,iy=MyGraph->yv[0]-1,iz=MyGraph->zv[0]-1;
+ if(!Xup)return;
   if(MyGraph->TimeFlag)return;
   set_color(0); 
   if(MyGraph->ThreeDFlag)

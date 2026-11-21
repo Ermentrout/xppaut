@@ -3,7 +3,23 @@
 	-lf2c -lm   (in that order)
 */
 
+#include <stdlib.h>
 #include "auto_f2c.h"
+
+extern int DelayFlag;
+int auto_delay_hopf_matrices(integer ndm, doublereal *u, doublereal omega, doublereal *Cr, doublereal *S);
+/* allocate and fill Cr,S (column-major) for a delay equation; 1 on success */
+static int auto_hopf_delay_ok(integer ndm, const doublereal *u, doublereal omega, doublereal **Cr, doublereal **S)
+{
+  *Cr = (doublereal *)malloc(sizeof(doublereal)*ndm*ndm);
+  *S  = (doublereal *)malloc(sizeof(doublereal)*ndm*ndm);
+  if (*Cr == NULL || *S == NULL ||
+      auto_delay_hopf_matrices(ndm, (doublereal *)u, omega, *Cr, *S) != 0) {
+    free(*Cr); free(*S); *Cr = NULL; *S = NULL;
+    return 0;
+  }
+  return 1;
+}
 #include "auto_c.h"
 
 /* The memory for these are taken care of in main, and setubv for the
@@ -944,7 +960,6 @@ fnhb(const iap_type *iap, const rap_type *rap, integer ndim, const doublereal *u
   }
 
   par[icp[0]] -= ep;
-
   return 0;
 } /* fnhb_ */
 
@@ -961,6 +976,7 @@ ffhb(const iap_type *iap, const rap_type *rap, integer ndim, const doublereal *u
   integer i, j;
 
   doublereal rom;
+  doublereal *Cr_ = NULL, *S_ = NULL;
   integer ndm2;
 
 
@@ -979,6 +995,20 @@ ffhb(const iap_type *iap, const rap_type *rap, integer ndim, const doublereal *u
   par[icp[1]] = u[-1 + ndim];
   funi(iap, rap, ndm, u, uold, icp, par, 1, f, dfdu, dfdp);
 
+  if (DelayFlag && auto_hopf_delay_ok(ndm, u, 1.0 / rom, &Cr_, &S_)) {
+    /* Delay equation: Delta(i w)(v1+i v2)=0 with w=1/rom, written as
+         v2 + rom (Cr v1 + S v2) = 0 ,   -v1 + rom (Cr v2 - S v1) = 0   */
+    for (i = 0; i < ndm; ++i) {
+      f[ndm + i] = u[ndm2 + i];
+      f[ndm2 + i] = -u[ndm + i];
+      for (j = 0; j < ndm; ++j) {
+        f[ndm + i]  += rom * (Cr_[i + j * ndm] * u[ndm + j] + S_[i + j * ndm] * u[ndm2 + j]);
+        f[ndm2 + i] += rom * (Cr_[i + j * ndm] * u[ndm2 + j] - S_[i + j * ndm] * u[ndm + j]);
+      }
+    }
+    free(Cr_);
+    free(S_);
+  } else
   for (i = 0; i < ndm; ++i) {
     f[ndm + i] = u[ndm2 + i];
     f[ndm2 + i] = -u[ndm + i];
@@ -999,6 +1029,7 @@ ffhb(const iap_type *iap, const rap_type *rap, integer ndim, const doublereal *u
   for (i = 0; i < ndm; ++i) {
     f[-1 + ndim] = f[-1 + ndim] + uold[ndm2 + i] * (u[ndm + i] - uold[ndm + i]) - uold[ndm + i] * (u[ndm2 + i] - uold[ndm2 + i]);
   }
+
 
   return 0;
 } /* ffhb_ */
@@ -1067,6 +1098,22 @@ stpnhb(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *
       smat[ndm + i + (ndm + j) * (ndim*2)] = rom * global_scratch.dfu[j * ndm + i];
     }
   }
+  if (DelayFlag) {
+    /* characteristic matrix of the delay equation at i w, w=1/rom */
+    doublereal *Cr_, *S_;
+    if (auto_hopf_delay_ok(ndm, u, 1.0 / rom, &Cr_, &S_)) {
+      for (i = 0; i < ndm; ++i) {
+        for (j = 0; j < ndm; ++j) {
+          smat[i + j * (ndim*2)] = rom * Cr_[i + j * ndm];
+          smat[ndm + i + (ndm + j) * (ndim*2)] = rom * Cr_[i + j * ndm];
+          smat[i + (ndm + j) * (ndim*2)] = (i == j ? 1.0 : 0.0) + rom * S_[i + j * ndm];
+          smat[ndm + i + j * (ndim*2)] = -(i == j ? 1.0 : 0.0) - rom * S_[i + j * ndm];
+        }
+      }
+      free(Cr_);
+      free(S_);
+    }
+  }
   {
     integer tmp=(ndim*2);
     nlvc(ndm2, tmp, 2, smat, v);
@@ -1079,7 +1126,6 @@ stpnhb(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *
 
   u[ndim - 2] = rom;
   u[-1 + ndim] = par[icp[1]];
-
   free(smat);
   free(f);
   free(v);

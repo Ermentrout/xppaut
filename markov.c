@@ -6,7 +6,7 @@
 #include "ggets.h"
 #include "my_rhs.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include "init_conds.h"
 #include "adj2.h"
 #include "histogram.h"
@@ -72,7 +72,7 @@ MARKOV markov[MAXMARK];
 
 extern float **storage;
 
-int storind;
+extern int storind;
 float *my_mean[MAXODE],*my_variance[MAXODE];
 int stoch_len;
 

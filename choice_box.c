@@ -1,6 +1,6 @@
 #include "choice_box.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -50,7 +50,7 @@ CHOICE_BOX p;
  XSetFillStyle(display,gc,FillSolid);
   XSetForeground(display,gc,MyForeColor);
  
-  if(w==p.ok)XDrawString(display,w,gc,0,CURY_OFF,"Ok",2);
+  if(w==p.ok)XDrawString(display,w,gc,0,CURY_OFF,"OK",2);
   if(w==p.cancel)
 	XDrawString(display,w,gc,0,CURY_OFF,"Cancel",6);
    for(i=0;i<n;i++)
@@ -136,8 +136,9 @@ for(i=0;i<n;i++){
 
    ypos=height-2*DCURY;
   xpos=(width-12*DCURX)/2;
-  p.ok=make_window(base,xpos,ypos,2*DCURX,DCURY,2);
-  p.cancel=make_window(base,xpos+4*DCURX,ypos,6*DCURX,DCURY,2);
+  p.ok=make_button(base,xpos,ypos,2*DCURX,DCURY,2);
+  p.cancel=make_button(base,xpos+4*DCURX,ypos,6*DCURX,DCURY,2);
+  wm_register_close(base,p.cancel);
   p.base=base;
   
   p.n=n;
@@ -165,7 +166,7 @@ int choice_box_event_loop(p)
  
  XEvent ev;
 
- XNextEvent(display,&ev);
+ xpp_next_event(&ev);
  
  
   switch(ev.type){

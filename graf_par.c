@@ -16,7 +16,8 @@
 #include "graphics.h"
 #include "menu.h"
 #include "pop_list.h"
-#include <stdlib.h> 
+#include "stdfix.h"   
+
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -629,7 +630,7 @@ void test_rot()
  double theta=MyGraph->Theta,phi=MyGraph->Phi;
  redraw_cube(theta,phi);
  while(done==0){
-    XNextEvent(display,&ev);
+    xpp_next_event(&ev);
    if(ev.type==KeyPress){
       kp=get_key_press(&ev);
       switch(kp){
@@ -1098,11 +1099,9 @@ void new_curve()
   
  }  
 
-void create_ps()
+int ps_options()
 {
- /*char filename[256];*/
- char filename[XPP_MAX_NAME];
- static char *nn[]={"BW-0/Color-1","Land(0)/Port(1)","Axes fontsize","Font","Linewidth"};
+  static char *nn[]={"BW-0/Color-1","Land(0)/Port(1)","Axes fontsize","Font","Linewidth"};
  int status;
  char values[5][MAX_LEN_SBOX];
  sprintf(values[0],"%d",PS_Color);
@@ -1117,15 +1116,26 @@ void create_ps()
 	 PS_FONTSIZE=atoi(values[2]);
 	 PS_LW=atof(values[4]);
          sprintf(PS_FONT,"%s",values[3]);
-	 sprintf(filename,"%s.ps",this_file);
-	 ping();
- 
-	 if(!file_selector("Print postscript",filename,"*.ps"))return;
-	 if(ps_init(filename,PS_Color)){
+ }
+ return status;
+} 
+
+void create_ps()
+{
+ /*char filename[256];*/
+  char filename[XPP_MAX_NAME];
+  int status;
+  status=ps_options();
+  if(status==0) return;
+  /* the file name must be set before the selector shows it (it used to be set
+     just before the options were applied; left unset it starts as garbage) */
+  sprintf(filename,"%s.ps",this_file);
+  ping();
+  if(!file_selector("Print postscript",filename,"*.ps"))return;
+  if(ps_init(filename,PS_Color)){
 	   ps_restore(); 
 	   ping();
 	 }
- }
 }
 
 void padnum(char *s,int i,int m)

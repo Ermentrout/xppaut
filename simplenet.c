@@ -7,7 +7,12 @@
 #include "tabular.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+/* #include "stdfix.h" */
+void *malloc();
+void *free();
+int atoi();
+void exit();
+int abs();
 #include <string.h>
 
 /* 

@@ -61,4 +61,6 @@ void check_draw_button(XEvent ev);
 void set_active_windows();
 
 
+int destroy_graph_window(Window w);
+
 #endif

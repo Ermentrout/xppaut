@@ -1,4 +1,4 @@
-# Copyright (C) 1990-2016 Bard Ermentrout & Daniel Dougherty & Robert McDougal
+# Copyright (C) 1990-2026 Bard Ermentrout & Daniel Dougherty & Robert McDougal
 # Edited for Debian GNU/Linux.
 #BINDIR = /usr/X11R6/bin
 DESTDIR =
@@ -8,9 +8,9 @@ MANDIR = /usr/local/man/man1
 # End Debian Edit
 #################################
 #
-VERSION=8.0
-MAJORVER=8.0
-MINORVER=0
+VERSION=8.4
+MAJORVER=8.4
+MINORVER=2
 
 ODES=ode/*.ode ode/*.ani canonical/*.* tstauto/*.ode
 DOC=xpp_doc.pdf xpp_sum.pdf install.pdf tree.pdf 
@@ -20,6 +20,7 @@ HELP=help/*.html
 # Use Gnu compiler
 #CC= gcc
 # Use c99 to compile according to newer ISO C standards (IEEE Std 1003.1-2001)
+# may need to add -fcommon
 CC= gcc -std=c99 -pedantic -D_XOPEN_SOURCE=600 -Wall  
 #AUTLIBS=  -lsundials_cvode -lX11 -lm 
 #These are the 32bit compat libraries.
@@ -37,13 +38,20 @@ CC= gcc -std=c99 -pedantic -D_XOPEN_SOURCE=600 -Wall
 ##################################
 #CFLAGS=   -g -O -DAUTO -DCVODE_YES -DHAVEDLL -DMYSTR1=$(MAJORVER) -DMYSTR2=$(MINORVER)  -I/usr/X11R6/include
 #CFLAGS=   -g -O -m32 -DNON_UNIX_STDIO -DAUTO -DCVODE_YES  -DHAVEDLL -DMYSTR1=$(MAJORVER) -DMYSTR2=$(MINORVER)  -I/usr/X11R6/include
-#CFLAGS=   -g -O -m64 -DNOERRNO -DNON_UNIX_STDIO -DAUTO -DCVODE_YES  -DHAVEDLL -DMYSTR1=$(MAJORVER) -DMYSTR2=$(MINORVER)  -I/usr/include/X11
-
-CFLAGS= -g -pedantic -O2     -DNOERRNO -DNON_UNIX_STDIO -DAUTO -DCVODE_YES  -DHAVEDLL -DMYSTR1=$(MAJORVER) -DMYSTR2=$(MINORVER)  -I/opt/X11/include 
+#CFLAGS=   -g -O -m64 -DNOERRNO -DNON_UNIX_STDIO -DAUTO -DCVODE_YES  -DHAVEDLL DMYSTR1=$(MAJORVER) -DMYSTR2=$(MINORVER)  -I/usr/include/X11
+#  to create univeral mac app, lipo -create -output xppmac  xppx86 xpparm
+# for I86
+#  -target x86_64-apple-macos10.12  
+CFLAGS= -g -pedantic -O2   -DNOERRNO -DNON_UNIX_STDIO -DAUTO -DCVODE_YES  -DHAVEDLL -DMYSTR1=$(MAJORVER) -DMYSTR2=$(MINORVER)  -I/opt/X11/include
+# add this line for x86
+#-target x86_64-apple-macos10.12
 #LDFLAGS=  -m64 -L/usr/lib -L/usr/lib64
 #LDFLAGS=  -m32 -L/usr/X11R6/lib 
-LDFLAGS=  -L/usr/X11/lib 
-LIBS=  -lX11 -lm -ldl   
+#for i86 -target x86_64-apple-macos10.12    
+LDFLAGS=  -L/usr/X11/lib -fcommon 
+# add this line for x86
+# -target x86_64-apple-macos10.12  
+LIBS=  -lX11 -lm -ldl 
 # NOTE: Recent (RedHat 8) versions of GCC seem to no longer have
 # the integer errno, so compile with the -DNOERRNO option as well
 #
@@ -126,7 +134,7 @@ HEADERS = abort.h browse.h do_fit.h iterativ.h my_rhs.h shoot.h \
 	  axes2.h  diagram.h init_conds.h my_pars.h run_auto.h xpplim.h \
 	  band.h  dialog_box.h integrate.h my_ps.h  scrngif.h spgmr.h \
 	  arrayplot.h cv2.h  extra.h load_eqn.h newpars.h struct.h \
-	  array_print.h comline.h endfile.h llnltyps.h newhome.h storage.h 	
+	  array_print.h comline.h endfile.h llnltyps.h newhome.h storage.h surface.h dde_po.h xpp_script.h  	
 
 BITMAPS = aniwin.bitmap alert.bitmap bc.bitmap eqns.bitmap info.bitmap ic.bitmap pp.bitmap\
 	  array.bitmap browse.bitmap equilib.bitmap lines.bitmap txtview.bitmap\
@@ -145,11 +153,11 @@ SOURCES = abort.c  cabs.c  delay_handle.c graf_par.c my_ps.c  simplenet.c \
 	  autlib4.c cvdiag.c eispack.c llnlmath.c pow_di.c volterra2.c \
 	  autlib5.c cvode.c  extra.c  load_eqn.c pow_ii.c worker2.c \
 	  auto_nox.c cvspgmr.c fftn.c  lunch-new.c pp_shoot.c z_abs.c \
-	  auto_x11.c d_imag.c flags.c  main.c  r_lg10.c z_exp.c \
+	  auto_x11.c d_imag.c flags.c  main.c  r_lg10.c z_exp.c periodic_ic.c hopf_l1.c phase_red.c lyapunov.c \
 	  autpp.c  d_lg10.c form_ode.c many_pops.c read_dir.c z_log.c \
 	  axes2.c  d_sign.c gear.c  markov.c rubber.c \
 	  band.c  dae_fun.c ggets.c  menu.c  scrngif.c \
-	  browse.c del_stab.c gogoauto.c menudrive.c setubv2.c \
+	  browse.c del_stab.c gogoauto.c menudrive.c setubv2.c surface.c dde_po.c dde_po_xpp.c xpp_script.c \
 
 
 #
@@ -168,11 +176,11 @@ OBJECTS = abort.o  cabs.o  delay_handle.o graf_par.o my_ps.o  simplenet.o \
 	  autlib4.o cvdiag.o eispack.o llnlmath.o pow_di.o volterra2.o \
 	  autlib5.o cvode.o  extra.o  load_eqn.o pow_ii.o worker2.o \
 	  auto_nox.o cvspgmr.o fftn.o  lunch-new.o pp_shoot.o z_abs.o \
-	  auto_x11.o d_imag.o flags.o  main.o  r_lg10.o z_exp.o \
+	  auto_x11.o d_imag.o flags.o  main.o  r_lg10.o z_exp.o periodic_ic.o hopf_l1.o phase_red.o lyapunov.o \
 	  autpp.o  d_lg10.o form_ode.o many_pops.o read_dir.o z_log.o \
 	  axes2.o  d_sign.o gear.o  markov.o rubber.o \
 	  band.o  dae_fun.o ggets.o  menu.o  scrngif.o \
-	  browse.o del_stab.o gogoauto.o menudrive.o setubv2.o \
+	  browse.o del_stab.o del_spec.o gogoauto.o menudrive.o setubv2.o surface.o dde_po.o dde_po_xpp.o xpp_script.o\
 
 #If you are using sundials cvode libraries then you may comment out following above
 #	cvode.o  cvdense.o  dense.o  cvband.o \
@@ -197,14 +205,19 @@ xppaut: $(OBJECTS)
 ####  You have previously installed the sundials
 	 #$(CC) -DAUTO -o xppaut $(OBJECTS) $(AUTOOBJ) $(LDFLAGS) $(LIBS) $(AUTLIBS) ./libf2cm.a
 	 $(CC) -DAUTO -o xppaut $(OBJECTS) $(LDFLAGS) $(LIBS) 
+extras:
+	tar zcvf xppextra.tgz default.opt script_doc.html xpp_doc.tex batch.tex README.md ode/*.* tstauto/*.ode canonical/*.* xpp_doc.pdf xpp_sum.tex xpp_sum.pdf tree.tex tree.pdf help/*.html help/odes/*.ode
+
+srconly:
+	tar zcvf xppsrc$(VERSION).tgz *.c *.h *.bitmap Makefile
 tarfile:
 	tar zcvf xppaut$(VERSION).tgz $(SOURCES) $(HEADERS) $(BITMAPS) default.opt \
-	 xpp_doc.tex README Makefile.old Makefile Makefile.64 Makefile.nice  Makefile.lib Makefile.avi Makefile.old Makefile.w7b \
+	 xpp_doc.tex batch.tex README.md Makefile Makefile.avi Makefile.w7b \
 	ode/*.*  tstauto/*.ode cuda/README cuda/*.* canonical/*.* xpp_doc.pdf xpp_sum.tex xpp_sum.pdf  xpp_doc.tex tree.tex tree.pdf  \
 	xppaut.1 install*.html\
         help/*.html \
-	help/odes/*.ode help/odes/*.c install.pdf install.tex LICENSE HISTORY \
-	Makefile.s2x sbml2xpp.c *.xbm *.jar changes.txt \
+	help/odes/*.ode install.pdf install.tex LICENSE HISTORY \
+	sbml2xpp.c *.xbm *.jar changes.txt script_doc.html \
 	xppaut-stylesheet.css	xppaut-stylesheet2.css animsvgwww
 
 
@@ -226,7 +239,7 @@ install: xppaut
 	install -m 755 xppaut $(DESTDIR)$(BINDIR)
 	cp -r ode* $(DESTDIR)$(DOCDIR)/examples
 	cp -r help/* $(DESTDIR)$(DOCDIR)/html
-	cp README *.pdf $(DESTDIR)$(DOCDIR)
+	cp README.md *.pdf $(DESTDIR)$(DOCDIR)
 	cp *.xbm $(DESTDIR)$(DOCDIR)/xbm 
 	cp xppaut.1 $(DESTDIR)$(MANDIR)
 # End Debian Ed
@@ -270,3 +283,12 @@ xppdoc:
 	 dvips -o install.ps  install
 	  ps2pdf install.ps
          
+
+# build the PDF documentation (needs LaTeX and the figure DutchBoy.png)
+docs:
+	pdflatex xpp_doc && pdflatex xpp_doc && pdflatex xpp_doc
+	pdflatex tree && pdflatex tree
+	pdflatex xpp_sum && pdflatex xpp_sum
+	pdflatex install && pdflatex install
+
+.PHONY: docs

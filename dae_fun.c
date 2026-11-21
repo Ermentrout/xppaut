@@ -4,7 +4,7 @@
 #include "parserslow.h"
 
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>

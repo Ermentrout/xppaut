@@ -1,5 +1,6 @@
 
 #include "edit_rhs.h"
+int get_key_press_nr();
 #include "init_conds.h"
 #include "browse.h"
 #include "auto_x11.h"
@@ -9,7 +10,7 @@
 #include "pop_list.h"
 #include "parserslow.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -153,7 +154,7 @@ int pos,col;
 {
  int i,flag;
 
- if(w==sb->ok){XDrawString(display,w,gc,0,CURY_OFF,"Ok",2);return;}
+ if(w==sb->ok){XDrawString(display,w,gc,0,CURY_OFF,"OK",2);return;}
  if(w==sb->cancel){XDrawString(display,w,gc,0,CURY_OFF,"Cancel",6);
 		   return; 
                  }
@@ -212,7 +213,7 @@ int e_box_event_loop(sb,pos,col)
  char *s;
  s=sb->value[ihot];
   
- XNextEvent(display,&ev);
+ xpp_next_event(&ev);
  switch(ev.type){
  	case ConfigureNotify:
 	case Expose:
@@ -251,7 +252,7 @@ int e_box_event_loop(sb,pos,col)
 	break;
 	
 	case KeyPress:
-	ch=get_key_press(&ev);
+	ch=get_key_press_nr(&ev);
 	edit_window(w,pos,s,col,&done,ch);
        if(done!=0){
 	           if(done==DONE_ALL){status=DONE_ALL;break;}
@@ -303,9 +304,10 @@ EDIT_BOX *sb;
   
  ypos=height-2*DCURY;
   xpos=(width-19*DCURX)/2;
-  (sb->ok)=make_window(base,xpos,ypos,2*DCURX,DCURY,1);
-  (sb->cancel)=make_window(base,xpos+4*DCURX,ypos,6*DCURX,DCURY,1);
-  (sb->reset)=make_window(base,xpos+12*DCURX,ypos,5*DCURX,DCURY,1);
+  (sb->ok)=make_button(base,xpos,ypos,2*DCURX,DCURY,1);
+  (sb->cancel)=make_button(base,xpos+4*DCURX,ypos,6*DCURX,DCURY,1);
+  wm_register_close(base,sb->cancel);
+  (sb->reset)=make_button(base,xpos+12*DCURX,ypos,5*DCURX,DCURY,1);
   XRaiseWindow(display,base);
  }
    

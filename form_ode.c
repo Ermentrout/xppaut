@@ -21,7 +21,7 @@
 #include "newpars.h"
 
 
-#include <stdlib.h>
+#include "stdfix.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -2642,14 +2642,15 @@ void read_a_line(fp,s)
      nn=strlen(temp)+1;
      if((save_eqn[NLINES]=(char *)malloc(nn))==NULL)exit(0);
      strncpy(save_eqn[NLINES++],temp,nn);
-     /* plintf("inc NLINES in readaline %s \n",temp); */
+     /* printf("inc NLINES in readaline %s \n",temp); */
      /* plintf(" NLINES = %d \n",NLINES); */
     n=strlen(temp);
     for(i=n-1;i>=0;i--){
-
+      /*      printf("i=%d c=%d\n",i,(int)temp[i]); */
       if(temp[i]=='\\'){
 	ok=1;
 	ihat=i;
+	/* printf("backslash!\n");*/
 
       }
     }

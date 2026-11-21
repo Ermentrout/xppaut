@@ -11,7 +11,7 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include "iterativ.h"
 #include "spgmr.h"
 #include "llnltyps.h"

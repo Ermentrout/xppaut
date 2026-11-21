@@ -4,7 +4,7 @@
 #include "menudrive.h"
 #include "pop_list.h"
 #include "graphics.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -33,6 +33,7 @@
 #include "auto_x11.h"
 #include "integrate.h"
 #include "arrayplot.h"
+#include "surface.h"
 #include "eig_list.h"
 
 
@@ -64,6 +65,7 @@ typedef struct {
 
 MARKINFO markinfo={2,0,1,0,1,1.0};
 
+int manual_expose=0;
 extern char *info_message;
 extern BROWSER my_browser;
 extern Atom deleteWindowAtom;
@@ -71,7 +73,7 @@ LABEL lb[MAXLAB];
 GROB grob[MAXGROB];
 GRAPH graph[MAXPOP];
 CURVE frz[MAXFRZ];
-NCLINE nclines[MAXNCLINE];
+extern NCLINE nclines[MAXNCLINE];
 GRAPH *MyGraph;
 extern int help_menu,screen;
 extern int SCALEY,CURY_OFF,CURY_OFFs,DCURYs,DCURXs,DCURYb;
@@ -150,10 +152,13 @@ int select_table()
 
 }
 
+extern double DELAY,DELTA_T;
+
 void get_intern_set()
 {
   char *n[MAX_INTERN_SET],key[MAX_INTERN_SET],ch;
   int i,j;
+  double old_delay,old_dt;
   int count=Nintern_set;
   Window temp=main_win;
   if(count==0)return;
@@ -172,9 +177,16 @@ void get_intern_set()
     return;
   }
   /* plintf(" Got set %d \n",j); */
+  old_delay=DELAY;
+  old_dt=DELTA_T;
   get_graph();
   extract_internset(j);
-  chk_delay();
+  /* Rebuilding the delay buffer also throws away the last solution, so do it
+     only when the maximal delay or the step size really changed. */
+  if(DELAY!=old_delay||DELTA_T!=old_dt)chk_delay();
+  /* Same as after changing parameters by hand: recompute derived parameters,
+     convolution kernels and tabulated functions that depend on them. */
+  redo_stuff();
   redraw_params();
   redraw_ics();
   reset_graph();
@@ -888,17 +900,23 @@ int nc;
 
 void destroy_a_pop()
  {
-  int i;
   if(draw_win==graph[0].w)
   {
-   respond_box("Okay","Can't destroy big window!");
-   /*respond_box(main_win,0,0,"Okay","Can't destroy big window!");*/
+   respond_box("OK","Can't destroy big window!");
    return;
   }
+  destroy_graph_window(draw_win);
+ }
+
+/* destroy a secondary graph window; used by "Makewindow/Destroy" and
+   by the window-manager close tab.  Returns 1 if w was such a window. */
+int destroy_graph_window(Window w)
+ {
+  int i;
   for(i=1;i<MAXPOP;i++)
-   if(graph[i].w==draw_win)break;
-  if(i>=MAXPOP)return;
-   select_window(graph[0].w);
+   if(graph[i].w==w)break;
+  if(i>=MAXPOP)return 0;
+  if(draw_win==w)select_window(graph[0].w);
   graph[i].Use=0;
   destroy_label(graph[i].w);
   destroy_grob(graph[i].w);
@@ -906,6 +924,7 @@ void destroy_a_pop()
   XDestroySubwindows(display,graph[i].w);
   XDestroyWindow(display,graph[i].w);
   num_pops--;
+  return 1;
   }
 
 
@@ -1075,11 +1094,14 @@ void do_expose(ev)
   int i;
   int cp=current_pop;
   Window temp;
+  
   temp=draw_win;
+  if(ev.type==Expose||ev.type==MapNotify)draw_button_hover(ev.xany.window);
   top_button_draw(ev.xany.window);
-  expose_aplot(ev.xany.window);
-  redraw_txtview(ev.xany.window);
-  ani_expose(ev.xany.window);
+  expose_aplot(ev.xany.window); 
+  surface_expose(ev.xany.window);
+  /* redraw_txtview(ev.xany.window);  */
+  ani_expose(ev.xany.window); 
   expose_my_browser(ev);
   /* draw_info_pop(ev.xany.window); */
   RedrawMessageBox(ev.xany.window);
@@ -1097,6 +1119,7 @@ void do_expose(ev)
    return;
     }
     */
+  if(manual_expose==0){
   GrCol();
 
      for(i=0;i<MAXPOP;i++){
@@ -1128,7 +1151,8 @@ void do_expose(ev)
 		draw_freeze(graph[i].w);
 		if(graph[i].Nullrestore)restore_nullclines();
 	}
-   }
+     }
+  } /* namual expose */  
    draw_win=temp;
    MyGraph=&graph[cp];
    current_pop=cp;
@@ -1136,6 +1160,7 @@ void do_expose(ev)
    get_draw_area();
    BaseCol();
    SmallBase();
+   draw_button_bevel(ev.xany.window);
  }
 
 
@@ -1179,14 +1204,15 @@ void create_a_pop()
   if(graph[i].Use==0)break;
   if(i>=MAXPOP)
   {
-   /*respond_box(main_win,0,0,"Okay","Too many windows!");*/
-   respond_box("Okay","Too many windows!");
+   /*respond_box(main_win,0,0,"OK","Too many windows!");*/
+   respond_box("OK","Too many windows!");
    return;
   }
 index=i;
 
 
 graph[index].w=XCreateSimpleWindow(display,RootWindow(display,screen),0,0,MINI_W,MINI_H,2,GrFore,GrBack);
+wm_forget_close(graph[index].w);
  graph[index].w_info=make_window(graph[index].w,10,0,40*DCURXs,DCURYs,0);
   XSetWindowBackground(display,graph[i].w,MyDrawWinColor);
   

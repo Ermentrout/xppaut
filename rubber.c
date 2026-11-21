@@ -1,4 +1,4 @@
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
@@ -7,6 +7,7 @@
 #define RUBBOX 0
 #define RUBLINE 1
 #include "rubber.h"
+#include "xpp_script.h"
 #include "ggets.h"
 #include "many_pops.h"
 
@@ -28,6 +29,11 @@ int rubber(x1,y1,x2,y2,w,f)
   int dragx=0,dragy=0;
     int oldx=0,oldy=0;
   int state=0;
+  if(script_is_active()){            /* a script can supply the drag (xpp_script.c) */
+    int r=script_mouse_drag(x1,y1,x2,y2);
+    if(r==1){rec_drag(*x1,*y1,*x2,*y2);return(1);}
+    if(r<0)return(0);
+  }
   xor_flag=1;
   XFlush(display);
   chk_xor();
@@ -99,7 +105,9 @@ int rubber(x1,y1,x2,y2,w,f)
 	*y1=dragy;
 	*x2=oldx;
 	*y2=oldy;
+	rec_drag(dragx,dragy,oldx,oldy);   /* File -> Record script */
         }
+        else rec_esc();
 
   XSelectInput(display,w,KeyPressMask|ButtonPressMask|ExposureMask|
 ButtonReleaseMask|ButtonMotionMask);

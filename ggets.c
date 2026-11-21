@@ -1,6 +1,8 @@
+#include "xpp_script.h"
+void xpp_next_event(XEvent *ev);
 #include "ggets.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include <X11/Xlib.h>
@@ -263,6 +265,7 @@ int get_key_press(ev)
       XComposeStatus comp;
        KeySym ks;
 
+       rec_key_event(ev);       /* File -> Record script */
        XLookupString((XKeyEvent *)ev,buf,maxlen,&ks,&comp);
        /*       printf(" ks=%d buf[0]=%d char=%c \n",ks,(int)buf[0],buf[0]); */
        
@@ -350,6 +353,11 @@ int get_mouse_xy(x,y,w)
   XEvent ev;
   *x=0;
   *y=0;
+  if(script_is_active()){            /* a script can supply the click (xpp_script.c) */
+    int r=script_mouse_point(x,y);
+    if(r==1){rec_click(*x,*y);return(1);}
+    if(r<0)return(0);
+  }
   while(no_but)
   {
    XNextEvent(display,&ev);
@@ -368,6 +376,7 @@ int get_mouse_xy(x,y,w)
           no_but=0;
           *x=ev.xbutton.x;
           *y=ev.xbutton.y;
+          rec_click(*x,*y);       /* File -> Record script */
           return(1);
           
    }
@@ -680,7 +689,22 @@ void edit_command_string(ev,name,value,done,pos,col)
   }
 
 
+int new_string_x(char *name,char *value);
+/* the command-line prompt; the real work is in new_string_x() */
 int new_string(name,value)
+char *name;
+char *value;
+{
+ char init[256];
+ int h,r;
+ strncpy(init,value,255);init[255]=0;
+ h=rec_text_begin(init);
+ r=new_string_x(name,value);
+ rec_text_end(h,r==1||r==2,name,value);
+ return(r);
+}
+
+int new_string_x(name,value)
 char *name;
 char *value;
 {
@@ -688,13 +712,18 @@ char *value;
  int done=0;
  int pos=strlen(value);
  int col=(pos+strlen(name))*DCURX;
+ int sr;
  
  XEvent ev;
+ /* scripted answer ("ans text") */
+ sr=script_take_text(name,value,80);
+ if(sr==1)return(1);
+ if(sr==-1)return(0);
  strcpy(old_value,value);
  clr_command();
  display_command(name,value,pos,0);
  while(done==0){
-	XNextEvent(display,&ev);
+	xpp_next_event(&ev);
 	edit_command_string(ev,name,value,&done,&pos,&col);
  	} 
 	clr_command();

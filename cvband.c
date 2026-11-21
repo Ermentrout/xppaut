@@ -11,7 +11,7 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include "cvband.h"
 #include "cvode.h"
 #include "band.h"

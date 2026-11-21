@@ -28,4 +28,9 @@ int test_sign(double old, double new);
 int plot_args(double *coef, double *delay, int n, int m, int npts, double almax, double wmax);
 
 
+double delay_char_coef(double *x, int n, double eps, double **coef_out);
+
+/* del_spec.c */
+int delay_spectrum(double *coef, double *delay, int n, int m, int nev, double *ev, int *nunstab, int *nrefined, int nmax);
+
 #endif

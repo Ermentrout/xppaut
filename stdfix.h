@@ -1,0 +1,10 @@
+void * malloc();
+void * calloc();
+int abs();
+int atoi();
+void free();
+void exit();
+void *realloc();
+int rand();
+char *getenv();
+int system();

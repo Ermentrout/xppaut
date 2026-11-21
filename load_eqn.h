@@ -182,7 +182,10 @@ typedef struct {
   int COLORIZE;
   int COLORLO;
   int COLORHI;
-
+  int HISTCOL2;
+  int HISTLO2;
+  int HISTHI2;
+  int HISTBINS2;
 
 
 

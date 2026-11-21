@@ -4,7 +4,7 @@
 #include "graphics.h"
 #include "color.h"
 
-#include <stdlib.h> 
+/* #include "stdfix.h"  */
 #include <stdio.h>
 #include <string.h>
 #define MAXPSLINE 100

@@ -2,7 +2,7 @@
 #include "dae_fun.h"
 #include "main.h"
 #include "extra.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include "xpplim.h"
 #include "shoot.h"
 #include "getvar.h"
@@ -26,6 +26,7 @@ double evaluate(/* int *ar */);
 	return(0);
 }
 */
+
 int main(argc,argv)
      char **argv;
      int argc;
@@ -149,6 +150,20 @@ int neq;
 }
 
 
+/***    
+    This is the order in which quantities are evaluated
+    
+1.  Fixed variables
+2.  network stuff 
+3.  DAEs
+4.  External C code
+5.  RH sides of the ODEs
+
+For Auxilliary stuff
+
+external C code is not evaluated but fixed are
+
+***/
 
 
 

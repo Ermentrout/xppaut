@@ -32,6 +32,7 @@ float *get_data_col(int c);
 int gettimenow(void);
 void waitasec(int msec);
 int get_maxrow_browser(void);
+int get_browser_rows(void);
 void write_mybrowser_data(FILE *fp);
 void write_browser_data(FILE *fp, BROWSER *b);
 int check_for_stor(float **data);

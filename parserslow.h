@@ -55,14 +55,14 @@
 #define ENDDELSHFT 986
 #define DELSHFTSYM 65
 #define ENDISHIFT 985
-#define SETSYM  92
+#define SETSYM  72
 #define ENDSET 981
 #define INDX 68
 #define INDXVAR 984
 
 /*#define STDSYM 95
 */
-#define STDSYM 95
+#define STDSYM 96
 
 #define INDXCOM 922
 #define STARTINDX 70
@@ -153,6 +153,9 @@ double bessel_y(double x, double y);
 double bessi(double nn, double x);
 double bessi0(double x);
 double bessi1(double x);
+double bessis(double nn, double x);
+double bessis0(double x);
+double bessis1(double x);
 char *com_name(int com);
 double do_shift(double shift, double variable);
 double do_ishift(double shift, double variable);

@@ -9,7 +9,7 @@
 #define NUM_MENU 2
 #define MAIN_ENTRIES 20
 /* CLONE */
-#define FILE_ENTRIES 16
+#define FILE_ENTRIES 18
 #define NUM_ENTRIES 18
 char *main_menu[]={
  "XPP","Initialconds","Continue","Nullcline",
@@ -28,12 +28,12 @@ char *num_menu[]={"NUMERICS","Total","Start time","tRansient",
 char *fileon_menu[]={
 "FILE","Prt src","Write set","Read set",
 "Auto","Calculator","Edit","Save info",
-"Bell off","Help","Quit","Transpose","tIps","Get par set","cLone",".Xpprc","tUtorial"}; 
+"Bell off","Help","Quit","Transpose","tIps","Get par set","cLone",".Xpprc","tUtorial","Do script","recOrd script"}; 
 
 char *fileoff_menu[]={
 "FILE","Prt src","Write set","Read set",
 "Auto","Calculator","Edit","Save info",
-"Bell on","Help","Quit","Transpose","tIps","Get par set","cLone",".Xpprc","tUtorial"}; 
+"Bell on","Help","Quit","Transpose","tIps","Get par set","cLone",".Xpprc","tUtorial","Do script","recOrd script"}; 
 
 /* end CLONE change */
 typedef struct {
@@ -89,7 +89,9 @@ char *file_hint[]={
 "Set predefined parameters",
 "Clone the ode file",
 "Edit your .xpprc preferences file",
-"Run a quick tutorial on XPPAUT"
+"Run a quick tutorial on XPPAUT",
+"Run a script of commands (an .xps file)",
+"Record what you do as a script (.xps file); again to stop"
 };
 
 
@@ -144,7 +146,8 @@ char *ic_hint[]={
 "Read init data from file",
 "Type in function of 't' for t^th equation",
 "Repeated ICs using mouse ","Guess new values for DAE",
-"Integrate backwards"
+"Integrate backwards",
+"Find the period of the current orbit; start at the peak of the x-axis variable and set total to the period"
 };
 
 char *wind_hint[]={
@@ -224,7 +227,7 @@ char *stoch_hint[]={
 "Power spectrum/phase",
 "Fit data from file to trajectory",
 "Get mean/variance of single trajectory",
-"Compute maximal Liapunov exponent",
+"Compute Lyapunov exponents (QR method)",
 "Compute spike-time autocorrel",
 "Compute correlations - subtracting mean",
 "Compute windowed spectral density",
@@ -240,12 +243,16 @@ char *bvp_hint[]={
 }; 
 
 char *adj_hint[]={
-"Compute a new adjoint function",
+"Adjoint and isostable quantities of the stable cycle through the initial conditions, with period Total",
 "Compute averaging interaction function",
-"Load computed adjoint",
-"Load computed orbit",
+"Load computed adjoint Z",
+"Load the isostable response I (the gradient of the amplitude coordinate)",
+"Load the Floquet eigenfunction rho of the slowest decaying direction",
+"Load the correction B to the phase response away from the orbit",
+"Load the orbit on the grid of the adjoint",
 "Load computed interaction function",
-"Adjoint numerical parameters",
+"Second-order interaction function H2 of two coupled cells (uses the coupling of Make H; needs I, rho and B)",
+"Grid steps for the adjoint",
 "Range over stuff to computte many adjoints"
 };
 

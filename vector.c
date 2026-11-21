@@ -13,7 +13,7 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include "vector.h"
 #include "llnltyps.h"
 #include "llnlmath.h" 

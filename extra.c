@@ -4,7 +4,7 @@
 #include "ggets.h"
 #include "read_dir.h"
 #include "parserslow.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 /* this is a way to communicate XPP with other stuff
 

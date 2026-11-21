@@ -1,6 +1,6 @@
 #include "derived.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include "ggets.h"

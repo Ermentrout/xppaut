@@ -1,8 +1,10 @@
 #include "dialog_box.h"
+#include "xpp_script.h"
+#include "pop_list.h"
 
 #include "many_pops.h"
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -42,7 +44,22 @@ extern int xor_flag,DCURY,DCURX,CURY_OFF,CURS_X,CURS_Y;
 double atof();
  Window make_window();
 
+int get_dialog_x(char *wname,char *name,char *value,char *ok,char *cancel,int max);
+/* the text dialog; the real work is in get_dialog_x() */
 int get_dialog(wname,name,value,ok,cancel,max)
+char *wname,*name,*value,*ok,*cancel;
+int max;
+{
+ int h,st;
+ char *init=strdup(value);
+ h=rec_text_begin(init);
+ st=get_dialog_x(wname,name,value,ok,cancel,max);
+ rec_text_end(h,st==ALL_DONE||st==DONE_WITH_THIS,name,value);
+ free(init);
+ return(st);
+}
+
+int get_dialog_x(wname,name,value,ok,cancel,max)
 char *wname,*name,*value,*ok,*cancel;
 int max;
 {
@@ -54,10 +71,15 @@ int max;
 
  int status;
   XTextProperty winname;
+  int sr;
 
  
 
  DIALOG d;
+ /* scripted answer ("ans text") */
+ sr=script_take_text(name,value,max+1);
+ if(sr==1)return(ALL_DONE);
+ if(sr==-1)return(FORGET_ALL);
  strcpy(d.mes_s,name);
  strcpy(d.input_s,value);
  strcpy(d.ok_s,ok);
@@ -73,12 +95,16 @@ int max;
  
  XSetWMProperties(display,d.base,&winname,NULL,NULL,0,NULL,NULL,&class_hints);
  
+ wm_accept_close(d.base);
  d.mes=XCreateSimpleWindow(display,d.base,5,5,lm,DCURY+8,1,MyBackColor,MyBackColor);
  d.input=XCreateSimpleWindow(display,d.base,10+lm,5,lv,DCURY+8,1,MyBackColor,MyBackColor);
  d.ok=XCreateSimpleWindow(display,d.base,5,10+DCURY,lo+4,DCURY+8,1,MyForeColor,MyBackColor);
  d.cancel=XCreateSimpleWindow(display,d.base,
 	5+lo+10,10+DCURY,lc+4,DCURY+8,1,MyForeColor,MyBackColor);
  
+	wm_register_close(d.base,d.cancel);
+	wm_register_button(d.ok,lo+4,DCURY+8);
+	wm_register_button(d.cancel,lc+4,DCURY+8);
 	XSelectInput(display,d.base,EV_MASK);
 	XSelectInput(display,d.input,EV_MASK);
 	XSelectInput(display,d.mes,EV_MASK);
@@ -122,7 +148,7 @@ DIALOG *d;
  int ch;
  XEvent ev;
 
- XNextEvent(display,&ev);
+ xpp_next_event(&ev);
  
   switch(ev.type){
 	case ConfigureNotify:
@@ -201,7 +227,7 @@ double *value;
  int status;
  sprintf(tvalue,"%.16g",*value);
  
- status=get_dialog(name,name,tvalue,"Ok","Cancel",30);
+ status=get_dialog(name,name,tvalue,"OK","Cancel",30);
  if(status==FORGET_ALL||strlen(tvalue)==0)return;
  if(tvalue[0]=='%')
   {
@@ -219,7 +245,7 @@ int *value;
  char tvalue[100];
  int status;
  sprintf(tvalue,"%d",*value);
- status=get_dialog(name,name,tvalue,"Ok","Cancel",30);
+ status=get_dialog(name,name,tvalue,"OK","Cancel",30);
  if(status==FORGET_ALL||strlen(tvalue)==0)return;
  *value=atoi(tvalue);
  }

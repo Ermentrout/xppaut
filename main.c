@@ -1,3 +1,4 @@
+#include "xpp_script.h"
 #include "main.h"
 
 #include "aniparse.h"
@@ -21,6 +22,7 @@
 #include "form_ode.h"
 #include "pop_list.h"
 #include "arrayplot.h"
+#include "surface.h"
 #include "menu.h"
 #include "userbut.h"
 #include "color.h"
@@ -37,13 +39,13 @@
 #include "lunch-new.h"
 
 #include "calc.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 
 
 
 
 /*
-    Copyright (C) 2002-2015  Bard Ermentrout & Daniel Dougherty
+    Copyright (C) 2002-2017  Bard Ermentrout & Daniel Dougherty
     
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -111,22 +113,25 @@ extern int ani_grab_flag;
 
 float xppvermaj,xppvermin;
 
+extern int manual_expose;
+extern int NCBatch,DFBatch;
 /*extern char this_file[100];*/
 extern char this_file[XPP_MAX_NAME];
 extern int METHOD,storind;
 extern int (*rhs)();
+extern int SuppressOut;
 extern XFontStruct *symfonts[5],*romfonts[5];
 extern int avsymfonts[5],avromfonts[5];
 extern int RunImmediately;
 int Xup,TipsFlag=1;
 Atom deleteWindowAtom=0;
-int XPPBatch=0,batch_range=0;
+int XPPBatch=0,batch_range=0,BatchEquil=-1;
 char batchout[256];
 char UserOUTFILE[256];
 XKeyEvent createKeyEvent(Window w,Window wr,int p,int kc,int m);
 void scripty();
 int my_rhs(); 
-
+extern int xorfix;
  int DisplayHeight,DisplayWidth;
 int TrueColorFlag;
 char big_font_name[100],small_font_name[100];
@@ -144,7 +149,7 @@ Window draw_win;
 Window make_input_strip();
 Window main_win;
 Window command_pop,info_pop;
-GC gc, gc_graph,small_gc, font_gc;
+GC gc, gc_graph,small_gc, font_gc,mygc;
 extern int help_menu,current_pop;
 unsigned int Black,White;
 char UserBlack[8];
@@ -199,6 +204,13 @@ int DoTutorial=0;
 OptionsSet notAlreadySet;
 
 XFontStruct *big_font,*small_font;
+void draw_many_lines();
+void set_colorization_stuff();
+void silent_equilibria();
+void silent_dfields();
+void silent_nullclines();
+
+
 
  int popped=0;
 
@@ -212,7 +224,6 @@ int argc;
   char myfile[XPP_MAX_NAME];
 /*  char *win_name; */
   char pptitle[80];
-  
   /*Track which options have not been set already*/
   notAlreadySet.BIG_FONT_NAME=1;
   notAlreadySet.SMALL_FONT_NAME=1;
@@ -353,6 +364,10 @@ int argc;
   notAlreadySet.HISTLO=1;
   notAlreadySet.HISTHI=1;
   notAlreadySet.HISTBINS=1;
+   notAlreadySet.HISTCOL2=1;
+  notAlreadySet.HISTLO2=1;
+  notAlreadySet.HISTHI2=1;
+  notAlreadySet.HISTBINS2=1;
   notAlreadySet.SPECCOL=1;
   notAlreadySet.SPECCOL2=1;
   notAlreadySet.SPECWIDTH=1;
@@ -372,6 +387,7 @@ int argc;
   /*
   sprintf(myfile,"lecar.ode");
   */
+  
   get_directory(myfile);
   
   SCALEX=640;
@@ -479,6 +495,7 @@ int argc;
   auto_load_dll();
   
 if(XPPBatch){
+      if(script_requested())fprintf(stderr,"-script needs the GUI and is ignored with -silent\n");
       MakeColormap();
     init_browser();
     init_all_graph();
@@ -489,10 +506,11 @@ if(XPPBatch){
      if_needed_load_ext_options();
      set_extra_graphs();
      set_colorization_stuff();
-
-    batch_integrate();
-    silent_nullclines();
-    silent_dfields();
+     /* if(!SuppressOut) */
+       batch_integrate();
+       if(NCBatch>0)silent_nullclines();
+       if(DFBatch>0)silent_dfields();
+    silent_equilibria();
     exit(0);
   }
 
@@ -973,16 +991,22 @@ void xpp_events(XEvent report,int min_wid,int min_hgt)
 /*  put_command("Command:");  */
  
    do_array_plot_events(report);
+   do_surface_events(report);
    txt_view_events(report);
    do_ani_events(report);
    top_button_events(report);
  switch(report.type){
- /* case ClientMessage:
-	  if(report.xclient.data.l[0]==deleteWindowAtom){
-        
-	  break;
-	  }
-	  break; */
+ case ClientMessage:
+   /* the window manager's close tab.  Windows with a Close/Cancel button
+      were already turned into a click on that button by xpp_next_event */
+   if(is_wm_delete(&report)){
+     if(report.xclient.window==main_win){
+       if(yes_no_box())bye_bye();
+     }
+     else
+       destroy_graph_window(report.xclient.window);
+   }
+   break;
  
  case ConfigureNotify: /* this needs to be fixed!!! */
    /*    printf("CN %ld \n",report.xany.window); */
@@ -1011,7 +1035,6 @@ void xpp_events(XEvent report,int min_wid,int min_hgt)
   break;
  case Expose:
  case MapNotify:
-   /*  printf("E %ld \n",report.xany.window); */
 	if(report.xany.window==command_pop)put_command("Command:");
      do_expose(report);
 
@@ -1060,7 +1083,6 @@ void xpp_events(XEvent report,int min_wid,int min_hgt)
    do_motion_events(report);
    break;
  case ButtonRelease:
-
     slide_release(report.xbutton.window);
 
     break;
@@ -1099,10 +1121,13 @@ unsigned int min_wid,min_hgt;
     run_the_commands(4);
     RunImmediately=0;
   }
+script_start();
 while(1)
 {
 /*  put_command("Command:");  */
- XNextEvent(display,&report);
+ script_set_top(1);
+ xpp_next_event(&report);
+ script_set_top(0);
  xpp_events(report,min_wid,min_hgt);
  } /* end while */
 }
@@ -1111,6 +1136,7 @@ while(1)
 void bye_bye()
 {
    int i;
+   script_record_stop();
    yes_reset_auto();
    XUnloadFont(display,big_font->fid);
    XUnloadFont(display,small_font->fid);
@@ -1133,11 +1159,13 @@ void clr_scrn()
 
 void redraw_all()
 {
+  if(manual_expose==0){
     redraw_dfield();
   restore(0,my_browser.maxrow);
   draw_label(draw_win);
   draw_freeze(draw_win);
   restore_on();
+  }
 }
 
 
@@ -1252,7 +1280,8 @@ void commander(ch)
 		case '3': get_3d_par();
 			 break;
 		case 'y':
-		  /* scripty();  */
+		  /* test_matrix_stuff(); */
+		     draw_many_lines();
 		  break;
 
 
@@ -1343,6 +1372,12 @@ void commander(ch)
 	 case 'u':  
 	    do_tutorial();
 	    break;  
+	 case 'd':
+	    script_run_from_menu();
+	    break;
+	 case 'o':
+	    script_record_from_menu();
+	    break;
                 } /* end file switch  */
 	        help();
             } /*  end file case   */ break;
@@ -1421,6 +1456,7 @@ XKeyEvent createKeyEvent(Window win,
 /*   Remove after debugging is done */   
  /* XSynchronize(display,1); */
  screen=DefaultScreen(display);
+ install_xpp_error_handler();
  if (!deleteWindowAtom) {
 	deleteWindowAtom = XInternAtom(display,"WM_DELETE_WINDOW", 0);
     }
@@ -1512,6 +1548,12 @@ void top_button_cross(Window w,int b)
       return;
     }
 }
+Window top_button_window(int i)
+{
+  if(i<0||i>=6)return 0;
+  return TopButton[i];
+}
+
 void top_button_press(Window w)
 {
   if(w==TopButton[0]){
@@ -1535,6 +1577,7 @@ void top_button_press(Window w)
 
   }
   if(w==TopButton[5]){
+    rec_command("browser open");     /* File -> Record script */
     make_new_browser();
 
   }
@@ -1585,17 +1628,17 @@ GC *gc;
 {
  unsigned int valuemask=0;
  XGCValues values;
- /* unsigned int lw=6;
+ unsigned int lw=6;
   int ls=LineOnOffDash;
  int cs=CapRound;
  int js=JoinRound;
  int dash_off=0;
  static char dash[]={12,24};
- int ll=2; */
+ int ll=2; 
  *gc=XCreateGC(display,main_win,valuemask,&values);
  XSetForeground(display,*gc,MyForeColor);
-/* XSetLineAttributes(display,*gc,lw,ls,cs,js);
- XSetDashes(display,*gc,dash_off,dash,ll); */
+ /* XSetLineAttributes(display,*gc,lw,ls,cs,js);
+    XSetDashes(display,*gc,dash_off,dash,ll);  */
 }
 
 void load_fonts()
@@ -1743,7 +1786,7 @@ int getxcolors(win_info, colors)
  plintf("%d entries in colormap\n", ncolors);
 
   *colors = (XColor *) malloc (sizeof(XColor) * ncolors);
-
+  xorfix=0;
 
   if (win_info->visual->class == DirectColor) {
     int red, green, blue, red1, green1, blue1;

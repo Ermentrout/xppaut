@@ -38,7 +38,7 @@
 #include "my_svg.h"
 #include "numerics.h"
 #include "volterra2.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include "calc.h"
 #include "aniparse.h"
 #include "pop_list.h"
@@ -78,6 +78,22 @@ NOTE: except for the structure MyGraph, it is "x-free" so it
 extern GRAPH *MyGraph;
 #include "menudrive.h"
 #include "arrayplot.h"
+
+#include <time.h>
+/* true if at least ~20 ms of wall-clock time has passed since the last
+   time it returned true */
+static int xpp_poll_due(void)
+{
+  static struct timespec last={0,0};
+  struct timespec now;
+  double dt;
+  clock_gettime(CLOCK_MONOTONIC,&now);
+  dt=(now.tv_sec-last.tv_sec)+1e-9*(now.tv_nsec-last.tv_nsec);
+  if(dt<0.02)return 0;
+  last=now;
+  return 1;
+}
+
 #define MSWTCH(u,v) memcpy((void *)(u),(void *)(v),xpv.node*sizeof(double))
 
 #define READEM 1
@@ -115,12 +131,13 @@ extern int queryics;
 extern int aplot_range;
 extern int Nintern_2_use;
 extern int AdjRange;
-
+extern int BatchEquil;
 extern Window draw_win;
 extern char this_internset[XPP_MAX_NAME];
 
 int MakePlotFlag=0;
 
+int OnTheFly=1;
 extern FILE *svgfile;
 
 extern OptionsSet notAlreadySet;
@@ -218,8 +235,14 @@ typedef struct {
 extern INTERN_SET intern_set[MAX_INTERN_SET];
 extern int Nintern_set;
 
+void redraw_dfield();
+void create_new_cline();
+void data_get_mybrowser();
+void save_batch_shoot();
 
 int (*solver)();
+
+int periodic_ic_prepare(void);   /* periodic_ic.c */
 
 void init_ar_ic()
 {
@@ -720,6 +743,7 @@ double *x;
       sprintf(bob,"%s=%.16g",eq_range.item,temp);
       bottom_msg(2,bob);
       evaluate_derived();
+      /*  I think  */ redo_all_fun_tables(); 
       if(mc) {
 	do_monte_carlo_search(0,0,1);
       }
@@ -967,6 +991,27 @@ MyGraph->color[0]=color;
 }
 
 
+void silent_equilibria()
+{
+  double x[MAXODE],er[MAXODE],em[MAXODE];
+  int ierr,i;
+  FILE *fp;
+  if(BatchEquil<0)return;
+  for(i=0;i<NODE;i++)
+    x[i]=last_ic[i];
+   
+  do_sing_info(x,NEWT_ERR,EVEC_ERR,BOUND,EVEC_ITER,NODE,er,em,&ierr);
+  if(ierr==0){
+    fp=fopen("equil.dat","w");
+    for(i=0;i<NODE;i++)
+      fprintf(fp,"%g %g %g\n",x[i],er[i],em[i]);
+    fclose(fp);
+    if(BatchEquil==1)
+      save_batch_shoot();
+  }
+      
+}
+  
 void find_equilib_com(int com)
 {
  int ierr;
@@ -1237,6 +1282,14 @@ void do_init_data(int com)
     return;
   }
 
+  if(com==M_IP){      /* (P)eriodic needs the stored trajectory, so it comes before the data are cleared */
+    if(periodic_ic_prepare()==0){
+      MyStart=oldstart;
+      return;
+    }
+    com=M_IG;         /* new initial data and total are in place: go on as for (G)o */
+  }
+
  data_back();
   wipe_rep();
   MyTime=T0;
@@ -1470,9 +1523,10 @@ void usual_integrate_stuff(x)
   ping();
   INFLAG=1;
   refresh_browser(storind);
-
+  if(Xup){
  auto_freeze_it();
   redraw_ics();
+  }
 }
 /*  form_ic  --  u_i(0) = F(i)  where  "i" is represented by "t"
     or  
@@ -1902,7 +1956,7 @@ if(Xup) cwidth=get_command_width();
  }
  if(dt<0.0)tscal=-tend;
  if(tscal==0.0)tscal=1.0;
- stor_delay(x);
+ stor_delay(x,*t);
 
  while(1)
  {
@@ -1922,7 +1976,7 @@ if(Xup) cwidth=get_command_width();
 	       gear(nodes,t,tout,xpv.x,HMIN,HMAX,TOLER,2,error,&kflag,start,WORK,IWORK); 
 	       
 	       MSWTCH(x,xpv.x);
-	       stor_delay(x);
+	       stor_delay(x,*t);
 	       if(DelayErr){
 		 DelayErr=0;
 		 LastTime=*t;
@@ -1962,7 +2016,7 @@ if(Xup) cwidth=get_command_width();
 	     MSWTCH(xpv.x,x);
 	     cvode(start,xpv.x,t,nodes,tout,&kflag,&TOLER,&ATOLER);
 	     MSWTCH(x,xpv.x);
-	     stor_delay(x);
+	     stor_delay(x,*t);
 	       if(DelayErr){
 		 DelayErr=0;
 		 err_dae();
@@ -1995,7 +2049,7 @@ if(Xup) cwidth=get_command_width();
 	     MSWTCH(xpv.x,x);
 	     dp(start,xpv.x,t,nodes,tout,&TOLER,&ATOLER,METHOD-DP5,&kflag);
 	     MSWTCH(x,xpv.x);
-	     stor_delay(x);
+	     stor_delay(x,*t);
 	       if(DelayErr){
 		 DelayErr=0;
 		 err_dae();
@@ -2025,7 +2079,7 @@ if(Xup) cwidth=get_command_width();
 	     MSWTCH(xpv.x,x);
 	     rb23(xpv.x,t,tout,start,nodes,WORK,&kflag);
 	     MSWTCH(x,xpv.x);
-              stor_delay(x);
+              stor_delay(x,*t);
 	       if(DelayErr){
 		 DelayErr=0;
 		 err_dae();
@@ -2057,7 +2111,7 @@ if(Xup) cwidth=get_command_width();
 	     adaptive(xpv.x,nodes,t,tout,TOLER,&hguess,
 		      HMIN,WORK,&kflag,NEWT_ERR,METHOD,start);
 	     MSWTCH(x,xpv.x);
-	     stor_delay(x);
+	     stor_delay(x,*t);
 	       if(DelayErr){
 		 DelayErr=0;
 		 err_dae();
@@ -2218,15 +2272,15 @@ if(Xup) cwidth=get_command_width();
            }
 	                
         /*   This is where the progresser goes   */
-	if(Xup){   plot_command(nit,icount,cwidth);
-	   esc=my_abort();
-	
-       
+	   if(Xup&&(icount==0||xpp_poll_due())){
+	     /* progress bar + check for Esc / expose events.  XPending()
+	        flushes the X connection, so doing this at every output point
+	        costs a system call each time; poll about 50 times a second. */
+	     plot_command(nit,icount,cwidth); 
+	     esc=my_abort();
            {
-            
              if(esc==ESCAPE) break;
 	     if(esc=='/'){rval=1;ENDSING=1;break;}
-	    
            }
 	}        
 	if(STOP_FLAG==1){STOP_FLAG=0;break;}
@@ -2348,9 +2402,9 @@ poi:    for(i=0;i<NEQ;i++)oldx[i]=x[i];
    oldperiod=*t;
  }
      
-          if(!(fabs(*t)<TRANS)&&Xup)
+          if(!(fabs(*t)<TRANS)&&Xup&&OnTheFly)
 	  {
-	    plot_the_graphs(xv,xvold,NODE,NEQ,fabs(dt*NJMP),torcross,0);
+	     plot_the_graphs(xv,xvold,NODE,NEQ,fabs(dt*NJMP),torcross,0); 
 
 	  }
 
@@ -2374,7 +2428,7 @@ out:
 
 	   /* END POST INTEGRATE ANALYSIS  */
  }
-    
+ 
        LastTime=*t;
 #ifdef CVODE_YES
        if(METHOD==CVODE)
@@ -2662,6 +2716,7 @@ void shoot_easy(x)
   double t=0.0;
   int i;
   SuppressBounds=1;
+  /* printf(" %g %g \n",x[0],x[1]); */
   integrate(&t,x,TEND,DELTA_T,1,NJMP,&i);
   SuppressBounds=0;
 }

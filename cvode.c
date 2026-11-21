@@ -15,7 +15,7 @@
 /************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include "cvode.h"
 #include "llnltyps.h"
 #include "vector.h"

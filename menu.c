@@ -2,7 +2,7 @@
 #include "menu.h"
 #include "main.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include <X11/Xlib.h>
@@ -16,6 +16,7 @@
 #include "pop_list.h"
 
 #include "menudrive.h"
+#include "xpp_script.h"
 
 int help_menu;
 MENUDEF my_menus[3]; 
@@ -67,7 +68,7 @@ void create_the_menus(base)
   key[18]=0;
   add_menu(base,NUM_MENU,NUM_ENTRIES,num_menu,key,num_hint);
   /* CLONE */
-  strcpy(key,"pwracesbhqtiglxu");
+  strcpy(key,"pwracesbhqtiglxudo");
   add_menu(base,FILE_MENU,FILE_ENTRIES,fileon_menu,key,file_hint);
   help_menu=-1;
 }
@@ -110,6 +111,9 @@ void help_num()
 
 void help_file()
 {
+  /* the last entry shows whether a recording is on */
+  fileon_menu[FILE_ENTRIES]=fileoff_menu[FILE_ENTRIES]=
+    script_recording()?"stop recOrding":"recOrd script";
   if(tfBell)
    my_menus[FILE_MENU].names=fileon_menu;
   else
@@ -176,6 +180,7 @@ void menu_button(win)
    for(i=0;i<n;i++){
     if(win==my_menus[j].w[i]){
       XSetWindowBorderWidth(display,win,0);
+      rec_menu_key(my_menus[j].key[i]);    /* File -> Record script */
       commander(my_menus[j].key[i]);
       return;
     }
