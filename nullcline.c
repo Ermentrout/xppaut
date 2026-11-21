@@ -12,7 +12,7 @@
 #include "parserslow.h"
 #include "pop_list.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
@@ -43,7 +43,7 @@ extern int XPPBatch;
 
 int NullStyle=0; /* 1 is with little vertical/horizontal lines */
 extern int (*rhs)();
-
+int user_set_color_par();
 double atof();
 extern int DRight,DLeft,DTop,DBottom;
 extern int STORFLAG;
@@ -52,7 +52,8 @@ extern double last_ic[MAXODE];
 extern double DELTA_T,TEND,TRANS;
 extern int PaperWhite,DCURY;
 int XNullColor=2,YNullColor=7;
-int NULL_HERE,num_x_n,num_y_n,num_index,
+extern int NULL_HERE;
+int num_x_n,num_y_n,num_index,
 	null_ix,null_iy,WHICH_CRV;
 float null_dist,*X_n,*Y_n,*saver,*NTop,*NBot;
 extern int NMESH,NODE,NJMP,NMarkov,FIX_VAR,NEQ;
@@ -408,6 +409,7 @@ void get_max_dfield(y,ydot,u0,v0,du,dv,n,inx,iny,mdf)
 
 void do_batch_nclines()
 {
+
   if(!XPPBatch)return;
   if(!NCBatch)return;
   if(NCBatch==1){

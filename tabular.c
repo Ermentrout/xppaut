@@ -8,7 +8,7 @@
 
 #include "parserslow.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 
 

@@ -83,7 +83,7 @@ so i dont have to parse the event trigger
 
 */
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 
 #include "sbml/SBMLReader.h"
 #include "sbml/SBMLTypes.h"

@@ -1,0 +1,25 @@
+f(u)=1/(1+exp(-beta*u))
+table w5 % 101 -50 50 exp(-abs(t/sig5))/(2*sig5)
+table w2 % 101 -50 50 exp(-abs(t/sig2))/(2*sig2)
+par sig5=10,sig2=20
+par c22=5,c25=3,t2=3.2
+par c52=2,c55=6.5,t5=3
+par d22=20,s2=11,d25=1,e2=3
+par d55=20,s5=11,d52=1,e5=3
+par g2=3,g5=3
+par taui=4
+stim(t,j)=heav(t-ton)*heav(ton+wid-t)*heav(jmax-j)
+par jmax=20,wid=10,ton=50,lam=0
+par amp2=0,amp5=0
+special wu5=conv(even,200,50,w5,u5_0)
+special wu2=conv(even,200,50,w2,u2_0)
+
+u2_[0..199]'=-u2_[j]+f(c22*wu2([j])+c25*wu5([j])-t2-g2*v2_[j]+amp2*stim(t,[j]))
+v2_[0..199]'=(-v2_[j]+f(d22*wu2([j])+d25*wu5([j])-e2*v2_[j]-s2))/taui
+u5_[0..199]'=-u5_[j]+f(c52*wu2([j])+c55*wu5([j])-t5-g5*v5_[j]+amp5*stim(t,[j]))
+v5_[0..199]'=(-v5_[j]+f(d52*wu2([j])+d55*wu5([j])-e5*v5_[j]-s5))/taui
+par beta=1
+u2_[0..199](0)=.069
+u5_[0..199](0)=.094
+@ total=200
+d

@@ -4,7 +4,7 @@
 #include "ggets.h"
 #include "markov.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include "xpplim.h"
 #include "getvar.h"
 #include "volterra.h"
@@ -342,7 +342,7 @@ int volterra(y,t,dt,nt,neq,istart,work)
       set_wieners(dt,y,*t);
       if((j=volt_step(y,*t,dt,neq,yg,yp,yp2,ytemp,errvec,jac))!=0)
 	return(j);
-      stor_delay(y); 
+      stor_delay(y,*t);
     }
  return(0);
 }

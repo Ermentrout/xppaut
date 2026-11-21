@@ -11,7 +11,7 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include "cvdense.h"
 #include "cvode.h"
 #include "dense.h"

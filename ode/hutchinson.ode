@@ -1,0 +1,14 @@
+# Hutchinson / Wright delayed logistic equation   x'(t) = r x(t) (1 - x(t-1))
+# Equilibria x=0 and x=1.  Linearization at x=1:  u' = -r u(t-1)
+#   Hopf at r = pi/2 = 1.570796 with omega = pi/2 (period 4).
+#   Characteristic roots at r=1.7:  0.0563472328 +- 1.605870228 i
+#                                  -1.524487644 +- 7.657465906 i ...
+# AUTO needs x(0) exactly on the equilibrium (x(0)=1).  For a simulation
+# change x(0) to e.g. 0.5 (it is also the constant history for t<0):
+# decaying oscillations for r<pi/2, growing -> periodic orbit for r>pi/2.
+par r=1.0
+x'=r*x*(1-delay(x,1))
+x(0)=1.0
+@ total=60,dt=0.01,delay=1,meth=rungekutta,xlo=0,xhi=60,ylo=0,yhi=3,bounds=1000
+@ parmin=0.5,parmax=3,autoxmin=0.5,autoxmax=3,autoymin=0,autoymax=3
+done

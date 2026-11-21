@@ -75,6 +75,8 @@ options <filename>
 " {z=3,b=3,...} Some nice text   <---  Active comments 
 done
 \end{verbatim}
+
+
 {\bf Remarks}
 \begin{itemize}\itemsep -.05in
 \item ODEs are put in as {\tt name'=expression} or {\tt dname/dt=expression}. Note you can use this notation for maps as well or use {\tt name(t+1)=expression}
@@ -99,6 +101,18 @@ done
 \item {\tt Active comments} allow you to create a little tutorial where you take care of changing parameters, numerics, etc. You involke this in XPP with the File Printsrc command. See {\tt lecar.ode} for an example.
 
 \end{itemize}
+
+\medskip \noindent {\bf Order of evaluation.}
+\begin{enumerate}
+\item Fixed variables
+\item {\tt specials}
+\item DAEs
+\item External C code 
+\item RHSs
+\end{enumerate}
+
+\medskip
+
 \noindent {\bf INTEGRAL EQUATIONS}
  
 The general integral equation
@@ -211,6 +225,13 @@ returns the $m$ values
 \[
 k(i)=\sum_{j=0}^{n-1} \mbox{w}[i n  + j] u[l(i n +j)](t-\mbox{tau}[i m + j])
 \]
+
+\begin{verbatim}
+special ydot=import(soname,sofun,nret,root,w1,w2,...wm)
+\end{verbatim}
+
+This is a conveneient way to load a large number of right-hand sides that have been coded in C.  See the examples in the cuda folder.
+
 
 \medskip
 
@@ -422,6 +443,11 @@ integer value of the expression.  This is a way to imitate arrays in
 XPP.  For example if you defined the sequence of 5 variables, {\tt
 u0,u1,u2,u3,u4} one right after another, then {\tt shift(u0,2)} would
 return the value of {\tt u2.} 
+\item {\tt set(<var>,int,value)}  is a weird little function that will assign the variable {\tt <var> } shifted by {\tt int } the value {\tt value}.  It would be used for example to reset some random variable in a {\tt global} statement. Since {\em all} XPP functions return values, this needs an assignment and will retun {\tt value}.  For example:
+\begin{verbatim}
+global 1 t-t0 {u=set(x0,50*ran(1),3.14159}
+\end{verbatim}
+will pick a random index {\tt int} and assign {\tt shift(x0,int)} the value 3.14159.  Weird, but I needed it for a problem, so there it is.
 \item {\tt sum(<ex1>,<ex2>)of(<ex3>)} is a way of summing up things.
 The expressions {\tt <ex1>,<ex1>} are evaluated and their integer
 parts are used as the lower and upper limits of the sum.  The index of

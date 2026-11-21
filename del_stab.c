@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "stdfix.h"
 
 #include "eig_list.h" 
 #include "gear.h"
@@ -13,12 +13,13 @@
 #define DING ping()
 /* this code takes the determinant of a complex valued matrix
 */
-
+int TwoChoice(char *c1,char *c2, char *q,char *key);
 extern double variable_shift[2][MAXODE],AlphaMax,OmegaMax;
 
 extern double delay_list[MAXDELAY];
-extern int NDelay,del_stab_flag,WhichDelay,DelayGrid;
+extern int NDelay,del_stab_flag,WhichDelay,DelayGrid,PAR_FOL;
 extern int (*rhs)();
+void eq_symb(double *x,int flag);
 double amax();
 
 /*typedef struct{
@@ -30,6 +31,80 @@ double amax();
  code here replaces the do_sing code if the equation is
    a delay differential equation. 
 */
+
+/* Build the coefficient matrices of the linearization about the
+   steady state x of
+        x'(t) = f( x(t), x(t-tau_1), ..., x(t-tau_m) ) :
+   A_0 = df/dx(t), A_k = df/dx(t-tau_k).  The distinct delays found at x are
+   left in delay_list[0..NDelay-1].  *coef_out is malloc'ed (caller frees)
+   with layout coef[j*n+i+n*n*k] = (A_k)_{j,i}.  Central differences are
+   used.  Returns an upper bound for |lambda| of any root with Re>=0
+   (sum of the matrix 1-norms), or <0 on failure.
+
+   Note: at a steady state a state-dependent delay tau(x) can be treated as
+   the constant tau(x*): the extra term in the linearization is proportional
+   to x'(t-tau)=0.                                                        */
+double delay_char_coef(double *x,int n,double eps,double **coef_out)
+{
+  double *coef,yp[MAXODE],ym[MAXODE],y[MAXODE],xp[MAXODE],dx;
+  double colmax,colsum,colnorm;
+  int i,j,k,oldflag=del_stab_flag;
+  double h0=1e-6;     /* central-difference step (relative) */
+
+  del_stab_flag=0;     /* scan: collect the distinct delays */
+  NDelay=0;
+  rhs(0.0,x,y,n);
+  for(i=0;i<n;i++){
+    variable_shift[0][i]=x[i];
+    variable_shift[1][i]=x[i];
+  }
+  coef=(double *)malloc(sizeof(double)*n*n*(NDelay+1));
+  if(coef==NULL){del_stab_flag=oldflag;return -1.0;}
+
+  del_stab_flag=-1;
+  WhichDelay=-1;
+  colnorm=0.0;
+  colmax=0.0;
+  for(i=0;i<n;i++){
+    colsum=0.0;
+    dx=h0*amax(1.0,fabs(x[i]));
+    for(j=0;j<n;j++)xp[j]=x[j];
+    xp[i]=x[i]+dx;
+    rhs(0.0,xp,yp,n);
+    xp[i]=x[i]-dx;
+    rhs(0.0,xp,ym,n);
+    for(j=0;j<n;j++){
+      coef[j*n+i]=(yp[j]-ym[j])/(2.0*dx);
+      colsum+=fabs(coef[j*n+i]);
+    }
+    if(colsum>colmax)colmax=colsum;
+  }
+  colnorm=colmax;
+  for(k=0;k<NDelay;k++){
+    WhichDelay=k;
+    colmax=0.0;
+    for(i=0;i<n;i++){
+      colsum=0.0;
+      dx=h0*amax(1.0,fabs(x[i]));
+      for(j=0;j<n;j++)variable_shift[1][j]=variable_shift[0][j];
+      variable_shift[1][i]=x[i]+dx;
+      rhs(0.0,x,yp,n);
+      variable_shift[1][i]=x[i]-dx;
+      rhs(0.0,x,ym,n);
+      variable_shift[1][i]=x[i];
+      for(j=0;j<n;j++){
+        coef[j*n+i+n*n*(k+1)]=(yp[j]-ym[j])/(2.0*dx);
+        colsum+=fabs(coef[j*n+i+n*n*(k+1)]);
+      }
+      if(colsum>colmax)colmax=colsum;
+    }
+    colnorm+=colmax;
+  }
+  WhichDelay=-1;
+  del_stab_flag=oldflag;
+  *coef_out=coef;
+  return colnorm;
+}
 
 void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
      double *x,eps,err,big;
@@ -60,61 +135,71 @@ void do_delay_sing(x,eps,err,big,maxit,n,ierr,stabinfo)
      return;
    }
  /* OKAY -- we have the root */
- NDelay=0;
- rhs(0.0,x,y,n); /* one more evaluation to get delays */
- for(i=0;i<n;i++){
-   variable_shift[0][i]=x[i];  /* unshifted  */
-   variable_shift[1][i]=x[i];
- }
  free(work);
- /*  plintf(" Found %d delays \n",NDelay); */ 
- coef=(double *)malloc(n*n*(NDelay+1)*sizeof(double));
- 
- /* now we must compute a bunch of jacobians  */
- /* first the normal one   */
- del_stab_flag=-1;
- WhichDelay=-1;
- colmax=0.0;
- 
- for(i=0;i<n;i++)
-   {
-     colsum=0.0;
-     for(j=0;j<n;j++)xp[j]=x[j];
-     dx=eps*amax(eps,fabs(x[i]));
-     xp[i]=xp[i]+dx;
-     rhs(0.0,xp,yp,n);
-     for(j=0;j<n;j++){
-       coef[j*n+i]=(yp[j]-y[j])/dx;
-       colsum+=fabs(coef[j*n+i]);
-       /*      plintf("a(0,%d,%d)=%g \n",i,j,coef[j*n+i]); */   
-     }
-     if(colsum>colmax)colmax=colsum;
-   }
- colnorm=colmax;
- for(j=0;j<n;j++)xp[j]=x[j];
- /* now the jacobians for the delays */
- for(k=0;k<NDelay;k++){
-   /* plintf(" found delay=%g \n",delay_list[k]); */   
-   WhichDelay=k;
-   colmax=0.0;
-   for(i=0;i<n;i++){
-     colsum=0.0;
-     for(j=0;j<n;j++)
-       variable_shift[1][j]=variable_shift[0][j];
-     dx=eps*amax(eps,fabs(x[i]));
-     variable_shift[1][i]=x[i]+dx;
-     rhs(0.0,x,yp,n);
-     variable_shift[1][i]=x[i];
-     for(j=0;j<n;j++){
-       coef[j*n+i+n*n*(k+1)]=(yp[j]-y[j])/dx;
-       colsum+=fabs(coef[j*n+i+n*n*(k+1)]);
-       /* plintf("a(%d,%d,%d)=%g \n",k+1,i,j,coef[j*n+i+n*n*(k+1)]); */  
-     }
-     if(colsum>colmax)colmax=colsum;
-   }
-   colnorm+=colmax;
+ colnorm=delay_char_coef(x,n,eps,&coef);
+ if(colnorm<0.0){
+   del_stab_flag=1;
+   free(ev);
+   err_msg("Out of memory in delay stability");
+   return;
  }
+ del_stab_flag=-1;
  /* plintf("Norm= %g \n",colnorm); */
+ /* Proper spectrum: Chebyshev collocation of the generator, polished by
+    Newton on the characteristic equation (del_spec.c).  The old contour
+    count below is kept as an independent cross-check.                    */
+ {
+   int nun=0,nref=0,nr,cp=0,cn=0,rp=0,rn=0,im=0,ii,tot;
+   int nreq=(n>12)?n:12;          /* roots to compute: at least n, and 12 */
+   double *evs;
+   double re,imag;
+   char ch='n';
+   if(nreq>40&&n<=40)nreq=40;
+   evs=(double *)malloc(2*nreq*sizeof(double));
+   if(evs!=NULL)for(ii=0;ii<2*nreq;ii++)evs[ii]=0.0;
+   nr=(evs==NULL)?-1:delay_spectrum(coef,delay_list,n,NDelay,nreq,evs,&nun,&nref,600);
+   if(nr>0){
+     for(ii=nr;ii<n;ii++){evs[2*ii]=evs[2*(nr-1)];evs[2*ii+1]=evs[2*(nr-1)+1];}
+     for(ii=0;ii<n;ii++){
+       re=evs[2*ii];imag=evs[2*ii+1];
+       if(fabs(imag)<1e-8)imag=0.0;
+       if(fabs(re)<1e-9*(1.0+fabs(imag)))re=0.0;
+       if(re<0.0){ if(imag!=0.0)cn++; else rn++; }
+       else if(re>0.0){ if(imag!=0.0)cp++; else rp++; }
+       else if(imag!=0.0)im++;
+     }
+     tot=cp+rp;
+     if(nun>tot)cp+=nun-tot;   /* more unstable roots than slots shown */
+     sign=plot_args(coef,delay_list,n,NDelay,DelayGrid,colnorm,colnorm);
+     if(abs((int)sign)!=nun)
+       plintf(" Note: %d unstable roots from Newton/collocation but argument-principle count is %d -- check delays/DelayGrid\n",nun,abs((int)sign));
+     if(!PAR_FOL)
+       ch=(char)TwoChoice("YES","NO","Print eigenvalues?","yn");
+     if(ch=='y'){
+       plintf("\n Characteristic roots (delay equation) -- the %d rightmost:\n",nr);
+       if(NDelay>0){
+         plintf(" Delays at this equilibrium:");
+         for(ii=0;ii<NDelay;ii++)plintf(" %g",delay_list[ii]);
+         plintf("\n");
+       }
+       for(ii=0;ii<nr;ii++)
+         plintf(" %3d:  %.10g  %c  i  %.10g \n",ii+1,evs[2*ii],
+                (evs[2*ii+1]<0.0)?'-':'+',fabs(evs[2*ii+1]));
+       plintf(" Roots with Re>0: %d     (argument-principle check: %d)\n",nun,abs((int)sign));
+     }
+     if(cp+rp!=0&&(rn+cn)!=0)eq_symb(x,1);
+     else if(cp+rp!=0)eq_symb(x,0);
+     else eq_symb(x,3);
+     *stabinfo=(float)(cp+rp)+(float)(cn+rn)/1000.0;
+     create_eq_box(cp,cn,rp,rn,im,x,evs,n);
+     free(evs);
+     free(coef);
+     free(ev);
+     del_stab_flag=1;
+     return;
+   }
+   free(evs);
+ }
  /* sign=plot_args(coef,delay_list,n,NDelay,DelayGrid,AlphaMax,OmegaMax); */
  sign=plot_args(coef,delay_list,n,NDelay,DelayGrid,colnorm,colnorm);
 

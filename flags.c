@@ -10,7 +10,7 @@
 #include "integrate.h"
 #include "parserslow.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <strings.h>
 #include <string.h>
 #include <stdio.h>
@@ -367,14 +367,19 @@ int one_flag_step(yold,ynew,istart,told,tnew,neq,s )
 	}
       }
     }
+    /* printf("step 7 \n");
+    for(i=0;i<neq;i++)
+    printf("%d %g %g\n",i,ynew[i],GETVAR(i+1)); */
     for(i=0;i<NFlags;i++){
       nevents=flag[i].nevents;
       if(flag[i].hit==ncycle&&flag[i].tstar<=smin){
 	for(j=0;j<nevents;j++){
 	  
 	  in=flag[i].lhs[j];
-	  if(flag[i].type[j]==0)
+	  if(flag[i].type[j]==0){
 	     ynew[in]=flag[i].vrhs[j];
+	     /* SETVAR(in+1,ynew[in]); if this screws up */
+	  }
 	  else {
 	    if(flag[i].type[j]==1)
 	      set_val(upar_names[in],flag[i].vrhs[j]);
@@ -394,9 +399,15 @@ int one_flag_step(yold,ynew,istart,told,tnew,neq,s )
 	}
       }
     }
+
 /*    plintf(" %g %g %g \n",*tnew,ynew[0],ynew[1]); */
-    for(i=0;i<neq;i++)
-      SETVAR(i+1,ynew[i]);
+    
+    for(i=0;i<neq;i++){
+      /* printf("step 8 %d %g %g\n",i,ynew[i],GETVAR(i+1)); */
+      /*  SETVAR(i+1,ynew[i]); */
+      ynew[i]=GETVAR(i+1); /* if this screws up */
+      /*      printf("step 9 %d %g %g\n",i,ynew[i],GETVAR(i+1)); */
+    }
     for(i=0;i<NFlags;i++){
       flag[i].f1=evaluate(flag[i].comcond);
       if(flag[i].hit>0)continue; /* already hit so dont do anything */
@@ -433,7 +444,8 @@ int one_flag_step(yold,ynew,istart,told,tnew,neq,s )
   /*  plintf(" Exit flags \n"); */ /* COMMENT */
  
   *s=smin;
-  
+  /* for(i=0;i<neq;i++)
+     printf("step 10 %d %g %g \n",i,ynew[i],GETVAR(i+1)); */
   return(1);
 }
   

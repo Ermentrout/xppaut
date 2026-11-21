@@ -1,0 +1,7 @@
+# Hutchinson delay equation: Hopf at r=pi/2, period 4 there
+par r=1.8
+x'=r*x*(1-delay(x,1))
+init x=1.2
+@ total=300,trans=295.8164662,dt=0.01,delay=2,meth=rungekutta
+@ xlo=0,xhi=300,ylo=0,yhi=3,maxstor=100000
+done

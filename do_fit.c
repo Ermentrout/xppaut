@@ -6,7 +6,7 @@
 #include "stiff.h"
 #include "parserslow.h"
 #include "derived.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -43,7 +43,7 @@ char *get_first();
 char *get_next();
 
 
-int (*solver)();
+extern int (*solver)();
 
 void init_fit_info()
 {
@@ -225,7 +225,7 @@ int one_step_int(y,t0,t1,istart)
       cvode_err_msg(kflag);
       return(0);
     }
-    stor_delay(y);
+    stor_delay(y,t);
     return 1;
   }
 #endif
@@ -235,7 +235,7 @@ int one_step_int(y,t0,t1,istart)
       dp_err(kflag);
       return(0);
     }
-        stor_delay(y);
+        stor_delay(y,t);
     return 1;
   }
   if(METHOD==RB23){
@@ -244,7 +244,7 @@ int one_step_int(y,t0,t1,istart)
        err_msg("Step size too small");
        return(0);
     }
-        stor_delay(y);
+        stor_delay(y,t);
     return 1;
   }
 if(METHOD==RKQS||METHOD==STIFF){
@@ -261,7 +261,7 @@ if(METHOD==RKQS||METHOD==STIFF){
 	       }
 	return(0);
       }
-          stor_delay(y);
+          stor_delay(y,t);
       return(1);
     }
   /* cvode(command,y,t,n,tout,kflag,atol,rtol) 
@@ -281,7 +281,7 @@ if(METHOD==RKQS||METHOD==STIFF){
 	
 	return(0);
       }
-        stor_delay(y);
+        stor_delay(y,t);
     return(1);
   }
   if(METHOD==0){

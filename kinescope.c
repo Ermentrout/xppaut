@@ -8,7 +8,7 @@
 #include "load_eqn.h"
 
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 /*    Kinescope for X  windows       */
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -29,7 +29,8 @@ int ks_ncycle=1;
 int ks_speed=50;
 extern char *info_message,*kin_hint[];
 extern int screen;
-int mov_ind;
+extern int mov_ind;
+extern int GifFrameDelay;
 typedef struct {
 		unsigned int h,w;
 		Pixmap xi;
@@ -49,7 +50,7 @@ void do_movie_com(int c)
  switch(c){
 
 	     case 0: if(film_clip()==0)
-	 respond_box("Okay","Out of film!");
+	 respond_box("OK","Out of film!");
 			break;
 	      case 1: reset_film();
 	                break;
@@ -205,6 +206,11 @@ void make_anigif()
    }
  }
  fp=fopen("anim.gif","wb");
+ {
+   char note[200];
+   sprintf(note," %%%% Kinescope: %d frames of %d x %d pixels, frame delay %d/100 s\n",mov_ind,(int)w,(int)h,GifFrameDelay);
+   gif_set_note(note);
+ }
  set_global_map(1);
   for(i=0;i<mov_ind;i++){
     XCopyArea(display,movie[i].xi,draw_win,gc_graph,0,0,w,h,0,0);
@@ -259,6 +265,11 @@ void save_movie(basename,fmat)
  XCopyArea(display,draw_win,xi,gc_graph,0,0,w,h,0,0); 
      
      fp=fopen(file,"wb");
+     {
+       char note[200];
+       sprintf(note," %%%% Kinescope: frame %d of %d\n",i,mov_ind);
+       gif_set_note(note);
+     }
      screen_to_gif(xi,fp);
      fclose(fp);
    }
@@ -353,7 +364,7 @@ void  auto_play()
 
 void too_small()
  {
-  respond_box("Okay","Window too small for film!");
+  respond_box("OK","Window too small for film!");
   }
 
  

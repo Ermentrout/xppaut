@@ -1,4 +1,5 @@
 #include "gear.h"
+#include "del_stab.h"
 #include "ggets.h"
 #include "menudrive.h"
 #include "eig_list.h"
@@ -7,7 +8,7 @@
 #include "integrate.h"
 #include "abort.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <math.h>
 #include <stdio.h>
 #include "xpplim.h"
@@ -16,11 +17,13 @@ int UnstableManifoldColor=5;
 int StableManifoldColor=8;
 double ndrand48();
 extern int (*rhs)();
-
+extern int Xup;
 
 extern double DELTA_T;
 extern int METHOD;
 extern int ENDSING,PAR_FOL,SHOOT,PAUSER;
+extern int DelayFlag,del_stab_flag,NDelay;
+extern double delay_list[];
 
 extern int NODE;
 extern int NFlags;
@@ -29,7 +32,7 @@ int ShootICFlag;
 int ShootIndex;
 int ShootType[8];
 int gear_pivot[MAXODE];
-
+extern int storind,STORFLAG;
 
 
 double amax(/* double,double */);
@@ -50,6 +53,7 @@ double pertst[7][2][3]={{{2,3,1},{2,12,1}},
 			{{1,1,1},{87.97,1,.0139}}};
 
 
+void write_mybrowser_data();
 
 void silent_fixpt(double *x,double eps,double err,double big,int maxit,int n,
 	     double *er,double *em,int *ierr)
@@ -362,6 +366,46 @@ if(!PAR_FOL)
  return;
 }
 
+void save_batch_shoot()
+{
+int i,k,type,oldcol,dummy;
+  double x[MAXODE],olddt;
+  char name[256];
+  FILE *fp;
+  if(ShootIndex<1)return;
+  olddt=DELTA_T;
+  STORFLAG=1;
+  for(k=0;k<ShootIndex;k++){
+    for(i=0;i<NODE;i++)
+      x[i]=ShootIC[k][i];
+      
+    type=ShootType[k];
+    if(type>0){
+ 
+       DELTA_T=fabs(DELTA_T);
+       usual_integrate_stuff(x);
+       sprintf(name,"UM%d.dat",k);
+
+       fp=fopen(name,"w");
+       write_mybrowser_data(fp);
+       fclose(fp);
+    }
+    if(type<0){
+ 
+       DELTA_T=-fabs(DELTA_T);
+       usual_integrate_stuff(x);
+       sprintf(name,"SM%d.dat",k);
+
+       fp=fopen(name,"w");
+       write_mybrowser_data(fp);
+       fclose(fp);
+ 
+    }
+  }
+  DELTA_T=olddt;
+
+
+}
 void shoot_this_now() /* this uses the current labeled saddle point stuff to integrate */
 {
   int i,k,type,oldcol,dummy;
@@ -408,16 +452,52 @@ void do_sing_info(x,eps, err,big,maxit, n,er,em,ierr)
  double real,imag;
  double bigpos=-1e10,bigneg=1e10;
 
+ /* Delay equation: equilibria and the roots of the characteristic
+    equation (the ODE code below would read the integration history). */
+ if(DelayFlag){
+   double *wk,*coefd=NULL,*evs;
+   int nun=0,nref=0,nr;
+   for(i=0;i<n;i++)old_x[i]=x[i];
+   wk=(double *)malloc(sizeof(double)*(n*(2*n+5)+50));
+   if(wk==NULL){*ierr=1;return;}
+   del_stab_flag=0;
+   rooter(x,err,eps,big,wk,ierr,maxit,n);
+   free(wk);
+   if(*ierr!=0){
+     del_stab_flag=1;
+     for(i=0;i<n;i++)x[i]=old_x[i];
+     return;
+   }
+   if(delay_char_coef(x,n,eps,&coefd)<0.0){del_stab_flag=1;*ierr=1;return;}
+   del_stab_flag=1;
+   evs=(double *)malloc(2*n*sizeof(double));
+   if(evs==NULL){free(coefd);*ierr=1;return;}
+   nr=delay_spectrum(coefd,delay_list,n,NDelay,n,evs,&nun,&nref,600);
+   free(coefd);
+   if(nr<=0){free(evs);*ierr=1;return;}
+   for(i=0;i<n;i++){
+     j=(i<nr)?i:nr-1;
+     er[i]=evs[2*j];
+     em[i]=evs[2*j+1];
+   }
+   if(nun>0&&er[n-1]<0.0)eq_symb(x,1);
+   else if(nun>0)eq_symb(x,0);
+   else eq_symb(x,3);
+   free(evs);
+   *ierr=0;
+   return;
+ }
  /* float xl[MAXODE]; */
  kmem=n*(2*n+5)+50;
  if((work=(double *)malloc(sizeof(double)*kmem))==NULL)
  {
-   /* err_msg("Insufficient core "); */
+   /* printf("Insufficient core \n");  */
   return;
  }
+
  ShootICFlag=0;
  ShootIndex=0;
- for(i=0;i<n;i++)old_x[i]=x[i];
+ for(i=0;i<n;i++){old_x[i]=x[i];}
  oldwork=work+n*n;
  eval=oldwork+n*n;
  b=eval+2*n;
@@ -528,7 +608,7 @@ void do_sing_info(x,eps, err,big,maxit, n,er,em,ierr)
      {
        pr_evec(x,b,n,pr,eval[2*pose],1);
 
-
+ 
      }
 
    }
@@ -542,7 +622,7 @@ void do_sing_info(x,eps, err,big,maxit, n,er,em,ierr)
      if(*ierr==0)
      {
        pr_evec(x,b,n,pr,eval[2*nege],-1);
-     
+
      }
    
      
@@ -1031,26 +1111,29 @@ int *ierr,maxit, n;
  dely=y+n;
  iter=0;
  *ierr=0;
+ 
  while(1)
  {
-  ch=my_abort();
+   if(Xup){
+     ch=my_abort();
  
-  {
+     {
   
-   if(ch==27)
-   {
-    *ierr=1;
-    return;
-    }
-   if(ch=='/')
-   {
-    *ierr=1;
-    ENDSING=1;
-    return;
+       if(ch==27)
+	 {
+	   *ierr=1;
+	   return;
+	 }
+       if(ch=='/')
+	 {
+	   *ierr=1;
+	   ENDSING=1;
+	   return;
+	 }
+       if(ch=='p')PAUSER=1;
+     }
    }
-   if(ch=='p')PAUSER=1;
-  }
-
+ 
   getjac(x,y,yp,xp,eps,dermat,n);
   sgefa(dermat,n,n,ipivot,&info);
   if(info!=-1)

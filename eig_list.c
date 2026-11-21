@@ -1,10 +1,11 @@
 #include "eig_list.h"
+int get_key_press_nr();
 #include "many_pops.h"
 #include "pop_list.h"
 #include "ggets.h"
 #include "init_conds.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include <X11/Xlib.h>
@@ -156,9 +157,10 @@ void create_eq_list()
  make_icon((char*)eqns_bits,eqns_width,eqns_height,base);
  eq_list.main=make_plain_window(base,0,0,width,hmain,1);
  eq_list.list=make_plain_window(base,0,hmain,width,hlist,1);
- eq_list.close=make_window(eq_list.main,10,5,7*DCURXs,DCURYs+2,1);
-  eq_list.up=make_window(eq_list.main,10+7*DCURXs+14,5,7*DCURXs,DCURYs+2,1);
- eq_list.down=make_window(eq_list.main,10+14*DCURXs+28,5,7*DCURXs,DCURYs+2,1);
+ eq_list.close=make_button(eq_list.main,10,5,7*DCURXs,DCURYs+2,1);
+ wm_register_close(base,eq_list.close);
+  eq_list.up=make_button(eq_list.main,10+7*DCURXs+14,5,7*DCURXs,DCURYs+2,1);
+ eq_list.down=make_button(eq_list.main,10+14*DCURXs+28,5,7*DCURXs,DCURYs+2,1);
 
  XSelectInput(display,eq_list.up,MYMASK);
  XSelectInput(display,eq_list.down,MYMASK);
@@ -184,7 +186,7 @@ void eq_list_keypress(ev,used)
  if(w==eq_list.main||w==eq_list.base||w==eq_list.list)
  {
   *used=1;
-   ks=(char)get_key_press(&ev);
+   ks=(char)get_key_press_nr(&ev);
  
 
  
@@ -363,8 +365,9 @@ double *y,*ev;
  eq_box.rest=make_plain_window(eq_box.base,0,hstab,width,hequil,1);
  eq_box.top=make_window(eq_box.stab,tpos,2,8*DCURX,
 			DCURY+5,1);
- eq_box.close=make_window(eq_box.base,2,2,8*DCURXs,DCURYs+4,1);
- eq_box.import=make_window(eq_box.base,tpos2,2,8*DCURXs,DCURYs+4,1);
+ eq_box.close=make_button(eq_box.base,2,2,8*DCURXs,DCURYs+4,1);
+ wm_register_close(eq_box.base,eq_box.close);
+ eq_box.import=make_button(eq_box.base,tpos2,2,8*DCURXs,DCURYs+4,1);
   eq_box.flag=1;
 }
 else {   /*   Already it has been created so we are updating it */

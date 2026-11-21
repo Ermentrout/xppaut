@@ -1,4 +1,6 @@
 #include "browse.h"
+#include "xpp_script.h"
+int get_key_press_nr();
 #include <string.h>
 #include <strings.h>
 #include "parserslow.h"
@@ -11,7 +13,7 @@
 #include "init_conds.h"
 #include "many_pops.h"
 #include "pop_list.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 
 #include <sys/time.h>
@@ -111,7 +113,7 @@ extern char uvar_names[MAXODE][12];
 float *old_rep;
 int REPLACE=0,R_COL=0;
 
-float **storage;
+extern float **storage;
 
 float **get_browser_data()
 {
@@ -176,6 +178,16 @@ int get_maxrow_browser()
   return my_browser.maxrow;
 }
 
+/* The number of rows of the data now in the browser. The stored solution has storind rows, but other data sets (the adjoint,
+   the interaction functions, a Fourier transform, ...) have their own length, so anything that works on the browser's columns
+   must use this and not storind. */
+int get_browser_rows()
+{
+  extern int storind;
+  if(my_browser.data==storage)return storind;
+  return my_browser.maxrow;
+}
+
 
 void write_mybrowser_data(FILE *fp)
 {
@@ -188,6 +200,7 @@ void write_browser_data(fp,b)
      BROWSER *b;
 {
   int i,j,l;
+  
   for(i=b->istart;i<b->iend;i++){
     if(N_plist>0){
       for(l=0;l<N_plist;l++){
@@ -268,7 +281,7 @@ void data_del_col(b)  /*  this only works with storage  */
   err_msg("Sorry - not working very well yet...");
   return;
   strcpy(var,"");
-  status=get_dialog("Delete","Name",var,"Ok","Cancel",20);
+  status=get_dialog("Delete","Name",var,"OK","Cancel",20);
    if(status!=0)
     del_stor_col(var,b); 
 }
@@ -284,7 +297,7 @@ BROWSER *b;
   XGetInputFocus(display,&w,&rev);
   strcpy(var,"");
   strcpy(form,"");
-  status=get_dialog("Add Column","Name",var,"Ok","Cancel",20);
+  status=get_dialog("Add Column","Name",var,"OK","Cancel",20);
   if(status!=0){
     status=get_dialog("Add Column","Formula:",form,"Add it","Cancel",80);
      if(status!=0)
@@ -799,7 +812,7 @@ int row,col,iflag;
   if(iflag==1)dcol=14*DCURXs;
    x=dcol*col+4;
    y=drow*row+4;
-   win=make_window(root,x,y,width+5,DCURYs+1,1);
+   win=make_button(root,x,y,width+5,DCURYs+1,1);
   XSelectInput(display,win,MYMASK);
  return(win);
  }
@@ -818,7 +831,7 @@ int row,col,iflag;
   if(iflag==1)dcol=14*DCURXs;
    x=dcol*col+4;
    y=drow*row+4;
-   win=make_window(root,x,y,width+5,DCURYs+1,1);
+   win=make_button(root,x,y,width+5,DCURYs+1,1);
   XSelectInput(display,win,MYMASK);
  return(win);
  }
@@ -897,6 +910,7 @@ XStringListToTextProperty(&iname,1,&iconname);
  b->addcol=br_button(base,2,4,"addcol",0);
  b->delcol=br_button(base,2,5,"delcol",0);
  b->close=br_button(base,2,6,"close",0);
+ wm_register_close(base,b->close);
  b->time=br_button(base,5,0,"time ",1);
  b->hint=make_window(base,0,4*drow,width-17,drow-3,1);
   XSelectInput(display,b->time,SIMPMASK);
@@ -1032,17 +1046,17 @@ XEvent ev;
   {
     done=1;
     while(done){
-      if(w==b->up)data_up(b);
-      if(w==b->down)data_down(b);
-      if(w==b->pgup)data_pgup(b);
-      if(w==b->pgdn)data_pgdn(b);
-      if(w==b->left)data_left(b);
-      if(w==b->right)data_right(b);
+      if(w==b->up){rec_browse_key("up");data_up(b);}
+      if(w==b->down){rec_browse_key("down");data_down(b);}
+      if(w==b->pgup){rec_browse_key("pgup");data_pgup(b);}
+      if(w==b->pgdn){rec_browse_key("pgdn");data_pgdn(b);}
+      if(w==b->left){rec_browse_key("left");data_left(b);}
+      if(w==b->right){rec_browse_key("right");data_right(b);}
       waitasec(100);
       if(XPending(display)>0)
 	  {
 	   
-          XNextEvent(display,&zz);
+          xpp_next_event(&zz);
           switch(zz.type){
 	  case ButtonRelease:
 	    done=0;
@@ -1053,35 +1067,35 @@ XEvent ev;
     return;
   }
 
- if(w==b->home){data_home(b); return;}
+ if(w==b->home){rec_browse_key("home");data_home(b); return;}
 
- if(w==b->end){data_end(b); return;}
+ if(w==b->end){rec_browse_key("end");data_end(b); return;}
 
- if(w==b->first){data_first(b); return;}
+ if(w==b->first){rec_browse_key("s");data_first(b); return;}
 
-if(w==b->last){data_last(b); return;}
+if(w==b->last){rec_browse_key("e");data_last(b); return;}
 
- if(w==b->restore){data_restore(b); return;}
+ if(w==b->restore){rec_browse_key("r");data_restore(b); return;}
 
- if(w==b->write){data_write(b); return;}
+ if(w==b->write){rec_browse_key("w");data_write(b); return;}
 
- if(w==b->get){data_get(b); return;}
+ if(w==b->get){rec_browse_key("g");data_get(b); return;}
  
- if(w==b->find){data_find(b); return;}
+ if(w==b->find){rec_browse_key("f");data_find(b); return;}
 
- if(w==b->repl){data_replace(b);return;}
+ if(w==b->repl){rec_browse_key("p");data_replace(b);return;}
  
- if(w==b->load){data_read(b);return; }
+ if(w==b->load){rec_browse_key("l");data_read(b);return; }
 
- if(w==b->addcol){data_add_col(b);return;}
+ if(w==b->addcol){rec_browse_key("a");data_add_col(b);return;}
 
- if(w==b->delcol){data_del_col(b);return;}
+ if(w==b->delcol){rec_browse_key("d");data_del_col(b);return;}
 
- if(w==b->unrepl){data_unreplace(b);return;}
+ if(w==b->unrepl){rec_browse_key("u");data_unreplace(b);return;}
 
- if(w==b->table){data_table(b);return;}
+ if(w==b->table){rec_browse_key("t");data_table(b);return;}
  
- if(w==b->close){kill_browser(b);return;}
+ if(w==b->close){rec_command("browser close");kill_browser(b);return;}
 
 }
 
@@ -1109,6 +1123,7 @@ int *used;
   *used=1;
   
 
+ rec_key_kind(3);                  /* recorded as browsekeys (xpp_script.c) */
  ks=(char)get_key_press(&ev);
 
 
@@ -1285,7 +1300,7 @@ BROWSER *b;
  XGetInputFocus(display,&w,&rev);
 strcpy(var,uvar_names[0]);
 strcpy(form,uvar_names[0]);
-status=get_dialog("Replace","Variable:",var,"Ok","Cancel",20);
+status=get_dialog("Replace","Variable:",var,"OK","Cancel",20);
 if(status!=0){
  status=get_dialog("Replace","Formula:",form,"Replace","Cancel",80);
  if(status!=0)replace_column(var,form,b->data,b->maxrow);
@@ -1391,7 +1406,7 @@ void open_write_file(fp,fil,ok)
 
 			*fp=fopen(fil,"w");
 			if(*fp==NULL){
-				      respond_box("Ok",
+				      respond_box("OK",
 					"Cannot open file");
 				      *ok=0;
 				     }
@@ -1418,14 +1433,14 @@ BROWSER *b;
  
  strcpy(fil,"test.dat");
  /*  XGetInputFocus(display,&w,&rev);
- status=get_dialog("Load","Filename:",fil,"Ok","Cancel",40);
+ status=get_dialog("Load","Filename:",fil,"OK","Cancel",40);
  XSetInputFocus(display,w,rev,CurrentTime);
  */
  status=file_selector("Load data",fil,"*.dat");
 if(status==0)return;
  fp=fopen(fil,"r");
  	if(fp==NULL){
-				      respond_box("Ok",
+				      respond_box("OK",
 					"Cannot open file");
 				     return;
 				     }
@@ -1497,7 +1512,7 @@ XGetInputFocus(display,&w,&rev);
  strcpy(fil,"test.dat");
  new_string("Write to:",fil);
 */
- /* status=get_dialog("Write","Filename:",fil,"Ok","Cancel",40);
+ /* status=get_dialog("Write","Filename:",fil,"OK","Cancel",40);
 
     XSetInputFocus(display,w,rev,CurrentTime); */
   status=file_selector("Write data",fil,"*.dat");
@@ -1587,3 +1602,22 @@ void get_col_list(s,cl,n)
 
  
 
+
+
+/* ---- scripting (xpp_script.c): where the script's keys and button presses go ---- */
+Window browser_key_window(void)
+{
+  return my_browser.xflag?my_browser.base:0;
+}
+
+int browser_owns_key(Window w)
+{
+  return my_browser.xflag&&(w==my_browser.base||w==my_browser.main||w==my_browser.upper);
+}
+
+Window browser_button_window(const char *name)
+{
+  if(!my_browser.xflag)return 0;
+  if(strcmp(name,"close")==0)return my_browser.close;
+  return 0;
+}

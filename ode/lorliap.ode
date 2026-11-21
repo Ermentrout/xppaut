@@ -1,0 +1,21 @@
+# the famous Lorenz equation set up for 3d view
+init x=-7.5  y=-3.6  z=30
+par r=27  s=10  b=2.66666  
+x'=s*(-x+y)
+y'=r*x-y-x*z
+z'=-b*z+x*y
+xl'=s*(-xl+yl)
+yl'=r*xl-yl-xl*z-x*zl
+zl'=-b*zl+xl*y+yl*x
+init xl=1,yl=0,zl=0
+par dtout=.5
+init tt=0
+global 1 tt-dtout {tt=0;norm=sqrt(xl^2+yl^2+zl^2);acc=acc+log(norm);xl=xl/norm;yl=yl/norm;zl=zl/norm}
+tt'=1
+norm'=0
+acc'=0
+aux liap=acc/max(1,t)
+@ bound=100000000
+@ dt=.025001, total=400,nout=10
+@ runnow=1
+done

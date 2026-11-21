@@ -4,7 +4,7 @@
 #include "ggets.h"
 #include "tabular.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 
 #ifndef WCTYPE
 #include <ctype.h>
@@ -192,7 +192,8 @@ SYMBOL my_symb[MAX_SYMBS]=
    {"ARG19",5,COM(USTACKTYPE,18),0,10},
    {"ARG20",5,COM(USTACKTYPE,19),0,10},  
    {"BESSELI",7,COM(FUN2TYPE,20),2,10},/* Bessel I  # 93 */
-   {"LGAMMA",6,COM(FUN1TYPE,25),1,10} /* Log Gamma  #94 */
+   {"LGAMMA",6,COM(FUN1TYPE,25),1,10}, /* Log Gamma  #94 */
+   {"BESSELIS",8,COM(FUN2TYPE,21),2,10},/* Bessel I Scaled  # 95 */
       };
     
     
@@ -1054,8 +1055,23 @@ int *toklist,*command;
           
 	 }
 
-
-
+	  if(newtok==SETSYM){
+	     temp=my_symb[toklist[lstptr+1]].com;
+             if(is_uvar(temp))
+	   {
+	    /* ram -- same issue */
+	    my_symb[LASTTOK].com=COM(SVARTYPE, temp%MAXTYPE); /* create a temporary sybol */
+           toklist[lstptr+1]=LASTTOK;
+	  	
+	    my_symb[LASTTOK].pri=10;
+	   }
+	     else
+	       {
+		 printf("Illegal use of set - variables only\n");
+		   return(1);
+	       }
+	  }
+	 
 /* check for shift  */
 	  if(newtok==SHIFTSYM||newtok==ISHIFTSYM)
 	  {
@@ -1187,7 +1203,7 @@ int *toklist,*command;
         
 	     ncomma-=1;
                 }
-             if(my_com==ENDDELSHFT)
+             if(my_com==ENDDELSHFT||my_com==ENDSET)
 	       ncomma-=2;  
            /*  if(my_com==CONV||my_com==DCONV){
        	      ncomma-=1;
@@ -1270,7 +1286,7 @@ int function_sym(int token) /* functions should have ( after them  */
   if(i1==FUN2TYPE&&!binary_sym(token))return(1); /* two-variable function */
   /* ram this was: if(i1==UFUN||i1==7||i1==6||i1==5)return(1); recall: 5 was bad */
   if (i1 == UFUNTYPE || i1 == TABTYPE || i1==VECTYPE||i1 == NETTYPE) return(1);
-  if(token==DELSHFTSYM||token==DELSYM||token==SHIFTSYM||token==ISHIFTSYM||com==MYIF||com==MYTHEN||com==MYELSE
+  if(token==DELSHFTSYM||token==SETSYM||token==DELSYM||token==SHIFTSYM||token==ISHIFTSYM||com==MYIF||com==MYTHEN||com==MYELSE
      ||com==SUMSYM||com==ENDSUM)return(1);
   return(0);
 }
@@ -1315,7 +1331,7 @@ int gives_number(token)
   /* !! */ 
   /* ram: 5 issue; was if(i1==8||isvar(i1)||iscnst(i1)||i1==7||i1==6||i1==5||isker(i1)||i1==UFUN)return(1); */
   if (i1 == USTACKTYPE || isvar(i1) || iscnst(i1) || i1 == TABTYPE || i1==VECTYPE||i1 == NETTYPE || isker(i1) || i1 == UFUNTYPE) return(1);
-  if(com==MYIF||token==DELSHFTSYM||token==DELSYM||token==SHIFTSYM||token==ISHIFTSYM||com==SUMSYM)return(1);
+  if(com==MYIF||token==DELSHFTSYM||token==SETSYM||token==DELSYM||token==SHIFTSYM||token==ISHIFTSYM||com==SUMSYM)return(1);
   return(0);
 }
 
@@ -1597,6 +1613,7 @@ void two_args()
  fun2[18]=bessel_j;
  fun2[19]=bessel_y;
  fun2[20]=bessi;
+ fun2[21]=bessis;
  
 
 
@@ -1698,6 +1715,81 @@ double  x;
 		ans=0.39894228+y*(-0.3988024e-1+y*(-0.362018e-2
 			+y*(0.163801e-2+y*(-0.1031555e-1+y*ans))));
 		ans *= (exp(ax)/sqrt(ax));
+	}
+	return x < 0.0 ? -ans : ans;
+}
+
+
+double bessis(nn,x)
+double  x;
+double nn;
+{
+  int j,n;
+	double  bi,bim,bip,tox,ans;
+	n=(int)nn;
+	if(n==0)return bessis0(x);
+	if(n==1)return bessis1(x);
+	if (x == 0.0)
+		return 0.0;
+	else {
+		tox=2.0/fabs(x);
+		bip=ans=0.0;
+		bi=1.0;
+		for (j=2*(n+(int) sqrt(ACC*n));j>0;j--) {
+			bim=bip+j*tox*bi;
+			bip=bi;
+			bi=bim;
+			if (fabs(bi) > BIGNO) {
+				ans *= BIGNI;
+				bi *= BIGNI;
+				bip *= BIGNI;
+			}
+			if (j == n) ans=bip;
+		}
+		ans *= bessis0(x)/bi;
+		return x < 0.0 && (n & 1) ? -ans : ans;
+	}
+}
+
+double bessis0(x)
+double  x;
+{
+	double  ax,ans;
+	double y;
+
+	if ((ax=fabs(x)) < 3.75) {
+		y=x/3.75;
+		y*=y;
+		ans=(1.0+y*(3.5156229+y*(3.0899424+y*(1.2067492
+						      +y*(0.2659732+y*(0.360768e-1+y*0.45813e-2))))))*exp(-ax);
+	} else {
+		y=3.75/ax;
+		ans=(1.0/sqrt(ax))*(0.39894228+y*(0.1328592e-1
+			+y*(0.225319e-2+y*(-0.157565e-2+y*(0.916281e-2
+			+y*(-0.2057706e-1+y*(0.2635537e-1+y*(-0.1647633e-1
+			+y*0.392377e-2))))))));
+	}
+	return ans;
+}
+
+double bessis1(x)
+double  x;
+{
+	double ax,ans;
+	double y;
+
+	if ((ax=fabs(x)) < 3.75) {
+		y=x/3.75;
+		y*=y;
+		ans=exp(-ax)*ax*(0.5+y*(0.87890594+y*(0.51498869+y*(0.15084934
+			+y*(0.2658733e-1+y*(0.301532e-2+y*0.32411e-3))))));
+	} else {
+		y=3.75/ax;
+		ans=0.2282967e-1+y*(-0.2895312e-1+y*(0.1787654e-1
+			-y*0.420059e-2));
+		ans=0.39894228+y*(-0.3988024e-1+y*(-0.362018e-2
+			+y*(0.163801e-2+y*(-0.1031555e-1+y*ans))));
+		ans *= (1./sqrt(ax));
 	}
 	return x < 0.0 ? -ans : ans;
 }
@@ -2028,7 +2120,7 @@ double x,y;
    int i,it,in,j,*tmpeq;
   int is;
   
-  int low,high,ijmp;
+  int low,high,ijmp,iv;
   double temx,temy,temz;
   double sum;
   union    /*  WARNING  -- ASSUMES 32 bit int  and 64 bit double  */
@@ -2078,6 +2170,15 @@ double x,y;
      temy=POP;
      temz=POP;
      PUSH(do_delay_shift(temx,temy,temz));
+     break;
+   case ENDSET:  /* indirectly set a variable + shift to a value
+                    SET(name,shift,value)  */
+     temx=POP;
+     temy=POP;
+     temz=POP;
+     iv=(int)temy+(((int)temz) % MAXTYPE);
+     variables[iv]=temx;
+     PUSH(temx);
      break;
    case ENDDELAY:
 		    temx=POP;

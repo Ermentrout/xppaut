@@ -1,12 +1,12 @@
 
 #include "storage.h"
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include "xpplim.h"
 float **storage;
 double *WORK;
-int MAXSTOR,storind;
+extern int MAXSTOR,storind;
 int IWORK[10000];
 extern int NODE,NMarkov;
 extern int METHOD;

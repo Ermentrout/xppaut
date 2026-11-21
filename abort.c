@@ -1,6 +1,6 @@
 #include "abort.h"
 
-#include <stdlib.h> 
+/* #include "stdfix.h"  */
 
 #include <stdio.h>
 #include <X11/Xlib.h>

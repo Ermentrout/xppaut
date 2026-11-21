@@ -10,7 +10,7 @@
  ******************************************************************/ 
 
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdfix.h"
 #include "dense.h"
 #include "llnltyps.h"
 #include "vector.h"

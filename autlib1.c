@@ -1,4 +1,6 @@
 #include "auto_f2c.h"
+extern int DelayFlag;
+int auto_delay_eigen(integer ndm, doublereal *u, doublereal *par, doublecomplex *ev, integer *nev);
 #include "auto_c.h"
 #include "xAuto.h"
 extern XAUTO xAuto;
@@ -46,6 +48,135 @@ void send_eigen();
 void send_mult();
 int byeauto_();
 void addbif(iap_type *iap, rap_type *rap, integer ntots, integer ibrs, double *par,integer *icp,int labw, double *a, double *uhigh, double *ulow, double *u0, double *ubar);
+
+/* ------------------------------------------------------------------------------------------
+   Closed-loop detection.
+
+   A branch that closes up on itself (an isola, the locked cycles of a tongue, a cycle branch that
+   leaves a Hopf point and comes back to it) is followed round and round until Nmax is reached.
+   At every accepted point the branch is compared with the points already computed on it.  The
+   point is a retrace when it lies within a step of an earlier point that is well back along the
+   branch (at least 15 steps of path), and the branch is heading the same way there.  Three such points in a row, with the matching earlier points in order,
+   mean that the branch has closed up: AUTO is stopped through the same flag that Esc and ABORT use,
+   so the run ends with an EP label on the last point.
+
+   The comparison uses only quantities that do not depend on where the mesh starts on the cycle
+   (the parameters, the plotted norm, the period and the L2 norm), so it works for periodic
+   orbits as well as for equilibria and for two-parameter curves.
+
+   Set the environment variable XPP_NOLOOPSTOP to 1 to switch the check off.
+   ------------------------------------------------------------------------------------------ */
+#include <stdlib.h>
+#include <string.h>
+#define LOOP_MAXC 6
+#define LOOP_MINLAP 8
+#define LOOP_NEED 3
+#define LOOP_ARC 15.0
+static double *lp_hist=NULL;
+static long lp_n=0, lp_cap=0, lp_ibr=-1, lp_lastk=-1;
+static int lp_nc=0, lp_hits=0;
+static double lp_min[LOOP_MAXC], lp_max[LOOP_MAXC];
+
+/* ntot: index of this point on the branch (1,2,...); c[0..nc-1]: the coordinates of the point.
+   Returns 1 when the branch has closed up. */
+static int auto_loop_check(long ibr, long ntot, int nc, const double *c)
+{
+  static int enabled=-1;
+  double inv[LOOP_MAXC], tn[LOOP_MAXC], tk[LOOP_MAXC];
+  double sl, slk, dbest, d2, dd, dot, tol, sc;
+  long n, k, kbest, stride;
+  int i, match;
+  const double *cur, *prev;
+
+  if (enabled<0) {
+    const char *e=getenv("XPP_NOLOOPSTOP");
+    enabled=(e && *e && *e!='0')?0:1;
+  }
+  if (!enabled || nc<2 || nc>LOOP_MAXC) return 0;
+  for (i=0;i<nc;i++) if (!(c[i]==c[i]) || fabs(c[i])>1e300) return 0;
+
+  if (ntot<=1 || ibr!=lp_ibr || nc!=lp_nc || ntot!=lp_n+1) {   /* a new branch or run */
+    lp_n=0; lp_hits=0; lp_lastk=-1; lp_ibr=ibr; lp_nc=nc;
+    for (i=0;i<nc;i++) { lp_min[i]=c[i]; lp_max[i]=c[i]; }
+  }
+  if (lp_n>=lp_cap) {
+    long ncap=lp_cap?2*lp_cap:4096;
+    double *nh=(double *)realloc(lp_hist,(size_t)ncap*LOOP_MAXC*sizeof(double));
+    if (!nh) return 0;
+    lp_hist=nh; lp_cap=ncap;
+  }
+  for (i=0;i<nc;i++) {
+    lp_hist[lp_n*LOOP_MAXC+i]=c[i];
+    if (c[i]<lp_min[i]) lp_min[i]=c[i];
+    if (c[i]>lp_max[i]) lp_max[i]=c[i];
+  }
+  n=lp_n;               /* index of the new point */
+  lp_n++;
+  if (n<LOOP_MINLAP+2) return 0;
+
+  stride=1+n/4000;      /* long runs: look every few points to keep the cost down */
+  if (n%stride) return 0;
+
+  /* scale each coordinate by the range it has covered; a coordinate that has not moved counts for nothing */
+  for (i=0;i<nc;i++) {
+    sc=lp_max[i]-lp_min[i];
+    inv[i]=(sc>1e-12*(fabs(lp_max[i])+fabs(lp_min[i]))+1e-300)?1.0/sc:0.0;
+  }
+  cur=lp_hist+n*LOOP_MAXC;
+  prev=lp_hist+(n-1)*LOOP_MAXC;
+  sl=0.0;
+  for (i=0;i<nc;i++) { tn[i]=(cur[i]-prev[i])*inv[i]; sl+=tn[i]*tn[i]; }
+  sl=sqrt(sl);
+  if (sl<=0.0) return 0;
+
+  /* the nearest earlier point (leaving out the most recent LOOP_MINLAP) */
+  dbest=1e300; kbest=-1;
+  for (k=0;k+LOOP_MINLAP<=n;k++) {
+    const double *h=lp_hist+k*LOOP_MAXC;
+    d2=0.0;
+    for (i=0;i<nc;i++) {
+      dd=(cur[i]-h[i])*inv[i];
+      d2+=dd*dd;
+      if (d2>=dbest) break;
+    }
+    if (i==nc && d2<dbest) { dbest=d2; kbest=k; }
+  }
+  match=0;
+  if (kbest>=0) {
+    const double *h=lp_hist+kbest*LOOP_MAXC;
+    const double *hp=(kbest>0)?lp_hist+(kbest-1)*LOOP_MAXC:h;
+    const double *hn=(kbest>0)?h:lp_hist+LOOP_MAXC;
+    slk=0.0; dot=0.0;
+    for (i=0;i<nc;i++) { tk[i]=(hn[i]-hp[i])*inv[i]; slk+=tk[i]*tk[i]; dot+=tk[i]*tn[i]; }
+    slk=sqrt(slk);
+    tol=0.75*((sl>slk)?sl:slk)+1e-12;
+    if (slk>0.0 && sqrt(dbest)<=tol && dot>=0.5*sl*slk) {
+      /* the earlier point must lie well back along the branch: at least LOOP_ARC local steps of path
+         between the two (this rejects a branch that merely creeps towards a limit in tiny steps) */
+      double need=LOOP_ARC*((sl>slk)?sl:slk), arc=0.0;
+      long j;
+      for (j=n;j>kbest && arc<need;j--) {
+        const double *a=lp_hist+j*LOOP_MAXC, *b=lp_hist+(j-1)*LOOP_MAXC;
+        d2=0.0;
+        for (i=0;i<nc;i++) { dd=(a[i]-b[i])*inv[i]; d2+=dd*dd; }
+        arc+=sqrt(d2);
+      }
+      if (arc>=need) match=1;
+    }
+  }
+  if (!match) { lp_hits=0; lp_lastk=-1; return 0; }
+  if (lp_hits>0 && kbest>lp_lastk && kbest-lp_lastk<=4*stride+4) lp_hits++;
+  else lp_hits=1;
+  lp_lastk=kbest;
+  if (lp_hits>=LOOP_NEED) {
+    printf("AUTO: branch %ld closed up on itself at point %ld (it rejoins point %ld); stopped. "
+           "(XPP_NOLOOPSTOP=1 switches this check off)\n",ibr,(long)ntot,(long)kbest+1);
+    fflush(stdout);
+    lp_hits=0; lp_lastk=-1;
+    return 1;
+  }
+  return 0;
+}
 
 int init(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *thl, doublereal **thu_pointer, integer *iuz, doublereal *vuz)
 {
@@ -1097,6 +1228,7 @@ cnrlae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, FUNI_TYPE((*
 	   dfdp, &rev, thl, thu, iuz, vuz);
     istop = iap->istop;
     if (istop == 1) {
+
       goto L5;
     }
     itp = iap->itp;
@@ -1104,6 +1236,8 @@ cnrlae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, FUNI_TYPE((*
       itp = itpst * 10 + 3;
       iap->itp = itp;
       rev = 0.;
+      /***  HERE IS WHERE Hopf IS FOUND */
+
     }
   }
 
@@ -1861,11 +1995,11 @@ fnhbae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, logical *chn
   doublecomplex *ev;
   doublereal rp;
 
-  integer iid, ibr, ndm, ier, loc=0, ips;
+  integer iid, ibr, ndm, ier, loc=0, ips, nev, nunst=0;
   doublereal rev;
   integer isw;
 
-  ev = (doublecomplex *)malloc(sizeof(doublecomplex)*(iap->ndim));
+  ev = (doublecomplex *)malloc(sizeof(doublecomplex)*(iap->ndim+64));
 
 
   /* Local */
@@ -1894,7 +2028,18 @@ fnhbae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, logical *chn
 
   /* Compute the eigenvalues of the Jacobian */
 
-  eig(iap, &ndm, &ndim, dfdu, ev, &ier);
+  /* For delay equations the eigenvalues of df/du are meaningless (it is
+     A_0+A_1+...): use the roots of the characteristic equation instead. */
+  nev = ndm;
+  ier = 1;
+  if (DelayFlag && abs(ips) == 1) {
+    /* returns nev>=ndm of the rightmost roots, sorted by real part */
+    ier = auto_delay_eigen(ndm, u, par, ev, &nev);
+  }
+  if (ier != 0) {
+    nev = ndm;
+    eig(iap, &ndm, &ndim, dfdu, ev, &ier);
+  }
   if (ips == -1) {
     for (i = 0; i < ndm; ++i) {
       if (ev[i].r != -1. || d_imag(&ev[i]) != 0.) {
@@ -1911,9 +2056,9 @@ fnhbae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, logical *chn
   send_eigen(ibr,ntot+1,ndim,(doublecomplex*)&ev[0]);
   /* Order the eigenvalues by real part. */
 
-  for (i = 0; i < ndm - 1; ++i) {
+  for (i = 0; i < nev - 1; ++i) {
     rmax = -RLARGE;
-    for (j = i; j < ndm; ++j) {
+    for (j = i; j < nev; ++j) {
       rp = ev[j].r;
       if (rp >= rmax) {
 	rmax = rp;
@@ -1932,7 +2077,7 @@ fnhbae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, logical *chn
   rimhb = 0.;
   arev = RLARGE;
   rev = 0.;
-  for (i = 0; i < ndm; ++i) {
+  for (i = 0; i < nev; ++i) {
     if (d_imag(&ev[i]) != 0.) {
       ar = fabs(ev[i].r);
       if (ar <= arev) {
@@ -1950,19 +2095,20 @@ fnhbae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, logical *chn
 
   nins1 = 0;
   if (isw != 2) {
-    for (i = 0; i < ndm; ++i) {
+    for (i = 0; i < nev; ++i) {
       if (ev[i].r <= 0.) {
 	++nins1;
       }
     }
   } else {
-    for (i = 0; i < ndm; ++i) {
+    for (i = 0; i < nev; ++i) {
       if (ev[i].r <= HMACH) {
 	++nins1;
       }
     }
   }
 
+  nins1 -= (nev - ndm);   /* = ndm - (#unstable roots) */
   if (isw == 2) {
     ret_val = 0.;
   } else {
@@ -1988,13 +2134,13 @@ fnhbae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, logical *chn
   if (iap->mynode == 0) {
     fprintf(fp9,"%4li%6li        Eigenvalues:                                 Stable:%3li\n",abs(ibr),ntop,nins);	
     if (ips == -1) {
-      for (i = 0; i < ndm; ++i) {
+      for (i = 0; i < nev; ++i) {
 	doublecomplex tmp;
 	z_exp(&tmp, &ev[i]);
 	fprintf(fp9,"%4li%6li        Eigenvalue%3li %14.6E%14.6E\n",abs(ibr),ntop,i+1,tmp.r,tmp.i);	
       }
     } else {
-      for (i = 0; i < ndm; ++i) {
+      for (i = 0; i < nev; ++i) {
 	fprintf(fp9,"%4li%6li        Eigenvalue%3li %14.6E%14.6E\n",abs(ibr),ntop,i+1,ev[i].r,ev[i].i);
       }
     }
@@ -2722,7 +2868,7 @@ stplae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *
   integer iab, lab, ibr, ndm;
   doublereal amp;
   integer ips, itp, npr, isw, nmx;
-  int iflag=0;
+  int iflag=0, loopflag=0;
 
 
 
@@ -2814,7 +2960,25 @@ stplae(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *
     amp = sqrt(ss);
   }
   rap->amp = amp;
+  {
+    /* closed-loop check: parameter, plotted norm, [second parameter], L2 norm of u */
+    double lc[LOOP_MAXC], nn=0.;
+    int nlc=0;
+    for (i = 0; i < ndm; ++i) {
+      nn += u[i] * u[i];
+    }
+    lc[nlc++] = rlcur[0];
+    lc[nlc++] = amp;
+    if (abs(isw) == 2) {
+      lc[nlc++] = par[icp[1]];
+    }
+    lc[nlc++] = sqrt(nn);
+    loopflag = auto_loop_check((long)ibr, (long)ntot, nlc, lc);
+  }
   byeauto_(&iflag); 
+  if (loopflag) {
+    iflag = 1;
+  }
   istop = iap->istop;
   if (istop == 1) {
     /*        Maximum number of iterations reached somewhere. */
@@ -6978,6 +7142,7 @@ stplbv(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *
   integer iab, lab, ibr, ndm;
   doublereal amp;
   integer ips, itp, irs, npr, isw, nmx;
+  int loopflag=0;
   doublereal umx[7];
 
   /* Writes the bifurcation diagram on unit 7 (Differential Equations) */
@@ -7065,9 +7230,27 @@ stplbv(iap_type *iap, rap_type *rap, doublereal *par, integer *icp, doublereal *
   }
 
   rap->amp = amp;
+  {
+    /* closed-loop check: parameter, plotted norm, [second parameter], [period], L2 norm of the solution */
+    double lc[LOOP_MAXC];
+    int nlc=0;
+    lc[nlc++] = par[icp[0]];
+    lc[nlc++] = amp;
+    if (abs(isw) == 2) {
+      lc[nlc++] = par[icp[1]];
+    }
+    if (ips == 2) {
+      lc[nlc++] = par[10];
+    }
+    lc[nlc++] = sqrt(rnrmsq(iap, &ndm, ndxloc, ups, dtm, thu));
+    loopflag = auto_loop_check((long)ibr, (long)ntot, nlc, lc);
+  }
   /* here is another place for byeauto
    call with iflag  */
   byeauto_(&iflag);
+  if (loopflag) {
+    iflag = 1;
+  }
   istop = iap->istop;
   if (istop == 1) {
     /*        ** Maximum number of iterations reached somewhere. */

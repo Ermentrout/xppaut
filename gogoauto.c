@@ -18,6 +18,24 @@ extern int fp8_is_open;
 extern char fort3[200], fort7[200], fort8[200],fort9[200];
 
 
+void dump_params(iap_type iap, rap_type rap,int *icp, double *thl)
+{
+  int i;
+  printf("%d %d %d %d  \n", iap.ndim,iap.ips,iap.irs,iap.ilp);
+  printf("%d ",iap.nicp);
+  for(i=0;i<iap.nicp;i++)
+    printf("%d ",icp[i]);
+  printf("\n");
+  printf("%d %d %d %d %d %d %d %d\n",iap.ntst,iap.ncol,iap.iad,iap.isp,iap.isw,iap.iplt,iap.nbc,iap.nint);
+  printf("%d %g %g %g %g\n",iap.nmx,rap.rl0,rap.rl1,rap.a0,rap.a1);
+  printf("%d %d %d %d %d %d %d\n",iap.npr,iap.mxbf,iap.iid,iap.itmx,iap.itnw,iap.nwtn,iap.jac);
+  printf("%g %g %g\n",rap.epsl,rap.epsu,rap.epss);
+  printf("%g %g %g %d\n",rap.ds,rap.dsmin,rap.dsmax,iap.iads);
+  for(i=0;i<5;i++)
+    printf("%g ",thl[icp[i]]);
+  printf("\n");
+  
+}
 
 
 int go_go_auto() /* this is the entry  at this point, xAuto has been set */
@@ -389,7 +407,7 @@ int set_function_pointers(const iap_type iap,function_list *data) {
     /*	** Fold continuation (algebraic problems, restart). */
     data->type	   = AUTOAE;
     data->aelist.funi  = fnlp;
-    data->aelist.stpnt  = stpnae;
+    data->aelist.stpnt  = stpnlp;
     data->aelist.pvli    = pvlsae;
   } else if ((iap.ips == 0 || iap.ips == 1) && abs(iap.isw) == 2 && iap.itp == 3) {
     /*	** Hopf bifurcation continuation (ODE). */
@@ -401,7 +419,7 @@ int set_function_pointers(const iap_type iap,function_list *data) {
     /*	** Hopf bifurcation continuation (ODE, restart). */
     data->type	   = AUTOAE;
     data->aelist.funi  = fnhb;
-    data->aelist.stpnt  = stpnae;
+    data->aelist.stpnt  = stpnhb; /* stpnae */ 
     data->aelist.pvli    = pvlsae;
   } else if (iap.ips == 11 && abs(iap.isw) == 2 && iap.itp == 3) {
     /*	** Hopf bifurcation continuation (Waves). */
@@ -413,7 +431,7 @@ int set_function_pointers(const iap_type iap,function_list *data) {
     /*	** Hopf bifurcation continuation (Waves, restart). */
     data->type	   = AUTOAE;
     data->aelist.funi  = fnhw;
-    data->aelist.stpnt  = stpnae;
+    data->aelist.stpnt  = stpnhw;
     data->aelist.pvli    = pvlsae;
   } else if (iap.ips == -1 && abs(iap.isw) == 2 && iap.itp == 3) {
     /*	** Hopf bifurcation continuation (Maps). */
@@ -425,7 +443,7 @@ int set_function_pointers(const iap_type iap,function_list *data) {
     /*	** Hopf bifurcation continuation (Maps). */
     data->type	   = AUTOAE;
     data->aelist.funi  = fnhd;
-    data->aelist.stpnt  = stpnae;
+    data->aelist.stpnt  = stpnae; /*stpnhd;*/
     data->aelist.pvli    = pvlsae;
   } else if (iap.ips == 2 && abs(iap.isw) == 2 && (iap.itp == 5 || iap.itp == 6)) {
     /*	** Fold continuation (Periodic solutions, start). */
@@ -505,22 +523,4 @@ int set_function_pointers(const iap_type iap,function_list *data) {
   return 0;
 }
 
-dump_params(iap_type iap, rap_type rap,int *icp, double *thl)
-{
-  int i;
-  printf("%d %d %d %d  \n", iap.ndim,iap.ips,iap.irs,iap.ilp);
-  printf("%d ",iap.nicp);
-  for(i=0;i<iap.nicp;i++)
-    printf("%d ",icp[i]);
-  printf("\n");
-  printf("%d %d %d %d %d %d %d %d\n",iap.ntst,iap.ncol,iap.iad,iap.isp,iap.isw,iap.iplt,iap.nbc,iap.nint);
-  printf("%d %g %g %g %g\n",iap.nmx,rap.rl0,rap.rl1,rap.a0,rap.a1);
-  printf("%d %d %d %d %d %d %d\n",iap.npr,iap.mxbf,iap.iid,iap.itmx,iap.itnw,iap.nwtn,iap.jac);
-  printf("%g %g %g\n",rap.epsl,rap.epsu,rap.epss);
-  printf("%g %g %g %d\n",rap.ds,rap.dsmin,rap.dsmax,iap.iads);
-  for(i=0;i<5;i++)
-    printf("%g ",thl[icp[i]]);
-  printf("\n");
-  
-}
 

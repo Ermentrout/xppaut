@@ -3,9 +3,10 @@
 #include "aniparse.h"
 
 #include "ggets.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
-#include <stdlib.h>
+#include <time.h>
+#include "stdfix.h"
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -44,6 +45,8 @@ extern Display *display;
 
 GIFCOL gifcol[256];
 GIFCOL gifGcol[256];
+#define STRINGIFY_(x) #x
+#define STRINGIFY(x) STRINGIFY_(x)
 int NGlobalColors=0;
 void set_global_map(int flag)
 {
@@ -80,10 +83,104 @@ int ppmtopix(unsigned char r,unsigned char g, unsigned char b,int *n)
 }
 
 
+/*  Information in the GIF itself. The program that makes a GIF can leave a note (gif_set_note); at the end of every GIF the
+    same text as at the end of a PostScript file is written: the file name and all the parameters (ps_write_pars), the date and
+    the numerics, then the note. It goes in twice: as a standard GIF Comment Extension after the header and before the first
+    image (read by Pillow, ImageMagick, exiftool, GIMP, ...) and as plain text after the end marker ';', which every decoder ignores, so that
+        tail -n 10 file.gif          or          tail -c 4000 file.gif | strings
+    shows it, as tail does for a .ps file. */
+extern char this_file[];
+extern int NJMP,METHOD;
+extern double DELTA_T,TEND,T0,TRANS;
+void ps_write_pars(FILE *fp);
+static char gif_note[3000]="";
+void gif_write_comment_now(FILE *fp);
+
+void gif_set_note(const char *s)
+{
+  strncpy(gif_note,s?s:"",sizeof(gif_note)-1);
+  gif_note[sizeof(gif_note)-1]=0;
+}
+
+/* the text, plain ASCII, in a malloc'd string */
+static char *gif_footer_text(void)
+{
+  static char *method[]={"Discrete","Euler","Mod. Euler","Runge-Kutta","Adams","Gear","Volterra","BackEul","QualRK",
+			 "Stiff","CVode","DoPri5","DoPri8(3)","Rosenbrock","Symplectic"};
+  FILE *tf=tmpfile();
+  char *txt;
+  long n,i;
+  time_t now=time(NULL);
+  if(tf==NULL)return NULL;
+  ps_write_pars(tf);
+  fprintf(tf," %%%% XPPAUT"
+#ifdef MYSTR1
+	  " %s.%s"
+#endif
+	  ", GIF written %s",
+#ifdef MYSTR1
+	  STRINGIFY(MYSTR1),STRINGIFY(MYSTR2),
+#endif
+	  ctime(&now));
+  fprintf(tf," %%%% Numerics: METHOD=%s  DT=%g  NJMP=%d  TOTAL=%g  TRANS=%g  T0=%g\n",
+	  (METHOD>=0&&METHOD<15)?method[METHOD]:"?",DELTA_T,NJMP,TEND,TRANS,T0);
+  if(gif_note[0])fprintf(tf,"%s",gif_note);
+  n=ftell(tf);
+  rewind(tf);
+  txt=(char *)malloc((size_t)n+2);
+  if(txt==NULL){fclose(tf);return NULL;}
+  n=(long)fread(txt,1,(size_t)n,tf);
+  txt[n]=0;
+  fclose(tf);
+  for(i=0;i<n;i++)if((txt[i]<32&&txt[i]!='\n')||txt[i]>126)txt[i]='?';   /* plain ASCII, as a GIF comment must be */
+  return txt;
+}
+
+/* the Comment Extension: 0x21 0xFE, sub-blocks of 255 bytes (the last one padded with blanks), 0x00 */
+static void gif_write_comment(FILE *fp,const char *txt)
+{
+  size_t n=strlen(txt),i=0;
+  char blk[255];
+  fputc(0x21,fp);
+  fputc(0xFE,fp);
+  while(i<n){
+    size_t k=n-i;
+    if(k>255)k=255;
+    memset(blk,' ',255);
+    memcpy(blk,txt+i,k);
+    fputc(255,fp);
+    fwrite(blk,1,255,fp);
+    i+=k;
+  }
+  fputc(0x00,fp);
+}
+
+/* the comment, written after the header and before the first image: this is where GIF readers look for it */
+void gif_write_comment_now(FILE *fp)
+{
+  char *txt=gif_footer_text();
+  if(txt){
+    gif_write_comment(fp,txt);
+    free(txt);
+  }
+}
+
+/* the end of a GIF: the end marker, and then the text again, as plain lines (the note is used up) */
+void gif_finish(FILE *fp)
+{
+  char *txt=gif_footer_text();
+  fputc(';',fp);
+  if(txt){
+    fputs("\n",fp);
+    fputs(txt,fp);
+    free(txt);
+  }
+  gif_note[0]=0;
+}
+
 void end_ani_gif(FILE *fp)
 {
-
-  fputc(';',fp);
+  gif_finish(fp);
 }
 
 void add_ani_gif(Window win,FILE *fp,int count)
@@ -294,6 +391,7 @@ void write_global_header(int cols,int rows, FILE *dst)
   fwrite(buffer,pos-buffer,1,dst);
   free(buffer-1);
   GifLoop(dst,GifFrameLoop);
+  gif_write_comment_now(dst);
 }
 
 void GifLoop(FILE *fout, unsigned int repeats)
@@ -349,7 +447,7 @@ void make_gif(unsigned char *pixels,int cols,int rows,FILE *dst)
 
   int     i,depth=8;
 
-  unsigned char    *pos,*buffer;
+  unsigned char    *pos,*buffer,*pdesc;
 
 
   buffer = (unsigned char *)malloc((BUFLEN+1)*sizeof(unsigned char))+1;
@@ -363,7 +461,7 @@ void make_gif(unsigned char *pixels,int cols,int rows,FILE *dst)
   *pos++ = 'I';
   *pos++ = 'F';
   *pos++ = '8';
-  *pos++ = '7';
+  *pos++ = '9';
   *pos++ = 'a';
   
   *pos++ = 0xff & cols;
@@ -379,6 +477,7 @@ void make_gif(unsigned char *pixels,int cols,int rows,FILE *dst)
     *pos++ = 0xff & gifcol[i].g;
     *pos++ = 0xff & gifcol[i].b;
   }    
+  pdesc = pos;                 /* the image descriptor starts here */
   *pos++ = 0x2c;
   *pos++ = 0x00;
   *pos++ = 0x00;
@@ -391,12 +490,14 @@ void make_gif(unsigned char *pixels,int cols,int rows,FILE *dst)
   *pos++ = 0x7&(depth-1);
   /* *pos++ = (depth==1)?2:depth; */
 
-  fwrite(buffer,pos-buffer,1,dst);
+  fwrite(buffer,pdesc-buffer,1,dst);
+  gif_write_comment_now(dst);
+  fwrite(pdesc,pos-pdesc,1,dst);
 
   /* header info done */
 
   GifEncode(dst,pixels,depth,rows*cols);
-  fputc(';',dst);
+  gif_finish(dst);
    free(buffer-1);
 
 }

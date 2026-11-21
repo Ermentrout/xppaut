@@ -1,3 +1,4 @@
+#include "xpp_script.h"
 #include "init_conds.h"
 #include "parserslow.h"
 #include "tabular.h"
@@ -13,7 +14,7 @@
 #include "eig_list.h"
 #include "graf_par.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <strings.h>
 #include "browse.h"
@@ -525,7 +526,7 @@ FILESEL f;
  
  char t[256]; 
  if(f.here!=1)return;
- if(f.ok==w)XDrawString(display,w,small_gc,5,CURY_OFFs,"Ok",2);
+ if(f.ok==w)XDrawString(display,w,small_gc,5,CURY_OFFs,"OK",2);
   if(f.cancel==w)XDrawString(display,w,small_gc,5,CURY_OFFs,"Cancel",6);
  if(f.up==w)
  {
@@ -769,7 +770,7 @@ int do_file_select_events()
  XEvent ev;
  /* plintf("Xup=%d\n",Xup); */
  while(1){
-   XNextEvent(display,&ev);
+   xpp_next_event(&ev);
    switch(ev.type){
    case ConfigureNotify:
    case Expose:
@@ -851,10 +852,10 @@ void create_file_selector(title,file,wild)
  XSetWMProperties(display,base,&winname,NULL,NULL,0,&size_hints,NULL,&class_hints);
  
  /*
- filesel.up=make_window(base,DCURXs,2+4*hgt,3*DCURXs+5,DCURYs,1);
- filesel.dn=make_window(base,DCURXs,2+5*hgt,3*DCURXs+5,DCURYs,1);
+ filesel.up=make_button(base,DCURXs,2+4*hgt,3*DCURXs+5,DCURYs,1);
+ filesel.dn=make_button(base,DCURXs,2+5*hgt,3*DCURXs+5,DCURYs,1);
  filesel.pgup=make_plain_window(base,DCURXs,2+7*hgt,3*DCURXs+5,DCURYs,1);
- filesel.pgdn=make_window(base,DCURXs,2+8*hgt,3*DCURXs+5,DCURYs,1);
+ filesel.pgdn=make_button(base,DCURXs,2+8*hgt,3*DCURXs+5,DCURYs,1);
  */
  
  filesel.up=make_icon_window(base,DCURXs,2+3*hgt+72+15,32,24,1,0,0,lineup_bits);
@@ -877,8 +878,9 @@ void create_file_selector(title,file,wild)
    filesel.w[i]=make_plain_window(base,6*DCURXs+5,2+(3+i)*hgt,width-6*DCURXs-10,DCURYs,0);
 } 
 
-  filesel.ok=make_window(base,width/2-7*DCURXs-3,height-hgt,7*DCURXs,DCURYs,1);
-  filesel.cancel=make_window(base,width/2+3,height-hgt,7*DCURXs,DCURYs,1);
+  filesel.ok=make_button(base,width/2-7*DCURXs-3,height-hgt,7*DCURXs,DCURYs,1);
+  filesel.cancel=make_button(base,width/2+3,height-hgt,7*DCURXs,DCURYs,1);
+  wm_register_close(base,filesel.cancel);
   /*  XSelectInput(display,filesel.wild,BOXEVENT);
       XSelectInput(display,filesel.file,BOXEVENT); */
   filesel.here=1;
@@ -1056,14 +1058,23 @@ int *off1,*pos1,mc;
 	
         ft[m] = '\0';
      	m--;
+	/* A name with no directory part (like the default "model.ode.ps") has no '/'
+	   to stop at: m would go below zero and ft[m] would be written before the start
+	   of the buffer (a crash).  Stop at the start of the name instead. */
+	if (m<0)
+	{
+		m=0;
+		break;
+	}
 	if ((ft[m] != '/') & (ft[m] != '\\'))
      	{
 		ft[m] = '\0';
      		m--;
      	}
 	
-	if (m==0)
+	if (m<=0)
 	{
+		if (m<0)m=0;
 		break;
 	}
      }
@@ -1233,11 +1244,30 @@ void destroy_selector()
 }
 
  
+int file_selector_x(char *title,char *file,char *wild);
+/* the file chooser; the real work is in file_selector_x() */
 int file_selector(title,file,wild)
  char *title;
  char *wild,*file;
 {
-  int i;
+  int h,r;
+  char *init=strdup(file);
+  h=rec_text_begin(init);
+  r=file_selector_x(title,file,wild);
+  rec_text_end(h,r,title,file);
+  free(init);
+  return(r);
+}
+
+int file_selector_x(title,file,wild)
+ char *title;
+ char *wild,*file;
+{
+  int i,sr;
+  /* scripted answer ("ans filename", "ok" or "cancel") */
+  sr=script_take_text(title,file,200);
+  if(sr==1)return 1;
+  if(sr==-1)return 0;
   if(!get_directory(cur_dir))
  return 0;
  if(!get_fileinfo(wild,cur_dir,&my_ff))
@@ -1309,6 +1339,9 @@ void do_slide_release(w,p)
 {
   if(p->use==0)return;
   if(p->slide==w){
+    {double zold=p->val;
+     if(p->type==ICBOX)zold=last_ic[p->index];else get_val(p->parname,&zold);
+     rec_set(p->parname,zold,p->val);}
     set_val(p->parname,p->val);
     if(p->type==ICBOX)
       last_ic[p->index]=p->val;
@@ -1605,7 +1638,7 @@ Window win;
   if(ParamBox.xuse==1&&win==ParamBox.base){
     ok=2;
     b=&ParamBox;
-    waitasec(ClickTime);
+    /* waitasec(ClickTime); */
     
     get_new_size(win,&w,&h);
     get_nrow_from_hgt(h,&nwin,(int*)&w);
@@ -1778,23 +1811,24 @@ int nrow,n;
  xb3=xb2+7*DCURXs+14;
  xb4=xb3+7*DCURXs+14;
  /*
- b->close=make_window(base,2,5,5*DCURXs,DCURYs,1);
- b->ok=make_window(base,xb1,5,2*DCURXs,DCURYs,1);
- b->def=make_window(base,xb2,5,7*DCURXs,DCURYs,1);
- b->cancel=make_window(base,xb3,5,6*DCURXs,DCURYs,1);
-  b->go=make_window(base,xb4,5,2*DCURXs,DCURYs,1);
+ b->close=make_button(base,2,5,5*DCURXs,DCURYs,1);
+ b->ok=make_button(base,xb1,5,2*DCURXs,DCURYs,1);
+ b->def=make_button(base,xb2,5,7*DCURXs,DCURYs,1);
+ b->cancel=make_button(base,xb3,5,6*DCURXs,DCURYs,1);
+  b->go=make_button(base,xb4,5,2*DCURXs,DCURYs,1);
   */
-  b->close=make_window(base,2,5,7*DCURXs+10,DCURYs,1);
- b->ok=make_window(base,xb1,5,7*DCURXs+10,DCURYs,1);
- b->def=make_window(base,xb2,5,7*DCURXs+10,DCURYs,1);
- b->cancel=make_window(base,xb3,5,7*DCURXs+10,DCURYs,1);
-  b->go=make_window(base,xb4,5,7*DCURXs+10,DCURYs,1);
+  b->close=make_button(base,2,5,7*DCURXs+10,DCURYs,1);
+ wm_register_close(base,b->close);
+ b->ok=make_button(base,xb1,5,7*DCURXs+10,DCURYs,1);
+ b->def=make_button(base,xb2,5,7*DCURXs+10,DCURYs,1);
+ b->cancel=make_button(base,xb3,5,7*DCURXs+10,DCURYs,1);
+  b->go=make_button(base,xb4,5,7*DCURXs+10,DCURYs,1);
   xb1=DCURXs+wid1+wid2+12;
   /*
-  b->up=make_window(base,xb1,2*DCURYs,3*DCURXs,DCURYs,1);
-  b->dn=make_window(base,xb1,2*DCURYs+DCURYs+4,3*DCURXs,DCURYs,1);
-  b->pgup=make_window(base,xb1,2*DCURYs+2*DCURYs+8,3*DCURXs,DCURYs,1);
-  b->pgdn=make_window(base,xb1,2*DCURYs+3*DCURYs+12,3*DCURXs,DCURYs,1);
+  b->up=make_button(base,xb1,2*DCURYs,3*DCURXs,DCURYs,1);
+  b->dn=make_button(base,xb1,2*DCURYs+DCURYs+4,3*DCURXs,DCURYs,1);
+  b->pgup=make_button(base,xb1,2*DCURYs+2*DCURYs+8,3*DCURXs,DCURYs,1);
+  b->pgdn=make_button(base,xb1,2*DCURYs+3*DCURYs+12,3*DCURXs,DCURYs,1);
 */
 
   b->up=make_icon_window(base,xb1,1.75*DCURYs+24+3,32,24,1,0,0,lineup_bits);
@@ -2020,7 +2054,7 @@ Window w;
  if(b.go==w)XDrawString(display,w,small_gc,5,CURY_OFFs,
 	"Go",2);
  if(b.ok==w)XDrawString(display,w,small_gc,5,CURY_OFFs,
-	"Ok",2);
+	"OK",2);
  if(b.cancel==w)XDrawString(display,w,small_gc,5,CURY_OFFs,
 	"Cancel",6);
 if(b.def==w)XDrawString(display,w,small_gc,5,CURY_OFFs,
@@ -2221,7 +2255,7 @@ void do_box_button(b,w)
    load_entire_box(b);
  if(w==b->cancel)
    redraw_entire_box(b);
- if(w==b->go) run_now();
+ if(w==b->go){rec_go();run_now();}
  if(w==b->def&&b->type==PARAMBOX)
    set_default_params();
  if(w==b->def&&b->type==ICBOX)
@@ -2352,7 +2386,7 @@ void do_box_key(b,ev,used)
         XGetInputFocus(display,&focus,&rev);
         if(w==focus){
 	  *used=1;
-	  ch=get_key_press(&ev);
+	  ch=get_key_press_nr(&ev);     /* typing: the committed value is recorded instead */
 	  flag=edit_bitem(b,i,ch);
 	  if(flag==EDIT_NEXT&&n>1){
 	    j=i+1;
@@ -2743,11 +2777,13 @@ void set_value_from_box(b,i)
   switch(b->type){
   case ICBOX:
     if(to_float(s,&z)==-1)return;
+    rec_set(uvar_names[i],last_ic[i],z);
     last_ic[i]=z;
     add_edit_float(b,i,z);
     break;
   case PARAMBOX:
     if(to_float(s,&z)==-1)return;
+    {double zold=z;get_val(upar_names[i],&zold);rec_set(upar_names[i],zold,z);}
     set_val(upar_names[i],z);
     add_edit_float(b,i,z);
     break;

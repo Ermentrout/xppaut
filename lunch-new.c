@@ -9,7 +9,7 @@
 #include "init_conds.h"
 
 #include "numerics.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>

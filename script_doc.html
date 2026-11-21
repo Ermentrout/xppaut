@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>XPPAUT scripting manual</title>
+  <style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">body{font-family:-apple-system,Helvetica,Arial,sans-serif;max-width:52em;margin:2em auto;padding:0 1em;line-height:1.5;color:#222}
+h1{border-bottom:2px solid #444;padding-bottom:.2em} h2{margin-top:1.8em;border-bottom:1px solid #bbb;padding-bottom:.15em}
+code,pre{font-family:Menlo,Consolas,monospace;font-size:.92em} pre{background:#f4f4f4;border:1px solid #ddd;padding:.7em .9em;overflow-x:auto;border-radius:4px}
+code{background:#f1f1f1;padding:.05em .3em;border-radius:3px} pre code{background:none;padding:0}
+table{border-collapse:collapse;margin:1em 0} th,td{border:1px solid #bbb;padding:.35em .7em;vertical-align:top} th{background:#eee;text-align:left}
+</style>
+</head>
+<body>
+<h1 id="xppaut-scripting-a-short-manual">XPPAUT scripting: a short
+manual</h1>
+<p>A script is a plain text file of commands that XPPAUT carries out for
+you: set parameters and numerics, press menu keys, answer dialogs, move
+around AUTO diagrams, and save figures. Use it to reproduce a figure
+exactly, to run a tutorial with pauses, or to run unattended. You do not
+have to write a script by hand: XPPAUT can record what you do as a script
+(section 11).</p>
+<h2 id="1-running-a-script">1. Running a script</h2>
+<pre><code>xppaut model.ode -script file.xps                          # pauses and waits are honoured
+xppaut model.ode -script file.xps -nopause                 # skip pause / wait / speed
+xvfb-run xppaut model.ode -script file.xps -scriptexit     # unattended; exits when finished</code></pre>
+<ul>
+<li>The script needs the graphical interface. (It is ignored with
+<code>-silent</code>.)</li>
+<li>XPP stays open when the script ends, unless you gave
+<code>-scriptexit</code> or the script says <code>quit</code>.</li>
+<li><code>-scriptexit</code> implies <code>-nopause</code>, so an
+unattended run can never wait for a person.</li>
+<li><strong>From inside the program:</strong> File → <strong>Do
+script</strong> (key <code>d</code>) opens a file selector
+(<code>*.xps</code>) and runs the file you choose. Pauses are honoured
+and errors appear in a box. A script cannot start another script.</li>
+<li>A script with no <code>pause</code> runs straight through.</li>
+<li><strong>Recording:</strong> File → <strong>recOrd script</strong>
+(key <code>o</code>) writes a script for you as you work. See section
+11.</li>
+</ul>
+<h2 id="2-the-script-file">2. The script file</h2>
+<p>One command per line. <code>#</code> starts a comment when it is at
+the start of a line or follows a blank
+(<code>keys i g   # run it</code>). To use a literal <code>#</code>,
+quote it: <code>msg &quot;step #1&quot;</code>. Command names are not case
+sensitive. A file is checked completely before anything runs, so a typo
+on line 40 stops the script before line 1 is executed.</p>
+<h2 id="3-commands">3. Commands</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>set a=2.5;b=0.2;total=40;xlo=-10</code></td>
+<td>Sets parameters, initial conditions, numerics, AUTO and plot
+options. Same syntax as a parameter set; separators are <code>;</code>
+<code>,</code> or blanks.</td>
+</tr>
+<tr class="even">
+<td><code>print a</code></td>
+<td>Writes a parameter, variable or initial condition to the
+terminal.</td>
+</tr>
+<tr class="odd">
+<td><code>keys i g</code></td>
+<td>Presses keys in the main window.</td>
+</tr>
+<tr class="even">
+<td><code>autokeys r s</code></td>
+<td>Presses keys in the AUTO window (open it first with
+<code>keys f a</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>browser open</code> / <code>browser close</code></td>
+<td>Opens the data browser (the Data button) or closes it with its Close
+button (section 7).</td>
+</tr>
+<tr class="even">
+<td><code>browsekeys down down f</code></td>
+<td>Presses keys in the data browser (section 7).</td>
+</tr>
+<tr class="odd">
+<td><code>aplot fit</code></td>
+<td>Presses a button of the array plot window: <code>edit fit range redraw
+print gif surface close</code> (section 8).</td>
+</tr>
+<tr class="even">
+<td><code>ans ...</code></td>
+<td>Answers the next dialog (section 4).</td>
+</tr>
+<tr class="odd">
+<td><code>ok</code></td>
+<td>Presses OK on the next dialog, keeping what it shows.</td>
+</tr>
+<tr class="even">
+<td><code>cancel</code></td>
+<td>Cancels the next dialog.</td>
+</tr>
+<tr class="odd">
+<td><code>auto goto HB 1</code></td>
+<td>Selects a point in the AUTO diagram (section 6).</td>
+</tr>
+<tr class="even">
+<td><code>auto list</code></td>
+<td>Prints the labelled points of the AUTO diagram.</td>
+</tr>
+<tr class="odd">
+<td><code>msg &quot;text&quot;</code></td>
+<td>Shows text in the info bar and on the terminal. With
+<code>-nopause</code> it goes to the terminal only, so it never appears
+in a final picture.</td>
+</tr>
+<tr class="even">
+<td><code>pause [&quot;text&quot;]</code></td>
+<td>Waits for Enter or Space (Esc stops the script). Skipped with
+<code>-nopause</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>wait 2.5</code></td>
+<td>Waits that many seconds. Skipped with <code>-nopause</code>.</td>
+</tr>
+<tr class="even">
+<td><code>speed 0.2</code></td>
+<td>Delay between keys, so an audience can follow. Skipped with
+<code>-nopause</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>shot fig.ps</code></td>
+<td>Saves the plot to a file (<code>.ps</code> or <code>.svg</code>)
+without going through the dialogs (section 5).
+<code>shot auto d.ps</code> saves the AUTO diagram.</td>
+</tr>
+<tr class="even">
+<td><code>for a in 1 2 3</code> ... <code>end</code></td>
+<td>Repeats the lines between, with <code>$a</code> replaced by each
+value (section 9). Also <code>for a = 0:0.5:2</code> and
+<code>repeat 3</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>try</code> ... <code>else</code> ... <code>end</code></td>
+<td>Carries on after a failure: if a command between <code>try</code>
+and <code>else</code> fails, the <code>else</code> part runs and the
+script continues (section 10). <code>$error</code> holds the
+message.</td>
+</tr>
+<tr class="even">
+<td><code>quit</code></td>
+<td>Leaves XPPAUT.</td>
+</tr>
+<tr class="odd">
+<td><code>click x y</code> / <code>drag x1 y1 x2 y2</code></td>
+<td>Supplies the mouse for a command that waits for it: placing text, the
+zoom rectangle, an arrow (section 4).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="set">set</h3>
+<p><code>set</code> leaves XPP in the same state as making the changes
+by hand: tables and derived parameters are recomputed, the plot window
+and the plotted variables (<code>xp=x;yp=y</code>) are updated, and the
+parameter and IC boxes are redrawn. Two things are refused:
+<code>maxstor</code> (fixed when XPP starts), and any name XPP does not
+know (the script stops with the line number).</p>
+<h3 id="keys">keys</h3>
+<p>Tokens are separated by blanks. A token can be</p>
+<ul>
+<li>a named key:
+<code>enter tab esc space bksp del up down left right home end pgup pgdn</code>;</li>
+<li>a single letter. Menu hot keys are all lower case, so a capital is
+sent as lower case (<code>keys I G</code> is
+<code>keys i g</code>);</li>
+<li>any other text, typed exactly (<code>keys 0.5 enter</code>), or a
+quoted string (<code>keys &quot;Fig 1&quot;</code>).</li>
+</ul>
+<p>Keys are delivered one at a time, only when XPP is idle, so a key
+never races a redraw. A run started by <code>keys i g</code> finishes
+before the next line is read. The hot key of a menu item is the capital
+letter in its name (Initialconds → <code>i</code>, nUmerics →
+<code>u</code>, Graphic stuff → <code>g</code>).</p>
+<p>Keys used in this manual: <code>i g</code> run, <code>i l</code>
+continue from the last point, <code>w w</code> window form,
+<code>n n</code> nullclines, <code>g p</code> PostScript,
+<code>g v</code> SVG, <code>e</code> erase, <code>v 2</code> 2D view
+dialog, <code>f a</code> open AUTO, <code>f g</code> then a letter loads
+a stored parameter set, <code>v a</code> array plot, <code>f o</code>
+start or stop recording.</p>
+<h2 id="4-dialogs-ans-ok-cancel">4. Dialogs: ans, ok, cancel</h2>
+<p>A dialog asks the script for its answer before it opens, so the
+answer goes on the line <strong>after</strong> the <code>keys</code>
+that opens it.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Dialog</th>
+<th>What you write</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>One line (command bar, one-field box)</td>
+<td><code>ans text</code></td>
+</tr>
+<tr class="even">
+<td>File selector</td>
+<td><code>ans filename.ps</code></td>
+</tr>
+<tr class="odd">
+<td>Form with several fields</td>
+<td>answer by position or by label, with the fields separated by a
+vertical bar (examples just below)</td>
+</tr>
+<tr class="even">
+<td>Yes / no</td>
+<td><code>ans y</code> or <code>ans n</code></td>
+</tr>
+<tr class="odd">
+<td>Accept as shown</td>
+<td><code>ok</code></td>
+</tr>
+<tr class="even">
+<td>Cancel</td>
+<td><code>cancel</code></td>
+</tr>
+<tr class="odd">
+<td>Let the person type this one</td>
+<td><code>ans ?</code> (not allowed with <code>-nopause</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Form answers, written exactly as you type them (the <code>|</code> is
+a vertical bar):</p>
+<pre><code>ans 0|10|-2|2                 # by position; an empty field keeps its value
+ans ||24||25                  # change only fields 3 and 5
+ans X Lo=0|Y Hi=2             # by label; fields you leave out keep their values</code></pre>
+<p>Labels must match the dialog&#39;s text (case does not matter); a label
+that matches no field is an error. Fields in a form hold at most 24
+characters. Postscript opens <strong>two</strong> dialogs, the options
+form and then the file name, so it needs two lines. A dialog with no
+answer line is left open for the following <code>keys</code> lines to
+drive.</p>
+<h3 id="if-a-dialog-changes">If a dialog changes</h3>
+<p>Scripts read each dialog&#39;s field list when it opens, so changing a
+dialog does not require changing the scripting program. What it can mean
+for a script you wrote earlier:</p>
+<ul>
+<li><strong>A field added at the end:</strong> nothing changes. Answers
+by position or by label still work, and the new field keeps its
+default.</li>
+<li><strong>A field inserted in the middle:</strong> answers <strong>by
+label</strong> still work; answers <strong>by position</strong> shift
+and put values in the wrong fields, with no error. Use labels
+(<code>ans Axes fontsize=24|Linewidth=25</code>) for dialogs that may
+change. <code>ok</code> is never affected.</li>
+<li><strong>A field renamed:</strong> an answer by that label stops with
+an error that names the dialog and lists its current fields. (A value
+that really contains <code>=</code> can be quoted:
+<code>&quot;a=b&quot;</code>.)</li>
+<li><strong>A new dialog added to a menu action:</strong> the new dialog
+opens with no answer waiting, so add an <code>ok</code> or
+<code>ans</code> line for it. The script then stops with an error if you
+forget, rather than doing something wrong. The reverse, a dialog that no
+longer appears, makes the old <code>ans</code> line an error (&quot;ans has
+no prompt to answer&quot;).</li>
+</ul>
+<h3 id="mouse-waits-click-and-drag">Mouse waits: click and drag</h3>
+<p>A few commands wait for the mouse in the plot window: placing text, a
+start point chosen with the mouse, a freeze key, and, with a drag, the
+zoom rectangle and arrows. The line after the <code>keys</code> that
+start one supplies the mouse:</p>
+<pre><code>click x y               a point, in the data coordinates of the plot
+drag x1 y1 x2 y2        a rectangle or a line, from the first point to the second
+click pixel x y         the same, in window pixels (also drag pixel x1 y1 x2 y2)
+click ?   drag ?        leave this one to the person at the keyboard
+                        (not allowed with -nopause)</code></pre>
+<p>Examples (<code>osc.ode</code>):</p>
+<pre><code>keys t t                # Text, etc -&gt; Text
+ans hello               # the text
+ans 2                   # its size
+click 8 1.5             # where it goes: t = 8, x = 1.5
+
+keys w z                # Window/zoom -&gt; Zoom in
+drag 5 -1 15 1          # the new window: t from 5 to 15, x from -1 to 1</code></pre>
+<p>For a zoom the first point becomes (xlo, ylo) and the second (xhi,
+yhi), as with the mouse. Data coordinates are those of the plot that is
+showing when the click happens, so a script that changes the window
+first should click after it. A point outside the plot window is an
+error, as a real click could not be there.</p>
+<p>Some waits repeat until Esc. Initialconds → mIce (<code>keys i i</code>)
+takes a click, runs from that point, and asks for the next one. Give it one
+click line for each start and end it with <code>keys esc</code>, which ends a
+mouse wait as Esc does for a person:</p>
+<pre><code>keys i i
+click 1 1
+click -1 0
+keys esc</code></pre>
+<p>If the script has nothing to give a mouse wait (no <code>click</code>
+or <code>drag</code> line after it), an unattended run
+(<code>-nopause</code>, <code>-scriptexit</code>) stops with an error
+that names the line, instead of waiting for ever:</p>
+<pre><code>script error  fig.xps:3: XPP is waiting for a mouse drag (a rectangle or a
+line) and the script has nothing to give it: add a "drag x1 y1 x2 y2" line
+after this one, or "drag ?" to leave it to a person</code></pre>
+<p>A script run by hand waits for the person to click, and then carries
+on. A click where a drag is wanted (or the other way round), and a click
+or drag with no mouse wait before it, are errors too. Inside
+<code>try</code> they are caught like any other failure.</p>
+<h2 id="5-saving-pictures-shot">5. Saving pictures: shot</h2>
+<p><code>shot</code> writes the picture straight to a file. It does not
+open any dialog, so a script keeps working if a menu later gains or
+loses an options form.</p>
+<pre><code>shot fig1.ps                         # the plot window, as Postscript
+shot fig1.svg                        # ... as SVG (the extension chooses the format)
+shot fig1.ps fontsize=24 linewidth=25    # options for this file only
+shot auto diagram.ps                 # the AUTO bifurcation diagram</code></pre>
+<p>The options are <code>color=0|1</code>,
+<code>orient=landscape|portrait</code>, <code>fontsize=N</code>,
+<code>font=Name</code> and <code>linewidth=X</code>. They apply to that
+one file; the settings go back to what they were afterwards (unlike the
+Postscript dialog, whose settings stay changed for the rest of the
+session). The files are identical to those written through Graphic stuff
+-&gt; Postscript or AUTO&#39;s File menu. If there is no AUTO diagram yet,
+<code>shot auto</code> stops with a message and creates no file.</p>
+<h2 id="6-auto">6. AUTO</h2>
+<pre><code>keys f a              # open the AUTO window
+autokeys r s          # Run -&gt; Steady state
+auto list             # show the labelled points and their numbers
+auto goto HB 1        # select a point as Grab + Enter would
+autokeys r p          # Hopf point menu -&gt; Periodic</code></pre>
+<p><code>auto goto</code> forms:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Line</th>
+<th>Selects</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>auto goto HB 1</code></td>
+<td>the first point of that type (BP EP HB LP MX PD TR UZ);
+<code>HB 2</code> the second; <code>HB -1</code> the last</td>
+</tr>
+<tr class="even">
+<td><code>auto goto lab 5</code></td>
+<td>the point with label 5</td>
+</tr>
+<tr class="odd">
+<td><code>auto goto first</code> / <code>last</code></td>
+<td>the ends of the diagram</td>
+</tr>
+<tr class="even">
+<td><code>auto goto HB 1 branch -2</code></td>
+<td>search only one branch, numbered as <code>auto list</code> shows
+(periodic branches are negative)</td>
+</tr>
+</tbody>
+</table>
+<p>The point&#39;s parameter and state values are loaded and the next AUTO
+command continues from it. &quot;Second&quot; means second in the order the points
+were computed. Use <code>auto list</code> to see the order.</p>
+<p>Saving the diagram uses AUTO&#39;s own File menu. Its Postscript item
+asks for the options first (the same form as Graphic stuff -&gt;
+Postscript) and then for the file name; SVG asks only for the name:</p>
+<pre><code>autokeys f p          # AUTO File -&gt; Postscript
+ok                    # accept the options (or: ans ||24||25)
+ans diagram.ps
+autokeys f v          # AUTO File -&gt; SVG
+ans diagram.svg</code></pre>
+<p>A script written for the older AUTO Postscript, which asked only for
+a file name, needs the extra <code>ok</code> line (without it the file
+name is taken as the answer to the options form and the script stops
+with &quot;the script ended while a menu or dialog is still open&quot;).</p>
+<p>The Grab keys also work through <code>autokeys</code>, starting from
+the first point: <code>tab</code> (next labelled point),
+<code>pgup</code>/<code>pgdn</code> (next/previous labelled, no wrap),
+<code>home</code>/<code>end</code>, <code>left</code>/<code>right</code>
+(one point), <code>up</code> or <code>down</code> followed by
+<code>b e h l m p t u</code> (next/previous point of a type), and
+<code>enter</code> to select. For example,
+<code>autokeys g tab tab left enter</code>. This is the only way to
+reach a point that has no label.</p>
+<h2 id="7-the-data-browser">7. The data browser</h2>
+<p>The data browser (the <strong>Data</strong> button in the top row of
+the main window) shows the stored solution as a table. A script can open
+it, move around in it, and use its commands. Run something first, since
+there is nothing to show until there is a solution.</p>
+<pre><code>keys i g
+browser open                  # the Data button
+browsekeys down down pgdn     # move around
+browsekeys f                  # Find: opens a form
+ans Variable=x|Value=0.5      # go to the row where x is closest to 0.5
+browsekeys g                  # Get: that row becomes the initial conditions
+browser close                 # the Close button</code></pre>
+<p><code>browser open</code> raises the browser if it is already open.
+<code>browser close</code>, <code>browsekeys</code> and the other
+browser commands stop the script with a message if the browser is not
+open. <code>browsekeys</code> takes the same tokens as <code>keys</code>
+(section 3), but sends them to the browser. These are its keys, and each
+is also a button on the browser window:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Key</th>
+<th>Button</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>up</code> <code>down</code></td>
+<td>Up, Down</td>
+<td>Move one row.</td>
+</tr>
+<tr class="even">
+<td><code>pgup</code> <code>pgdn</code></td>
+<td>PgUp, PgDn</td>
+<td>Move one page of rows.</td>
+</tr>
+<tr class="odd">
+<td><code>left</code> <code>right</code></td>
+<td>Left, Right</td>
+<td>Scroll the columns.</td>
+</tr>
+<tr class="even">
+<td><code>home</code> <code>end</code></td>
+<td>Home, End</td>
+<td>Go to the first or last row. Home also clears the selected range of
+rows (below).</td>
+</tr>
+<tr class="odd">
+<td><code>s</code> <code>e</code></td>
+<td>First, Last</td>
+<td>Mark the current row as the first or last row of a selected range.
+Write and Restore use the range.</td>
+</tr>
+<tr class="even">
+<td><code>f</code></td>
+<td>Find</td>
+<td>Form <em>Find Data</em> with the fields <code>Variable</code> and
+<code>Value</code>. Moves to the row, from the current row down, where
+the variable is closest to the value.</td>
+</tr>
+<tr class="odd">
+<td><code>g</code></td>
+<td>Get</td>
+<td>Makes the current row (time and variables) the initial
+conditions.</td>
+</tr>
+<tr class="even">
+<td><code>r</code></td>
+<td>Restore</td>
+<td>Restores the selected rows as the current solution (as the main menu
+Restore does).</td>
+</tr>
+<tr class="odd">
+<td><code>w</code></td>
+<td>Write</td>
+<td>Writes the selected rows to a file. File selector
+(<code>*.dat</code>): <code>ans out.dat</code>.</td>
+</tr>
+<tr class="even">
+<td><code>l</code></td>
+<td>Load</td>
+<td>Reads a data file into the browser. File selector:
+<code>ans out.dat</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>p</code> <code>u</code></td>
+<td>Replace, Unrepl</td>
+<td>Replace asks two questions, the variable and then the formula, so it
+needs two <code>ans</code> lines. Unrepl undoes the last replace.</td>
+</tr>
+<tr class="even">
+<td><code>t</code></td>
+<td>Table</td>
+<td>Form <em>Tabulate</em> with the fields <code>Variable</code>,
+<code>Xlo</code>, <code>Xhi</code> and <code>File</code>: writes a lookup
+table.</td>
+</tr>
+<tr class="odd">
+<td><code>a</code> <code>d</code></td>
+<td>Add col, Del col</td>
+<td>Add col asks for a name and then a formula (two <code>ans</code>
+lines). Del col currently only shows an error box in XPP, which stops
+the script.</td>
+</tr>
+<tr class="even">
+<td><code>esc</code></td>
+<td></td>
+<td>Gives the keyboard back to the main window. The browser stays
+open.</td>
+</tr>
+</tbody>
+</table>
+<p>As with a person at the keyboard, a key goes to the window the
+pointer is over (or the one with the keyboard focus). A script does not
+have this problem: <code>browsekeys</code> always goes to the browser, and
+<code>keys</code> always goes to the main window.</p>
+<h2 id="8-the-array-plot">8. The array plot</h2>
+<p>The array plot shows a stored solution as an image (rows are times,
+columns are the variables <code>Column 1</code>, <code>Column 1</code>+1,
+...). It opens from Viewaxes → Array, which asks for its settings in the
+<em>Edit arrayplot</em> form. After that its buttons are scripted with
+<code>aplot</code>.</p>
+<pre><code>keys i g
+keys v a                                  # Viewaxes -&gt; Array: the Edit arrayplot form
+ans Column 1=v|NCols=20|NRows=100         # first variable, number of columns and rows
+aplot fit                                 # rescale Zmin and Zmax to the data
+aplot gif                                 # file selector
+ans array.gif
+aplot close</code></pre>
+<p>The fields of the <em>Edit arrayplot</em> form are
+<code>Column 1</code> (the name of a variable; any other name is an
+error box), <code>NCols</code>, <code>Row 1</code>, <code>NRows</code>,
+<code>RowSkip</code>, <code>Zmin</code>, <code>Zmax</code>,
+<code>Autoplot(0/1)</code> and <code>ColSkip</code>. The buttons:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>aplot edit</code></td>
+<td>The <em>Edit arrayplot</em> form again.</td>
+</tr>
+<tr class="even">
+<td><code>aplot fit</code></td>
+<td>Rescales Zmin and Zmax to the data and redraws.</td>
+</tr>
+<tr class="odd">
+<td><code>aplot redraw</code></td>
+<td>Redraws.</td>
+</tr>
+<tr class="even">
+<td><code>aplot range</code></td>
+<td>Form <em>Array range saving</em> with the fields <code>Basename</code>,
+<code>Still(1/0)</code> and <code>Tag(0/1)</code>, then a range
+integration that saves the array plots.</td>
+</tr>
+<tr class="odd">
+<td><code>aplot print</code></td>
+<td>Form <em>Print arrayplot</em> with the fields <code>Filename</code>,
+<code>Top label</code>, <code>Side label</code>, <code>Bottom label</code>
+and <code>Render(-1,0,1,2)</code>. Does nothing if the plot has not been
+defined.</td>
+</tr>
+<tr class="even">
+<td><code>aplot gif</code></td>
+<td>Saves a GIF. File selector: <code>ans array.gif</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>aplot surface</code></td>
+<td>Makes a surface plot from the array plot.</td>
+</tr>
+<tr class="even">
+<td><code>aplot close</code></td>
+<td>Closes the array plot window.</td>
+</tr>
+</tbody>
+</table>
+<p><code>aplot</code> stops the script with a message if the array plot
+is not open. Dragging in the plot window to scroll the rows has no script
+form: set <code>Row 1</code> in the <code>aplot edit</code> form
+instead.</p>
+<h2 id="9-loops">9. Loops</h2>
+<pre><code>for a in 0.5 1.5 2.5            # a list of values (words, numbers, &quot;quoted text&quot;)
+  set a=$a
+  keys i g
+  shot fig_$a.ps                # $a also works inside file names and ans lines
+end
+
+for k = 0:0.5:2                 # start:step:stop (step 1 if left out); 0, 0.5, 1, 1.5, 2
+  ...
+end
+
+repeat 3                        # no variable
+  ...
+end</code></pre>
+<ul>
+<li><strong>Variables:</strong> <code>$a</code> or <code>${a}</code>
+(use the braces when a letter follows: <code>${a}x</code>).
+<code>$$</code> is a literal <code>$</code>. Loops can be nested (up to
+8 deep), and an inner loop can use an outer variable.</li>
+<li><strong>Checked before anything runs:</strong> a loop is expanded
+when the script is loaded, so every iteration is syntax-checked first. A
+missing <code>end</code>, an undefined <code>$name</code>, a range with
+step 0, or a loop that expands to more than 200,000 lines is an error at
+load time (exit status 2).</li>
+<li><strong>Failures name the iteration:</strong>
+<code>fig.xps:7: auto goto: the diagram has only 1 HB point [loop: a=1.5]</code>.</li>
+<li><strong>Values are fixed when the script loads.</strong> A loop
+cannot depend on a result computed during the run (for example, &quot;for
+each Hopf point found&quot;).</li>
+</ul>
+<h2 id="10-carrying-on-after-a-failure-try">10. Carrying on after a
+failure: try</h2>
+<p>Without <code>try</code>, the first command that fails stops the
+script. Wrap a block in <code>try</code> when a failure is expected and
+the rest of the script should carry on (this example is for a model with
+a parameter <code>tau</code>):</p>
+<pre><code>for tau in 1 1.5 2 2.5 3
+  set tau=$tau
+  try
+    autokeys r s
+    auto goto HB 1                # there may be no Hopf point for some values of tau
+    autokeys r p
+    shot auto diagram_$tau.ps
+  else
+    msg &quot;tau=$tau: skipped ($error)&quot;
+  end
+  autokeys f r                    # clean up on both paths
+  ans y
+end</code></pre>
+<p>If every command between <code>try</code> and <code>else</code>
+works, the <code>else</code> part is skipped. If one fails, the rest of
+the <code>try</code> part is skipped, the <code>else</code> part runs,
+and the script continues after <code>end</code>. The <code>else</code>
+part is optional (<code>try ... end</code> just skips the block
+silently).</p>
+<ul>
+<li><strong>What is caught:</strong> anything that would otherwise stop
+the script while it runs: <code>auto goto</code> with no such point, an
+unknown name in <code>set</code>, a file <code>shot</code> cannot write,
+a wrong answer to a prompt, and an XPP error box (the box is not
+shown).</li>
+<li><strong>What is not:</strong> mistakes in the script itself (a typo,
+a missing <code>end</code>) are still found when the script is loaded,
+before anything runs. <code>quit</code> and anything that makes XPP
+itself exit are not caught.</li>
+<li><strong><code>$error</code></strong> in a <code>msg</code> (or
+<code>pause</code>) text is the message of the failure that was caught,
+for example
+<code>auto goto: the diagram has only 1 HB point</code>.</li>
+<li><strong>Nesting:</strong> <code>try</code> blocks can be nested and
+can sit inside loops or contain them. A failure in an <code>else</code>
+part is caught by the enclosing <code>try</code>, if there is one.</li>
+<li><strong>Cleaning up:</strong> the failed command may have left a
+menu, form or message box open. XPP presses Esc until it is back at the
+top level, and for a form (which has no keyboard cancel) it also presses
+the form&#39;s accept key, which keeps the values as they were. If it cannot
+get back to the top level, the script stops with an error.</li>
+<li><strong>The log and the exit status:</strong> each caught failure is
+written to the terminal as
+<code>script caught  file.xps:5: ... [loop: tau=2.5]</code>, and the
+script ends with a summary line. Under <code>-scriptexit</code> a script
+that finished but caught something exits with status <strong>3</strong>,
+so a batch job can tell &quot;everything worked&quot; (0) from &quot;finished, but some
+passes were skipped&quot; (3).</li>
+</ul>
+<h2 id="11-recording-a-script">11. Recording a script</h2>
+<p>XPPAUT can write the script for you while you work. Do the task once
+by hand, then replay it, edit it, or send it to a colleague.</p>
+<ol type="1">
+<li>File → <strong>recOrd script</strong> (key <code>o</code>). A file
+selector asks for the name; the default is the model name with
+<code>.ode</code> replaced by <code>.xps</code> (<code>osc.ode</code> →
+<code>osc.xps</code>). If the file exists you are asked before it is
+overwritten.</li>
+<li>XPP asks <em>Start with the current parameters?</em> If you say yes,
+the script begins with <code>set</code> lines for every parameter and
+initial condition, so that it does not depend on how XPP was set up when
+you replay it. If you say no, only your changes are recorded.</li>
+<li>Work as usual. The File menu entry now reads <strong>stop
+recOrding</strong>.</li>
+<li>Choose it again to stop. The keys that stopped the recording are not
+written. Quitting XPP also closes the file. The file is kept up to date
+as you go, so a crash does not lose the last lines.</li>
+</ol>
+<p>The file is an ordinary script. Run it with File → Do script, or
+<code>xppaut model.ode -script osc.xps</code>.</p>
+<h3 id="what-is-written">What is written</h3>
+<p>The recorder writes what you <em>meant</em>, not every key, so that
+the script still works when you replay it.</p>
+<table>
+<thead>
+<tr class="header">
+<th>You do</th>
+<th>The script gets</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Press menu keys, or click menu items</td>
+<td><code>keys i g</code>. Consecutive keys are collected on one line.
+Menu items clicked with the mouse are written as their hot key.</td>
+</tr>
+<tr class="even">
+<td>Answer a dialog</td>
+<td>A comment with the name of the dialog, then <code>ans</code>,
+<code>ok</code> or <code>cancel</code>. Forms are written by label and
+only the fields you changed (<code>ans X Lo=-5</code>); an untouched form
+is <code>ok</code>. Keys typed into a dialog are not written as
+keys.</td>
+</tr>
+<tr class="odd">
+<td>Click or drag in the plot window (placing text, zoom, mIce)</td>
+<td><code>click x y</code> or <code>drag x1 y1 x2 y2</code>, in data
+coordinates. The numbers are those of the pixel you pointed at, so
+expect values like <code>-1.0023</code> rather than <code>-1</code>;
+round them if you like.</td>
+</tr>
+<tr class="even">
+<td>Edit a parameter or initial condition in its box, or move a
+slider</td>
+<td><code>set mu=3</code>, only when the value changed. Typing in the
+box is not written, only the value that was entered.</td>
+</tr>
+<tr class="odd">
+<td>Press Go in the parameter window</td>
+<td><code>keys i g</code></td>
+</tr>
+<tr class="even">
+<td>Press keys or buttons in the AUTO window</td>
+<td><code>autokeys r s</code></td>
+</tr>
+<tr class="odd">
+<td>Pick a point in the AUTO diagram with Grab</td>
+<td><code>auto goto lab 5</code>, or by type and number if the point has
+no label (<code>auto goto HB 1 branch 1</code>). The keys that moved
+along the diagram are not written.</td>
+</tr>
+<tr class="even">
+<td>Open or close the data browser; use its keys or buttons</td>
+<td><code>browser open</code>, <code>browser close</code>,
+<code>browsekeys down f</code></td>
+</tr>
+<tr class="odd">
+<td>Press a button of the array plot window</td>
+<td><code>aplot edit</code>, <code>aplot fit</code>, ...</td>
+</tr>
+<tr class="even">
+<td>Scroll the array plot with the mouse</td>
+<td>A comment line saying that it happened. It cannot be written as a
+command.</td>
+</tr>
+</tbody>
+</table>
+<p>In recorded <code>keys</code> lines a capital letter or a punctuation
+mark is written in quotes (<code>keys &quot;A&quot;</code>), which types
+it exactly.</p>
+<p>A short recording (the comments in the header and the dialog names
+are written for you):</p>
+<pre><code># XPPAUT script recorded Fri Nov 20 03:08:50 2026
+# model: vdp.ode
+# Edit freely.  Run it with File -&gt; Do script, or:  xppaut model.ode -script this_file.xps
+set mu=3
+keys i g
+keys w w
+# Window
+ans X Lo=-5
+keys u t
+# total
+ans 40
+keys esc
+browser open
+browsekeys down down pgdn
+browser close
+# end of recording</code></pre>
+<h3 id="what-is-not-written">What is not written, and editing a
+recording</h3>
+<ul>
+<li><strong>Timing.</strong> A recording has no pauses, so it replays at
+full speed. Add <code>pause</code>, <code>wait</code>, <code>speed</code>
+and <code>msg</code> lines by hand to turn it into a tutorial.</li>
+<li><strong>Aborting a run.</strong> Pressing Abort, or Esc during an
+AUTO run, is not recorded. The replay lets the run finish, which can take
+as long as the run did before you stopped it. Tighten the AUTO numerics
+(for example the maximum number of steps) in the script instead.</li>
+<li><strong>Windows the script cannot open.</strong> The ICs, BCs, Delay,
+Param and Eqns buttons in the top row are mouse only. Parameters and
+initial conditions you change in their windows are written as
+<code>set</code> lines, but edits in the BC and delay boxes, clicks in
+the equation list, window moves and resizes, and rotating a 3D view with
+the mouse are not.</li>
+<li><strong>Where the pointer is.</strong> A key goes to the window under
+the pointer, as it does for you. A key is written as
+<code>browsekeys</code> or <code>autokeys</code> only if the browser or
+the AUTO window took it; otherwise it is a <code>keys</code> line, which
+is exactly what XPP did with it.</li>
+<li><strong>Not while a script runs.</strong> Recording is refused while
+a script is running.</li>
+</ul>
+<p>Two environment variables help with testing and demonstrations:
+<code>XPP_RECORD=file xppaut model.ode</code> starts a recording as XPP
+starts, and <code>XPP_REC_ECHO=1</code> also prints each recorded line on
+the terminal. (<code>XPP_REC_TEST=1</code> allows recording while a
+script runs; it is for testing the recorder.)</p>
+<h2 id="12-when-something-goes-wrong">12. When something goes wrong</h2>
+<p>A command that cannot work stops the script with the file and line
+number:</p>
+<pre><code>script error  fig.xps:7: auto goto: the diagram has only 1 HB point</code></pre>
+<p>Under <code>-scriptexit</code> the exit status is 0 when the script
+finished cleanly, 1 for a problem while running, 2 for a script that
+does not parse, and 3 when it finished but a <code>try</code> caught a
+failure. These also stop a script: a name <code>set</code> does not
+know; an <code>ans</code> with no dialog waiting (the line before it did
+not open one); a wrong answer to a yes/no; too many fields; and any XPP
+error box, and <code>browser</code>, <code>browsekeys</code> or
+<code>aplot</code> when that window is not open. Two more are errors only with <code>-nopause</code> or
+<code>-scriptexit</code>: a script that ends with a menu or dialog still
+open, and a <code>set</code> or <code>auto goto</code> while one is
+open. Interactively the script simply waits for you to close it. This is
+why an unattended script can never hang.</p>
+<h2 id="13-examples">13. Examples</h2>
+<p><strong>1. Set up, run, and save a figure.</strong> (Two files:
+PostScript with a bigger axis font and thicker lines, and SVG.)</p>
+<pre><code>set a=2.5;b=0.2;x=1;y=0
+set total=40;xp=x;yp=y;xlo=-10;xhi=10;ylo=-10;yhi=10
+keys i g                 # run
+keys g p                 # Graphic stuff -&gt; Postscript
+ans ||24||25             # options form: change fields 3 and 5 only
+ans fig1.ps              # file name
+keys g v                 # SVG has no options form
+ans fig1.svg</code></pre>
+<p><strong>2. Phase plane with nullclines, window set through its
+dialog.</strong></p>
+<pre><code>set xp=x;yp=y
+keys i g
+keys w w                                       # Window/zoom -&gt; Window
+ans X Lo=-10|X Hi=10|Y Lo=-10|Y Hi=10
+keys n n                                       # Nullcline -&gt; New
+keys g p
+ok                                             # accept the PostScript options
+ans phase.ps</code></pre>
+<p><strong>3. A parameter sweep: one figure per value.</strong></p>
+<pre><code>set b=0.2;x=1;y=0;total=30
+for a in 0.5 1.5 2.5
+  set a=$a
+  keys i g
+  shot sweep_$a.ps                # sweep_0.5.ps, sweep_1.5.ps, sweep_2.5.ps
+end</code></pre>
+<p>To put several values on one plot, freeze each run. XPP keeps only the
+last trajectory unless it is frozen. Graphic stuff -&gt; Freeze -&gt; Freeze
+(<code>keys g f f</code>) opens an Edit Freeze form (Color, Key, Name), which
+<code>ans</code> or <code>ok</code> fills in. Put one <code>shot</code> after
+the loop:</p>
+<pre><code>set b=0.2;x=1;y=0;total=30
+for a in 0.5 1.5 2.5
+  set a=$a
+  keys i g
+  keys g f f
+  ans |"a=$a"|                     # Edit Freeze: keep the colour, Key = a=0.5, ...
+end
+shot sweep.ps                      # all three curves</code></pre>
+<p>Use <code>ok</code> instead of the <code>ans</code> line to accept the
+form as it is. Quote the key (<code>"a=$a"</code>), since an unquoted
+<code>a=...</code> is read as a field name.</p>
+<p><strong>4. Continue a run.</strong></p>
+<pre><code>set a=2.5;b=0.2
+keys i g
+keys i l                 # Initialconds -&gt; Last: continue from where it stopped</code></pre>
+<p><strong>5. A tutorial with pauses.</strong></p>
+<pre><code>msg &quot;Driven oscillator&quot;
+pause &quot;Press Enter to set the parameters&quot;
+set a=2.5;b=0.2;x=1;y=0
+set xp=x;yp=y;xlo=-10;xhi=10;ylo=-10;yhi=10
+pause &quot;Press Enter to run it&quot;
+keys i g
+msg &quot;The oscillation spirals outward&quot;</code></pre>
+<p>Run it normally for the tutorial, and with <code>-nopause</code> to
+get just the final picture.</p>
+<p><strong>6. A bifurcation diagram: first Hopf point and the periodic
+branch.</strong></p>
+<pre><code>keys i g i l i l         # settle on the resting state (AUTO starts from the current state)
+keys f a
+autokeys r s
+auto goto HB 1
+autokeys r p
+auto list</code></pre>
+<p><strong>6b. A diagram for each value of another parameter</strong>
+(build, save and reset on every pass).</p>
+<pre><code>keys f a
+for rep in 1 2
+  set r=1.0;x=1.0               # start every pass from the same point
+  autokeys r s
+  auto goto HB 1
+  autokeys r p
+  shot auto diagram_$rep.ps
+  autokeys f r                  # AUTO File -&gt; Reset diagram
+  ans y
+end</code></pre>
+<p>In a real study the loop variable would be a model parameter
+(<code>for tau in 1 2 3</code>, then <code>set tau=$tau</code>). Reset
+does not restore parameters or initial conditions, so every pass sets
+its starting values again.</p>
+<p><strong>6c. A sweep that survives a pass with no Hopf point</strong>
+(runs as it stands on the Hutchinson model).</p>
+<pre><code>keys f a
+for r0 in 1.0 2.0 1.2
+  set r=$r0;x=1.0               # start the branch of x = 1 at r = r0
+  autokeys r s
+  try
+    auto goto HB 1              # no Hopf point if the branch starts beyond r = pi/2
+    msg &quot;r0=$r0: Hopf point at r = 1.5708&quot;
+  else
+    msg &quot;r0=$r0: no Hopf point  ($error)&quot;
+  end
+  autokeys f r
+  ans y
+end</code></pre>
+<p>The pass with <code>r0=2.0</code> fails and is caught; the other two
+finish, and the script exits with status 3.</p>
+<p><strong>7. Load a stored parameter set (from a <code>set</code> line
+in the ODE file).</strong></p>
+<pre><code>keys f g                 # File -&gt; Get par set
+keys a                   # the first set in the list
+keys i g</code></pre>
+<p><strong>8. Unattended, for a batch job.</strong></p>
+<pre><code>xvfb-run xppaut model.ode -script fig.xps -scriptexit
+echo $?                  # 0 = finished, 1 = a command failed, 2 = the script had a typo,
+                         # 3 = finished, but a try block caught a failure</code></pre>
+<p><strong>9. Several starting points with the mouse (Initialconds →
+mIce).</strong> mIce needs a phase plane, so the plot is set to one
+first. Auto-freeze keeps every run on the plot (without it only the last
+run stays). Each <code>click</code> is a starting point; <code>keys esc</code>
+ends mIce, as it does for a person.</p>
+<pre><code>set a=0;b=0.2;total=20;xp=x;yp=y;xlo=-3;xhi=3;ylo=-3;yhi=3
+keys g f a                # Graphic stuff -&gt; Freeze -&gt; Auto-freeze (a toggle)
+keys i i                  # Initialconds -&gt; mIce
+click 1 1                 # a run from x=1, y=1
+click -1 0                # a run from x=-1, y=0
+click 0 -2                # a run from x=0, y=-2
+keys esc                  # end mIce
+shot mice.ps              # all three runs</code></pre>
+<p><strong>10. Start a run from a point on the last trajectory (data
+browser).</strong></p>
+<pre><code>set a=2.5;b=0.2;x=1;y=0
+keys i g
+browser open
+browsekeys f
+ans Variable=x|Value=0.5      # the row where x is closest to 0.5
+browsekeys g                  # Get: that row is now the initial condition
+browser close
+keys i g                      # run again from there</code></pre>
+<p><strong>11. An array plot of a simulation, saved as a GIF.</strong>
+(For a model with variables <code>v1</code> ... <code>v20</code>, say a
+chain of cells; use the name of your first variable.)</p>
+<pre><code>keys i g
+keys v a
+ans Column 1=v1|NCols=20|NRows=200
+aplot fit
+aplot gif
+ans chain.gif
+aplot close</code></pre>
+<p><strong>12. Record, then turn the recording into a
+tutorial.</strong> Do the figure by hand once with File → recOrd script
+switched on; stop the recording and open the file in an editor. Add
+pauses and messages, tidy the numbers, and run it:</p>
+<pre><code>msg &quot;A driven oscillator&quot;
+set mu=3
+pause &quot;Press Enter to run it&quot;
+keys i g
+keys w w
+ans X Lo=-5
+pause &quot;The window is now wider&quot;
+browser open
+browsekeys down down pgdn
+wait 3
+browser close</code></pre>
+<h2 id="14-tips-and-current-limits">14. Tips and current limits</h2>
+<ul>
+<li>To find the keys for a task, do it by hand once and note the capital
+letters in the menu names.</li>
+<li>AUTO takes its ranges from the model&#39;s <code>@</code> options
+(<code>parmin</code>, <code>parmax</code>, <code>autoxmin</code>, ...).
+Put them in the ODE file, or add a <code>set</code> line.</li>
+<li><code>keys i g i l i l</code> is useful before AUTO: it runs the
+simulation long enough to reach rest.</li>
+<li>If a <code>keys</code> line seems to do nothing, check that the
+<code>ans</code> after it matches what actually opens.</li>
+<li>Mouse waits in the plot window are covered by <code>click</code> and
+<code>drag</code> (section 4). <strong>Not available yet:</strong> mouse
+actions elsewhere (the AUTO window, rotating a 3D view, scrolling the
+array plot), the other buttons in the top row (ICs, BCs, Delay, Param,
+Eqns), and writing <code>print</code> output to a file.</li>
+<li>The quickest way to find the keys for a task is to record it: switch
+on File → recOrd script, do the task by hand, and read the file
+(section 11).</li>
+</ul>
+</body>
+</html>

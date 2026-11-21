@@ -1,0 +1,12 @@
+# One delayed Stuart-Landau oscillator: z' = (mu + i om) z - |z|^2 z + kappa z(t-tau)
+# Rotating waves z = r exp(i Omega t) with Omega = om - kappa sin(Omega tau), r^2 = mu + kappa cos(Omega tau).
+# Folds of the wave in tau are exact: 1 + kappa tau cos(Omega tau) = 0.  For mu=1, om=10, kappa=0.8 they are at
+# tau = 1.560254, 1.582413, 2.153950, 2.250648, 2.741942, 2.926149, 3.327610 ...
+# The simulation stores one period (T=0.582759) of the stable wave at tau=1.
+par tau=1,mu=1,om=10,kappa=0.8
+x'=mu*x-om*y+kappa*delay(x,tau)-(x^2+y^2)*x
+y'=om*x+mu*y+kappa*delay(y,tau)-(x^2+y^2)*y
+init x=1,y=0
+@ total=300.000000,trans=299.417241,dt=0.002,delay=4,meth=rungekutta
+@ xlo=0,xhi=300,ylo=-2,yhi=2,maxstor=200000
+done

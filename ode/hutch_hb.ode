@@ -1,0 +1,7 @@
+# Hutchinson: steady state x=1 loses stability in a Hopf bifurcation at r=pi/2
+par r=1.8
+x'=r*x*(1-delay(x,1))
+init x=1
+@ total=100,dt=0.01,delay=2,meth=rungekutta
+@ xlo=0,xhi=100,ylo=0,yhi=3,maxstor=100000
+done

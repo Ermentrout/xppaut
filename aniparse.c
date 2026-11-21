@@ -18,7 +18,7 @@
 #include "sys/stat.h"
 #include <sys/time.h>
 #include <fcntl.h>
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <libgen.h>
 /*  A simple animator
@@ -336,6 +336,7 @@ void create_vcr(name)
  vcr.wpause = br_button(base,2,0,"Pause",0);
  vcr.wmpeg = br_button(base,2,1,"MPeg",0);
  vcr.kill=br_button(base,2,2,"Close",0);
+ wm_register_close(base,vcr.kill);
 
  vcr.wfly=make_window(base,4*12*DCURXs,4,5+DCURXs+5,(DCURYs+6)-4,1);
  /*   vcr.kill=make_window(base,5*12*DCURXs,(DCURYs+6)+4,8*DCURXs,DCURYs+1,1); */
@@ -724,7 +725,7 @@ void ani_newskip()
   int rev,status;
   XGetInputFocus(display,&w,&rev);
   sprintf(bob,"%d",vcr.inc);
-  status=get_dialog("Frame skip","Increment:",bob,"Ok","Cancel",20);
+  status=get_dialog("Frame skip","Increment:",bob,"OK","Cancel",20);
   if(status!=0){
     vcr.inc=atoi(bob);
     if(vcr.inc<=0)vcr.inc=1;
@@ -861,13 +862,19 @@ void ani_flip()
  /* check avi_flags for initialization */
  if(mpeg.aviflag==1){
   angiffile=fopen("anim.gif","wb");
+  {
+    char note[400];
+    if(use_ani_file)sprintf(note," %%%% Animation window (Toon), script %s\n",anifile);
+    else sprintf(note," %%%% Animation window (Toon)\n");
+    gif_set_note(note);
+  }
   set_global_map(1);
  }
  count=0;  
  while(!done){ /* Ignore all events except the button presses */
  if(XPending(display)>0)
    {
-     XNextEvent(display,&ev);
+     xpp_next_event(&ev);
      switch(ev.type){
      case ButtonPress:
        w=ev.xbutton.window;
@@ -1174,7 +1181,7 @@ void get_ani_file(char *fname)
   int err;
 
   /* XGetInputFocus(display,&w,&rev);
-  status=get_dialog("Load ani file","Filename:",vcr.file,"Ok","Cancel",40);
+  status=get_dialog("Load ani file","Filename:",vcr.file,"OK","Cancel",40);
   XSetInputFocus(display,w,rev,CurrentTime);
   */
   if (fname == NULL)

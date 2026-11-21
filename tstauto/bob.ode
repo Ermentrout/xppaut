@@ -1,0 +1,17 @@
+dX/dT=(-X+F(A+B*X-C*Y))
+dY/dT=(-Y+F(A+B*X-C*Y))/TAU
+
+
+F(X) = SQRT(MAX(X,0))/PI
+
+
+
+
+init X=0.008133577343489495
+init Y=0.1549233657962823
+
+
+
+par a=1   b=6   c=8   tau=7   
+d
+

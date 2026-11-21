@@ -1,3 +1,25 @@
+VERSION 8.4.2   November 2026     (a draft written from the source tree; please edit)
+- Scripts:  xppaut file.ode -script file.xps  (with -nopause and -scriptexit for unattended runs).
+  The script language drives the menus (keys), answers dialogs (ans, ok, cancel), moves in the AUTO
+  window (autokeys, auto goto), the data browser (browser, browsekeys) and the array plot (aplot),
+  and has set, msg, pause, wait, click, drag, shot, for loops and try.  See the scripting chapter of the manual.
+- File -> recOrd script records what you do as a script.
+- Lyapunov exponents were rewritten (lyapunov.c): the QR method with its own double precision integrator,
+  so the answer does not depend on the integration method; the full spectrum, error estimates, the sum
+  of the exponents checked against the divergence, the Kaplan-Yorke dimension, and running estimates in the browser.
+- Initialconds -> Periodic finds a stable limit cycle and its period (periodic_ic.c).
+- Averaging menu: the adjoint, isostable quantities, the Floquet function, and the first and second
+  order interaction functions H and H2 (phase_red.c).
+- AUTO: the first Lyapunov coefficient is computed along curves of Hopf points and the curve is colored
+  by its sign, with generalized Hopf points marked (hopf_l1.c); homoclinic and heteroclinic orbits are
+  continued with Run -> Homoclinic / hEteroclinic; continuation for delay equations (dde_po.c, del_spec.c).
+- Surface plots (surface.c); SVG output; batch options -mkplot -plotfmt -ncdraw -dfdraw -equil -with -readset.
+- Bug fixes, among them several found with AddressSanitizer (use after free, memory leaks, a crash
+  in Tab completion).  Fourteen of the examples that aborted with 'buffer overflow detected' under 8.0 on
+  a hardened system now run.
+- The Makefile links with -fcommon, so the program builds with current compilers.
+- The documentation was brought up to date.
+
 VERSION 5.99 Sept 2009
 - havent kept up with history much
 - lots of new stuff added

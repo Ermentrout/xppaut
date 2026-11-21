@@ -1,6 +1,6 @@
 #include "histogram.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -47,6 +47,7 @@ extern int NCON,NSYM,NCON_START,NSYM_START;
 
 extern float **storage;
 extern int storind;
+int get_browser_rows(void);
 int hist_len,four_len;
 float *my_hist[MAXODE+1];
 float *my_four[MAXODE+1];
@@ -57,6 +58,13 @@ extern int NEQ,NODE,NMarkov,FIX_VAR;
 
 extern char *no_hint[],*info_message;
 
+int twod_hist();
+void new_2dhist()
+{
+
+
+
+}  
 int two_d_hist(int col1,int col2,int ndat,int n1,int n2,double xlo,double xhi,double ylo,double yhi)
      /*
        col1,2 are the data you want to histogram
@@ -128,13 +136,23 @@ void new_four(nmodes,col)
 {
   int i;
   int length=nmodes+1;
-  float total=storage[0][storind-1]-storage[0][0];
+  int nrows=get_browser_rows();     /* the length of the data in the browser: not storind for an adjoint, an H function, ... */
+  float *tcol=get_data_col(0);
+  float total;
   float *bob;
+  static float *four_zero=NULL;
+  if(nrows<2||tcol==NULL){
+    err_msg("No data!");
+    return;
+  }
+  total=tcol[nrows-1]-tcol[0];
   if(FOUR_HERE){
    data_back();
    free(my_four[0]);
    free(my_four[1]);
    free(my_four[2]);
+   free(four_zero);
+   four_zero=NULL;
    FOUR_HERE=0;
  }
   four_len=nmodes;
@@ -148,13 +166,15 @@ void new_four(nmodes,col)
    return;
  }
  FOUR_HERE=1;
- for(i=3;i<=NEQ;i++)my_four[i]=storage[i];
+ /* the columns beyond the transform are not used; give them zeros, as the data in the browser can be shorter than storage */
+ four_zero=(float *)calloc((size_t)length,sizeof(float));
+ for(i=3;i<=NEQ;i++)my_four[i]=four_zero;
 for(i=0;i<length;i++)my_four[0][i]=(float)i/total; 
 /* for(i=0;i<length;i++)my_four[0][i]=(float)i; */
  /*  sft(my_browser.data[col],my_four[1],my_four[2],length,storind);
   */
  bob=get_data_col(col);
-    fft(bob,my_four[1],my_four[2],nmodes,storind);
+    fft(bob,my_four[1],my_four[2],nmodes,nrows);
  four_back();
   ping();
 }
@@ -168,6 +188,10 @@ void post_process_stuff()
     N_plist=2;
     plotlist[0]=0;
     plotlist[1]=1;
+    if(post_process==7){ /* two-d histogram stuff */
+      twod_hist();
+      return;
+    }
     if(post_process==1){
       new_hist(hist_inf.nbins,hist_inf.xlo,hist_inf.xhi,hist_inf.col,0,"",0);
       return;
@@ -193,42 +217,11 @@ void post_process_stuff()
 }
 
 
-int new_2d_hist()
+int twod_hist()
+
 {
-  
-  int i,length;
-  if((NEQ<2)||(storind<3)){
-    err_msg("Need more data and at least 3 columns");
-    return 0;
-  }
-  if(get_col_info(&hist_inf.col,"Variable 1 ")==0)return(-1);  
-  new_int("Number of bins ",&hist_inf.nbins);
-  new_float("Low ",&hist_inf.xlo);
-  new_float("Hi ",&hist_inf.xhi);
-  if(hist_inf.nbins<2){
-    err_msg("At least 2 bins\n");
-    return(0);
-  }
-  if(hist_inf.xlo>=hist_inf.xhi){
-    err_msg("Low must be less than hi");
-    return(0);
-  }
-  
-  if(get_col_info(&hist_inf.col2,"Variable 2 ")==0)return(-1);  
-  new_int("Number of bins ",&hist_inf.nbins2);
-  new_float("Low ",&hist_inf.ylo);
-  new_float("Hi ",&hist_inf.yhi);
-
-if(hist_inf.nbins2<2){
-    err_msg("At least 2 bins\n");
-    return(0);
-  }
-  if(hist_inf.ylo>=hist_inf.yhi){
-    err_msg("Low must be less than hi");
-    return(0);
-  }
-
-  length=hist_inf.nbins*hist_inf.nbins2;
+  int length,i;
+ length=hist_inf.nbins*hist_inf.nbins2;
    if(length>=MAXSTOR)
     length=MAXSTOR-1;
 
@@ -264,6 +257,44 @@ if(hist_inf.nbins2<2){
       
   return(1);
  
+
+}  
+int new_2d_hist()
+{
+  
+  
+  if((NEQ<2)||(storind<3)){
+    err_msg("Need more data and at least 3 columns");
+    return 0;
+  }
+  if(get_col_info(&hist_inf.col,"Variable 1 ")==0)return(-1);  
+  new_int("Number of bins ",&hist_inf.nbins);
+  new_float("Low ",&hist_inf.xlo);
+  new_float("Hi ",&hist_inf.xhi);
+  if(hist_inf.nbins<2){
+    err_msg("At least 2 bins\n");
+    return(0);
+  }
+  if(hist_inf.xlo>=hist_inf.xhi){
+    err_msg("Low must be less than hi");
+    return(0);
+  }
+  
+  if(get_col_info(&hist_inf.col2,"Variable 2 ")==0)return(-1);  
+  new_int("Number of bins ",&hist_inf.nbins2);
+  new_float("Low ",&hist_inf.ylo);
+  new_float("Hi ",&hist_inf.yhi);
+
+if(hist_inf.nbins2<2){
+    err_msg("At least 2 bins\n");
+    return(0);
+  }
+  if(hist_inf.ylo>=hist_inf.yhi){
+    err_msg("Low must be less than hi");
+    return(0);
+  }
+
+  return(twod_hist());
 }
   
 void new_hist(nbins,zlo,zhi,col,col2,condition,which)
@@ -375,6 +406,9 @@ void new_hist(nbins,zlo,zhi,col,col2,condition,which)
 }
 
     
+
+
+
   
 
 void column_mean()
@@ -701,8 +735,8 @@ void just_fourier(int flag)
   int i;
   double s,c;
   float *datx,*daty;
-  int nmodes=storind/2-1;
-  if(NEQ<2||storind<=1)return;
+  int nmodes=get_browser_rows()/2-1;
+  if(NEQ<2||get_browser_rows()<=1)return;
    new_four(nmodes,spec_col);
    if(flag)
      {
@@ -728,12 +762,12 @@ void compute_fourier()
     return;
   }
   /* new_int("Number of modes ",&nmodes); */
-  if(storind<=1){
+  if(get_browser_rows()<=1){
     err_msg("No data!");
     return;
   }
   if(get_col_info(&spec_col,"Variable ")==1)
-    nmodes=storind/2-1;
+    nmodes=get_browser_rows()/2-1;
     new_four(nmodes,spec_col);
 }
  

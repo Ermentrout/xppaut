@@ -3,6 +3,11 @@
 	-lf2c -lm   (in that order)
 */
 
+/*   this also has the code for finding the Hopf normal form
+ */
+
+
+extern int (*rhs)();
 #include "auto_f2c.h"
 #include "math.h"
 #include "auto_c.h"
@@ -14,6 +19,8 @@ static integer c__1 = 1;
 static doublereal c_b367 = -1.;
 static integer c__2 = 2;
 
+void sgefa(double *a,int n,int m,int *ip, int *ier);
+void sgesl(double *a,int n,int m,int *ip, double *b,int );  
 /* ----------------------------------------------------------------------- */
 /* ----------------------------------------------------------------------- */
 /*          Eigenvalue solver from EISPACK */
@@ -7412,4 +7419,97 @@ L140:
 L200:
     return 0;
 } /* ortran_ */
+
+
+
+
+double dotp(double *p,double *q,int n)
+{
+  double z=0.0;
+  int i;
+  for(i=0;i<n;i++)
+    z+=(p[i]*q[i]);
+  return z;
+}
+
+int get_qp(double *a1,int n, double *qr,double *qi, double *pr, double *pi)
+{
+  double *at,*a,*z,*wr,*wi,*fv1;
+  int i,j,k,kt,*iv1,ier;
+  double eps=1e-8;
+  at=(double *)malloc(n*n*sizeof(double));
+    a=(double *)malloc(n*n*sizeof(double));
+  z=(double *)malloc(n*n*sizeof(double));
+  wr=(double *)malloc(n*sizeof(double));
+  wi=(double *)malloc(n*sizeof(double));
+  fv1=(double *)malloc(n*sizeof(double));
+   iv1=(int *)malloc(n*sizeof(int));
+   printf("I am here \n");
+
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      k=i*n+j;
+      kt=j*n+i;
+      at[k]=a1[k];
+      a[k]=a1[kt];
+      printf(" %d %d %g %g \n",i,j,at[k],a[k]);
+    }
+  }
+ rg(n,n,at,wr,wi,1,z,iv1,fv1,&ier);
+ j=-1;
+ for(i=0;i<n;i++)
+   if((fabs(wr[i])<eps)&&(wi[i]>0))j=i;
+ printf("%d is imaginary \n",j);
+ for(i=0;i<n;i++){
+   qr[i]=z[n*j+i];
+   qi[i]=z[n*(j+1)+i];
+ }
+ rg(n,n,a,wr,wi,1,z,iv1,fv1,&ier);
+ j=-1;
+    for(i=0;i<n;i++)
+    if((fabs(wr[i])<eps)&&(wi[i]>0))j=i;
+  printf("%d is imaginary \n",j);
+  for(i=0;i<n;i++){
+    pr[i]=z[n*j+i];
+    pi[i]=-z[n*(j+1)+i]; /* get AT z = i w z, take CC to get AT zbar = -i w zbar */
+    }
+
+			
+  free(at);
+  free(a);
+  free(z);
+  free(wr);
+  free(fv1);
+  free(iv1);
+  free(wi);
+   return(ier);
+
+}
+
+void test_matrix_stuff()
+{
+  /* what is called At (a-transpose) gives the eigenvectors
+     for what I would call A
+  */
+  int i;
+  double a[]={-1,5,0,-2,1,0,0,0,-1};
+  double pr[3],pi[3],qr[3],qi[3];
+  get_qp(a,3,qr,qi,pr,pi); 
+
+
+  for(i=0;i<3;i++)
+    printf(" %g    %g  ||  %g    %g \n",qr[i],qi[i],pr[i],pi[i]);
+  
+
+  
+  /*
+      sgefa(ac,3,3,iv1,&ier);
+    sgesl(ac,3,3,iv1,b,0);
+    printf("Solving....\n");
+    for(i=0;i<3;i++)
+      printf("%g\n",b[i]);
+  */
+}
+  
+  
 

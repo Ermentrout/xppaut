@@ -1,0 +1,5 @@
+x'=y
+y'=-x
+init x=1
+@ xp=x,yp=y,xlo=-2,xhi=2,ylo=-2,yhi=2
+d

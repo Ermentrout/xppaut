@@ -20,6 +20,9 @@ typedef struct {
 void set_global_map(int flag);
 int ppmtopix(unsigned char r, unsigned char g, unsigned char b, int *n);
 void end_ani_gif(FILE *fp);
+void gif_set_note(const char *s);
+void gif_finish(FILE *fp);
+void gif_write_comment_now(FILE *fp);
 void add_ani_gif(Window win, FILE *fp, int count);
 void screen_to_gif(Window win, FILE *fp);
 void get_global_colormap(Window win);

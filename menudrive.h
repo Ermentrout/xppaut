@@ -17,8 +17,9 @@
 #define M_II 11
 #define M_ID 12
 #define M_IB 13
+#define M_IP 14
 
-#define MAX_M_I 13 
+#define MAX_M_I 14 
 
 
 #define M_C  20
@@ -179,6 +180,10 @@
 #define M_UAH 304
 #define M_UAP 305
 #define M_UAR 306
+#define M_UAI 307
+#define M_UAF 308
+#define M_UAB 309
+#define M_UA2 313
 
 #define M_UCN 310
 #define M_UCV 311

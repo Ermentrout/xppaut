@@ -1,7 +1,9 @@
 #include "arrayplot.h"
+#include "xpp_script.h"
 #include "array_print.h"
+#include "surface.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 /*   routines for plotting arrays as functions of time  
 
@@ -62,6 +64,10 @@
 #define MAX_LEN_SBOX 25
 #define FIRSTCOLOR 30
 #define FIX_MIN_SIZE 2
+extern int NJMP;
+extern double TRANS,DELTA_T;
+
+
 extern int COLOR;
 extern unsigned int GrFore,GrBack;
 /*extern char this_file[100];*/
@@ -81,7 +87,9 @@ extern Window draw_win;
 int plot3d_auto_redraw=0;
 FILE *ap_fp;
 GC aplot_gc;
+static Window aplot_wsurf;
 int first_aplot_press;
+static int aplot_scroll_noted=0;
 int do_range(double *, int);
 extern double MyData[MAXODE];
 
@@ -253,6 +261,7 @@ void do_array_plot_events(ev)
     /*printf("%d\n",ev.xmotion.y-first_aplot_press); */
     aplot.nstart=aplot.nstart-ev.xmotion.y+first_aplot_press;
     if(aplot.nstart<0)aplot.nstart=0;
+    if(!aplot_scroll_noted){rec_comment("the array plot was scrolled with the mouse here (not recorded)");aplot_scroll_noted=1;}
     redraw_aplot(aplot);}
     break;
   case ConfigureNotify:
@@ -273,8 +282,10 @@ void do_array_plot_events(ev)
     wborder(ev.xexpose.window,1,aplot);
     break;
   case ButtonPress:
-    if(ev.xany.window==aplot.wplot)
+    if(ev.xany.window==aplot.wplot){
       first_aplot_press=ev.xbutton.y;
+      aplot_scroll_noted=0;
+    }
     /*apbutton(ev.xbutton.window,aplot);*/
       apbutton(ev.xbutton.window);
     break;
@@ -287,13 +298,14 @@ void wborder(w,i,ap)
      APLOT ap;
 {
  /* if(w==ap.wedit||w==ap.wprint||w==ap.wkill||w==ap.wstyle||w==ap.wredraw) */
-  if(w==ap.wedit||w==ap.wprint||w==ap.wclose||w==ap.wredraw||w==ap.wgif||w==ap.wrange||w==ap.wfit)
+  if(w==ap.wedit||w==ap.wprint||w==ap.wclose||w==ap.wredraw||w==ap.wgif||w==ap.wrange||w==ap.wfit||w==aplot_wsurf)
     XSetWindowBorderWidth(display,w,i);
 }
 
 void destroy_aplot()
 {
   aplot.alive=0;
+  surface_close();
   waitasec(ClickTime);
   XDestroySubwindows(display,aplot.base);
     XDestroyWindow(display,aplot.base);
@@ -339,9 +351,11 @@ void create_arrayplot(ap,wname,iname)
   ap->wedit=br_button(base,0,1,"Edit",0);
   ap->wprint=br_button(base,0,2,"Print",0);
   ap->wclose=br_button(base,0,3,"Close",0);
+  wm_register_close(base,ap->wclose);
   ap->wfit=br_button(base,0,4,"Fit",0);
   ap->wrange=br_button(base,0,5,"Range",0);
   ap->wgif=br_button(base,1,0,"GIF",0);
+  aplot_wsurf=br_button(base,1,3,"Surface",0);
   ap->wmax=make_window(base,10,45,10*DCURXs,DCURYs,1);
   ap->wmin=make_window(base,10,51+DCURYs+color_total,10*DCURXs,DCURYs,1);
   ap->wscale=make_window(base,10+4*DCURXs,48+DCURYs,2*DCURXs,color_total,0);
@@ -352,7 +366,7 @@ void create_arrayplot(ap,wname,iname)
   ap->alive=1;
   aplot_gc=XCreateGC(display,ap->wplot,valuemask,&values);
 }
- 
+
 void print_aplot(ap)
      APLOT *ap;
 {
@@ -374,6 +388,9 @@ void print_aplot(ap)
   jb=row0+ap->nskip*(ap->ndown-1);
   if(jb>=nrows)jb=nrows-1;
   if(jb>=0)thi=my_browser.data[0][jb];
+  tlo=TRANS+(row0)*NJMP*DELTA_T;
+  thi=tlo+((ap->ndown-1)*NJMP*DELTA_T*ap->nskip);
+  
   sprintf(values[0],"%s",ap->filename);
   sprintf(values[1],"%s",ap->xtitle);
   sprintf(values[2],"%s",ap->ytitle);
@@ -400,27 +417,53 @@ void apbutton(w)
      Window w;
 {
   if(w==aplot.wedit){
+    rec_command("aplot edit");
     editaplot(&aplot);
   }
   if(w==aplot.wfit){
+    rec_command("aplot fit");
     fit_aplot();
   }
   if(w==aplot.wrange){
+    rec_command("aplot range");
     set_up_aplot_range();
 
   }
   if(w==aplot.wredraw){
+    rec_command("aplot redraw");
     redraw_aplot(aplot);
   }
   if(w==aplot.wprint){
+    rec_command("aplot print");
     print_aplot(&aplot);
   }
   if(w==aplot.wclose){
+    rec_command("aplot close");
     destroy_aplot();
   }
   if(w==aplot.wgif){
+    rec_command("aplot gif");
     gif_aplot();
   }
+  if(w==aplot_wsurf){
+    rec_command("aplot surface");
+    surface_create();
+  }
+}
+
+/* scripting (xpp_script.c): the window behind a button name, 0 if the array plot is not open */
+Window aplot_button_window(const char *name)
+{
+  if(aplot.alive==0)return 0;
+  if(strcmp(name,"edit")==0)return aplot.wedit;
+  if(strcmp(name,"fit")==0)return aplot.wfit;
+  if(strcmp(name,"range")==0)return aplot.wrange;
+  if(strcmp(name,"redraw")==0)return aplot.wredraw;
+  if(strcmp(name,"print")==0)return aplot.wprint;
+  if(strcmp(name,"close")==0)return aplot.wclose;
+  if(strcmp(name,"gif")==0)return aplot.wgif;
+  if(strcmp(name,"surface")==0)return aplot_wsurf;
+  return 0;
 }
 
 void draw_scale(ap)
@@ -564,10 +607,48 @@ sprintf(values[8],"%d",ap->ncskip);
  }
    return 1;
 }
+/* the note at the end of the GIF of an array plot: what is shown, and the range of time along the vertical axis.
+   With step = nout*dt (NJMP*DELTA_T), Row 1 = R, NRows = N and RowSkip = S, the rows shown are R, R+S, ..., R+(N-1)S
+   and the time runs from tstart = step*R to tend = tstart + (N-1)*S*step, plus the transient: XPP does not store the first TRANS
+   units of time, and the stored times are the real ones, so the times are read from the stored solution. */
+extern int NJMP,NEQ,storind;
+extern double DELTA_T,TRANS;
+static void aplot_gif_note(APLOT *ap)
+{
+  char note[2000],n0[40],n1[40];
+  int r0=ap->nstart,rl=ap->nstart+ap->nskip*(ap->ndown-1),a=r0,b=rl;
+  double step=NJMP*DELTA_T,ts,te;
+  strcpy(n0,(ap->index0>=1&&ap->index0<=NEQ)?uvar_names[ap->index0-1]:"?");
+  strcpy(n1,(ap->indexn>=1&&ap->indexn<=NEQ)?uvar_names[ap->indexn-1]:"?");
+  if(storind>0){
+    if(a>storind-1)a=storind-1;
+    if(b>storind-1)b=storind-1;
+    ts=storage[0][a];
+    te=storage[0][b];
+  }
+  else {
+    ts=step*r0;
+    te=ts+(ap->ndown-1)*ap->nskip*step;
+  }
+  sprintf(note," %%%% Array plot: columns %s (%d) ... %s (%d), %d across, column skip %d\n"
+	  " %%%% Rows: Row 1 = %d, NRows = %d, RowSkip = %d (last row %d)\n"
+	  " %%%% Time along the vertical axis: tstart = %.10g, tend = %.10g  (output step nout*dt = %.10g; stored times, they include the transient TRANS = %g)\n"
+	  " %%%% Color range: %.8g to %.8g\n",
+	  n0,ap->index0,n1,ap->indexn,ap->nacross,ap->ncskip,r0,ap->ndown,ap->nskip,rl,ts,te,step,TRANS,ap->zmin,ap->zmax);
+  if(aplot_still==0){
+    if(aplot_range_count>0)sprintf(note+strlen(note)," %%%% Range animation: %d frames (the parameter value of each frame is in its tag, if tags are on)\n",aplot_range_count);
+    else sprintf(note+strlen(note)," %%%% Range animation (the parameter value of each frame is in its tag, if tags are on)\n");
+  }
+  gif_set_note(note);
+}
+
 void close_aplot_files()
 {
-  if(aplot_still==0)
+  if(aplot_still==0){
+    aplot_gif_note(&aplot);
+    end_ani_gif(ap_fp);
     fclose(ap_fp);
+  }
 }
 void gif_aplot_all(char *filename,int still)
 {
@@ -591,6 +672,7 @@ void gif_aplot_all(char *filename,int still)
 		      DefaultDepth(display,screen));
      XCopyArea(display,aplot.wplot,xi,aplot_gc,0,0,w,h,0,0); 
      
+     if(aplot_range_count==0)aplot_gif_note(&aplot);
      add_ani_gif(xi,ap_fp,aplot_range_count);
      XFreePixmap(display,xi);
      return;
@@ -610,6 +692,7 @@ void gif_aplot_all(char *filename,int still)
  /*  XFlush(display); */
   
   /* screen_to_gif(aplot.wplot,fp); */  
+  aplot_gif_note(&aplot);
   screen_to_gif(xi,ap_fp);  
   fclose(ap_fp);
   XFreePixmap(display,xi);
@@ -658,6 +741,8 @@ void redraw_aplot(ap)
   jb=row0+ap.nskip*(ap.ndown-1);
   if(jb>=nrows)jb=nrows-1;
   if(jb>=0)thi=my_browser.data[0][jb];
+  tlo=TRANS+(row0)*NJMP*DELTA_T;
+  thi=tlo+((ap.ndown-1)*NJMP*DELTA_T*ap.nskip);
   sprintf(bob, " %g < t < %g ",tlo,thi);
    XDrawString(display,ap.wtime,small_gc,0,CURY_OFFs,bob,strlen(bob));
   dx=(double)ap.plotw/(double)(ap.nacross/ap.ncskip);
@@ -687,6 +772,7 @@ void redraw_aplot(ap)
 	}
       }
     }
+    surface_redraw();
     XFlush(display);
 }
 void tag_aplot(char *bob)
@@ -751,6 +837,10 @@ if(w==ap.wfit){
  }
 if(w==ap.wrange){
    XDrawString(display,w,small_gc,0,CURY_OFFs,"Range",5);
+   return;
+ }
+if(w==aplot_wsurf){
+   XDrawString(display,w,small_gc,0,CURY_OFFs,"Surface",7);
    return;
  }
   if(w==ap.wprint){

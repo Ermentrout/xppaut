@@ -2,9 +2,9 @@
 #define _pop_list_h
 
 
-
 #include "phsplan.h"
-#include <stdlib.h> 
+/* #include <stdlib.h>   */
+#include "stdfix.h"
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -88,7 +88,7 @@ typedef struct {
 extern int NUPAR,NEQ,NODE,NMarkov;
 extern char  upar_names[MAXPAR][11],uvar_names[MAXODE][12];
 extern  char *color_names[];
-SCRBOX_LIST scrbox_list[10];
+extern SCRBOX_LIST scrbox_list[10];
 
 
 /*  This is a new improved pop_up widget */
@@ -119,7 +119,7 @@ typedef struct {
               char **list;
               } SCROLLBOX;
 
-TEXTWIN mytext;
+extern TEXTWIN mytext;
 #define SB_PLOTTABLE 0
 #define SB_VARIABLE 1
 #define SB_PARAMETER 2
@@ -166,5 +166,26 @@ int pop_up_list(Window *root, char *title, char **list, char *key, int n, int ma
 void draw_pop_up(POP_UP p, Window w);
 Window make_unmapped_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
 Window make_icon_window(Window root,int x,int y,int width,int height,int bw,int icx,int icy,unsigned char* icdata);
+
+
+/* window-manager close-tab support (see pop_list.c) */
+void wm_register_close(Window top,Window btn);
+void wm_forget_close(Window top);
+void wm_accept_close(Window top);
+int  is_wm_delete(XEvent *ev);
+void xpp_next_event(XEvent *ev);
+
+/* button bevels (see pop_list.c) */
+void wm_register_button(Window w,int wd,int ht);
+Window make_button(Window root,int x,int y,int width,int height,int bw);
+void draw_button_bevel(Window w);
+
+void install_xpp_error_handler(void);
+
+void wm_button_hover_event(XEvent *ev);
+void draw_button_hover(Window w);
+
+void xpp_set_border(Display *d,Window w,unsigned int bw);
+#define XSetWindowBorderWidth(d,w,b) xpp_set_border(d,w,b)
 
 #endif

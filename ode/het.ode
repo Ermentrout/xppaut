@@ -1,0 +1,10 @@
+# het.ode -- a heteroclinic orbit: -c u' = u'' + u(1-u)(u-a), saddles at (u,up)=(1,0) and (0,0).
+# For a=0.5, c=0 the connection is exact: up=-u(1-u)/sqrt(2).  Run het.xps or follow the AUTO chapter.
+u'=up
+up'=-c*up-u*(1-u)*(u-a)
+par a=0.5,c=0
+init u=0.999,up=-0.000706
+@ total=30,dt=0.01,meth=8,xp=u,yp=up
+@ xlo=-0.25,xhi=1.25,ylo=-0.75,yhi=0.25
+@ autoxmin=0,autoxmax=1,autoymin=-2,autoymax=2,parmin=0,parmax=1
+done

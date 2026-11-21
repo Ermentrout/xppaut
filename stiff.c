@@ -1,4 +1,4 @@
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <math.h>
 #include "xpplim.h"
 #include "stiff.h"

@@ -4,6 +4,9 @@ par a=.3,omega=10,k=.1
 th'=v
 v'=-k*v-(1+a*omega*omega*cos(omega*t))*sin(th)
 init th=0,v=3
+aux mth=mod(th,2*pi)
 @ meth=qualrk,total=30
+@ xp=t,yp=mth,xlo=0,xhi=30,ylo=0,yhi=6.3
+@ lt=-2
 done
 

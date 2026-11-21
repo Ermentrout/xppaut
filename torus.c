@@ -1,6 +1,6 @@
 #include "torus.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -103,7 +103,7 @@ Window win;
    return;
  }
  if(win==torbox.done){
-   XDrawString(display,win,small_gc,5,CURY_OFFs,"Done",4);
+   XDrawString(display,win,small_gc,5,CURY_OFFs,"OK",2);
    return;
  }
 
@@ -178,8 +178,9 @@ XStringListToTextProperty(&title,1,&winname);
  xpos=(width-16*DCURXs-10)/2;
  ypos=height-3*DCURYs/2;
 
- torbox.cancel=make_window(base,xpos,ypos,8*DCURXs,DCURYs,1);
- torbox.done=make_window(base,xpos+8*DCURXs+10,ypos,8*DCURXs,DCURYs,1);
+ torbox.cancel=make_button(base,xpos,ypos,8*DCURXs,DCURYs,1);
+ wm_register_close(base,torbox.cancel);
+ torbox.done=make_button(base,xpos+8*DCURXs+10,ypos,8*DCURXs,DCURYs,1);
  XSelectInput(display,torbox.cancel,BUT_MASK);
  XSelectInput(display,torbox.done,BUT_MASK);
  XRaiseWindow(display,torbox.base);
@@ -196,7 +197,7 @@ void do_torus_events()
  for(i=0;i<NEQ;i++)oldit[i]=itor[i];
  while(!done){
    
-  XNextEvent(display,&ev);
+  xpp_next_event(&ev);
  switch(ev.type){
  	
 	case Expose:

@@ -1,6 +1,6 @@
 #include  "axes2.h"
 
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <string.h>
  /* All new improved axes !!  */
 

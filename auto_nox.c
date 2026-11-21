@@ -35,7 +35,7 @@
 
 
 #include "menudrive.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -152,6 +152,9 @@ int LPc=20;
 int LPP_color=0;
 int LPE_color=20;
 int HB_color=28;
+int HB_sub_color=29;  /* two-parameter Hopf curve where the first Lyapunov coefficient is positive (subcritical): purple. Supercritical keeps HB_color */
+int hopf_curve_point(int first,const double *par,const double *u,int icp1,int icp2,const char *name1,const char *name2,int *sign,double *frac);
+int hopf_curve_sign(const double *par,const double *u,int icp1,int icp2);
 int TR_color=26;
 int PD_color=23;
 int BR_color=27;
@@ -170,11 +173,16 @@ int is_3_there=0;
 
 int load_all_labeled_orbits=0;
 
-
+int SuppressBP=0;
 ROTCHK blrtn;
   
 
 
+void evaluate_derived();
+void redo_all_fun_tables();
+void go_go_auto();
+void extra();
+void load_browser_with_branch();
 
 GRABPT grabpt;
 
@@ -339,6 +347,7 @@ void setautopoint()
       set_val(upar_names[AutoPar[Auto.icp1]],XfromAuto);
       set_val(upar_names[AutoPar[Auto.icp2]],YfromAuto);
       evaluate_derived();
+      redo_all_fun_tables();
       redraw_params();
     }
 }
@@ -579,12 +588,14 @@ void create_auto_file_name()
   dname = (char*)dirname(dirc);
   
   char* HOME = getenv("HOME");
+
   if (HOME == NULL)
   {
   	HOME = dname;
   }
  
   sprintf(this_auto_file,"%s/%s",HOME,bname);
+
 }
   
 void open_auto(flg) /* compatible with new auto */
@@ -616,15 +627,80 @@ void open_auto(flg) /* compatible with new auto */
     sprintf(string,"%s.s",this_auto_file);
     copyf(string,fort3);
   }
-
+  /* bname and dname pointed into these copies; they are not used again */
+  free(basec);
+  free(dirc);
 }
 
 /* MAIN Running routine  Assumes that Auto structure is set up */
 
+extern int DelayFlag;
+int dde_po_run(void);
+int dde_po_hopf_run(void);
+int dde_po_extend_run(void);
+int dde_po_pd_run(void);
+int dde_po_fold2_run(void);
+int dde_po_pd2_run(void);
+int dde_po_tr2_run(void);
+int dde_po_get_orbit(int ibr,int lab,double per,int maxrows,int *nrow,double **ts,double **us);
+extern int MAXSTOR;
 void do_auto(iold,isave,itp)
      int iold,isave;
      int itp;
 {
+      /* AUTO evaluates delayed arguments as the steady state x(t-tau)=x(t)
+         (see func() in autpp.c).  That is right for equilibria and their
+         fold curves, but periodic orbits, BVPs and homoclinics of a delay
+         equation need genuine delayed arguments, which AUTO's collocation
+         code does not provide (yet). */
+      if(DelayFlag&&Auto.ips!=1){
+        /* periodic orbits of a delay equation, started from the last simulation:
+           dde_po.c / dde_po_xpp.c (not AUTO's collocation) */
+        /* a grabbed Hopf point of a steady state branch (Auto.irs is its label) */
+        if(Auto.ips==2&&AutoTwoParam==0&&Auto.irs>0&&
+           (Auto.itp%10==3||abs(Auto.itp/10)==3)){
+          dde_po_hopf_run();
+          redraw_params();
+          return;
+        }
+        /* Two-parameter continuation of a fold (LP) of cycles */
+        if(Auto.ips==2&&AutoTwoParam==LPP2&&Auto.irs>0&&grabpt.ibr<0&&grabpt.itp%10==5){
+          dde_po_fold2_run();
+          redraw_params();
+          return;
+        }
+        /* Two-parameter continuation of a torus (TR) point of cycles */
+        if(Auto.ips==2&&AutoTwoParam==TR2&&Auto.irs>0&&grabpt.ibr<0&&grabpt.itp%10==8){
+          dde_po_tr2_run();
+          redraw_params();
+          return;
+        }
+        /* Two-parameter continuation of a period doubling (PD) of cycles */
+        if(Auto.ips==2&&AutoTwoParam==PD2&&Auto.irs>0&&grabpt.ibr<0&&grabpt.itp%10==7){
+          dde_po_pd2_run();
+          redraw_params();
+          return;
+        }
+        /* Run -> Doubling on a PD point: follow the period-doubled branch */
+        if(Auto.ips==2&&AutoTwoParam==0&&Auto.irs>0&&grabpt.ibr<0&&Auto.isw==-1){
+          dde_po_pd_run();
+          redraw_params();
+          return;
+        }
+        /* Extend from a labeled point of a delay periodic branch (its orbit is kept in memory) */
+        if(Auto.ips==2&&AutoTwoParam==0&&Auto.irs>0&&grabpt.ibr<0){
+          dde_po_extend_run();
+          redraw_params();
+          return;
+        }
+        if(Auto.ips==2&&NewPeriodFlag==1&&Auto.irs==0&&AutoTwoParam==0){
+          dde_po_run();
+          redraw_params();
+          return;
+        }
+        err_msg("AUTO cannot yet continue this kind of solution of a delay equation (only Start -> Periodic from a simulation or a Hopf point of a steady state, and Extend or Doubling of such a branch)");
+        return;
+      }
       redraw_auto_menus();
       
     set_auto(); /* this sets up all the continuation initialization 
@@ -657,6 +733,7 @@ void do_auto(iold,isave,itp)
 void set_auto() /* Caution - need to include NICP here */
 {
   NAutoUzr=Auto.nper;
+  printf("%d %d %d \n",Auto.nfpar,Auto.icp1,Auto.icp2);
   init_auto(NODE,Auto.nfpar,Auto.nbc,Auto.ips,Auto.irs,Auto.ilp,Auto.ntst,Auto.isp,
 	    Auto.isw,Auto.nmx,Auto.npr,Auto.ds,Auto.dsmin,
 	    Auto.dsmax,Auto.rl0,Auto.rl1,Auto.a0,Auto.a1,Auto.icp1,
@@ -762,9 +839,9 @@ void auto_num_par()
 {
   static char *n[]={"Ntst","Nmax","NPr","Ds","Dsmin","Ncol","EPSL",
 		    "Dsmax","Par Min","Par Max","Norm Min","Norm Max",
-                    "EPSU","EPSS","IAD","MXBF","IID","ITMX","ITNW","NWTN","IADS"};
+                    "EPSU","EPSS","IAD","MXBF","IID","ITMX","ITNW","NWTN","IADS","SuppBP"};
   int status;
-  char values[21][MAX_LEN_SBOX];
+  char values[22][MAX_LEN_SBOX];
   sprintf(values[0],"%d",Auto.ntst);
   sprintf(values[1],"%d",Auto.nmx);
   sprintf(values[2],"%d",Auto.npr);
@@ -785,10 +862,11 @@ void auto_num_par()
   sprintf(values[17],"%d",aauto.itmx);
   sprintf(values[18],"%d",aauto.itnw);
   sprintf(values[19],"%d",aauto.nwtn);
-  sprintf(values[20],"%d",aauto.iads); 
+  sprintf(values[20],"%d",aauto.iads);
+  sprintf(values[21],"%d",SuppressBP); 
 
   
-  status=do_string_box(21,7,3,"AutoNum",n,values,25);
+  status=do_string_box(22,7,4,"AutoNum",n,values,25);
   if(status!=0){
     Auto.ntst=atoi(values[0]);
     Auto.nmx=atoi(values[1]);
@@ -810,7 +888,8 @@ void auto_num_par()
     aauto.itmx=atoi(values[17]);
     aauto.itnw=atoi(values[18]);
     aauto.nwtn=atoi(values[19]);
-    aauto.iads=atoi(values[20]); 
+    aauto.iads=atoi(values[20]);
+    SuppressBP=atoi(values[21]);
 
     
   }
@@ -1133,7 +1212,7 @@ void add_ps_point(par,per,uhigh,ulow,ubar,a,type,flg,lab,npar,icp1,icp2,flag2,
 
     if(PS_Color){
       set_linestyle(1);
-      if(flag2>0)pscolset2(flag2);
+      if(flag2>0){pscolset2(flag2);if(flag2==HB2&&METHOD!=DISCRETE&&hopf_curve_sign(par,ubar,icp1,icp2)>0)set_linestyle(HB_sub_color-19);}
     }
     else 
       set_linestyle(8);
@@ -1148,7 +1227,7 @@ void add_ps_point(par,per,uhigh,ulow,ubar,a,type,flg,lab,npar,icp1,icp2,flag2,
     else
       {
 	pscolset2(flag2);
-      
+	if(flag2==HB2&&METHOD!=DISCRETE&&hopf_curve_sign(par,ubar,icp1,icp2)>0)set_linestyle(HB_sub_color-19);
       }
     line_abs((float)x,(float)y1,(float)Auto.lastx,(float)Auto.lasty);
     break;
@@ -1232,6 +1311,8 @@ void add_point(par,per,uhigh,ulow,ubar,a,type,flg,lab,npar,icp1,icp2,icp3,icp4,f
 {
   double x,y1,y2,par1,par2=0;
   int ix,iy1,iy2,type1=type;
+  int hbsign=0,hbgh=0;   /* first Lyapunov coefficient on a two-parameter Hopf curve: its sign, and whether it changed sign here (GH) */
+  double hbfrac=0.0;
   char bob[5];
   sprintf(bob,"%d",lab);
   par1=par[icp1];
@@ -1259,6 +1340,8 @@ if(flag2>0&&Auto.plot!=P_P){ /* two parameter and not in two parameter plot, jus
 
  if((flag2>0)&&(Auto.plot==P_P))
    type1=CSEQ;
+ if(flag2==HB2&&Auto.plot==P_P&&METHOD!=DISCRETE&&icp1==Auto.icp1&&Auto.icp2==icp2)
+   hbgh=hopf_curve_point(flg==0,par,ubar,icp1,icp2,upar_names[AutoPar[icp1]],upar_names[AutoPar[icp2]],&hbsign,&hbfrac);
  switch(type1){
   
   case CSEQ:
@@ -1267,7 +1350,7 @@ if(flag2>0&&Auto.plot!=P_P){ /* two parameter and not in two parameter plot, jus
     if(flag2>0&&Auto.icp2!=icp2)break;
     LineWidth(2);
     colset(type);
-    if(flag2>0)colset2(flag2);
+    if(flag2>0){colset2(flag2);if(hbsign>0)autocol(HB_sub_color);}
     auto_line(x,y1,Auto.lastx,Auto.lasty);
     autobw();
     break;
@@ -1277,7 +1360,7 @@ if(flag2>0&&Auto.plot!=P_P){ /* two parameter and not in two parameter plot, jus
     if(flag2>0&&Auto.icp2!=icp2)break;
     LineWidth(1);
         colset(type);
-	if(flag2>0)colset2(flag2);
+	if(flag2>0){colset2(flag2);if(hbsign>0)autocol(HB_sub_color);}
     auto_line(x,y1,Auto.lastx,Auto.lasty);
     autobw();
     break;
@@ -1286,7 +1369,7 @@ if(flag2>0&&Auto.plot!=P_P){ /* two parameter and not in two parameter plot, jus
     if(flag2>0&&Auto.icp2!=icp2)break;
     LineWidth(1);
         colset(type);
-	if(flag2>0)colset2(flag2);
+	if(flag2>0){colset2(flag2);if(hbsign>0)autocol(HB_sub_color);}
     if(chk_auto_bnds(ix,iy1))Circle(ix,iy1,3);
     if(chk_auto_bnds(ix,iy2))Circle(ix,iy2,3);
     autobw();
@@ -1296,7 +1379,7 @@ if(flag2>0&&Auto.plot!=P_P){ /* two parameter and not in two parameter plot, jus
     if(flag2>0&&Auto.icp2!=icp2)break;
     LineWidth(1);
         colset(type);
-	if(flag2>0)colset2(flag2);
+	if(flag2>0){colset2(flag2);if(hbsign>0)autocol(HB_sub_color);}
     if(chk_auto_bnds(ix,iy1))FillCircle(ix,iy1,3);
     if(chk_auto_bnds(ix,iy2))FillCircle(ix,iy2,3);
     autobw();
@@ -1317,6 +1400,16 @@ if(flag2>0&&Auto.plot!=P_P){ /* two parameter and not in two parameter plot, jus
     }
   }
 
+  if(hbgh){   /* a generalised Hopf point lies between the previous point and this one */
+    double xm=Auto.lastx+hbfrac*(x-Auto.lastx),ym=Auto.lasty+hbfrac*(y1-Auto.lasty);
+    int ixm=IXVal(xm),iym=IYVal(ym);
+    if(chk_auto_bnds(ixm,iym)){
+      LineWidth(1);
+      autocol(0);
+      FillCircle(ixm,iym,4);
+      ATEXT(ixm+8,iym-8,"GH");
+    }
+  }
   Auto.lastx=x;
   Auto.lasty=y1;
    plot_stab(evr,evi,NODE);
@@ -1464,6 +1557,7 @@ void do_auto_win()
     Auto.exist=1;
     
   }
+
 }
 
 void load_last_plot(flg)
@@ -1547,6 +1641,7 @@ void init_auto_win()
   Auto.irs=0;
   Auto.ips=1;
   Auto.isp=1;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ilp=1;
   Auto.isw=1;
   Auto.nbc=NODE;
@@ -1936,7 +2031,8 @@ void auto_run()
     
   itp=grabpt.itp;
   itp1=itp%10;
-  itp2=itp/10;
+  itp2=abs(itp/10);
+  /* printf("%d %d %d\n",itp,itp1,itp2); */
   ips=Auto.ips;
   /*  printf(" ips=%d itp=%d itp1= %d itp2=%d\n",ips,itp,itp1,itp2); */
   if(itp1==3||itp2==3){  /* its a HOPF Point  */
@@ -2019,8 +2115,10 @@ void auto_branch_choice(ibr,ips)
   int ipsuse;
   ch=(char)auto_pop_up_list("Branch Pt",m,key,4,10,0,10,10,
 		       no_hint,Auto.hinttxt);
+
+
   if(ch=='s'){
-    if(ibr<0&&ips==2)
+       if(ibr<0&&ips==2)
       auto_switch_per();
     else 
       if(ips==4)
@@ -2097,6 +2195,7 @@ void auto_start_diff_ss()
   Auto.ilp=1;
   Auto.isw=1;
   Auto.isp=1;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.nfpar=1;
   AutoTwoParam=0;
   do_auto(NO_OPEN_3,APPEND,Auto.itp);
@@ -2114,8 +2213,10 @@ void auto_start_at_bvp()
   Auto.itp=0;
   Auto.ilp=1;
   Auto.isw=1;
-  Auto.isp=2;
 
+  Auto.isp=2;
+  if(SuppressBP==1) Auto.isp=0;
+    
   Auto.nfpar=1;
   AutoTwoParam=0;
   NewPeriodFlag=2;
@@ -2135,6 +2236,7 @@ void auto_start_at_per()
   Auto.isw=1;
 
   Auto.isp=2;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.nfpar=1;
   AutoTwoParam=0;
   NewPeriodFlag=1;
@@ -2151,10 +2253,6 @@ void auto_new_ss()
 
   if(NBifs>1){
     ans=reset_auto();
-    if ((ans!=0) || (ans!=1))
-    {
-       plintf("Boolean response expected.\n");	
-    }
    /* if(ans==0){
       opn=OPEN_3;
       cls=APPEND;
@@ -2167,6 +2265,7 @@ void auto_new_ss()
   Auto.ilp=1;
   Auto.isw=1;
   Auto.isp=1;
+      if(SuppressBP==1) Auto.isp=0;;
   Auto.nfpar=1;
    AutoTwoParam=0;
   do_auto(opn,cls,Auto.itp);
@@ -2180,10 +2279,6 @@ void auto_new_discrete()
   NewPeriodFlag=0;
   if(NBifs>1){
     ans=reset_auto();
-    if ((ans!=0) || (ans!=1))
-    {
-       plintf("Boolean response expected.\n");	
-    }
    /* if(ans==0){
       opn=OPEN_3;
       cls=APPEND;
@@ -2196,6 +2291,7 @@ void auto_new_discrete()
   Auto.ilp=1;
   Auto.isw=1;
   Auto.isp=1;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.nfpar=1;
    AutoTwoParam=0; 
   do_auto(opn,cls,Auto.itp);
@@ -2217,7 +2313,7 @@ void auto_extend_ss()
   
   if (isinf(grabpt.per))
   {
-  	respond_box("Okay","Can't continue infinite period Hopf!");
+  	respond_box("OK","Can't continue infinite period Hopf!");
   	return;
   } 
   
@@ -2231,6 +2327,8 @@ void auto_extend_ss()
   if(METHOD==DISCRETE)
     Auto.ips=-1;
   Auto.isp=1;
+    if(SuppressBP==1) Auto.isp=0;
+    
   AutoTwoParam=0;
   do_auto(OPEN_3,APPEND,Auto.itp);
 }
@@ -2368,7 +2466,7 @@ void auto_start_at_homoclinic()
   if(HomoFlag==2)
     xAuto.iequib=-2;
   flag=get_homo_info(HomoFlag,&xAuto.nunstab,&xAuto.nstab,homo_l,homo_r);
-  if(flag)do_auto(opn,close,Auto.itp);
+  if(flag>0)do_auto(opn,cls,Auto.itp);
 
   
 }
@@ -2390,7 +2488,7 @@ void auto_new_per() /* same for extending periodic  */
   
   if (isinf(grabpt.per))
   {
-  	respond_box("Okay","Can't continue infinite period Hopf.");
+  	respond_box("OK","Can't continue infinite period Hopf.");
   	return;
   } 	
       TypeOfCalc=PE1;
@@ -2401,6 +2499,7 @@ void auto_new_per() /* same for extending periodic  */
   Auto.ilp=1;
   Auto.isw=1; /* -1 */
   Auto.isp=2;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ips=2;
     AutoTwoParam=0;
   do_auto(OPEN_3,APPEND,Auto.itp);
@@ -2415,6 +2514,7 @@ void auto_extend_bvp() /* extending bvp */
   Auto.ilp=1;
   Auto.isw=1;
   Auto.isp=2;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ips=4;
     AutoTwoParam=0;
   do_auto(OPEN_3,APPEND,Auto.itp);
@@ -2432,6 +2532,7 @@ void auto_switch_per()
   Auto.ilp=1;
   Auto.isw=-1;
   Auto.isp=2;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ips=2;
   AutoTwoParam=0;
   do_auto(OPEN_3,APPEND,Auto.itp);
@@ -2446,6 +2547,7 @@ void auto_switch_bvp()
   Auto.ilp=1;
   Auto.isw=-1;
   Auto.isp=2;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ips=4;
   AutoTwoParam=0;
   do_auto(OPEN_3,APPEND,Auto.itp);
@@ -2453,6 +2555,7 @@ void auto_switch_bvp()
 
 void auto_switch_ss()
 {
+
       TypeOfCalc=EQ1;
   Auto.irs=grabpt.lab;
   Auto.itp=grabpt.itp;
@@ -2460,6 +2563,7 @@ void auto_switch_ss()
   Auto.ilp=1;
   Auto.isw=-1;
   Auto.isp=1;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ips=1;
   if(METHOD==DISCRETE)
     Auto.ips=-1;
@@ -2597,7 +2701,7 @@ void auto_2p_hopf()
   
   if (isinf(grabpt.per))
   {
-  	respond_box("Okay","Can't continue infinite period Hopf.");
+  	respond_box("OK","Can't continue infinite period Hopf.");
   	return;
   } 
   
@@ -2628,6 +2732,7 @@ void auto_period_double()
   Auto.isw=-1;
   TypeOfCalc=PE1;
   Auto.isp=2;
+    if(SuppressBP==1) Auto.isp=0;
   Auto.ips=2;
   AutoTwoParam=0;
   do_auto(OPEN_3,APPEND,Auto.itp);
@@ -2659,6 +2764,32 @@ void load_auto_orbit()
    
   if((ibr>0&&(Auto.ips!=4)&&(Auto.ips!=3)&&(Auto.ips!=9))||flag==0)return; 
    /* either nothing grabbed or just a fixed point and that is already loaded */
+  if(ibr<0&&DelayFlag){
+    /* periodic orbits of a delay equation are not in AUTO's file (labels would point to other
+       orbits): the delay periodic orbit solver keeps its own copies */
+    double *ts=NULL,*us=NULL;
+    int nr=0;
+    if(!dde_po_get_orbit(ibr,lab,per,MAXSTOR-1,&nr,&ts,&us)){
+      auto_err("The orbit of this point is not stored (delay periodic orbits are kept for the current session only)");
+      return;
+    }
+    x=&MyData[0];
+    for(i=0;i<nr;i++){
+      storage[0][i]=ts[i]*per;
+      for(j=0;j<NODE;j++){
+	storage[j+1][i]=us[i*NODE+j];
+	x[j]=us[i*NODE+j];
+      }
+      extra(x,(double)storage[0][i],NODE,NEQ);
+      for(j=NODE;j<NEQ;j++)storage[j+1][i]=(float)x[j];
+    }
+    storind=nr;
+    refresh_browser(nr);
+    if(load_all_labeled_orbits==2)clr_all_scrns();
+    drw_all_scrns();
+    free(ts);free(us);
+    return;
+  }
   sprintf(string,"%s.s",this_auto_file);
   fp=fopen(string,"r");
   if(fp==NULL){
@@ -2715,7 +2846,7 @@ void save_auto()
   /* XGetInputFocus(display,&w,&rev); */
   
   sprintf(filename,"%s.auto",basename(this_auto_file));
-  /* status=get_dialog("Save Auto","Filename",filename,"Ok","Cancel",60);
+  /* status=get_dialog("Save Auto","Filename",filename,"OK","Cancel",60);
   XSetInputFocus(display,w,rev,CurrentTime);
   */
   status=file_selector("Save Auto",filename,"*.auto");

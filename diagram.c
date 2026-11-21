@@ -1,3 +1,4 @@
+#include <string.h>
 #include "diagram.h"
 #include "autevd.h"
 #include "init_conds.h"
@@ -5,15 +6,14 @@
 
 #include "my_svg.h"
 #include "my_ps.h"
-#include "my_ps.h"
 #include "graphics.h"
 #include "auto_nox.h"
-#include <stdlib.h> 
+#include "stdfix.h" 
 #include <stdio.h>
 #include "autlim.h"
 #include "load_eqn.h"
 #define DALLOC(a) (double *)malloc((a)*sizeof(double))
-
+int refresh_browser();
 extern int TypeOfCalc;
 extern ROTCHK blrtn;
 extern int PS_Color;  
@@ -34,6 +34,9 @@ void start_diagram(n)
 {
   NBifs=1;
   bifd=(DIAGRAM *)malloc(sizeof(DIAGRAM));
+  /* every field starts at zero: the root node is read (itp, ibr, par, ...)
+     by code that walks the diagram before the first point replaces it */
+  memset(bifd,0,sizeof(DIAGRAM));
   bifd->prev=NULL;
   bifd->next=NULL;
   bifd->index=0;
@@ -169,6 +172,9 @@ void add_diagram(ibr,ntot,itp,lab,nfpar,a,uhi,ulo,u0,ubar,
  
 }
 
+extern DIAGRAM *CUR_DIAGRAM;
+void dde_po_clear_saved(void);
+
 void kill_diagrams()
 {
   DIAGRAM *d,*dnew;
@@ -201,6 +207,12 @@ void kill_diagrams()
   free(bifd->evr);
   free(bifd->evi);
   free(bifd);
+  /* Grab mode and the stability window keep a pointer into the diagram;
+     it pointed at a node that has just been freed */
+  CUR_DIAGRAM=NULL;
+  /* orbits stored by the delay-equation periodic-orbit solver belong to the
+     diagram that was just destroyed */
+  dde_po_clear_saved();
   start_diagram(NODE);
 }
 
@@ -238,7 +250,7 @@ void write_info_out()
   /*double a,*ubar,*u0;*/
   FILE *fp;
   sprintf(filename,"allinfo.dat");
-  /* status=get_dialog("Write all info","Filename",filename,"Ok","Cancel",60);
+  /* status=get_dialog("Write all info","Filename",filename,"OK","Cancel",60);
    */
   status=file_selector("Write all info",filename,"*.dat");
 
@@ -352,7 +364,7 @@ void write_init_data_file()
   /*double a,*uhigh,*ulow,*ubar;*/
   FILE *fp;
   sprintf(filename,"initdata.dat");
-  /* status=get_dialog("Write all info","Filename",filename,"Ok","Cancel",60);
+  /* status=get_dialog("Write all info","Filename",filename,"OK","Cancel",60);
    */
   status=file_selector("Write init data file",filename,"*.dat");
 
@@ -395,8 +407,9 @@ void write_init_data_file()
     else 
       par2=par1;
      
-    fprintf(fp,"%d %d %g %g %g ",
-	    type,d->ibr,par1,par2,per);
+    /* fprintf(fp,"%d %d %g %g %g ",
+       type,d->ibr,par1,par2,per); */
+    fprintf(fp,"%g ",par1);
     for(i=0;i<NODE;i++)
       fprintf(fp,"%g ",u0[i]);
     fprintf(fp,"\n");
@@ -423,7 +436,7 @@ void write_pts()
   FILE *fp;
   sprintf(filename,"diagram.dat");
   status=file_selector("Write points",filename,"*.dat");
-  /* get_dialog("Write points","Filename",filename,"Ok","Cancel",60); */
+  /* get_dialog("Write points","Filename",filename,"OK","Cancel",60); */
   if(status==0)return;
   fp=fopen(filename,"w");
   if(fp==NULL){
@@ -467,26 +480,33 @@ void write_pts()
   fclose(fp);
 }
 
-void post_auto()
+/* Write the AUTO bifurcation diagram to a Postscript or SVG file.
+   Returns 1 on success, 0 if there is no diagram to draw (no file is created),
+   -1 if the file cannot be opened.  Used by File -> Postscript / SVG in the
+   AUTO window and by the script command "shot auto". */
+extern int NoBreakLine;
+
+int auto_diagram_to_file(const char *filename,int svg)
 {
-  /*char filename[256];*/
-  char filename[XPP_MAX_NAME];
   DIAGRAM *d;
-  int type,flag=0;
-  int status;
-  sprintf(filename,"auto.ps");
-  /* status=get_dialog("Postscript","Filename",filename,"Ok","Cancel",60); */
-  status=file_selector("Postscript",filename,"*.ps");
-  if(status==0)return;
-  if(!ps_init(filename,PS_Color))
-    return;
-   draw_ps_axes();
+  int type,flag=0,old_nobreak=NoBreakLine;
+  if(bifd==NULL||bifd->next==NULL)return 0;
+  /* every segment is written as an explicit move and line, so that separate
+     branches are never joined (the AUTO menu items used to set this) */
+  NoBreakLine=1;
+  if(svg){
+    if(!svg_init((char *)filename,PS_Color)){NoBreakLine=old_nobreak;return -1;}
+    draw_svg_axes();
+  }
+  else {
+    if(!ps_init((char *)filename,PS_Color)){NoBreakLine=old_nobreak;return -1;}
+    draw_ps_axes();
+  }
   d=bifd;
-  if(d->next==NULL)return;
   while(1){
     type=get_bif_type(d->ibr,d->ntot,d->lab);
     if (type < 0)
-    {	
+    {
     	plintf("Unable to get bifurcation type.\n");
     }
     if(d->ntot==1)flag=0;
@@ -496,43 +516,34 @@ void post_auto()
     d=d->next;
     if(d==NULL)break;
   }
-  ps_end();
+  if(svg)svg_end();
+  else ps_end();
+  NoBreakLine=old_nobreak;
   set_normal_scale();
+  return 1;
+}
+
+void post_auto()
+{
+  char filename[XPP_MAX_NAME];
+  int status;
+  status=ps_options();
+  if(status==0)return;
+  sprintf(filename,"auto.ps");
+  status=file_selector("Postscript",filename,"*.ps");
+  if(status==0)return;
+  auto_diagram_to_file(filename,0);
 }
 
 
 void svg_auto()
 {
-  /*char filename[256];*/
   char filename[XPP_MAX_NAME];
-  DIAGRAM *d;
-  int type,flag=0;
   int status;
   sprintf(filename,"auto.svg");
-  /* status=get_dialog("Postscript","Filename",filename,"Ok","Cancel",60); */
   status=file_selector("SVG",filename,"*.svg");
   if(status==0)return;
-  if(!svg_init(filename,PS_Color))
-    return;
-   draw_svg_axes();
-  d=bifd;
-  if(d->next==NULL)return;
-  while(1){
-    type=get_bif_type(d->ibr,d->ntot,d->lab);
-    if (type < 0)
-    {	
-    	plintf("Unable to get bifurcation type.\n");
-    }
-    if(d->ntot==1)flag=0;
-    else flag=1;
-    add_ps_point(d->par,d->per,d->uhi,d->ulo,d->ubar,d->norm,type,flag,
-	      d->lab,d->nfpar,d->icp1,d->icp2,d->flag2,d->evr,d->evi);
-    d=d->next;
-    if(d==NULL)break;
-  }
-  svg_end();
-  
-  set_normal_scale();
+  auto_diagram_to_file(filename,1);
 }
 
 

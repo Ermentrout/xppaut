@@ -23,6 +23,6 @@ void ps_rel(int x, int y);
 void special_put_text_ps(int x, int y, char *str, int size);
 void fancy_ps_text(int x, int y, char *str, int size, int font);
 void ps_text(int x, int y, char *str);
-
+int ps_options();
 
 #endif

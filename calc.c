@@ -3,7 +3,8 @@
 #include "ggets.h"
 #include "pop_list.h"
 #include "init_conds.h"
-#include <stdlib.h> 
+/* #include "stdfix.h"  */
+#include "stdfix.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -66,7 +67,7 @@ Window w;
  return;
 }
  if(w==my_calc.quit){
-   XDrawString(display,w,small_gc,0,CURY_OFFs,"Quit",4);
+   XDrawString(display,w,small_gc,0,CURY_OFFs,"Close",5);
    return;
  }
 }
@@ -102,7 +103,8 @@ double z;
 		   NULL,0,&size_hints,NULL,NULL);
  my_calc.answer=make_window(base,10,DCURYs/2,24*DCURXs,DCURYs,0);
  width=(width-4*DCURXs)/2;
- my_calc.quit=make_window(base,width,(int)(2.5*DCURYs),4*DCURXs,DCURYs,1);
+ my_calc.quit=make_button(base,width,(int)(2.5*DCURYs),6*DCURXs,DCURYs,1);
+ wm_register_close(base,my_calc.quit);
  XSelectInput(display,my_calc.quit,MYMASK);
  my_calc.use=1;
 }
@@ -143,7 +145,7 @@ void q_calc()
  ini_calc_string(name,value,&pos,&col);
  while(1)
    {
-   XNextEvent(display,&ev);
+   xpp_next_event(&ev);
    draw_calc(ev.xany.window);
    if(ev.type==ButtonPress)
      if(ev.xbutton.window==my_calc.quit)break;

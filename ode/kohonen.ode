@@ -1,7 +1,7 @@
 # this implements the kohonen algorithm
 # using the findext code in xpp
 number ntot=100
-# here is the Gauddian like nbhd function
+# here is the Gaussian like nbhd function
 h(u)=exp(-sig*(1-cos(2*pi*u*k/ntot)))
 par sig=10
 # k=1 gives 1 peak, k=2, 2, etc
