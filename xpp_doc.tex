@@ -326,9 +326,16 @@ As you have probably guessed, comments have the form:
 \begin{verbatim}
 # This is a comment
 \end{verbatim}
+A comment can also follow a statement on the same line:
+\begin{verbatim}
+par a=1,b=2     # the rate and the delay
+\end{verbatim}
+A \verb|#| that is not the first character of the line and is not inside parentheses, braces or brackets
+starts a comment.  (Inside braces it is part of the kernel of an integral, {\tt int\{kernel\#variable\}}.)
 
 The ``@'' sign tells XPP that you want to preset some of the internal
-parameters for numerical integration and graphing, AUTO, etc. Please put a space after the ``@'' on each line or it wont work.
+parameters for numerical integration and graphing, AUTO, etc. Please put a space after the ``@'' on each line or it wont work.  The values in these options are numbers, not
+expressions: {\tt @ total=2*3} is read as {\tt total=2}.
   In this case, we have told XPP
 to integrate the equations until t=100 with a timestep of 0.2 and to
 set the high value for the x-axis to 100.  You can, of course, change
@@ -1602,6 +1609,22 @@ operator.  {\tt sum(0,4)of(shift(u0,i'))} will sum up {\tt u0} and the
 next four variables that were defined after it.  An example below
 shows how this can be used to solve large systems of equations that
 are densely coupled. 
+\end{itemize}
+
+\TCC{Operators and their priorities}  From the lowest priority to the highest:
+\begin{verbatim}
+lowest      +  -  |
+            *  /  &    unary minus    not
+highest     ^  **  >  <  ==  >=  <=  !=
+\end{verbatim}
+Operators of the same priority are evaluated from left to right, so {\tt 2-3-4} is $-5,$ and even
+{\tt 2\^{}3\^{}2} is $(2^3)^2=64,$ not $2^9.$  Two things are worth remembering.
+\begin{itemize}
+\item The comparisons ({\tt >  <  ==  >=  <=  !=}) have the same priority as {\tt \^{}}, which is {\em higher}
+than that of {\tt *} and {\tt /}.  So {\tt 2*3<4} means {\tt 2*(3<4)}, which is 2, not {\tt (2*3)<4}, which is 0.
+Use parentheses.
+\item A minus (or plus) sign may follow another operator: {\tt 2*-3}, {\tt x\^{}-2}, {\tt 2--3} and {\tt x>-1} are all fine.
+A unary minus has the priority of {\tt *}, so {\tt -x\^{}2} is $-(x^2)$ and {\tt 2\^{}-x} is $2^{-x}.$
 \end{itemize}
 \TCC{Compatibility} The parser in this distribution is a great
 improvement over the old style parser. 

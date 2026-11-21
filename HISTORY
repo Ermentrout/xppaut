@@ -17,6 +17,9 @@ VERSION 8.4.2   November 2026     (a draft written from the source tree; please 
 - Bug fixes, among them several found with AddressSanitizer (use after free, memory leaks, a crash
   in Tab completion).  Fourteen of the examples that aborted with 'buffer overflow detected' under 8.0 on
   a hardened system now run.
+- A comment may follow a statement on the same line (par a=1  # the rate).  Before, the words of the comment became
+  parameters after par and number, and after other statements the file would not load.
+- A minus or plus sign may follow another operator: 2*-3, x^-2, 2--3, x>-1.  Before, the sign had to be in parentheses.
 - The Makefile links with -fcommon, so the program builds with current compilers.
 - The documentation was brought up to date.
 

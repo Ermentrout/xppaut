@@ -2232,6 +2232,21 @@ void strpiece(dest,src,i0,ie)
   dest[ie-i0+1]=0;
 }
 
+/* A comment may follow a statement on the same line:   par a=1   # the rate
+   A # that is not the first character of the line and is not inside (), {} or [] starts the comment.
+   (A # inside braces is part of an integral kernel, int{kernel#variable}, and a line that begins with # is
+   a comment or an include.)  Returns 1 if a comment was removed. */
+static int strip_trailing_comment(char *s)
+{
+  int i,depth=0;
+  for(i=0;s[i];i++){
+    if(s[i]=='('||s[i]=='{'||s[i]=='[')depth++;
+    else if(s[i]==')'||s[i]=='}'||s[i]==']'){if(depth>0)depth--;}
+    else if(s[i]=='#'&&depth==0&&i>0){s[i]=0;return 1;}
+  }
+  return 0;
+}
+
 int parse_a_string(s1,v)
      char *s1;
      VAR_INFO *v;
@@ -2253,6 +2268,7 @@ int parse_a_string(s1,v)
     return 0;
   }
     remove_blanks(s1); 
+  if(strip_trailing_comment(s1))n1=(int)strlen(s1)-1;
 
   strcpy(s1old,s1);
   strupr(s1);
