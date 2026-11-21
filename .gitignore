@@ -1,0 +1,20 @@
+# build products
+*.o
+*.a
+*.so
+*.dylib
+xppaut
+a.out
+# editor and system files
+*~
+.DS_Store
+._*
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+# files that XPPAUT writes when you run an example
+output.dat
+auto.ps
+auto.svg
