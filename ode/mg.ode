@@ -1,0 +1,9 @@
+# Mackey-Glass: beta varied, Hopf points of the steady state at beta=1.3369 and 2.0703 (tau=2); PD cascade at beta=1.5554491, 1.6958309, 1.7199016.
+# PD curve: grab the first PD (label 6), Axes -> Two par with beta in [1.3,2.1], tau in [1.0,2.3], Run -> Two Param.
+# It passes beta=2 at tau=1.324922.
+par beta=1.15,tau=2,gamma=1
+x'=beta*delay(x,tau)/(1+delay(x,tau)^10)-gamma*x
+init x=0.827197
+@ total=100,dt=0.01,delay=3,meth=rungekutta
+@ xlo=0,xhi=100,ylo=0,yhi=2,maxstor=100000
+done

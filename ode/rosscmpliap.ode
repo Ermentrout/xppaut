@@ -1,0 +1,88 @@
+# This code computes the Pecora-Carroll exponents for a complex eigenvalue
+# You could use a different chaotic system if you wanted
+# rossler attractor
+f(x,y,z)=-y-z
+g(x,y,z)=x+a*y
+h(x,y,z)=b*x-c*z+x*z
+par a=.36,b=.4,c=4.5
+init x=0,y=-4.3,z=-.054
+# these are parameters for the numerical method
+# eps is to compute the variational equation
+# dt is the numerical dt
+par eps=.01,dt=.05
+# 
+# coupling stuff
+# see below
+par mu=0,nu=0,kx=1,ky=0,kz=0
+# evaluate the right-hand sides
+xdot=f(x,y,z)
+ydot=g(x,y,z)
+zdot=h(x,y,z)
+# perturb along the preferred direction
+# v,u are the real and complex vectors of the variational equation
+xx=x+eps*vx
+yy=y+eps*vy
+zz=z+eps*vz
+xp=x+eps*ux
+yp=y+eps*uy
+zp=z+eps*uz
+# Note that  [F(X + eps V)-F(x)]/eps = A V + O(eps)
+# so we compute  A V without using the actual Jacobian
+# we also add the coupling:
+# K =  diag(kx,ky,kz) so we get
+#  (A - mu K) V   mu ios the overall strength of coupling
+# we integrate this using Euler  
+# (mu + i nu)*(v + i u)
+# dx, etc fx, etc are the new values of vx, ..., ux
+# but we will renormalize them to norm 1 and get
+# the accumulation  
+dx=vx+dt*((f(xx,yy,zz)-xdot)/eps+kx*(mu*vx-nu*ux))
+dy=vy+dt*((g(xx,yy,zz)-ydot)/eps+ky*(mu*vy-nu*uy))
+dz=vz+dt*((h(xx,yy,zz)-zdot)/eps+kz*(mu*vz-nu*uz))
+fx=ux+dt*((f(xp,yp,zp)-xdot)/eps+kx*(mu*ux+nu*vx))
+fy=uy+dt*((g(xp,yp,zp)-ydot)/eps+ky*(mu*uy+nu*vy))
+fz=uz+dt*((h(xp,yp,zp)-zdot)/eps+kz*(mu*uz+nu*vz))
+
+# now we figure out the magnitude of the change in length
+# the new norm of them
+amp=sqrt(dx^2+dy^2+dz^2+fx^2+fy^2+fz^2)
+#
+# eulers method for integration of the Rossler equations
+x'=x+dt*xdot
+y'=y+dt*ydot
+z'=z+dt*zdot
+# update the unit vector (vx,vy,vz)
+# renormalized initial variational equations
+vx'=dx/amp
+vy'=dy/amp
+vz'=dz/amp
+ux'=fx/amp
+uy'=fy/amp
+uz'=fz/amp
+# accumulate the log of the expansion/compression
+ss'=ss+log(amp)
+# we average it (note that time is discrete so multiply t by dt)
+# this yields the liapunov exponent
+aux liap=ss/max(dt,t*dt)
+
+# keep track of mu
+# xpp in range integration does not keep track of the parameters
+aux muu=mu
+aux nuu=nu
+# initialize (vx,vy,vz) as a unit vector
+init vx=1
+#####  
+# integrate 80000*dt = 4000 time steps
+# only keep the last one (trans=79999)
+@ total=80000,meth=discrete,nout=50
+@ trans=79999
+@ bound=100000
+# plot set up
+@ xp=muu,yp=nuu,xlo=-4,xhi=0,ylo=0,yhi=2
+done
+# init conditions 2 par range
+# mu 0 to -4 50 steps
+# nu 0 to 2 50 steps
+it will take a while
+
+

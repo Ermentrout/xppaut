@@ -1,0 +1,7 @@
+x'=-y-z
+y'=x+b*y
+z'=b+z*(x-a)
+par b=.2,a=4
+aux aa=a
+@ total=5000,trans=1000
+done

@@ -1,0 +1,18 @@
+# Wilson-Cowan E-I pair with delayed E<->I interaction, sigmoid S(u)=1/(1+exp(-u))
+#   E' = -E + S(6 E - 8 I(t-tau) + P)
+#   I' = (-I + S(8 E(t-tau) - I + Q))/0.5
+# tau = 1, Q = 0: unique equilibrium for all P in [-6,4]; stable for small P.
+# Hopf (exact, from det Delta(i w)=0):  P = 1.54359,  omega = 0.87492
+# Two-parameter (P,tau) Hopf curve, verified points (P, tau, omega):
+#   (1.5436, 1.0000, 0.8749) (1.7306, 0.8200, 0.9869) (2.3153, 0.5157, 1.2717) (3.1739, 0.3400, 1.5005)
+#   [in the AUTO parameter dialog, tau is the 3rd parameter: use it as Par2]
+# For AUTO start: P=0.0, E(0)=0.031767, I(0)=0.450954.
+par P=0.0,Q=0.0,tau=1.0
+s(u)=1/(1+exp(-u))
+E'=-E+s(6*E-8*delay(I,tau)+P)
+I'=(-I+s(8*delay(E,tau)-I+Q))/0.5
+E(0)=0.031767
+I(0)=0.450954
+@ total=200,dt=0.01,delay=2,meth=rungekutta,xlo=0,xhi=200,ylo=0,yhi=1,bounds=1000
+@ parmin=-1,parmax=4,autoxmin=-1,autoxmax=4,autoymin=0,autoymax=1
+done

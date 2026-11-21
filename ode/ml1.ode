@@ -6,26 +6,27 @@ p vk=-.7,vl=-.5,vca=1
 p v1=.01,v2=.145,v3=.1,v4=.15
 p i=.2,phi=.333   
   
-w nz
 # Define some functions
 minf(v)=.5*(1+tanh((v-v1)/v2))
 winf(v)= .5*(1+tanh((v-v3)/v4))
 lamw(v)= cosh((v-v3)/(2*v4))
 
 # define the right-hand sides
-v'= gl*(vl-v)+gk*w*(vk-v)-icaf+i+sig*nz
+v'= gl*(vl-v)+gk*w*(vk-v)-icaf+i
 w'= phi*lamw(v)*(winf(v)-w)
 
 # where
 icaf=gca*minf(v)*(v-vca)
-
+init v=-.144,w=.03
 # and
 aux ica=icaf
-par sig=.2
 # some initial conditions -- not necessary but for completeness
 v(0)=.05
 w(0)=0
-@ total=5000,meth=euler
 
+# some options
+@ xp=v,yp=w
+@ xlo=-1,xhi=1,ylo=-.1,yhi=1,nmesh=100
+@ total=50
 # Done!!
 d

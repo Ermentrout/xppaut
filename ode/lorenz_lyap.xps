@@ -1,0 +1,9 @@
+# Lyapunov exponents of the Lorenz equations (Numerics -> stocHast -> Liapunov).
+# Run with:  xppaut lorenz.ode -script lorenz_lyap.xps
+# Expect about  0.905  0.000  -14.572  for r=28 (accepted values 0.9056, 0, -14.5723),
+# sum = -13.667 = the average divergence, and Kaplan-Yorke dimension 2.062.  (lorenz.ode itself has r=27.)
+set r=28;s=10;b=2.6666667;total=100;trans=20      # the classic parameters
+keys i g                  # integrate onto the attractor
+keys u h l                # Numerics, stocHast, Liapunov
+ans |3|5000               # 3 exponents, measured over 5000 time units
+keys esc esc

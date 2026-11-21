@@ -1,0 +1,13 @@
+# Mackey-Glass:  x' = beta x(t-tau)/(1+x(t-tau)^10) - x
+# Equilibrium x* = (beta-1)^(1/10).   Linearization: u' = -u + c u(t-tau), c=(10-9 beta)/beta
+# tau = 2:  Hopf at beta = 1.336863 (omega = 1.144465, x* = 0.896903)
+#           second crossing at beta = 2.070294 (omega = 4.048082)
+# Two-parameter (beta,tau) Hopf curve, exact points:
+#   tau=1.0 -> beta=1.484082 (omega=2.028758)     tau=0.5 -> beta=1.925626 (omega=3.673194)
+# For AUTO start: beta=1.15, x(0)=0.827 (the equilibrium).
+par beta=1.15,tau=2
+x'=beta*delay(x,tau)/(1+delay(x,tau)^10)-x
+x(0)=0.827
+@ total=300,dt=0.02,delay=3,meth=rungekutta,xlo=0,xhi=300,ylo=0,yhi=2,bounds=1000
+@ parmin=1.1,parmax=2.4,autoxmin=1.1,autoxmax=2.4,autoymin=0.5,autoymax=1.5
+done

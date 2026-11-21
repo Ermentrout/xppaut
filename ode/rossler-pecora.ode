@@ -1,0 +1,23 @@
+# rossler attractor 
+init x=1,y=1,z=.2
+par a=.2,b=.2,c=7
+par alpha=0  ,c1=1,c2=0,c3=0
+x'=-y-z
+y'=x+a*y
+z'=b+z*(x-c)
+xl'=-yl-zl+alpha*c1*xl
+yl'=xl+a*yl+alpha*c2*yl
+zl'=zl*x+xl*z-c*zl+alpha*c3*zl
+init xl=1,yl=0,zl=0
+par dtout=1.1
+init tt=0
+global 1 tt-dtout {tt=0;norm=sqrt(xl^2+yl^2+zl^2);acc=acc+log(norm);xl=xl/norm;yl=yl/norm;zl=zl/norm}
+tt'=1
+norm'=0
+acc'=0
+aux liap=acc/max(1,t)
+aux mya=alpha
+@ bound=100000000
+@ dt=.025001, total=1000,nout=100,transient=999.99
+@ runnow=1
+done

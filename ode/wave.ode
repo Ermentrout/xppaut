@@ -10,6 +10,7 @@ vv20'=i+f(vv20)-w20+d*(vv19-vv20)
 #
 w[0..20]'=eps*(vv[j]-gamma*w[j])
 @ meth=qualrk,dt=.25,total=150,xhi=150
+@ colormap=1
 done
 
 

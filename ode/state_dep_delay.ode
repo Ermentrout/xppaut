@@ -1,0 +1,12 @@
+# State-dependent delay:   x' = 1 - x - b x(t - tau(x)),   tau(x) = 0.5 + 0.5 x
+# Equilibrium x* = 1/(1+b), delay at equilibrium tau* = 0.5+0.5x*.
+# (At a steady state the state-dependence of the delay drops out of the
+#  linearization because x'(t-tau)=0, so the stability code treats tau as tau*.)
+# Hopf at b = 3.210300, omega = 3.050578, x* = 0.237513, tau* = 0.618756.
+# For AUTO start: b=1.2, x(0)=1/2.2=0.454545.
+par b=1.2
+x'=1-x-b*delay(x,0.5+0.5*x)
+x(0)=0.454545
+@ total=100,dt=0.005,delay=3,meth=rungekutta,xlo=0,xhi=100,ylo=0,yhi=1,bounds=1000
+@ parmin=1,parmax=5,autoxmin=1,autoxmax=5,autoymin=0,autoymax=1
+done

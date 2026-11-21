@@ -4,7 +4,7 @@
  some example functions
 */
  
-lv(double *in,double *out,int nin,int nout,double *var,double *con)
+void lv(double *in,double *out,int nin,int nout,double *var,double *con)
 {
   double x=in[0],y=in[1];
   double a=in[2],b=in[3],c=in[4],d=in[5];
@@ -13,7 +13,7 @@ lv(double *in,double *out,int nin,int nout,double *var,double *con)
   out[1]=c*y*(-d+x);
 }
 
-vdp(double *in,double *out,int nin,int nout,double *var,double *con)
+void vdp(double *in,double *out,int nin,int nout,double *var,double *con)
 {
   double x=in[0],y=in[1];
   double a=in[2],b=in[3],c=in[4],d=in[5];
@@ -23,7 +23,7 @@ vdp(double *in,double *out,int nin,int nout,double *var,double *con)
 
 }
 
-duff(double *in,double *out,int nin,int nout,double *var,double *con)
+void duff(double *in,double *out,int nin,int nout,double *var,double *con)
 {
   double x=in[0],y=in[1];
   double a=in[2],b=in[3],c=in[4],d=in[5];

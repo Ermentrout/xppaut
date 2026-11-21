@@ -1,0 +1,14 @@
+# XPPAUT script recorded Fri Nov 20 18:37:11 2026
+# model: ode/lorenz.ode
+# Edit freely.  Run it with File -> Do script, or:  xppaut model.ode -script this_file.xps
+keys u t
+# total
+ans 100
+keys d
+# Delta t
+ans 0.01
+keys esc e i g u h l
+# Lyapunov exponents
+ok
+keys esc
+# end of recording

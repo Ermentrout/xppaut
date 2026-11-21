@@ -1,0 +1,15 @@
+# Homoclinic continuation for hom.ode (see the AUTO chapter of the manual).
+# Run with:  xppaut hom.ode -script hom.xps
+set a=0.05;sig=0.05833;x=0.5;y=0;total=4000
+keys i g                  # integrate until it has settled on the cycle
+keys i p                  # Initialconds Periodic: finds the period and sets Total
+keys f a                  # open AUTO
+autokeys p                # Parameter
+ans Par1=a|Par2=sig
+autokeys a t              # Axes, Two par
+ans Main Parm=a|Secnd Parm=sig|Xmin=0|Xmax=0.3|Ymin=0|Ymax=0.4
+autokeys n                # Numerics
+ans Ntst=50|Nmax=80|Dsmax=0.02|Par Min=0|Par Max=0.3
+autokeys r h              # Run, Homoclinic
+ok                        # accept the Homoclinic info dialog
+auto list

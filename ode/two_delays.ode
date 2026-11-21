@@ -1,0 +1,14 @@
+# Scalar equation with two delays:  x' = -a ( x(t-1) + x(t-1.7) )
+# Characteristic equation  lambda + a(exp(-lambda) + exp(-1.7 lambda)) = 0
+# First Hopf at a = 0.633594 (omega = 1.163553); stable for 0 < a < 0.633594.
+# A second crossing occurs at a = 4.251022 (omega = 8.14487).
+# This checks that several delays are picked up and handled together.
+# "Print eigenvalues" at a=0.8: 0.11191770 +- 1.24352376 i (unstable pair),
+#   -1.33013388 +- 4.45755707 i, -1.17819739 +- 8.12643108 i ...
+# For AUTO start: a=0.2, x(0)=0 (the equilibrium).
+par a=0.2
+x'=-a*(delay(x,1)+delay(x,1.7))
+x(0)=0.0
+@ total=100,dt=0.01,delay=2,meth=rungekutta,xlo=0,xhi=100,ylo=-1,yhi=1,bounds=1000
+@ parmin=0,parmax=5,autoxmin=0,autoxmax=5,autoymin=-1,autoymax=1
+done

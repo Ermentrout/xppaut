@@ -1,0 +1,13 @@
+# Heteroclinic continuation for het.ode (see the AUTO chapter of the manual).
+# Run with:  xppaut het.ode -script het.xps
+keys i g
+keys f a
+autokeys p
+ans Par1=a|Par2=c
+autokeys a t
+ans Main Parm=a|Secnd Parm=c|Xmin=0|Xmax=1|Ymin=-2|Ymax=2
+autokeys n
+ans Ntst=40|Nmax=80|Dsmax=0.05|Par Min=0|Par Max=0.9
+autokeys r e              # Run, hEteroclinic
+ans dim unstable=1|dim stable=1|u_L=1|up_L=0|u_R=0|up_R=0
+auto list

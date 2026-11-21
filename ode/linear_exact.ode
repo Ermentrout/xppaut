@@ -1,0 +1,9 @@
+# Accuracy check of the delay integration:  x' = -x(t-1),  x = 1 for t<=0.
+# Method of steps gives  x(1)=0,  x(2)=-1/2,  x(3)=-1/6  exactly.
+# RK4, dt=0.01 :  x(2) = -0.500008,  x(3) = -0.1666667   (errors ~1e-5, 1e-9)
+# The same file with the unpatched code gave x(2)=-0.505, x(3)=-0.1717.
+par tau=1
+x'=-delay(x,tau)
+x(0)=1
+@ total=3,dt=0.01,delay=2,meth=rungekutta,bounds=1000
+done
